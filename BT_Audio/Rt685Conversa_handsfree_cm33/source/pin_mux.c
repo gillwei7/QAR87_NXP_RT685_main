@@ -99,7 +99,7 @@ pin_labels:
 #define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_CS0_PIN_MASK (1U << 19U)	/*!* @brief PORT pin mask */
 /* @} */
 
-void dev_BOARD_InitFlexSPI0APins(void);
+void BOARD_InitFlexSPI0APins(void);
 
 /* FUNCTION ************************************************************************************************************
  *
@@ -116,7 +116,7 @@ void BOARD_InitBootPins(void)
     BOARD_InitArduinoUARTPins();
     BOARD_Init_Audio_Pins();
     //BOARD_InitFlexSPI0BPins();
-    dev_BOARD_InitFlexSPI0APins();
+    BOARD_InitFlexSPI0APins();
     BOARD_InitScoPins();
     BOARD_InitFourDbgPins();
     BOARD_InitDmicPins();
@@ -189,7 +189,7 @@ void BOARD_InitPins(void)
     IOPCTL_PinMuxSet(IOPCTL, 2U, 28U, port2_pin28_config);
 }
 
-void dev_BOARD_InitFlexSPI0APins(void)
+void BOARD_InitFlexSPI0APins(void)
 {
 
     const uint32_t QSPI_A_DATA0 = (/* Pin is configured as FLEXSPI0B_DATA0 */
