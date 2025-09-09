@@ -1,7 +1,0 @@
-D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/error.h:147:19:mbedtls_error_add	24	static
-../mbedtls/library/x509_csr.c:42:12:x509_csr_get_version	32	static
-../mbedtls/library/x509_csr.c:63:5:mbedtls_x509_csr_parse_der	72	static
-../mbedtls/library/x509_csr.c:225:5:mbedtls_x509_csr_parse	64	static
-../mbedtls/library/x509_csr.c:299:5:mbedtls_x509_csr_info	64	static
-../mbedtls/library/x509_csr.c:341:6:mbedtls_x509_csr_init	16	static
-../mbedtls/library/x509_csr.c:349:6:mbedtls_x509_csr_free	24	static

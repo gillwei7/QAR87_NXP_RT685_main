@@ -1,8 +1,0 @@
-D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:138:20:bt_addr_le_copy	16	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_addr.c:18:19:create_random_addr	16	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_addr.c:25:5:bt_addr_le_create_nrpa	24	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_addr.c:39:5:bt_addr_le_create_static	24	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_addr.c:53:5:bt_addr_from_str	32	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_addr.c:87:5:bt_addr_le_from_str	32	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_addr.c:112:6:bt_addr_le_copy_resolved	16	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_addr.c:119:6:bt_addr_le_is_resolved	16	static

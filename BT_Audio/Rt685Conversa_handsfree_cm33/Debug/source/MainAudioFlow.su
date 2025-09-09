@@ -1,5 +1,0 @@
-D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_gpio.h:153:20:GPIO_PinWrite	24	static
-D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_mu.h:210:20:MU_SendMsgNonBlocking	24	static
-D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_sema42.h:181:20:SEMA42_Unlock	16	static
-../source/MainAudioFlow.c:61:5:CheckTimePoint_CurrentIntrIsAStartingOne	24	static
-../source/MainAudioFlow.c:95:6:ProcessAudio_AfterAudioInputBufIsReady	296	static

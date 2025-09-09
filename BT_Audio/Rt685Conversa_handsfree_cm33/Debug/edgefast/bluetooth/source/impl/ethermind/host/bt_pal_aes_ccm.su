@@ -1,7 +1,0 @@
-D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:310:20:sys_put_be16	16	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_aes_ccm.c:19:20:xor16	24	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_aes_ccm.c:40:12:ccm_calculate_X0	40	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_aes_ccm.c:98:12:ccm_auth	112	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_aes_ccm.c:154:12:ccm_crypt	80	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_aes_ccm.c:193:5:bt_ccm_decrypt	64	static
-../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_aes_ccm.c:221:5:bt_ccm_encrypt	48	static

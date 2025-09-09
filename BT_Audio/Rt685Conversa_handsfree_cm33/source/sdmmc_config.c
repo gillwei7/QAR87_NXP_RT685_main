@@ -210,7 +210,7 @@ void BOARD_SDIO_Config(void *card, sd_cd_t cd, uint32_t hostIRQPriority, sdio_in
     ((sdio_card_t *)card)->usrParam.ioVoltage = &s_ioVoltage;
 
     BOARD_SDCardPowerResetInit();
-    BOARD_SDCardIoVoltageControlInit();
+    //BOARD_SDCardIoVoltageControlInit();
     BOARD_SDCardDetectInit(cd, NULL);
 
     NVIC_SetPriority(BOARD_SDMMC_SDIO_HOST_IRQ, hostIRQPriority);

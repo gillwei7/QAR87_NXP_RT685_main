@@ -1,7 +1,0 @@
-../source/Sweep.c:20:6:InitSineToneGen1	8	static
-../source/Sweep.c:26:6:InitSineToneGen2	8	static
-../source/Sweep.c:33:6:InitSineToneGenerator	40	static
-../source/Sweep.c:63:6:GenerateSineToneSingleFreq_S32_LRMixed	40	static
-../source/Sweep.c:135:6:GenerateSineTone_S32_LRMixed	40	static
-../source/Sweep.c:232:6:GenerateSineToneSingleFreq_S16_LRMixed	40	static
-../source/Sweep.c:304:6:GenerateSineTone_S16_LRMixed	40	static

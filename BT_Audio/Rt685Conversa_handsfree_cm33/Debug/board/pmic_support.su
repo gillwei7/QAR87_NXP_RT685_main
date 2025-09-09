@@ -1,4 +1,0 @@
-D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_power.h:444:32:POWER_GetBodyBiasMode	24	static
-../board/pmic_support.c:49:26:BOARD_CalcVoltLevel	24	static
-../board/pmic_support.c:64:6:BOARD_InitPmic	40	static
-../board/pmic_support.c:77:6:BOARD_SetPmicVoltageForFreq	32	static
