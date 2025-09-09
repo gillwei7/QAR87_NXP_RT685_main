@@ -1,0 +1,14 @@
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:428:20:atomic_test_bit	24	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:467:20:atomic_test_and_set_bit	24	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:488:20:atomic_clear_bit	24	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:506:20:atomic_set_bit	24	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1495:21:net_buf_add	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_ecc.c:36:6:bt_pub_key_is_debug	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_ecc.c:41:5:bt_pub_key_gen	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_ecc.c:107:6:bt_pub_key_hci_disrupted	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_ecc.c:122:16:bt_pub_key_get	8	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_ecc.c:136:12:hci_generate_dhkey_v1	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_ecc.c:152:12:hci_generate_dhkey_v2	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_ecc.c:169:5:bt_dh_key_gen	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_ecc.c:204:6:bt_hci_evt_le_pkey_complete	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_ecc.c:227:6:bt_hci_evt_le_dhkey_complete	24	static

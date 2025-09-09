@@ -1,0 +1,17 @@
+../wifi/port/osa/osa_freertos.c:99:14:OSA_TimerCreate	40	static
+../wifi/port/osa/osa_freertos.c:145:14:OSA_TimerActivate	40	static
+../wifi/port/osa/osa_freertos.c:180:14:OSA_TimerChange	48	static
+../wifi/port/osa/osa_freertos.c:215:6:OSA_TimerIsRunning	24	static
+../wifi/port/osa/osa_freertos.c:230:7:OSA_TimerGetContext	24	static
+../wifi/port/osa/osa_freertos.c:238:14:OSA_TimerReset	40	static
+../wifi/port/osa/osa_freertos.c:273:14:OSA_TimerDeactivate	40	static
+../wifi/port/osa/osa_freertos.c:308:14:OSA_TimerDestroy	40	static
+../wifi/port/osa/osa_freertos.c:337:6:vApplicationTickHook	16	static
+../wifi/port/osa/osa_freertos.c:351:6:vApplicationIdleHook	16	static
+../wifi/port/osa/osa_freertos.c:363:5:OSA_SetupIdleFunction	24	static
+../wifi/port/osa/osa_freertos.c:393:5:OSA_SetupTickFunction	24	static
+../wifi/port/osa/osa_freertos.c:423:5:OSA_RemoveIdleFunction	24	static
+../wifi/port/osa/osa_freertos.c:445:5:OSA_RemoveTickFunction	24	static
+../wifi/port/osa/osa_freertos.c:499:6:OSA_ThreadSelfComplete	16	static
+../wifi/port/osa/osa_freertos.c:530:14:OSA_GetTimestamp	16	static
+../wifi/port/osa/osa_freertos.c:555:10:OSA_MsgQWaiting	24	static

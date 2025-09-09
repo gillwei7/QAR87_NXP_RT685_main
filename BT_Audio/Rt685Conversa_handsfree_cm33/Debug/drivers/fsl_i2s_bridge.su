@@ -1,0 +1,4 @@
+../drivers/fsl_i2s_bridge.c:31:6:I2S_BRIDGE_SetFlexcommSignalShareSet	32	static
+../drivers/fsl_i2s_bridge.c:41:6:I2S_BRIDGE_SetFlexcommShareSet	32	static
+../drivers/fsl_i2s_bridge.c:54:6:I2S_BRIDGE_SetShareSetSrc	32	static
+../drivers/fsl_i2s_bridge.c:71:6:I2S_BRIDGE_SetShareSignalSrc	32	static

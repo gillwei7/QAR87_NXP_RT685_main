@@ -1,0 +1,3 @@
+../wifi/port/osa/stack_simple.c:50:6:InitStack	16	static
+../wifi/port/osa/stack_simple.c:56:6:PushOnStack	16	static
+../wifi/port/osa/stack_simple.c:72:11:PopOffStack	24	static

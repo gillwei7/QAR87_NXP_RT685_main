@@ -1,0 +1,1454 @@
+# Copyright (c) 2017-2021 by Cadence Design Systems, Inc. ALL RIGHTS RESERVED.
+# These coded instructions, statements, and computer programs are the
+# copyrighted works and confidential proprietary information of Cadence.
+# They may not be modified, copied, reproduced, distributed, or disclosed to
+# third parties in any manner, medium, or form, in whole or in part, without
+# the prior written consent of Cadence.
+
+
+# templates for brevity - mostly in the bcons lists (conflicts with many)
+#
+# NOTE WELL that these are aliased as LIST nodes ... not as a sequence of entries
+# so the list processor has to deal with a list-in-a-list
+#
+
+_templates:
+- &allcoprocslist
+  [ ball, pdxnx8, visionq6, fuj6, bbn_b10, bbn_b20, visionq7, flix3, visionq8, fpmnx_220, fpmnx_240 ]
+
+
+#
+# The UI group structure for this ISA
+#
+# Production Variants use the same structure - just pages/groups/items 
+# with no participating entries ... go away
+#
+# page name prefix "x." means exclude from norm logic because it has special code
+# page name prefix "p." means the page is emitted as a single table and the table
+# name in build.dita is ("t." + PageName.toLowerCase()) 
+#
+
+_ui:
+  x.Processors:
+  - { n: 'Processor Templates', c: 1, id: procTemplatesNX }
+  - { n: 'Processor Compliance', c: 1, id: 'proc.fusa:procCompliance' }  
+  - { n: 'Ball', c: 1, id: ball }
+  - { n: 'PDXNX', c: 1, id: pdxx }
+  - { n: 'Vision Q', c: 2, id: visionQ }
+  - { n: 'ConnX B', c: 2, id: bbn }
+  - { n: 'FloatingPoint DSPs', c: 2, id: fpm }
+  - { n: 'Tensilica® Fusion J DSPs', c: 1, id: fusionJ }
+  - { n: 'Flixed Core Extensions', c: 1, id: flix3 }
+  p.Software:
+  - { n: 'Target Software', c: 1, id: sw.targetSW }
+  - { n: 'Compatibility with External Software', c: 1, id: sw.extSW }
+  p.Implementation:
+  - { n: 'Implementation', c: 1, id: impl.implementation }
+  - { n: 'Energy Analysis', c: 1, id: impl.teaf }
+  - { n: 'IR Drop Port', c: 1, id: impl.irdrop }
+  Instructions:
+  - { n: 'Memory Management Options', c: 2, id: ins.mmu }
+  - { n: 'Instruction Options', c: 2, id: ins.isa }
+  - { n: 'ISA Configuration Options', c: 1, id: ins.configuration }
+  - { n: 'Instruction Fetch Options', c: 1, id: ins.fetch }
+  - { n: 'TIE', c: 1, id: ins.tie }
+  'TIE Capabilities':
+  - { n: 'TIE Capabilities', c: 1, id: tie.tiecap }  
+  Interfaces:
+  - { n: 'Manager Interface', c: 2, id: ifc.master }
+  - { n: 'Subordinate Interface', c: 2, id: ifc.slave }
+  - { n: 'Port and Queue Interfaces', c: 2, id: ifc.portNQueue }
+  - { n: 'Prefetch Options', c: 1, id: ifc.prefetch }
+  - { n: 'Instruction Cache', c: 2, id: ifc.icache }
+  - { n: 'Scalar Data Cache / L1S', c: 2, id: ifc.sdcache }
+  - { n: 'Vector Data Cache (L1V)', c: 2, id: ifc.vdcache }
+  - { n: 'Local Memories', c: 1, id: ifc.lmems }
+  - { n: 'Scatter Gather', c: 1, id: nxsg }
+  - { n: 'Memory Errors', c: 2, id: ifc.memErrors }
+  'iDMA/L2/MP Interfaces':
+  - { n: 'Multicore - MP', c: 2, id: ifc.mp }
+  - { n: 'L2 Cache/RAM', c: 2, id: ifc.l2cache }
+  - { n: 'L2 Subordinate', c: 2, id: ifc.l2slave }
+  - { n: 'iDMA', c: 2, id: ifc.nxiDMA }
+  - { n: 'MP Interrupts', c: 2, id: ifc.mpints }  
+  'Debug and XEA3':
+  - { n: 'Debug Options', c: 1, id: dbg.debugOp }
+  - { n: 'XEA3 Options', c: 2, id: dbg.xea3 }
+  - { n: 'Trace Options', c: 1, id: dbg.trace }
+  'Safety':
+  - { n: 'Safety Guides', c: 2, id: sas.safetyguides }  
+  - { n: 'Windowed Watchdog Timer', c: 2, id: sas.wwdt }
+  - { n: 'FlexLock', c: 2, id: sas.flexlock }  
+  Vectors:
+  - { n: 'System Memories', c: 2, id: vec.sysmem.nx }
+  - { n: 'Vector Options', c: 2, id: vec.vecOptions }
+  
+##############################################################################
+##############################################################################
+# ORDER OF ITEMS IN A RECORD can never change
+# -> append items to the end of a record, or create a new one
+#
+# Similarly, "persist" can never change on an item that was at one time
+# written to a record because that would break index in sequence
+#
+# coreisa is a group
+#   implementation is a record
+#     implCgGlobal is an XOptionDesc
+#     newitem1
+#     anewitem2
+##############################################################################
+##############################################################################
+
+coreisa:
+  processors:
+  - ball:
+      n: Ball
+      tt: |-
+          Tensilica® Ball Processor
+      bdeps: [ depbits ]
+      bsdeps: { immu_bgmap: '!mpu_nowndw' }
+      mindeps: { data_width: '256-256', arCount: 32, inst_width: 128, 
+                 loadStoreUnits: 2, instWidthBytes: 16, maxCoprocs: 3  }
+      bcons: [ *allcoprocslist, brs ]
+      t: ibool
+      nat: HS
+      pgr: 'Ball'
+      order: 100
+      nofeaturevis: false
+      isa:
+      - { hi: 99999, lo: 0, feat: nx_ball, reqfeat: nx_req_ball }
+  - ball_addsub8x20p:
+      n: Ball addsub8x20p
+      t: ibool
+      nat: HS
+      p: ball
+      order: 120
+      isa:
+      - { hi: 99999, lo: 0 }
+  - pdxnx8:
+      n: PDXNX8
+      tt: |-
+          PDXNX8 Processor
+      bdeps: [ brs, depbits ]
+      bsdeps: { mul32choice: 'full:fullupper' }
+      mindeps: { data_width: 256, inst_width: 128, loadStoreUnits: 2, instWidthBytes: 16, maxCoprocs: 3 }
+      bcons: [ *allcoprocslist ]
+      t: ibool
+      nat: HS
+      pgr: 'PDXNX'
+      order: 200
+      nofeaturevis: false
+      isa:
+      - { hi: 99999, lo: 0, feat: nx_pdxnx8, reqfeat: nx_req_pdxnx8 }
+  - visionq6:
+      n: Vision Q6
+      tt: |-
+          Vision Q6 Processor
+      mindeps: { dram_count: 1, vdc_size: '0-0', 
+                 dram_banks: 2, data_width: 512, 
+                 inst_width: 128, loadStoreUnits: 2, instWidthBytes: 16,
+                 idma_addr_width: '32-36', maxCoprocs: 3  }
+      bsdeps: { mul32choice: 'full:fullupper', immu_bgmap: '!mpu_nowndw', data_latency: '5', l32r: l32r_const16 }
+      bcons: [ *allcoprocslist, brs, iside_errors, dside_errors ]
+      evalex:
+      - [ [ '${idma}==0' ],
+          [ 'W:Vision processors without iDMA are not supported by Tensilica provided Vision libraries' ] ]
+      - [ [ '${dram_count}<2' ],
+          [ 'W:We recommend configuring a Vision DSP with two data RAMs. Configuring with one data RAM may impact software performance' ] ] 
+      - [ [ 'F:!viz_noidma' ],
+          [ '${idma}==0' ],
+          [ 'E:Vision processors require iDMA for support by Tensilica provided Vision libraries' ] ]               
+      t: ibool
+      nat: HS
+      pgr: 'Vision Q'
+      nofeaturevis: false
+      order: 300
+      isa:
+      - { hi: 28000_06_9, lo: 0, feat: nx_visionq6, reqfeat: nx_req_visionq6 }
+      - { hi: 28100_00_9, lo: 28000_07_0, feat: nx_visionq6, reqfeat: nx_req_visionq6, bcons: [ *allcoprocslist, iside_errors, dside_errors ] }
+      - { hi: 99999, lo: 28100_01_0, exist: false } 
+  - vq6_histogram:
+      n: Vision Q6 Histogram
+      tt: |-
+          Vision Q6 Histogram
+      t: ibool
+      nat: HS
+      p: visionq6
+      order: 320
+      isa:
+      - { hi: 99999, lo: 0 }
+  - vq6_hpvfp:
+      n: Vision Q6 Half Precision VFP
+      tt: |-
+          Vision Q6 Half Precision Vector Floating Point
+      t: ibool
+      nat: HS
+      p: visionq6
+      order: 340
+      isa:
+      - { hi: 99999, lo: 0 }
+  - vq6_spvfp:
+      n: Vision Q6 Single Precision VFP
+      tt: |-
+          Vision Q6 Single Precision Vector Floating Point
+      t: ibool
+      nat: HS
+      p: visionq6
+      order: 360
+      isa:
+      - { hi: 99999, lo: 0 }
+  - ballap_isa:
+      n: ballap_isa
+      t: ibool
+      nat: HS
+      p: ball
+      order: 140
+      isa:
+      - { hi: 99999, lo: 0 }
+  - ballap_ioq_expstate:
+      n: ballap_ioq_expstate
+      t: ibool
+      nat: HS
+      p: ball
+      order: 160
+      isa:
+      - { hi: 99999, lo: 0 }
+  - no_bbe16_isa:
+      n: no_bbe16_isa
+      t: ibool
+      nat: HS
+      p: ball
+      order: 180
+      isa:
+      - { hi: 99999, lo: 0 }
+  - fuj6:
+      n: Fusion J6 DSP
+      tt: |-
+          Tensilica® Fusion J6 DSP
+      bdeps: [ brs, depbits ]
+      bsdeps: { mul32choice: 'full:fullupper' }
+      mindeps: { data_width: 256, inst_width: 128, loadStoreUnits: 2, instWidthBytes: 16, maxCoprocs: 3  }          
+      bcons: [ *allcoprocslist ]
+      t: ibool
+      nat: HS
+      pgr: 'Tensilica® Fusion J DSPs'
+      order: 400
+      nofeaturevis: false
+      isa:
+      - { exist: false, hi: 1305, lo: 0 }
+      - { hi: 99999, lo: 1306, feat: nx_fuj6, reqfeat: nx_req_fuj6 }    
+  - fuj6_sfp:
+      n: Fusion J6 Vector SPFP
+      tt: |-
+          Fusion J6 Vector single precision floating point 
+      t: ibool
+      nat: HS
+      p: fuj6
+      order: 420
+      isa:
+      - { exist: false, hi: 1305, lo: 0 }
+      - { feat: nx_fuj6, hi: 99999, lo: 1306 }
+  - fuj6_dfp:
+      n: Fusion J6 Vector DPFP
+      tt: |-
+          Fusion J6 Vector double precision floating point
+      bdeps: [ fuj6_sfp ]
+      t: ibool
+      nat: HS
+      p: fuj6
+      order: 440
+      isa:
+      - { exist: false, hi: 1305, lo: 0 }
+      - { feat: nx_fuj6, hi: 99999, lo: 1306 }
+  - bbn_b10:
+      n: ConnX B10
+      tt: |-
+          Tensilica® ConnX B10 Processor
+      bdeps: [ depbits ]
+      bsdeps: { immu_bgmap: '!mpu_nowndw', data_latency: '3:4' }
+      mindeps: { data_width: 256, arCount: 32, inst_width: 128, 
+                 loadStoreUnits: 2, instWidthBytes: 16, maxCoprocs: 3  }
+      bcons: [ *allcoprocslist, brs ]
+      evalex:
+      - [ [ '${scatgat}>0 && ${data_width}!=256' ],
+          [ 'E:<${bbn_b10}> with <${scatgat}> requires that <${data_width}>is 256 bits' ] ]
+      - [ [ '${scatgat}>0 && strcmp("${wizpage}","rel") && ${bwisanver}<28100030' ],
+          [ 'E:<${bbn_b10}> with <${scatgat}> is not supported for this release.' ] ]              
+      exprdeps:        
+      - [ [ 'bwisanver>=28100050' ],
+          [ 'bbn_sfp==0', 'bbn_hp_vfp==0' ],
+          [ 'P:rel' ],
+          [ 'E:B10 with floating point cannot be swupgraded to the selected release' ] ]
+      - [ [ 'bwrelnver>=14000050' ],
+          [ 'P:rel' ],
+          [ 'E:This Xplorer cannot submit ConnX B10 to build on the selected release' ] ]
+      t: ibool
+      nat: HS
+      pgr: 'ConnX B'
+      order: 100
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0, feat: 'nx_b10', reqfeat: nx_req_b10 }
+  - bbn_b20:
+      n: ConnX B20
+      tt: |-
+          Tensilica® ConnX B20 Processor
+      bdeps: [ depbits ]
+      bsdeps: { immu_bgmap: '!mpu_nowndw' }
+      mindeps: { data_width: 512, arCount: 32, inst_width: 128, 
+                 loadStoreUnits: 2, bbn_vec_regs: 32, instWidthBytes: 16, maxCoprocs: 3  }
+      evalex:
+      - [ [ 'strcmp("${data_latency}","3")==0 && strcmp("${data_latency}","4")==0' ],
+          [ 'E:<${bbn_b20}> requires <${data_latency}> to be either "L1S/L1V DSP" or "3 cycle DSP"' ] ]
+      - [ [ '${scatgat}>0 && ${data_width}!=512' ],
+          [ 'E:<${bbn_b20}> with <${scatgat}> requires that data width is 512 bits' ] ]                
+      exprdeps:
+      - [ [ 'bwisanver>=28100050' ],
+          [ 'bbn_sfp==0', 'bbn_hp_vfp==0' ],
+          [ 'P:rel' ],
+          [ 'E:B20 with floating point cannot be swupgraded to the selected release' ] ]
+      - [ [ 'bwrelnver>=14000050' ],
+          [ 'P:rel' ],
+          [ 'E:This Xplorer cannot submit ConnX B20 to build on the selected release' ] ]         
+      bcons: [ *allcoprocslist, brs ]
+      t: ibool
+      nat: HS
+      pgr: 'ConnX B'
+      order: 101
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0, feat: 'nx_b20', reqfeat: nx_req_b20 }
+  - bbn_hh_isa:
+      n: ConnX B bbn_hh_isa
+      parented_name: bbn_hh_isa
+      t: ibool
+      nat: HS
+      p: [ bbn_b10, bbn_b20 ]
+      order: 300
+      nofeaturevis: false
+      isa:
+      - { hi: 99999, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0, feat: nx_b10_hh }
+  - bbn_hh_ioq_expstate:
+      n: ConnX B bbn_hh_ioq_expstate
+      parented_name: bbn_hh_ioq_expstate
+      t: ibool
+      nat: HS
+      p: [ bbn_b10, bbn_b20 ]
+      order: 310
+      nofeaturevis: false
+      isa:
+      - { hi: 99999, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0, feat: nx_b10_hh }
+  - bbn_sfp:
+      n: ConnX B Single Precision VFP
+      parented_name: Single Precision VFP
+      tt: |-
+          Single Precision Vector Floating Point
+          Enhanced ... enhances it
+      t: int
+      exprdeps:
+      - [ [ 'bbn_sfp==0' ],
+          [ 'bwrelnver>=14000050' ],
+          [ 'P:rel' ],
+          [ 'E:This Xplorer cannot submit configurations with ConnX B VFP to the selected release' ] ]
+      mindeps: { bbn_vec_regs: 32 }
+      nat: HS
+      helppage: bbn_fp
+      p: [ bbn_b10, bbn_b20 ]
+      order: 130
+      dv: 0
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0, choice: [ [ 0, 'None' ], [ 3, 'Single Precision VFP' ], [ 4, 'Extended Single Precision VFP' ] ] }
+  - bbn_32b_isa:
+      n: ConnX B Vector 32b MAC unit (FFT/FIR)
+      parented_name: Vector 32b MAC unit (FFT/FIR)
+      t: ibool
+      nat: HS
+      p: [ bbn_b10, bbn_b20 ]
+      order: 120
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - bbn_vec_regs:
+      n: ConnX B Vector Registers
+      parented_name: Vector Registers
+      tt: |-
+          Count of Vector Registers
+      p: { p: 'bbn_b10,bbn_b20', d: 32, e: 32 }
+      dv: 32
+      order: 320
+      t: int
+      nat: HS
+      nofeaturevis: false    
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }      
+      - { hi: 99999, lo: 28100_01_0, visible: false, rangepo2: { hi: 5, inczero: false, lo: 5 } }
+      - { hi: 99999, lo: 28100_01_0, visible: true, rangepo2: { hi: 5, inczero: false, lo: 4 }, dv: 32, feat: nx_b10_hh  }
+  processors2:
+  - visionq7:
+      n: Vision Q7
+      tt: |-
+          Vision Q7 Processor
+      mindeps: { dram_count: 1, vdc_size: '0-0', dram_banks: 2, 
+                 data_width: 512, inst_width: 128, loadStoreUnits: 2, instWidthBytes: 16, maxCoprocs: 3  }
+      bsdeps: { mul32choice: 'full:fullupper', immu_bgmap: '!mpu_nowndw', data_latency: '4', l32r: l32r_const16 }
+      bdeps: [ +scatgat ]
+      bcons: [ *allcoprocslist ]
+      evalex:
+      - [ [ '${scatgat}>0 && ${data_width}!=512' ],
+          [ 'E:<${visionq7}> with <${scatgat}> requires that <${data_width}> is 512 bits' ] ]      
+      - [ [ '${idma}==0' ],
+          [ 'W:Vision processors without iDMA are not supported by Tensilica provided Vision libraries' ] ]
+      - [ [ '${dram_count}<2' ],
+          [ 'W:We recommend configuring a Vision DSP with two data RAMs. Configuring with one data RAM may impact software performance' ] ]
+      - [ [ '${vq7_hpvfp}>0 && ${vq7_spvfp}>0 && ${vq7_spvfp}!=${vq7_hpvfp}' ],
+          [ 'E:If <${vq7_hpvfp}> and <${vq7_spvfp}> are both selected they must match slotting selection' ] ]      
+      - [ [ 'F:!viz_noidma' ],
+          [ '${idma}==0' ],
+          [ 'E:Vision processors require iDMA for support by Tensilica provided Vision libraries' ] ]  
+      t: ibool
+      nat: HS
+      pgr: 'Vision Q'
+      order: 400
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 28100_02_9, lo: 28100_01_0, feat: nx_visionq7, reqfeat: nx_req_visionq7, bcons: [ *allcoprocslist, iside_errors, dside_errors ] }
+      - { hi: 99999, lo: 28100_03_0, feat: 'nx_visionq7', reqfeat: nx_req_visionq7, bcons: [ *allcoprocslist ] }
+  - vq7_histogram:
+      n: Vision Q7 Histogram
+      tt: |-
+          Vision Q7 Histogram
+      t: ibool
+      nat: HS
+      p: [ visionq7 ]
+      order: 420
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - vq7_hpvfp:
+      n: Vision Q7 Half Precision VFP
+      tt: |-
+          Vision Q7 Half Precision Vector Floating Point
+          The 64 Half Precision FMAC option adds
+          the FMAC operations to a second slot
+      t: int
+      exprdeps:
+      - [ [ 'vq7_hpvfp<=1' ],
+          [ 'bwrelnver>=14000050' ],
+          [ 'P:rel' ],
+          [ 'E:This Xplorer cannot submit configurations with Vision extended VFP to the selected release' ] ]
+      nat: HS
+      helppage: vq7_fp
+      p: [ visionq7 ]
+      order: 440
+      dv: 0
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0, choice: [ [ 0, "None" ], [ 1, "32 Half Precision FMAC" ], [ 3, "64 Half Precision FMAC" ] ] }
+  - vq7_spvfp:
+      n: Vision Q7 Single Precision VFP
+      tt: |-
+          Vision Q7 Single Precision Vector Floating Point
+          The 32 Single Precision FMAC option adds
+          the FMAC operations to a second slot
+      t: int
+      exprdeps:
+      - [ [ 'vq7_spvfp<=1' ],
+          [ 'bwrelnver>=14000050' ],
+          [ 'P:rel' ],
+          [ 'E:This Xplorer cannot submit configurations with Vision extended VFP to the selected release' ] ]
+      nat: HS
+      helppage: vq7_fp
+      p: [ visionq7 ]
+      order: 460
+      dv: 0
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0, choice: [ [ 0, 'None' ], [ 1, '16 Single Precision FMAC' ], [ 3, '32 Single Precision FMAC' ] ] }
+  - vq7_quad_16x16_mac:
+      n: Vision Q7 128 16-bit MAC
+      tt: |-
+          Adds a set of quad multiply and multiply-add (MULQ)
+          operations on 16-bit vector data types
+      t: ibool
+      nat: HS
+      p: [ visionq7 ]
+      order: 450
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - vq7_dualquad_8x8_mac:
+      n: Vision Q7 512 8-bit MAC
+      tt: |-
+          Adds a set of dual-quad multiply and multiply-add (DMULQ)
+          operations on 8-bit vector data types
+      t: ibool
+      nat: HS
+      p: [ visionq7 ]
+      order: 470
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - vq7_fast_acc:
+      n: Vision Q7 FAST Accelerator
+      tt: |-
+          A set of state-based operations designed to accelerate
+          the Features from Accelerated Segment Test algorithm
+      t: ibool
+      nat: HS
+      p: [ visionq7 ]
+      order: 480
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - vq7_spfp_fast_recip:
+      n: Vision Q7 SP FP Reciprocal Accelerator
+      tt: |-
+          Single Precision Floating Point Reciprocal Accelerator
+          Includes operations which directly approximate reciprocals
+          of a vector of single-precision floating-point values
+      t: ibool
+      bsdeps: { vq7_spvfp: '!0' }
+      nat: HS
+      p: [ visionq7 ]
+      order: 490
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - bbn_hp_vfp:
+      n: ConnX B Extended Half Precision VFP
+      parented_name: Extended Half Precision VFP
+      tt: |-
+          ConnX B Extended Half Precision Vector Floating Point
+      t: ibool
+      mindeps: { bbn_vec_regs: 32 }
+      nat: HS
+      helppage: bbn_fp
+      p: [ bbn_b10, bbn_b20 ]
+      order: 110
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - bbn_viterbi:
+      n: ConnX B Viterbi decoder
+      parented_name: Viterbi decoder
+      t: ibool
+      nat: HS
+      p: [ bbn_b10, bbn_b20 ]
+      order: 150
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - bbn_hh_fft:
+      n: ConnX B High Precision 16 bit FFT
+      parented_name: High Precision 16 bit FFT
+      t: ibool
+      bcons: [ bbn_32b_isa]
+      nat: HS
+      p: [ bbn_b10 ]
+      order: 170
+      nofeaturevis: false
+      isa:
+      - { hi: 99999, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0, feat: nx_b10_hh }
+  - scatgat:
+      n: Scatter Gather
+      t: ibool
+      bsdeps: { data_latency: '4' }
+      mindeps: { data_width: 256, loadStoreUnits: 2 }
+      nat: HS
+      htmlVisibility: show
+      pgr: 'Scatter Gather'
+      p: [ visionq7, visionq8, bbn_b10, bbn_b20, fpmnx_220, fpmnx_240 ]
+      order: 100
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - flix3:
+      n: FLIX3
+      tt: |-
+          Configuration for 3-way FLIX, with a 64-bit instruction length.
+          Enables execution of 2 or 3 instructions per cycle
+      mindeps: { inst_width: 64, instWidthBytes: 8 }
+      bcons: [ *allcoprocslist ]
+      t: ibool
+      nat: HS
+      pgr: 'Flixed Core Extensions'
+      order: 100
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - flix3_fc:
+      n: FLIX3 Flow Control
+      tt: |-
+          FLIX3 Flow Control
+      t: ibool
+      nat: HS
+      helppage: flix3
+      p: flix3
+      order: 120
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - bbn_turbo:
+      n: ConnX B Turbo decoder
+      parented_name: Turbo decoder
+      t: ibool
+      nat: HS
+      p: [ bbn_b10, bbn_b20 ]
+      order: 160
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - bbn_ldpc:
+      n: ConnX B LDPC
+      parented_name: LDPC
+      t: ibool
+      nat: HS
+      p: [ bbn_b10, bbn_b20 ]
+      order: 400
+      isa:
+      - { hi: 28100_02_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_03_0 }
+  - bbn_polar:
+      n: ConnX B Polar NOT IN RI.3
+      parented_name: Polar NOT IN RI.3
+      t: ibool
+      nat: HS
+      p: [ bbn_b10, bbn_b20 ]
+      order: 910
+      nofeaturevis: false
+      isa:
+      - { hi: 28100_02_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_03_0, feat: bbn_polar_ri3 }
+  - vq7_dpvfp:
+      n: Vision Q7 Double Precision VFP
+      tt: |-
+          Vision Q7 Double Precision Vector Floating Point
+          The 16 Double Precision FMAC option adds
+          the FMAC operations to a second slot
+      t: int
+      nat: HS
+      evalex:
+      - [ [ '${visionq7}>0 && ${vq7_dpvfp}>0 && ${vq7_dpvfp}!=${vq7_spvfp}' ],
+          [ 'E:If <${vq7_dpvfp}> is selected it must match the <${vq7_spvfp}> choice for slotting selection' ] ]      
+      helppage: vq7_fp
+      p: [ visionq7 ]
+      order: 475
+      dv: 0
+      isa:
+      - { hi: 28100_04_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_05_0, choice: [ [ 0, 'None' ], [ 1, '8 Double Precision FMAC' ], [ 3, '16 Double Precision FMAC' ] ] }
+  - bbn_dfp:
+      n: ConnX B Double Precision VFP
+      parented_name: Double Precision VFP
+      tt: |-
+          Double Precision Vector Floating Point
+          Enhanced ... enhances it
+      t: int
+      mindeps: { bbn_vec_regs: 32 }
+      evalex:
+      - [ [ '(${bbn_b10}>0 || ${bbn_b20}>0) && ${bbn_dfp}>0 && ${bbn_dfp}!=${bbn_sfp}' ],
+          [ 'E:If <${bbn_dfp}> is selected it must match the <${bbn_sfp}> for enhanced selection' ] ]      
+      nat: HS
+      helppage: bbn_fp
+      p: [ bbn_b10, bbn_b20 ]
+      order: 140
+      dv: 0
+      isa:
+      - { hi: 28100_04_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_05_0, choice: [ [ 0, 'None' ], [ 3, 'Double Precision VFP' ], [ 4, 'Extended Double Precision VFP' ] ] }
+  - visionq8:
+      n: Vision Q8
+      tt: |-
+          Vision Q8 Processor
+      mindeps: { dram_count: 1, vdc_size: '0-0', dram_banks: 2, 
+                 data_width: 1024, inst_width: 128, loadStoreUnits: 2, instWidthBytes: 16, maxCoprocs: 3  }
+      bsdeps: { mul32choice: 'full:fullupper', immu_bgmap: '!mpu_nowndw', data_latency: '4', l32r: l32r_const16 }
+      bdeps: [ +scatgat ]
+      bcons: [ *allcoprocslist ]
+      evalex:
+      - [ [ '${scatgat}>0 && ${data_width}!=1024' ],
+          [ 'E:<${visionq8}> with <${scatgat}> requires that <${data_width}> is 1024 bits' ] ]      
+      - [ [ '${idma}==0' ],
+          [ 'W:Vision processors without iDMA are not supported by Tensilica provided Vision libraries' ] ]
+      - [ [ '${dram_count}<2' ],
+          [ 'W:We recommend configuring a Vision DSP with two data RAMs. Configuring with one data RAM may impact software performance' ] ]      
+      - [ [ 'F:!viz_noidma' ],
+          [ '${idma}==0' ],
+          [ 'E:Vision processors require iDMA for support by Tensilica provided Vision libraries' ] ]  
+      t: ibool
+      nat: HS
+      pgr: 'Vision Q'
+      order: 500
+      nofeaturevis: false
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0, feat: 'nx_visionq8' }
+  - bbn_sp_addsub:
+      n: ConnX B SP FP Add/Sub
+      parented_name: SP FP Add/Sub
+      t: ibool
+      nat: HS
+      helppage: bbn_fp
+      p: { p: 'bbn_sfp:3:4', d: 0, e: 0 }
+      order: 135
+      dv: 0
+      evalex:
+      - [ [ '${bbn_sfp}>0 && ${bbn_sp_addsub}==0 && strcmp("${wizpage}","rel") && ${bwisanver}<28100050' ],
+          [ 'E:<${bbn_sfp}> for this release requires that <${bbn_sp_addsub}> is also selected' ] ]      
+      isa:
+      - { hi: 28100_04_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_05_0 }
+  - bbn_dp_addsub:
+      n: ConnX B DP FP Add/Sub
+      parented_name: DP FP Add/Sub
+      t: ibool
+      nat: HS
+      helppage: bbn_fp
+      p: { p: 'bbn_dfp:3:4', d: 0, e: 0 }
+      order: 145
+      dv: 0
+      evalex:
+      - [ [ '${bbn_dfp}>0 && ${bbn_dp_addsub}==0 && strcmp("${wizpage}","rel") && ${bwisanver}<28100050' ],
+          [ 'E:<${bbn_dfp}> for this release requires that <${bbn_dp_addsub}> is also selected' ] ]        
+      isa:
+      - { hi: 28100_04_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_05_0 }
+  - bbn_sp_reciprsqrtqli:
+      n: ConnX B SP FP Reciprocal and RSQRT Accelerator
+      parented_name: SP FP Reciprocal and RSQRT Accelerator
+      t: ibool
+      nat: HS
+      helppage: bbn_fp
+      p: { p: 'bbn_sfp:3:4', d: 0, e: 0 }
+      order: 147
+      dv: 0
+      evalex:
+      - [ [ '${bbn_sfp}>3 && ${bbn_sp_reciprsqrtqli}==0 && strcmp("${wizpage}","rel") && ${bwisanver}<28100050' ],
+          [ 'E:B10/B20 Extended Single-Precision for this release requires that <${bbn_sp_reciprsqrtqli}> is also selected' ] ]         
+      isa:
+      - { hi: 28100_04_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_05_0 }
+  processors3:      
+  - fpmnx_220:
+      n: KQ7
+      tt: |-
+          KQ7
+      oneof: [ [ fpmnx_hpvfp, fpmnx_spvfp ] ]    
+      mindeps: { instWidthBytes: 16, maxCoprocs: 3, data_width: 512, loadStoreUnits: 2  }
+      bsdeps: { mul32choice: 'fullupper', data_latency: '4'}
+      bdeps: [ '+div32Int', '+depbits' ]
+      bcons: [ *allcoprocslist, brs ]
+      evalex:
+      - [ [ '${scatgat}>0 && ${data_width}!=512' ],
+          [ 'E:<${fpmnx_220}> with <${scatgat}> requires that <${data_width}> is 512 bits' ] ]            
+      t: ibool
+      nat: HS
+      pgr: 'FloatingPoint DSPs'
+      order: 501
+      nofeaturevis: false
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0, feat: 'nx_fpm220' }   
+  - vq8_histogram:
+      n: Vision Q8 Histogram
+      tt: |-
+          Vision Q8 Histogram
+      t: ibool
+      nat: HS
+      p: [  visionq8 ]
+      order: 510
+      isa:
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0 }
+  - vq8_fast_acc:
+      n: Vision Q8 FAST Accelerator
+      tt: |-
+          A set of state-based operations designed to accelerate
+          the Features from Accelerated Segment Test algorithm
+      t: ibool
+      nat: HS
+      p: [ visionq8 ]
+      order: 530
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0 }    
+  - vq8_quad_256_8x8_mac:
+      n: Vision Q8 256 8-bit MAC
+      t: ibool
+      nat: HS
+      helppage: vq8_macs
+      p: { p: visionq8, d: 1, e: 1 }
+      order: 570
+      dv: 1
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0, visible: false }  
+      - { hi: 99999, lo: 28100_06_0, feat: nx_visionq8_spl, visible: true }  
+  - vq8_quad_512_8x8_mac:
+      n: Vision Q8 512 8-bit MAC
+      t: ibool
+      nat: HS
+      helppage: vq8_macs
+      bdeps: [ '+vq8_quad_256_8x8_mac' ]
+      p: { p: visionq8, d: 1, e: 1 }
+      order: 580
+      dv: 1
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 28100_07_9, lo: 28100_06_0, feat: nx_visionq8_spl }  
+      - { hi: 99999, lo: 28100_08_0 } 
+  - vq8_quad_256_16x16_mac:
+      n: Vision Q8 256 16-bit MAC
+      t: ibool
+      nat: HS
+      helppage: vq8_macs
+      bdeps: [ '+vq8_quad_512_8x8_mac' ]
+      p: [ visionq8 ]
+      order: 550
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0 }  
+  - vq8_quad_1024_8x8_mac:
+      n: Vision Q8 1024 8-bit MAC
+      t: ibool
+      nat: HS
+      helppage: vq8_macs
+      bdeps: [ '+vq8_quad_512_8x8_mac' ]
+      p: [ visionq8 ]
+      order: 600
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0 }   
+  - vq8_hpvfp:
+      n: Vision Q8 Half Precision VFP
+      tt: |-
+          Vision Q8 Half Precision Vector Floating Point
+          The 128 Half Precision FMAC option adds
+          the FMAC operations to a second slot
+      t: int
+      nat: HS
+      helppage: vq8_fp
+      p: [ visionq8 ]
+      order: 520
+      dv: 0
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0, choice: [ [ 0, "None" ], [ 1, "64 Half Precision FMAC" ], [ 2, "128 Half Precision FMAC" ] ] }      
+  - vq8_spvfp:
+      n: Vision Q8 Single Precision VFP
+      tt: |-
+          Vision Q8 Single Precision Vector Floating Point
+          The 64 Single Precision FMAC option adds
+          the FMAC operations to a second slot
+      t: int
+      nat: HS
+      helppage: vq8_fp
+      p: [ visionq8 ] 
+      bsdeps2: {  '1': { vq8_hpvfp: '0:1' }, '2': { vq8_hpvfp: '0:2' } }        
+      order: 540
+      dv: 0
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0, choice: [ [ 0, 'None' ], [ 1, '32 Single Precision FMAC' ], [ 2, '64 Single Precision FMAC' ] ] }                              
+  - vq8_spfp_fast_recip:
+      n: Vision Q8 SP FP Reciprocal Accelerator
+      tt: |-
+          Single Precision Floating Point Reciprocal Accelerator
+          Includes operations which directly approximate reciprocals
+          of a vector of single-precision floating-point values
+      t: ibool
+      bsdeps: { vq8_spvfp: '!0' }
+      nat: HS
+      p: [ visionq8 ]
+      order: 650
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0 }
+  - vq8_dpvfp:
+      n: Vision Q8 Double Precision VFP
+      tt: |-
+          Vision Q8 Double Precision Vector Floating Point
+          The 32 Double Precision FMAC option adds
+          the FMAC operations to a second slot
+      t: int
+      nat: HS
+      helppage: vq8_fp
+      p: [ visionq8 ]
+      bsdeps2: {  '1': { vq8_spvfp: '1' }, '2': { vq8_spvfp: '2' } }
+      order: 560
+      dv: 0
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0, choice: [ [ 0, 'None' ], [ 1, '16 Double Precision FMAC' ], [ 2, '32 Double Precision FMAC' ] ] }  
+  - fpmnx_spvfp:
+      n: KQ Single Precision VFP
+      parented_name: Single Precision VFP
+      t: int
+      nat: HS
+      helppage: fpm220_fp
+      p: { p: 'fpmnx_220,fpmnx_240', d: 0 }
+      order: 720
+      dv: 0
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 28100_06_9, lo: 28100_06_0, choice: [ [ 1, 'Single Precision VFP' ], [ 2, 'Extended Single Precision VFP' ] ] }
+      - { hi: 99999, lo: 28100_07_0, choice: [ [ 0, 'None' ], [ 1, 'Single Precision VFP' ], [ 2, 'Extended Single Precision VFP' ] ] }
+  - fpmnx_dpvfp:
+      n: KQ Double Precision VFP
+      parented_name: Double Precision VFP
+      t: int
+      nat: HS
+      helppage: fpm220_fp
+      p: { p: 'fpmnx_220,fpmnx_240', d: 0 }
+      bdeps2: { '!0': [ fpmnx_spvfp ] }
+      bsdeps2: { '2': { fpmnx_spvfp: '2' } }
+      order: 740
+      dv: 0
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0, choice: [ [ 0, 'None' ], [ 1, 'Double Precision VFP' ], [ 2, 'Extended Double Precision VFP' ] ] }
+  - fpmnx_dpvfp_addsub:
+      n: KQ DP VFP Add/Sub
+      parented_name: DP VFP Add/Sub
+      t: ibool
+      nat: HS
+      helppage: fpm220_fp
+      p: { p: 'fpmnx_220,fpmnx_240', d: 0 }
+      bsdeps: { fpmnx_dpvfp: '!0' }
+      order: 710
+      dv: 0
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0 }
+  - fpmnx_latency:
+      n: KQ Low Latency FMA
+      parented_name: Low Latency FMA
+      tt: |-
+          Select this for low latency FMA
+      t: ibool
+      nat: HS
+      p: { p: 'fpmnx_220,fpmnx_240', d: 1 }
+      order: 730
+      dv: 1
+      isa:
+      - { hi: 28100_05_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_06_0 }   
+  - fpmnx_240:
+      n: KQ8
+      tt: |-
+          KQ8
+      mindeps: { instWidthBytes: 16, maxCoprocs: 3, data_width: 1024, loadStoreUnits: 2 }
+      bsdeps: { mul32choice: 'fullupper', data_latency: '4'}
+      oneof: [ [ fpmnx_hpvfp, fpmnx_spvfp ] ]
+      bdeps: [ '+div32Int', '+depbits' ]
+      bcons: [ *allcoprocslist, brs ]
+      evalex:
+      - [ [ '${scatgat}>0 && ${data_width}!=1024' ],
+          [ 'E:<${fpmnx_240}> with <${scatgat}> requires that <${data_width}> is 1024 bits' ] ]             
+      t: ibool
+      nat: HS
+      pgr: 'FloatingPoint DSPs'
+      order: 505
+      nofeaturevis: false
+      isa:
+      - { hi: 28100_06_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_07_0, feat: 'nx_fpm240' }     
+  - fpmnx_hpvfp:
+      n: KQ Half Precision VFP
+      parented_name: Half Precision VFP
+      t: int
+      nat: HS
+      helppage: fpm220_fp
+      p: { p: 'fpmnx_220,fpmnx_240', d: 0 }
+      order: 700
+      dv: 0
+      isa:
+      - { hi: 28100_06_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_07_0, choice: [ [ 0, 'None' ], [ 1, 'Half Precision VFP' ], [ 2, 'Extended Half Precision VFP' ] ] }
+  - bbn_rmFormatF9:
+      n: ConnX B Remove Format F9
+      parented_name: Remove Format F9
+      t: ibool
+      nat: HS
+      p: bbn_b20
+      order: 410
+      nofeaturevis: false
+      isa:
+      - { hi: 28100_06_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_07_0, feat: nx_b20_rmFormatF9 }
+  processors4:        
+  - vq8_fourbit_mac:
+      n: Vision Q8 4-bit MAC
+      tt: |-
+          4-bit NN ISA support. Provides 2048 4x4 MACs and 1024 4x8 MACs, conversions between 4-/8-bit values
+      t: ibool
+      nat: HS
+      p: [  visionq8 ]
+      order: 610
+      helppage: vq8_macs
+      isa:
+      - { hi: 28100_07_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_08_0 }      
+  - vq7_bfloat16_alu_mul:
+      n: Vision Q7 BFloat16 ALU + MUL operations
+      tt: |-
+          Vision Q7 BFloat16 ALU + MUL operations
+      t: ibool
+      nat: HS
+      bdeps: [ vq7_spvfp ]
+      p: [ visionq7 ]
+      order: 495
+      helppage: vq7_fp
+      isa:
+      - { hi: 28100_07_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_08_0 }        
+  implementation:
+  - clockgating:
+      n: Global/Functional Clock Gating
+      tt: |-
+          Select whether global and functional clock gating should be enabled
+      t: ibool
+      evalex:
+      - [ [ '${clockgating}!=${scan}' ],
+          [ 'E:<${clockgating}> and <${scan}> must match (both selected or neither selected)' ] ]
+      - [ [ '${clockgating}==0 && ${l2_size}>0' ],
+          [ 'W:No <${clockgating}> with L2 can cause significant speed degradation - for FPGA/Emulation only' ] ]
+      - [ [ '${clockgating}==0 && ${l2_size}>0 && strcmp("${hw_rtl}","Production") && strcmp("${wizpage}","hw")' ],
+          [ 'E:No <${clockgating}> with L2 can cause significant speed degradation - Not supported for Production builds' ] ]      
+      nat: HV
+      pgr: 'Implementation'
+      order: 100
+      minmax: false
+      prodvar: true
+      order: 100
+      dv: 1
+  - scan:
+      n: Full scan
+      tt: |-
+          Full scan
+      t: ibool
+      nat: HV
+      pgr: 'Implementation'
+      order: 200
+      dv: 1
+      minmax: false
+      prodvar: true
+  - implasyncreset:
+      n: Asynchronous Reset
+      tt: |-
+          Asynchronous Reset
+      t: ibool
+      nat: HV
+      pgr: 'Implementation'
+      order: 300
+      minmax: false
+      prodvar: true
+      dv: 1
+      isa:
+      - { exist: false, hi: 28000_99_9, lo: 0 }
+      - { hi: 99999, lo: 28100_00_0 }
+  - ir_drop_port:
+      n: IR Drop Port
+      t: ibool
+      nat: HS
+      bdeps: [ implasyncreset ]
+      pgr: 'IR Drop Port'
+      p: [ visionq7 ]
+      order: 100
+      nofeaturevis: false
+      prodvar: true
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0, feat: 'nx_ir_drop_port' }
+  - teaf:
+      n: Energy Analysis Flow
+      tt: |-
+          Enable the Tensilica Energy Analysis Flow with 
+          hardware builds for supported options 
+      t: ibool
+      nat: HV
+      pgr: 'Energy Analysis'
+      dv: 0
+      minmax: false
+      prodvar: true
+      order: 100
+      isa: 
+      - { hi: 28100_06_9, lo: 0, exist: false } 
+      - { feat: xtream, hi: 99999, lo: 28100_07_0 }                                                                      
+  mmu:
+  - mmuchoice:
+      n: MMU Selection
+      tt: |-
+          Memory management selection
+      t: str
+      nat: HS
+      pgr: 'Memory Management Options'
+      order: 100
+      dv: IMMU
+      isa:
+      - { choice: [ [ 'IMMU', 'MPU' ] ], hi: 99999, lo: 0 }
+  - immu_fgentries:
+      n: Number of MPU FG entries
+      tt: |-
+          Number of MPU foreground entries
+      t: int
+      nat: HS
+      dv: 32
+      order: 120
+      p: { p: 'mmuchoice:IMMU:IMMU_vt', d: 16 }
+      dv: 16
+      isa:
+      - { hi: 99999, lo: 0, minmax: false, rangepo2: { hi: 5, lo: 4  } }
+  - immu_bgmap:
+      n: MPU Background Map
+      tt: |-
+          IMMU background (reset) map selection
+      t: str
+      nat: HS
+      p: { p: 'mmuchoice:IMMU:IMMU_vt', d: mpu_ca_4kpg }
+      order: 140
+      dv: mpu_ca_4kpg
+      nofeaturevis: false
+      isa:
+      - { choice: [ [ 'mpu_ca_4kpg', '4K Pages' ], [ 'mpu_nowndw', 'Alt MPU BGMap' ] ], feat: nx_altbgmap, hi: 99999, lo: 0 }
+  - immu_lock:
+      n: Enable MPU Locking
+      t: ibool
+      order: 160
+      p: { p: 'mmuchoice:IMMU:IMMU_vt' }
+      evalex:
+      - [ [ 'strcmp("${immu_bgmap}","mpu_ca_4kpg")==0' ],
+          [ 'E:MPU Locking is only compatible with the uniform 4K Pages background map' ] ]      
+      isa:
+      - { exist: false, hi: 28100_04_9, lo: 0 }
+      - { exist: true, hi: 99999, lo: 28100_05_0 } 
+  - immu_useMinMPUEntry:
+      n: Enable MPU Small Pages
+      t: ibool
+      order: 180
+      p: { p: 'mmuchoice:IMMU:IMMU_vt' }
+      isa:
+      - { exist: false, hi: 28100_04_9, lo: 0 }
+      - { exist: true, hi: 99999, lo: 28100_05_0 }       
+  isa:
+  - mul32choice:
+      n: MUL32
+      tt: |-
+          MUL32 implementation
+      t: str
+      nat: HS
+      pgr: 'Instruction Options'
+      # to keep sari randomizer happy
+      evalex:
+      - [ [ 'strcmp("${mul32choice}","fullupper")==0' ],
+          [ 'E:MUL32 selection Pipelined + UH/SH is supported currently.' ] ]          
+      order: 100
+      dv: fullupper
+      visible: false
+      isa:
+      - { choice: [ [ 'none', 'None' ], [ 'full', 'Fully Pipelined' ], [ 'fullupper', 'Pipelined + UH/SH' ],  ], hi: 99999, lo: 0  }
+  - depbits:
+      n: DEPBITS
+      tt: |-
+          Insert a set of bits from one AR into another AR
+          at a specific offset. XCC can automatically infer this operation
+      bcons: [ fp ]
+      t: ibool
+      nat: HS
+      pgr: 'Instruction Options'
+      order: 200
+      isa:
+      - { hi: 99999, lo: 0 }
+  - brs:
+      n: Boolean Registers
+      tt: |-
+          Enable use of Boolean Register File (for TIE)
+      t: ibool
+      nat: HS
+      pgr: 'Instruction Options'
+      order: 220
+      isa:
+      - { hi: 99999, lo: 0 }
+  - arCount:
+      n: AR registers count
+      tt: |-
+          Number of AR registers for call windows if >= 32.
+          Setting to 16 registers means windowed calls are not supported 
+      t: int
+      nat: HS
+      pgr: 'ISA Configuration Options'
+      order: 300
+      dv: 32
+      isa:
+      - { rangepo2: { hi: 6, lo: 4 }, hi: 99999, lo: 0 }
+  - l32r:
+      n: L32R hardware support
+      tt: |-
+          Normal L32R loads literals using an offset preceding the PC.
+          Const16 adds support for literals loaded from immediate values
+          which can be beneficial if loading from system memory without D-Cache
+      t: str
+      nat: HS
+      pgr: 'ISA Configuration Options'
+      order: 320
+      dv: l32r
+      isa:
+      - { choice: [ [ 'l32r', 'Normal L32R' ], [ 'l32r_const16', 'L32R + Const16' ],  ], hi: 99999, lo: 0, minmax: false }
+  - maxCoprocs:
+      n: Number of Coprocessors
+      tt: |-
+          Maximum number of coprocessors that can be defined in TIE
+          Coprocessors can be used to support efficient (lazy) register save/restore
+          Some Tensilica provided coprocessors utilize specific coprocessor IDs
+      t: int
+      nat: HS
+      pgr: 'ISA Configuration Options'
+      order: 340
+      dv: 7
+      nofeaturevis: false
+      isa:
+      - { hi: 99999, lo: 0, choice: [ 7 ], visible: false }
+      - { hi: 28000_99_9, lo: 0, choice: [ 3, 7 ], feat: nx_ball, visible: true }
+  - div32Int:
+      n: 32 bit integer divider
+      tt: |-
+          32 bit integer divider that completes in a variable number
+          of cycles depending on the operands
+      t: ibool
+      nat: HS
+      pgr: 'Instruction Options'
+      order: 240
+      dv: 1
+      isa:
+      - { exist: false, hi: 28000_99_9, lo: 0 }
+      - { hi: 99999, lo: 28100_00_0 }      
+  - threadptr:
+      n: Thread Pointer
+      tt: |-
+          Select this option to get thread-local storage support
+          (only if you plan to run Linux on your Xtensa core)
+      t: ibool
+      nat: HS
+      pgr: 'Instruction Options'
+      order: 260
+      dv: 1
+      isa:
+      - { exist: false, hi: 28000_99_9, lo: 0 }
+      - { hi: 99999, lo: 28100_00_0 }   
+  - instWidthBytes:
+      n: Max instruction width
+      tt: |-
+          Max instruction width. Xtensa base ISA instructions are 2 or 3 bytes wide.
+          This specified the maximum width that can be used for wide / FLIX instructions.
+          Some of the DSP coprocessor options require wide instructions.
+          This must fit within the "instruction fetch width" 
+      t: int    
+      exprdeps:
+      - [ [ 'inst_width==$instWidthBytes*8%2' ],
+          [ 'E:Max Instruction Width must fit within the Instruction Fetch Width within a power-of-2' ] ]
+      nat: HS
+      pgr: 'ISA Configuration Options'
+      order: 360
+      dv: 16
+      prodvar: true
+      isa:
+      - { hi: 27999_99_9, lo: 0, exist: false }
+      - { hi: 28000_99_9, lo: 28000_00_0, visible: false, choice: [ 16 ] }
+      - { hi: 99999, lo: 28100_00_0, visible: true, enab: false, choice: [ 12, 13, 14, 15, 16, 20, 24, 28, 32  ] }
+      - { hi: 99999, lo: 28100_01_0, visible: true, enab: true, choice: [ 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 20, 24, 28, 32  ] }
+  - fp:
+      n: Single or Double Precision FP
+      tt: |-
+          IEEE scalar floating point instruction family
+          Can be configured as single+double or just single precision
+          Requires boolean registers and uses coprocessor ID 0
+      bdeps2: { '!0': [ +brs ] }
+      bcons: [ depbits ]
+      mindeps: { maxCoprocs: 3 }
+      mindeps2: { '2': { data_width: 64 } }
+      t: int
+      nat: HS
+      htmlVisibility: show
+      pgr: 'Instruction Options'
+      p: { p: 'data_latency:2:2_long' }
+      order: 400
+      isa:
+      - { hi: 28100_00_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0, choice: [ [ 0, 'None' ], [ 1, 'Single' ], [ 2, 'Single+Double' ] ] }
+      
+  - loops:
+      n: Zero overhead loops
+      tt: |-
+          Enable zero overhead loop instructions
+          (eliminates loop pipeline overhead)
+      t: ibool
+      nat: HS
+      htmlVisibility: show
+      pgr: 'Instruction Options'
+      p: { p: 'data_latency:2:2_long', d: 1 }
+      order: 300
+      dv: 1
+      isa:
+      - { hi: 99999, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_01_0 }
+  - prid:
+      n: Processor ID
+      tt: |-
+          Enable Processor ID
+      t: ibool
+      evalex:
+      - [ [ '${prid}==0 && strcmp("${wizpage}","rel") && ${bwisanver}<28100050' ],        
+          [ 'E:Processor ID is required for this release.' ] ]       
+      nat: HS
+      pgr: 'Instruction Options'
+      order: 320
+      dv: 1
+      isa:
+      - { range: { hi: 1, lo: 1 }, hi: 28100_04_9, lo: 0 }
+      - { range: { hi: 1, lo: 0 }, hi: 99999, lo: 28100_05_0 }    
+  - etie_enable:
+      n: Enable eTIE
+      tt: |-
+          Enable attaching of eTIE instrustion definitions to this
+          processor configuration. eTIE instructions can also make
+          use of eTIE interrupts 
+      t: ibool
+      nat: HV
+      pgr: 'TIE Capabilities'
+      order: 100
+      isa:
+      - { hi: 28100_04_9, lo: 0, exist: false }
+      - { hi: 99999, lo: 28100_05_0, feat: etieNX }
+  - tieware:
+      n: Enable TIEWare
+      tt: |-
+          Enable the TIEWare Library module.
+      t: ibool
+      nat: HV
+      pgr: 'TIE Capabilities'
+      nofeaturevis: true
+      dv: 0
+      order: 120
+      isa: 
+      - { hi: 28100_04_9, lo: 0, exist: false }   
+      - { feat: tiemodulesNX, hi: 99999, lo: 28100_05_0 }          
+  fetch:
+  - L0IBuffer:
+      n: Size of L0 Loop Buffer
+      tt: |-
+          Configures an L0 Loop Buffer to cache loop instructions to save loop power by avoiding I-memory accesses
+      bdeps: [ loops ]
+      evalex:
+      - [ [ '${L0IBuffer}>0 && ${L0IBuffer}<(${inst_width}/4)' ],
+          [ 'E:If configured, the <${L0IBuffer}> must be large enough for at least 2 instruction fetch widths' ] ]               
+      t: int
+      nat: HV
+      pgr: 'Instruction Fetch Options'
+      order: 100
+      dv: 32
+      isa:
+      - { hi: 99999, lo: 0, minmax: false, rangepo2: { hi: 13, inczero: false, lo: 5  } }
+      - { hi: 99999, lo: 28100_01_0, minmax: false, rangepo2: { hi: 13, inczero: true, lo: 5  } }
+  - btb_entries:
+      n: BTB Entries
+      t: int
+      nat: HS
+      pgr: 'Instruction Fetch Options'
+      order: 200
+      dv: 128
+      isa:
+      - { rangepo2: { hi: 8, lo: 7 }, hi: 99999, lo: 0 }
+      - { rangepo2: { hi: 8, lo: 5 }, hi: 99999, lo: 28100_01_0 }
+  - btb_rasentries:
+      n: BTB RAS Entries
+      t: int
+      nat: HS
+      pgr: 'Instruction Fetch Options'
+      order: 220
+      dv: 8
+      isa:
+      - { rangepo2: { hi: 3, lo: 3 }, hi: 28100_04_9, lo: 0 }
+      - { rangepo2: { hi: 3, lo: 1 }, hi: 99999, lo: 28100_05_0 }   
+  - btb_ways:
+      n: BTB Associativity
+      t: int
+      nat: HS
+      pgr: 'Instruction Fetch Options'
+      order: 240
+      dv: 4
+      isa:
+      - { rangepo2: { hi: 2, lo: 2 }, hi: 28100_04_9, lo: 0 }
+      - { rangepo2: { hi: 2, lo: 1 }, hi: 99999, lo: 28100_05_0 }     
+  - inst_missbuffers:
+      n: Instruction Miss Buffers
+      t: int
+      nat: HS
+      pgr: 'Instruction Fetch Options'
+      order: 260
+      dv: 3
+#      bsdeps2: {  '!3': { data_latency: '2:2_long' } }
+      evalex:
+      - [ [ '${inst_missbuffers}!=3 && (strcmp("${data_latency}","3") || strcmp("${data_latency}","4") || strcmp("${data_latency}","5"))' ],
+          [ 'E:The selected value of <${data_latency}> requires that <${inst_missbuffers}> is 3.' ] ]
+      isa:
+      - { hi: 28100_04_9, lo: 0, exist: false }
+      - { choice: [ 1, 2, 3 ], hi: 99999, lo: 28100_05_0 }              
+  systemif:
+  - sys_mif_data_apb:
+      n: Manager APB Interface
+      tt: |-
+          Include 32-bit Manager(Master) APB Interface
+      t: ibool
+      nat: HS
+      pgr: 'Manager Interface'
+      order: 240
+      dv: 0
+      prodvar: true
+      isa:
+      - { hi: 28000_99_9, lo: 0, bdeps: [ visionq6 ] }
+      - { hi: 99999, lo: 28100_00_0, bdeps: [ ] }
+  - sys_mif_data_apb_addr:
+      n: Manager APB Init Address
+      t: int
+      nat: HSA
+      p: { p: sys_mif_data_apb, d: 0, e: 0xD0000000 }
+      memdef: [ { size: sys_mif_data_apb_size, count: 1, align: sys_mif_data_apb_size, 
+                requires: d, supports: '', level: 1, active: sys_mif_data_apb  } ]
+      order: 260
+      dv: 0
+      prodvar: true
+      isa:
+      - { hi: 99999, lo: 0 }
+  - sys_mif_data_apb_size:
+      n: Manager APB Size
+      t: int
+      nat: HS
+      p: { p: sys_mif_data_apb, d: 65536 }
+      order: 280
+      dv: 65536
+      prodvar: true
+      isa:
+      - { hi: 28100_00_9, lo: 0, rangepo2: { lo: 14, hi: 18 } }
+      - { hi: 99999, lo: 28100_01_0, rangepo2: { lo: 14, hi: 24 } }
+  - sys_sif_inst_width:
+      n: Subordinate Instruction Interface Width
+      t: int
+      evalex:
+      - [ [ '${sys_sif_inst_width}>128 && strcmp("${data_latency}","4")==0' ],
+          [ 'E:<${sys_sif_inst_width}> > 128 is only compatible 3 cycle DSP load store' ] ]
+      - [ [ '${sys_sif_inst_width}>${inst_width}' ],
+          [ 'E:<${sys_sif_inst_width}> cannot exceed <${inst_width}>' ] ]      
+      nat: HS
+      pgr: 'Subordinate Interface'
+      p: { p: iram_count, d: 0, e: 128 }
+      order: 200
+      dv: 128
+      prodvar: true
+      isa:
+      - { hi: 99999, lo: 0, rangepo2: { hi: 7, lo: 6, inczero: true } }
+      - { hi: 99999, lo: 28100_

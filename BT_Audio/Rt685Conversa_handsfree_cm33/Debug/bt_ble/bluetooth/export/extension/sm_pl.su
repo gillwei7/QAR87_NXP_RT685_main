@@ -1,0 +1,6 @@
+../bt_ble/bluetooth/export/extension/sm_pl.c:54:12:BT_sm_get_device_attr_pl	32	static
+../bt_ble/bluetooth/export/extension/sm_pl.c:121:12:BT_sm_get_rank_count_pl	32	static
+../bt_ble/bluetooth/export/extension/sm_pl.c:167:6:sm_init_device_attr_pl	16	static
+../bt_ble/bluetooth/export/extension/sm_pl.c:197:6:sm_set_device_attr_pl	16	static
+../bt_ble/bluetooth/export/extension/sm_pl.c:241:12:sm_update_device_attr_pl	48	static
+../bt_ble/bluetooth/export/extension/sm_pl.c:443:12:sm_purge_device_list_pl	32	static

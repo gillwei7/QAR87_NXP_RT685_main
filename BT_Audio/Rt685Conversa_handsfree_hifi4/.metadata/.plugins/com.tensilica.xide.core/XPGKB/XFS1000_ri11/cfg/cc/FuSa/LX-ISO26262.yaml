@@ -1,0 +1,161 @@
+# Copyright (c) 2017-2021 by Cadence Design Systems, Inc. ALL RIGHTS RESERVED.
+# These coded instructions, statements, and computer programs are the
+# copyrighted works and confidential proprietary information of Cadence.
+# They may not be modified, copied, reproduced, distributed, or disclosed to
+# third parties in any manner, medium, or form, in whole or in part, without
+# the prior written consent of Cadence.
+
+# this file has rules specific to ISO-26262
+_templates:
+- &nonfusacoproc
+  [ vectra2, connx,
+    cx_bbep8, 
+    cx_bben_ue32, cx_bben_ue32l, cx_bben_gpc32, 
+    hifi2, hifi2_40, hifi3, hifi3_2slot, 
+    pdx, 
+    cx_bbe16, cx_bsp3, cx_ssp16, cx_turbo16, 
+    cx_bben_ivp32, ivpep_sac, ivp2c_32, ivp2ce_32, pdx4b_fpm128,
+    nne_engine ]
+    
+options:
+  - ivp26_32:
+      bsdeps: { sg_subbanks: '4:8' }        
+  - ivp2_32:
+      bsdeps: { sg_subbanks: '4:8' }         
+  - pdx4b:
+      bdeps: [ pdx4b_sfp, pdx4b_dfp ]  
+  - hifi5:
+      bcons: [ hifi5_sigtanh ]
+  - dc.size:
+      bdeps: [ dc.writeBack]  
+      bsdeps: { dc.nbanks: '1:2:4' }
+      mindeps: { dc.lineSize: '16-256' }  
+      exprdeps:      
+      - [ [ 'dc.size==0' ],
+          [ 'dynamic_way_disable==1' ],
+          [ 'P:rel' ],         
+          [ 'bwisanver>=27100050' ],
+          [ 'E:Data cache requires <Dynamic way disable> is selected for this release.' ] ]         
+  - ic.size:   
+      mindeps: { ic.widthBits: '32-128', ic.lineSize: '16-256' }  
+      exprdeps:      
+      - [ [ 'ic.size==0' ],
+          [ 'dynamic_way_disable==1' ],
+          [ 'P:rel' ],         
+          [ 'bwisanver>=27100050' ],
+          [ 'Instruction cache requires <Dynamic way disable> is selected for this release.' ] ]               
+  - udma:
+      mindeps: { udma_outstanding_rows: '2-32', udma_bufferwidth: '1-16' }
+  - debugEnabled:
+      mindeps: { dataTraps: '0-2', instTraps: '0-2', perfcounters: '0-8', debugIntLevel: '2-6' }            
+  - xnne2_num_sblks:
+      mindeps: { xnne2_num_m_per_s: '4-8', xnne2_sblk_axi_width: '128-256', xnne2_ubuf_size: '786432-2097152', udma_outstanding_rows: '2-16' }   
+      bsdeps: { instMemErrorType: '2', dataMemErrorType: '2' } 
+      bcons: [ L0IBuffer, udma_reorder_buffer, ivp26_histogram ]
+      exprdeps:
+      - [ [ 'prefetchEntries==0' ],
+          [ 'prefetch_memerror==2' ],
+          [ 'E:Selection of <DNA150> requires that <Prefetch Memory Error type> is ECC' ] ]   
+  - secure_mode:  
+      evalex:
+      - [ [ 'strcmp("${wizpage}","rel") && ${bwisanver}<27100080' ],
+          [ 'E:Selection of <${fusa_iso26262}> requires that <${secure_mode}> is not selected for this release.' ] ]  
+  - fpmlx_128:
+      bdeps: [ fpmlx_spvfp ] 
+      bsdeps: { loadStoreUnits: 2 }        
+  - fpmlx_512:
+      bdeps: [ fpmlx_spvfp ]  
+      bsdeps: { loadStoreUnits: 2 }   
+  - nna_engine:   
+      bdeps: [ ivp26_32, xnne2_mem_error, implCgGlobal, implasyncreset, scan ]  
+      mindeps: { xnne2_num_m_per_s: '4-8' } 
+      bsdeps: { xnne2_ubuf_size: '786432', mmuType: 'IMMU', tempBus: 'axi4', tempPipeLength: '7',
+                 pifWidthBits: '128', loadStoreUnits: 2 }                                                     
+  - fusa_iso26262:
+      graphedEditor: true     # show only applicable options in the editor.     
+      bcons: [ vfp, dfpassist, sdfp.pre_inc_LS, user_provided_spfpu, user_provided_dpfpu, mulUser, 
+               dramRetry, xnne_num_sblks, tieware, *nonfusacoproc ]
+      bsdeps: { implBlock: flop, mmuType: 'CaMMU:IMMU', byteOrder: le, unalignedLoadAction: exception,
+                tempPipeLength: '5:7', tempBus: 'none:pif:ahblite:axi4',
+                sem.data.gating: 'None:User:All',
+                immu_noofmpuentries: '16:32', arCount: '16:32:64', l32r: 'l32r:l32r_const16', tempPipeLength: '5:7',
+                axi_ecc: 'none:32bit', prefetchEntries: '0:8:16', prefetchBlockEntries: '0:8', dataMemErrorWidth: '1:4',
+                loadStoreUnits: '1:2', pso.domains: None, pso.core.ret: None, xnne2_num_sblks: '0:2', sw_clibs: xclib,
+                nna_engine: '0:20' }
+      mindeps: { L0IBuffer: '0-512', wbEntries: '2-32', iFetchWidthBits: '32-128', dataWidthBits: '32-512',
+                 pifWidthBits: '0-128', intCount: '3-32', intLevelCount: '2-6',
+                 intTimerCount: '0-3', execmIntLevel: '1-5', maxCoprocs: '0-8', miscSpecRegs: '0-4',
+                 num_extn_exclmaster: '0-16', bs.req.ctl.dep: '1-16', bs.req.data.dep: '1-16', bs.rsp.dep: '1-16',
+                 dmaDepth: '2-16', prefetchCastoutLines: '1-2', instWidthBytes: '3-16', traxMemBytes: '0-32768' }          
+      evalex:
+      - [ [ 'strcmp("${wizpage}","rel") && ${bwisanver}<27100080 && ${L0IBuffer}==512' ],
+          [ 'E:Selection of <${fusa_iso26262}> requires that <${L0IBuffer}> is in the range 0-256 for this release.' ] ]        
+      - [ [ '${nna_engine}>0 && strcmp("${wizpage}","rel") && ${bwisanver}!=27100081' ],
+          [ 'E:<${nna_engine}> FuSa builds are not supported on this release.' ] ] 
+      - [ [ '${nna_engine}==0 && strcmp("${wizpage}","rel") && ${bwisanver}==27100081' ],
+          [ 'E:FuSa builds of LX cores other than <${nna_engine}> are not supported on this release' ] ]                                                              
+      exprdeps:
+      - [ [ 'model:lmem[memName:=instram.0].sizeBytes==0' ],
+          [ 'model:lmem[memName:=instram.0].sizeBytes>0', 'model:lmem[memName:=instram.0].sizeBytes<262145' ],
+          [ 'E: Selection of <FuSa> requires that <Instruction RAM 0> is either unselected or has values 0-256K' ] ]  
+      - [ [ 'model:lmem[memName:=instram.1].sizeBytes==0' ],
+          [ 'model:lmem[memName:=instram.1].sizeBytes>0', 'model:lmem[memName:=instram.1].sizeBytes<262145' ],
+          [ 'E: Selection of <FuSa> requires that <Instruction RAM 1> is either unselected or has values 0-256K' ] ]   
+      - [ [ 'model:lmem[memName:=dataram.0].sizeBytes<16777217' ],
+          [ 'E: Selection of <FuSa> requires that <Data RAM 0> has values between 0-16M' ] ]   
+      - [ [ 'model:lmem[memName:=dataram.1].sizeBytes<16777217' ],
+          [ 'E: Selection of <FuSa> requires that <Data RAM 1> has values between 0-16M' ] ]                                 
+      - [ [ 'bwrelnver>13000000' ],
+          [ 'P:sw' ],
+          [ 'W: Software generated with RG releases is for development purposes. FuSa compliant software tools and builds are generated by sw-upgrading to a FuSa software compliant releases.' ] ]      
+      - [ [ 'dc.size<=131072' ],
+          [ 'E: Selection of <FuSa> requires that <D-Cache> has values between 0-128K' ] ]
+      - [ [ 'ic.size<=131072' ],
+          [ 'E: Selection of <FuSa> requires that <I-Cache> has values between 0-128K' ] ]  
+      - [ [ 'bwisanver!=27100000' ],
+          [ 'mmuType!=IMMU' ],
+          [ 'tempPipeLength!=5' ],
+          [ 'ic.size==0' ],
+          [ 'pif.crit.word.first==0' ],
+          [ 'early.restart==0' ],
+          [ 'ic.lineSize<=$pifWidthBits' ],
+          [ 'P:rel' ],
+          [ 'E:The combination (mpu+5stg+ic+cwf+earlyrestart+icline>pifwidth) is not allowed on RI-2018.0 release.' ] ]
+      - [ [ 'bwisanver!=27100000' ],
+          [ 'mmuType!=IMMU' ],
+          [ 'tempPipeLength!=5' ],
+          [ 'model:lmem[memName:=instram.1].sizeBytes==0' ],
+          [ 'model:lmem[memName:=instram.1].memError==0' ],
+          [ 'instMemErrorType==0' ], 
+          [ 'P:rel' ],
+          [ 'E:The combination (mpu+5stg+iram1+ecc/parity) is not allowed on RI-2018.0 release.' ] ]      
+      - [ [ 'user_tie==0' ],
+          [ 'user_tie==100' ],     
+          [ 'W: Specification, development, verification and functional-safety impact analysis of User Tie that adds new operations and resources to processor is responsibility of the user.' ] ]
+      - [ [ 'hw_fusa==0' ],
+          [ 'bwisanver!=27100040' ],
+          [ 'xnne2_num_sblks==2' ],
+          [ 'P:fusa' ],
+          [ 'E:Only DNA150 configs are RI.4 Hardware FuSa compliant.' ] ] 
+      - [ [ 'bwisanver==27100040' ],
+          [ 'xnne2_num_sblks!=2' ],
+          [ 'P:rel' ],
+          [ 'E:DNA150 FuSa builds can only be submitted to this RI.4 release.' ] ]  
+      - [ [ 'model:lmem[memName:=instrom.0].sizeBytes==0' ],
+          [ 'model:lmem[memName:=instrom.0].sizeBytes>0', 'model:lmem[memName:=instrom.0].sizeBytes<262145' ],
+          [ 'E: Selection of <FuSa> requires that <Instruction RAM 0> is either unselected or has values 0-256K' ] ]                              
+      - [ [ 'bwisanver>=27100080' ],
+          [ 'model:lmem[memName:=instrom.0].sizeBytes==0' ],
+          [ 'P:rel' ],
+          [ 'E: Selection of <FuSa> requires that <Instruction ROM 0> is not selected for this release.' ] ]  
+      - [ [ 'model:lmem[memName:=datarom.0].sizeBytes==0' ],
+          [ 'E: Selection of <FuSa> requires that <Data ROM 0> is not selected' ] ]  
+      - [ [ 'model:lmem[memName:=dataport.0].sizeBytes==0' ],
+          [ 'E: Selection of <FuSa> requires that <XLMI port> is not selected' ] ]     
+      - [ [ 'sw_fusa==0' ],
+          [ 'mmuType==IMMU' ], 
+          [ 'bwisanver!=27100000' ],    
+          [ 'P:fusa' ],
+          [ 'E: RI-2018.0 Software FuSa compliance requires that MMU type is MPU (Memory Protection Unit).' ] ]                                                                                                       
+                                                             
+                                                                         

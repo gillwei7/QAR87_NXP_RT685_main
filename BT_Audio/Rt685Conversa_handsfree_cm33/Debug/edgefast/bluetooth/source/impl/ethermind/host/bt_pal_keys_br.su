@@ -1,0 +1,12 @@
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:81:19:bt_addr_cmp	16	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:91:20:bt_addr_eq	16	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:128:20:bt_addr_copy	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys_br.c:36:26:bt_keys_find_link_key	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys_br.c:54:26:bt_keys_get_link_key	32	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys_br.c:100:6:bt_keys_link_key_clear	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys_br.c:115:6:bt_keys_link_key_clear_addr	40	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys_br.c:144:6:bt_keys_link_key_store	32	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys_br.c:161:6:bt_foreach_bond_br	32	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys_br.c:181:12:link_key_set	72	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys_br.c:235:12:link_key_commit	4	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys_br.c:244:6:bt_keys_link_key_update_usage	24	static

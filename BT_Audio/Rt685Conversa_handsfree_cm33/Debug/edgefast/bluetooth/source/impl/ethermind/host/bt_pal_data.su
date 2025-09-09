@@ -1,0 +1,3 @@
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_data.c:20:6:bt_data_parse	40	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_data.c:52:8:bt_data_get_len	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_data.c:63:8:bt_data_serialize	24	static

@@ -1,0 +1,4 @@
+This is an example NX controller with 3-way AR operations (flix3).
+It has 64 AR registers and a number of configuration options that maximize basic controller performance, such as zero-overhead loops, DEPBITS, integer divider, and 128-entry BTB.
+It configures local instruction and data tightly-coupled memories and has two load-store units.
+From this configuration, users can do multiple experiments on the impact of various configuration operations on their code.

@@ -1,0 +1,7 @@
+../mbedtls/library/psa_crypto_ecp.c:32:14:mbedtls_psa_ecp_load_representation	48	static
+../mbedtls/library/psa_crypto_ecp.c:149:14:mbedtls_psa_ecp_import_key	40	static
+../mbedtls/library/psa_crypto_ecp.c:191:14:mbedtls_psa_ecp_export_key	48	static
+../mbedtls/library/psa_crypto_ecp.c:242:14:mbedtls_psa_ecp_export_public_key	40	static
+../mbedtls/library/psa_crypto_ecp.c:271:14:mbedtls_psa_ecp_generate_key	216	static
+../mbedtls/library/psa_crypto_ecp.c:323:14:mbedtls_psa_ecdsa_sign_hash	112	static
+../mbedtls/library/psa_crypto_ecp.c:395:14:mbedtls_psa_ecdsa_verify_hash	80	static

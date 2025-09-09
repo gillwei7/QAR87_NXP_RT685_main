@@ -1,0 +1,15 @@
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:164:19:ethermind_br_sm_ui_notify_cb	72	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:328:12:ethermind_bt_sm_init	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:361:13:bt_smp_br_update_io_cap	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:398:6:bt_smp_update_io_cap	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:403:5:bt_smp_init	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:417:5:bt_smp_auth_cb_overlay	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:422:5:bt_smp_auth_passkey_entry	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:427:5:bt_smp_auth_passkey_confirm	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:431:5:bt_smp_auth_cancel	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:435:5:bt_smp_auth_pairing_confirm	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:439:5:bt_smp_start_security	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:444:5:bt_smp_le_oob_set_tk	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:448:5:bt_smp_le_oob_set_sc_data	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:455:5:bt_smp_le_oob_get_sc_data	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_smp.c:462:6:bt_set_bondable	16	static

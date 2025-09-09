@@ -1,0 +1,66 @@
+# Copyright (c) 2017-2021 by Cadence Design Systems, Inc. ALL RIGHTS RESERVED.
+# These coded instructions, statements, and computer programs are the
+# copyrighted works and confidential proprietary information of Cadence.
+# They may not be modified, copied, reproduced, distributed, or disclosed to
+# third parties in any manner, medium, or form, in whole or in part, without
+# the prior written consent of Cadence.
+
+# this file has rules specific to NX ISO-26262 (General rules applicable to all releases)
+_templates:
+- &nonfusacoproc
+  [ ball, pdxnx8, visionq6 ]
+    
+options: 
+  - bbn_b10:
+      mindeps: { bbn_vec_regs: '32-32' }         
+  - bbn_b20:
+      mindeps: { bbn_vec_regs: '32-32' }  
+  - sys_mif_data_apb:      
+      mindeps: { sys_mif_data_apb_size: '16384-16777216' }
+  - sys_mif_data_apb:    
+      mindeps: { sys_sif_inst_idwidth: '4-16' }    
+  - sys_sif_data_width:                 
+      mindeps: { sys_sif_data_idwidth: '4-16' }      
+  - sdc_size:                 
+      bsdeps: { sdc_accesswidth: '32:64:128' }   
+  - iram_count:                 
+      mindeps: { iram_size: '8192-1048576' }    
+  - dram_count:                 
+      mindeps: { dram_size: '16384-16777216' }
+      bsdeps: { dram_banks: '2:4' }    
+  - idma:                 
+      bsdeps: { idma_buf_depth: '4:8', idma_max_reqs: '32:64', idma_reorder_buf: '0:32:48:64:128', idma_channels: '1:2:4',
+      idma_addr_width: '32:40', idma_data_width: '32:64:128:256' }                                
+  - fusa_iso26262:
+      graphedEditor: true     # show only applicable options in the editor.
+      bdeps: [ loops, prid ]
+      bcons: [ *nonfusacoproc, bbn_hh_fft, bbn_hh_isa, bbn_hh_ioq_expstate, mp_psodomain,
+                tieware ]
+      bsdeps: { mmuchoice: IMMU, l32r: 'l32r:l32r_const16', arCount: '16:32:64',
+                immu_fgentries: '16:32', maxCoprocs: '7', btb_entries: '32:64:128:256',
+                sys_mif_inst_width: '32:64:128', sys_mif_data_width: '32:64:128', sys_sif_inst_width: '0:32:64:128:256', 
+                sys_sif_data_width: '0:32:64:128:256', iprefetch_entries: '0:2:4:8', dprefetch_entries: '0:2:4:8',
+                vdc_size: '0:32768:65536:131072:262144', iram_count: '0:1', dram_count: '0:1:2',
+                data_latency: '2:3:4', loadStoreUnits: '1:2', perfcounters: '0:8:16', instTraps: '0:1:2',
+                dataTraps: '0:1:2', ints_max_level: '7:15:31', sw_clibs: xclib }
+      mindeps: { L0IBuffer: '0-8192', ints_ext_count: '16-240', ints_timer_count: '0-3', ints_sw_count: '0-112', traxMemBytes: '0-262144',
+                 sram_size: '67108864-1073741824', data_width: '32-1024', ic_size: '0-131072', sdc_size: '0-131072', ic_linesize: '16-256',
+                 sdc_linesize: '16-256', inst_width: '32-256', instWidthBytes: '4-32' }
+      exprdeps: 
+      - [ [ 'user_tie==0' ],
+          [ 'user_tie==100' ],     
+          [ 'W: Specification, development, verification and functional-safety impact analysis of User Tie that adds new operations and resources to processor is responsibility of the user.' ] ]           
+      - [ [ 'F:flexlockNX' ],
+          [ 'flexlock==1', 'flexlock_mem_lockstep==1' ],
+          [ 'iside_errors==1', 'dside_errors==1' ],
+          [ 'E:FuSa requires that either I/D memory errors or <FlexLock / DCLS> (Lock Only) + <FlexLock Memory Lockstep> is selected.' ] ]     
+      - [ [ 'F:!flexlockNX' ],
+          [ 'iside_errors==1', 'dside_errors==1' ],
+          [ 'E:FuSa requires that  I/D memory errors are selected.' ] ]         
+      - [ [ 'sw_fusa==0' ],
+          [ 'l2_size==0' ],  
+          [ 'P:fusa' ],
+          [ 'E: Software FuSa compliance requires that L2 Cache/RAM Size is not selected.' ] ]         
+      - [ [ 'l2_size==0' ],  
+          [ 'W: L2 Cache/RAM Size is not Software FuSa compliant.' ] ]                                                             
+ 

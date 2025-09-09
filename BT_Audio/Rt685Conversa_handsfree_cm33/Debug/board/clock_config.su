@@ -1,0 +1,6 @@
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_clock.h:1114:20:CLOCK_SetXtalFreq	16	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_power.h:352:20:POWER_DisablePD	16	static
+../board/clock_config.c:48:29:BOARD_FlexspiClockSafeConfig	4	static
+../board/clock_config.c:61:29:BOARD_SetFlexspiClock	16	static
+../board/clock_config.c:74:6:BOARD_InitBootClocks	8	static
+../board/clock_config.c:150:6:BOARD_BootClockRUN	8	static

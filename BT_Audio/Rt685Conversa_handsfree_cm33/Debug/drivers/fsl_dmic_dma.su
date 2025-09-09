@@ -1,0 +1,8 @@
+../drivers/fsl_dma.h:486:24:DMA_SetChannelXferConfig	24	static
+../drivers/fsl_dmic.h:348:20:DMIC_EnableChannelDma	16	static
+../drivers/fsl_dmic_dma.c:38:13:DMIC_TransferReceiveDMACallback	40	static
+../drivers/fsl_dmic_dma.c:69:6:DMIC_InstallDMADescriptorMemory	24	static
+../drivers/fsl_dmic_dma.c:85:10:DMIC_TransferCreateHandleDMA	24	static
+../drivers/fsl_dmic_dma.c:121:10:DMIC_TransferReceiveDMA	104	static
+../drivers/fsl_dmic_dma.c:229:6:DMIC_TransferAbortReceiveDMA	16	static
+../drivers/fsl_dmic_dma.c:251:10:DMIC_TransferGetReceiveCountDMA	32	static

@@ -1,0 +1,5 @@
+../bt_ble/port/pal/mcux/ethal/ethal_debug.c:32:6:EM_debug_init	16	static
+../bt_ble/port/pal/mcux/ethal/ethal_debug.c:60:6:EM_debug_shutdown	4	static
+../bt_ble/port/pal/mcux/ethal/ethal_debug.c:200:9:EM_debug_get_current_timestamp	4	static
+../bt_ble/port/pal/mcux/ethal/ethal_debug.c:208:6:EM_set_debug_level	16	static
+../bt_ble/port/pal/mcux/ethal/ethal_debug.c:223:6:EM_update_module_debug_flag	24	static

@@ -1,0 +1,15 @@
+../edgefast/bluetooth/porting/atomic_c.c:52:5:atomic_cas	32	static
+../edgefast/bluetooth/porting/atomic_c.c:86:6:atomic_ptr_cas	32	static
+../edgefast/bluetooth/porting/atomic_c.c:117:14:atomic_add	24	static
+../edgefast/bluetooth/porting/atomic_c.c:146:14:atomic_sub	24	static
+../edgefast/bluetooth/porting/atomic_c.c:173:14:atomic_inc	24	static
+../edgefast/bluetooth/porting/atomic_c.c:200:14:atomic_dec	24	static
+../edgefast/bluetooth/porting/atomic_c.c:228:14:atomic_get	16	static
+../edgefast/bluetooth/porting/atomic_c.c:246:18:atomic_ptr_get	16	static
+../edgefast/bluetooth/porting/atomic_c.c:263:14:atomic_set	24	static
+../edgefast/bluetooth/porting/atomic_c.c:294:18:atomic_ptr_set	24	static
+../edgefast/bluetooth/porting/atomic_c.c:321:14:atomic_clear	24	static
+../edgefast/bluetooth/porting/atomic_c.c:350:14:atomic_or	32	static
+../edgefast/bluetooth/porting/atomic_c.c:381:14:atomic_xor	32	static
+../edgefast/bluetooth/porting/atomic_c.c:413:14:atomic_and	32	static
+../edgefast/bluetooth/porting/atomic_c.c:444:14:atomic_nand	32	static

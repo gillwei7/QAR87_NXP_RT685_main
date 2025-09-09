@@ -1,0 +1,61 @@
+#
+# ruleclassNN is a fully qualified groovy class implementing IRuleGroovy
+# the RuleSet creates / holds an instance of the class with its trigger
+# fields. fields can be regex wildcards. thus:
+# - int.* will match all interrupts
+# - lmem.* all local mems
+# - [ls]mem.* any memory.
+#
+# if there are no isas then the rule fires regardless
+# if isas listed then rule only fires for defined ranges; assumed irrelevant
+# outside of those. fields that don't exist (for an isa range) never cause 
+# a rule trigger.
+#
+# if props exist then they are set onto the rule instance at time of creation
+# assuming appropriate setters exist for groovy to call.
+#
+# fields:
+# primary pfields: the validity of this is being affected
+# trigger tfields: this is not affected ... it is affecting the primary
+#
+# if one of the tfields mentioned does not "exist" for the ISA it is simply
+# dropped. this avoids the need for repeating fields for diff. isa versions
+#
+# all fields may be primary if the effects are symmetrical (a conflicts with b).
+# if its clear which way tho ... e.g. FP (primary) requires booleans (trigger)
+
+# common to all isa variants (TX, X, LX, NX)
+common:
+- rule.class1:
+    pfields: [ mac16 ]  # primary fld: the validity of this is being affected
+    tfields: [ clamps ] # trigger fld. this is not affected ... it is affecting the primary
+    isas:
+    - { range: { lo: 1k, hi: 2k, ia: 0x70000000, la: 0x90000000 }, lo: 900, hi: 1099, featbypass: candothis } # without feat, the rule fires
+    - { lo: 1100, hi: 1199 }
+    
+- ruleclass1: { props: { pname1: pval5, pname2: pval7 }, fields: [ fld1, fld3 ], isas: [ { lo: 900, hi: 1099, featbypass: candothis }, { lo: 1100, hi: 1199 } ] }
+
+- ruleclass1:
+    props: { pname1: pval5, pname2: pval7 }
+    fields: [ fld1, fld3 ]
+    isas: [ { lo: 900, hi: 1099, featbypass: candothis }, { lo: 1100, hi: 1199 } ]
+
+
+- ruleclass2:
+    fields: [ fld1, fld3 ]
+    
+- ruleclass2: { fields: [ fld1, fld3 ] }
+
+yamlrules:
+- 'bdeps-mac16-mul16':
+    prop: true
+    sev: note
+    msg: 'Adding MUL16 costs very few gates, and yet is very beneficial in most cases'
+- 'bdeps.$f1.$f2':
+    msg: 'Option ${0} requires that option ${1} is also selected'
+    
+
+- bdeps.mul32.mul16:
+    prop: false
+    sev: note
+    msg: Adding MUL16 costs very few gates, and yet is very beneficial in most cases

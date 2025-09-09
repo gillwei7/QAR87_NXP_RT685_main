@@ -1,0 +1,10 @@
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/error.h:147:19:mbedtls_error_add	24	static
+../mbedtls/library/x509_crl.c:50:12:x509_crl_get_version	32	static
+../mbedtls/library/x509_crl.c:75:12:x509_get_crl_ext	40	static
+../mbedtls/library/x509_crl.c:159:12:x509_get_crl_entry_ext	32	static
+../mbedtls/library/x509_crl.c:214:12:x509_get_entries	48	static
+../mbedtls/library/x509_crl.c:282:5:mbedtls_x509_crl_parse_der	96	static
+../mbedtls/library/x509_crl.c:504:5:mbedtls_x509_crl_parse	64	static
+../mbedtls/library/x509_crl.c:593:5:mbedtls_x509_crl_info	72	static
+../mbedtls/library/x509_crl.c:667:6:mbedtls_x509_crl_init	16	static
+../mbedtls/library/x509_crl.c:675:6:mbedtls_x509_crl_free	40	static

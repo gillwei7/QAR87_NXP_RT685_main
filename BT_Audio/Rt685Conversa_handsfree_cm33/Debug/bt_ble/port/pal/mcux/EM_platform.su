@@ -1,0 +1,7 @@
+../bt_ble/port/pal/mcux/EM_platform.c:24:6:EM_enter_sleep_pl	4	static
+../bt_ble/port/pal/mcux/EM_platform.c:28:6:EM_exit_sleep_pl	4	static
+../bt_ble/port/pal/mcux/EM_platform.c:32:5:EM_str_to_num_pl	24	static
+../bt_ble/port/pal/mcux/EM_platform.c:56:5:EM_str_to_hexnum_pl	32	static
+../bt_ble/port/pal/mcux/EM_platform.c:116:6:EM_num_to_str_pl	40	static
+../bt_ble/port/pal/mcux/EM_platform.c:157:6:__assertion_failed	16	static
+../bt_ble/port/pal/mcux/EM_platform.c:161:5:_printf	4	static

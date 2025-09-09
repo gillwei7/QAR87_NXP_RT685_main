@@ -1,0 +1,5 @@
+../bt_ble/port/pal/mcux/bluetooth/btsnoop_pl.c:115:6:btsnoop_init_pl	4	static
+../bt_ble/port/pal/mcux/bluetooth/btsnoop_pl.c:119:12:btsnoop_open_pl	4	static
+../bt_ble/port/pal/mcux/bluetooth/btsnoop_pl.c:124:12:btsnoop_close_pl	4	static
+../bt_ble/port/pal/mcux/bluetooth/btsnoop_pl.c:129:8:btsnoop_write_pl	16	static
+../bt_ble/port/pal/mcux/bluetooth/btsnoop_pl.c:134:8:btsnoop_get_us_timestamp_pl	4	static

@@ -1,0 +1,8 @@
+../bt_ble/port/pal/mcux/bluetooth/ctn_pl.c:41:12:BT_ctn_build_object_listing_pl	1152	static
+../bt_ble/port/pal/mcux/bluetooth/ctn_pl.c:376:12:BT_ctn_get_object_list	1056	static
+../bt_ble/port/pal/mcux/bluetooth/ctn_pl.c:495:12:ctn_get_object_attributes_pl	192	static
+../bt_ble/port/pal/mcux/bluetooth/ctn_pl.c:767:7:ctn_compare_timestamp_pl	72	static
+../bt_ble/port/pal/mcux/bluetooth/ctn_pl.c:943:12:BT_ctn_convert_bytes_to_chars	40	static
+../bt_ble/port/pal/mcux/bluetooth/ctn_pl.c:978:7:ctn_nibble_to_char	24	static
+../bt_ble/port/pal/mcux/bluetooth/ctn_pl.c:1016:13:BT_ctn_update_object_handle_pl	440	static
+../bt_ble/port/pal/mcux/bluetooth/ctn_pl.c:1194:12:BT_ctn_build_event_file_pl	208	static

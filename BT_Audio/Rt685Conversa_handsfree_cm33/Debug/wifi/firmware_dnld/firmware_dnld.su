@@ -1,0 +1,2 @@
+../wifi/firmware_dnld/firmware_dnld.c:35:16:conn_download_normal_fw	48	static
+../wifi/firmware_dnld/firmware_dnld.c:61:9:firmware_download	40	static

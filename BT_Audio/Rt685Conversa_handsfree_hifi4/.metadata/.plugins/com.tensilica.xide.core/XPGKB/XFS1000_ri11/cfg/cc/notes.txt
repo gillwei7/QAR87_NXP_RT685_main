@@ -1,0 +1,9 @@
+
+when considering a parent and child, need to handle the default
+values when parent is DISABLED and ENABLED. The defaults for int
+values are
+- for ibools 0 in both cases
+- for numerics the "lowest valid value" - e.g. for dcachelinesize
+  the default would be 16 bytes if not otherwise specified
+  
+

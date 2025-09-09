@@ -1,0 +1,15 @@
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:29:5:settings_init	8	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:47:5:settings_load_one	32	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:70:16:settings_read_data	24	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:75:5:settings_load_subtree_direct	624	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:128:12:settings_load_subtree_scan	616	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:182:5:settings_load_subtree	24	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:203:5:settings_load	8	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:208:12:settings_has_spacer	32	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:225:12:settings_check_create_path	552	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:255:5:settings_save_one	32	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:287:5:settings_name_steq	24	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:326:5:settings_name_next	24	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:357:5:settings_delete	24	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:368:5:settings_commit	8	static
+../bt_ble/source/impl/ethermind/platform/bt_ble_settings.c:373:5:settings_commit_subtree	24	static

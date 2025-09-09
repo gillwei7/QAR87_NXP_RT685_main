@@ -1,0 +1,5 @@
+../bt_ble/bluetooth/export/extension/device_queue_pl.c:31:6:device_queue_pl_init	4	static
+../bt_ble/bluetooth/export/extension/device_queue_pl.c:39:6:device_queue_pl_shutdown	4	static
+../bt_ble/bluetooth/export/extension/device_queue_pl.c:47:6:device_queue_free_pl	16	static
+../bt_ble/bluetooth/export/extension/device_queue_pl.c:52:6:device_queue_full_pl	24	static
+../bt_ble/bluetooth/export/extension/device_queue_pl.c:132:6:device_queue_disconnect_on_full_pl	16	static

@@ -1,0 +1,10 @@
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/cipher.h:615:19:mbedtls_cipher_get_key_bitlen	16	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:321:19:mbedtls_ssl_chk_buf_ptr	24	static
+../mbedtls/library/ssl_ticket.c:24:6:mbedtls_ssl_ticket_init	16	static
+../mbedtls/library/ssl_ticket.c:52:12:ssl_ticket_gen_key	64	static
+../mbedtls/library/ssl_ticket.c:85:12:ssl_ticket_update_keys	16	static
+../mbedtls/library/ssl_ticket.c:110:5:mbedtls_ssl_ticket_setup	40	static
+../mbedtls/library/ssl_ticket.c:204:5:mbedtls_ssl_ticket_write	96	static
+../mbedtls/library/ssl_ticket.c:289:32:ssl_ticket_select_key	24	static
+../mbedtls/library/ssl_ticket.c:307:5:mbedtls_ssl_ticket_parse	96	static
+../mbedtls/library/ssl_ticket.c:404:6:mbedtls_ssl_ticket_free	16	static

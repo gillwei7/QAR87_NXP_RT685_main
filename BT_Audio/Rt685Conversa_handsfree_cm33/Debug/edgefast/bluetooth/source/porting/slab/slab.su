@@ -1,0 +1,8 @@
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_common_arm.h:902:24:DisableGlobalIRQ	16	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_common_arm.h:928:20:EnableGlobalIRQ	24	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\source\porting/thread/thread.h:707:23:k_uptime_get	32	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\source\porting/thread/thread.h:731:24:k_uptime_get_32	8	static
+../edgefast/bluetooth/source/porting/slab/slab.c:39:5:k_mem_slab_init	56	static
+../edgefast/bluetooth/source/porting/slab/slab.c:104:5:k_mem_slab_alloc	96	static
+../edgefast/bluetooth/source/porting/slab/slab.c:189:6:k_mem_slab_free	40	static
+../edgefast/bluetooth/source/porting/slab/slab.c:247:5:k_mem_slab_runtime_stats_get	40	static

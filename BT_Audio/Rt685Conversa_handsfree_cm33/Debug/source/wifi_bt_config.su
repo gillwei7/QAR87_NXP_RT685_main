@@ -1,0 +1,4 @@
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_gpio.h:186:20:GPIO_PortSet	24	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_gpio.h:198:20:GPIO_PortClear	24	static
+../source/wifi_bt_config.c:31:6:BOARD_WIFI_BT_Enable	16	static
+../source/wifi_bt_config.c:50:6:BOARD_WIFI_BT_Config	16	static

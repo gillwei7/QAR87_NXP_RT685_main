@@ -1,0 +1,1 @@
+../bt_ble/port/pal/mcux/bluetooth/ftp_pl.c:57:12:BT_ftp_server_create_xml_dir_listing	648	static

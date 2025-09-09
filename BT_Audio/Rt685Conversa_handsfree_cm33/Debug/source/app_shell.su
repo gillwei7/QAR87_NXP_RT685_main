@@ -1,0 +1,3 @@
+../source/app_shell.c:73:17:hfp_get_value_from_str	32	static
+../source/app_shell.c:103:23:shellBt	40	static
+../source/app_shell.c:238:6:app_shell_init	8	static

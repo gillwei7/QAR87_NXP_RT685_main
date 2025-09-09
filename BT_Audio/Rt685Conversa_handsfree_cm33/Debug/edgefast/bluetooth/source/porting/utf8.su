@@ -1,0 +1,2 @@
+../edgefast/bluetooth/source/porting/utf8.c:18:7:utf8_trunc	24	static
+../edgefast/bluetooth/source/porting/utf8.c:63:7:utf8_lcpy	24	static

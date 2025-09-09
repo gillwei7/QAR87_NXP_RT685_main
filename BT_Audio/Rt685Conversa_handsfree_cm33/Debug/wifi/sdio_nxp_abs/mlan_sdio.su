@@ -1,0 +1,17 @@
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:934:20:USDHC_EnableInterruptStatus	16	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:945:20:USDHC_DisableInterruptStatus	16	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:956:20:USDHC_EnableInterruptSignal	16	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:967:20:USDHC_DisableInterruptSignal	16	static
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\sdmmc\host\usdhc/fsl_sdmmc_host.h:283:20:SDMMCHOST_EnableCardInt	16	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:105:5:sdio_drv_creg_read	32	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:130:5:sdio_drv_creg_write	40	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:154:5:sdio_drv_read	48	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:237:5:sdio_drv_write	48	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:315:13:SDIO_CardInterruptCallBack	16	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:321:6:sdio_enable_interrupt	8	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:329:6:sdio_disable_interrupt	8	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:337:13:sdio_controller_init	8	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:351:12:sdio_card_init	16	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:416:13:print_card_info	16	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:465:5:sdio_drv_init	24	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:493:6:sdio_drv_deinit	16	static

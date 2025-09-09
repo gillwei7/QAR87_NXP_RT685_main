@@ -1,0 +1,6 @@
+../wifi/port/osa/slist.c:50:6:SlAddNodeToTail	24	static
+../wifi/port/osa/slist.c:77:6:SlInsertNodeAfter	24	static
+../wifi/port/osa/slist.c:98:6:SlInsertNodeBefore	40	static
+../wifi/port/osa/slist.c:143:6:SlRemoveNode	32	static
+../wifi/port/osa/slist.c:182:11:SlRemoveNodeFromHead	24	static
+../wifi/port/osa/slist.c:203:11:SlRemoveNodeFromTail	24	static

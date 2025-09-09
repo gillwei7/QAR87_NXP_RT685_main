@@ -1,0 +1,1 @@
+../bt_ble/port/pal/mcux/bluetooth/obex_pl.c:76:13:BT_obex_generate_digest_string	24	static

@@ -1,0 +1,11 @@
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_crc.h:169:24:CRC_Get32bitResult	16	static
+../source/virtual_com.c:98:14:USB_DeviceCdcVcomCallback	48	static
+../source/virtual_com.c:328:14:USB_DeviceCdcVcomSetConfigure	16	static
+../source/virtual_com.c:354:14:USB_DeviceCdcVcomInit	16	static
+../source/virtual_com.c:362:10:InvertU32	24	static
+../source/virtual_com.c:372:6:crc32	24	static
+../source/virtual_com.c:384:6:InitCrc32	32	static
+../source/virtual_com.c:396:6:ResetCrc32Seed	4	static
+../source/virtual_com.c:400:6:Init_CrcEngine	8	static
+../source/virtual_com.c:417:6:USB_DeviceCdcVcomTask_ConnectTuningTool	48	static
+../source/virtual_com.c:623:6:USB_DeviceCdcVcomTask	4	static

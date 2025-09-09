@@ -1,0 +1,7 @@
+../bt_ble/port/pal/mcux/bluetooth/littlefs_pl.c:135:12:lfs_mflash_read	32	static
+../bt_ble/port/pal/mcux/bluetooth/littlefs_pl.c:167:12:lfs_mflash_prog	40	static
+../bt_ble/port/pal/mcux/bluetooth/littlefs_pl.c:219:12:lfs_mflash_erase	32	static
+../bt_ble/port/pal/mcux/bluetooth/littlefs_pl.c:270:12:lfs_mflash_sync	16	static
+../bt_ble/port/pal/mcux/bluetooth/littlefs_pl.c:276:12:lfs_mflash_lock	16	static
+../bt_ble/port/pal/mcux/bluetooth/littlefs_pl.c:282:12:lfs_mflash_unlock	16	static
+../bt_ble/port/pal/mcux/bluetooth/littlefs_pl.c:290:9:lfs_pl_init	16	static

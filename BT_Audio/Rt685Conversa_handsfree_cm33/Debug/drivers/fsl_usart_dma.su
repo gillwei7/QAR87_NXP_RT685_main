@@ -1,0 +1,16 @@
+D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\CMSIS/core_cm33.h:2358:22:__NVIC_EnableIRQ	16	static
+../drivers/fsl_common_arm.h:672:24:EnableIRQ	24	static
+../drivers/fsl_common_arm.h:902:24:DisableGlobalIRQ	16	static
+../drivers/fsl_common_arm.h:928:20:EnableGlobalIRQ	24	static
+../drivers/fsl_usart.h:581:20:USART_EnableTxDMA	24	static
+../drivers/fsl_usart.h:600:20:USART_EnableRxDMA	24	static
+../drivers/fsl_usart_dma.c:75:13:USART_TransferSendDMACallback	32	static
+../drivers/fsl_usart_dma.c:89:13:USART_TransferReceiveDMACallback	40	static
+../drivers/fsl_usart_dma.c:117:10:USART_TransferCreateHandleDMA	32	static
+../drivers/fsl_usart_dma.c:191:10:USART_TransferSendDMA	88	static
+../drivers/fsl_usart_dma.c:243:10:USART_TransferReceiveDMA	88	static
+../drivers/fsl_usart_dma.c:290:6:USART_TransferAbortSendDMA	16	static
+../drivers/fsl_usart_dma.c:308:6:USART_TransferAbortReceiveDMA	16	static
+../drivers/fsl_usart_dma.c:330:10:USART_TransferGetReceiveCountDMA	32	static
+../drivers/fsl_usart_dma.c:358:10:USART_TransferGetSendCountDMA	32	static
+../drivers/fsl_usart_dma.c:374:6:USART_TransferDMAHandleIRQ	24	static

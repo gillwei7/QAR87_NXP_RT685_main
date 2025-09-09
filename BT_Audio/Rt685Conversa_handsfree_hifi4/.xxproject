@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xxProperties>
+    	
+    <propertyGroup name="library.dependencies">
+        		
+        <libraryDependencies targetMappingRule="2"/>
+        	
+    </propertyGroup>
+    	
+    <propertyGroup name="build.exclusion.data">
+        		
+        <buildExclusionDatas>
+            			
+            <exclusionSet name="Default" selected="1">
+                				
+                <excludedEntry data="/.*/bin/.*"/>
+                			
+            </exclusionSet>
+            			
+            <exclusionSet name="Set_Debug" selected="0" target="Debug">
+                				
+                <excludedEntry data="/.*/bin/.*"/>
+                				
+                <excludedEntry data="/.*/ConversaDemo/tuning/Dell_GamingController_tuning3\.cpp"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_dmic_dma\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_dmic\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_i2c_dma\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_i2c\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_i2s_dma\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_i2s\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_pint\.c"/>
+                			
+            </exclusionSet>
+            			
+            <exclusionSet name="Set_Release" selected="0" target="Release">
+                				
+                <excludedEntry data="/.*/bin/.*"/>
+                				
+                <excludedEntry data="/.*/ConversaDemo/tuning/Dell_GamingController_tuning3\.cpp"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_dmic_dma\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_dmic\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_i2c_dma\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_i2c\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_i2s_dma\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_i2s\.c"/>
+                				
+                <excludedEntry data="/.*/drivers/fsl_pint\.c"/>
+                			
+            </exclusionSet>
+            		
+        </buildExclusionDatas>
+        	
+    </propertyGroup>
+    	
+    <propertyGroup name="build.auto.includes">
+        		
+        <exportDirs autoConsumeDirs="false" includeDepDirs="false" mode="off"/>
+        	
+    </propertyGroup>
+    	
+    <propertyGroup name="project.information">
+        		
+        <version value="3.0"/>
+        	
+    </propertyGroup>
+    	
+    <propertyGroup name="build.property">
+        		
+        <buildTarget defaultTarget="Release"/>
+        	
+    </propertyGroup>
+    	
+    <propertyGroup name="build.custom.steps">
+        		
+        <pre-build enable="false">
+            			
+            <content/>
+            		
+        </pre-build>
+        		
+        <pre-link enable="false">
+            			
+            <content/>
+            		
+        </pre-link>
+        		
+        <post-build enable="false">
+            			
+            <content>postbuild.bat ${xt_sysargs} ${xt_build_project} ${xt_build_config} ${xt_build_target} "xtensa" "..\Rt685_AudioProc_McuPrg\"</content>
+            		
+        </post-build>
+        		
+        <pre-clean enable="false">
+            			
+            <content/>
+            		
+        </pre-clean>
+        	
+    </propertyGroup>
+    
+</xxProperties>

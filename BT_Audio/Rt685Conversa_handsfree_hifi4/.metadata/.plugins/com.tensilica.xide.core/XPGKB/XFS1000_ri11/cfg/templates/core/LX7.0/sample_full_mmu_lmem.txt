@@ -1,0 +1,7 @@
+This template is for a simple example core that has the Full MMU with TLBs selected and an appropriate system memory configuration.
+
+The System ROM starts at 0x0 and the System RAM is placed above ROM. The vectors are placed in System ROM. 
+
+This template has a 2 Load-Store units.
+
+This template has local memories defined and they are placed above System RAM.

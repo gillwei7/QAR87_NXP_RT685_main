@@ -1,0 +1,46 @@
+NXP Software Content Register
+
+Release - Conversa_v7.3.1
+
+Outgoing License: LA_OPT_NXP_Software_License v63 May 2025 - License in Section 2.2 applies 
+License File: LICENSE.txt
+
+Release tag: v7.3.1 
+
+--------------------------------------------
+
+Package:                    libNXP_Conversa_RT685HiFi4.a ( with 2h timeout ) 
+Version:                    7.3.1
+Outgoing License:           LA_OPT_NXP_Software_License v63 May 2025 - License in Section 2.2 applies
+License File:               ./LICENSE.txt
+Package Category:           library
+Type of Content:            binary
+Description and comments:   Multi-microphone voice call suite.
+Release Location:           ./
+Origin:                     NXP (Proprietary)
+			    NatureDSP - Cadence Design Systems (Proprietary)
+
+--------------------------------------------
+Package:                     NatureDSP Signal Library ( HiFi4 )
+Version:                     4.1.0
+Outgoing License:            LA_OPT_NXP_Software_License v63 May 2025 - License in Section 2.2 applies
+License File:                ./LICENSE.txt
+Package Category:            library
+Type of Content:             binary
+Description and comments:    Digital Signal Processing for Xtensa 
+                 HiFi Audio Engines
+Origin:                      Cadence Design Systems (Proprietary)
+--------------------------------------------
+Package:                     Setup_ConversaTool_v7.2.0.msi
+Version:                     7.2.0
+Outgoing License:            LA_OPT_NXP_Software_License v63 May 2025 - License in Section 2.2 applies
+License File:                ./LICENSE.txt
+Package Category:            installer
+Type of Content:             installer
+Description and comments:    Tuning Tool for the Conversa voice call suite
+Release Location:            ../ConversaTool/
+Origin:                      NXP (Proprietary)
+			     LightningChart v12 (Proprietary) - https://www.arction.com (Appendix A: NXP Voice Software applies)
+			     DevExpress v24.2.3 (Proprietary) - https://www.devexpress.com (Appendix A: NXP Voice Software applies)
+			     LomontFFT v1.1 (Lomont License) - https://lomont.org/software/misc/fft/LomontFFT.html
+

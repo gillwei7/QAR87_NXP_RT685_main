@@ -1,0 +1,7 @@
+../bt_ble/bluetooth/export/extension/BT_common_pl.c:93:6:ethermind_init_lower_pl	8	static
+../bt_ble/bluetooth/export/extension/BT_common_pl.c:123:6:ethermind_init_upper_pl	8	static
+../bt_ble/bluetooth/export/extension/BT_common_pl.c:278:6:bluetooth_on_lower_pl	8	static
+../bt_ble/bluetooth/export/extension/BT_common_pl.c:308:6:bluetooth_on_upper_pl	8	static
+../bt_ble/bluetooth/export/extension/BT_common_pl.c:375:6:bluetooth_off_lower_pl	8	static
+../bt_ble/bluetooth/export/extension/BT_common_pl.c:405:6:bluetooth_off_upper_pl	8	static
+../bt_ble/bluetooth/export/extension/BT_common_pl.c:467:6:BT_ethermind_register_ul_cb_pl	16	static

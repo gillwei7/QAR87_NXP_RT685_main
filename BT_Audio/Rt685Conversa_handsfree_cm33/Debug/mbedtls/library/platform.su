@@ -1,0 +1,5 @@
+../mbedtls/library/platform.c:47:7:mbedtls_calloc	16	static
+../mbedtls/library/platform.c:52:6:mbedtls_free	16	static
+../mbedtls/library/platform.c:57:5:mbedtls_platform_set_calloc_free	16	static
+../mbedtls/library/platform.c:358:5:mbedtls_platform_setup	16	static
+../mbedtls/library/platform.c:368:6:mbedtls_platform_teardown	16	static

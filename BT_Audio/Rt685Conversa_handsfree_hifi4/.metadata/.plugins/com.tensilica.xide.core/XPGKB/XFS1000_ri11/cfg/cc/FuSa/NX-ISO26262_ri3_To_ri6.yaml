@@ -1,0 +1,32 @@
+# Copyright (c) 2017-2021 by Cadence Design Systems, Inc. ALL RIGHTS RESERVED.
+# These coded instructions, statements, and computer programs are the
+# copyrighted works and confidential proprietary information of Cadence.
+# They may not be modified, copied, reproduced, distributed, or disclosed to
+# third parties in any manner, medium, or form, in whole or in part, without
+# the prior written consent of Cadence.
+
+# this file has rules specific to NX ISO-26262 FOR RELEASES PRIOR TO RI.7
+_templates:
+- &nonfusacoproc
+  [ ball, pdxnx8, visionq6, flix3, fpmnx_220, visionq8 ]
+    
+options:  
+  - idma:                 
+      bsdeps: { idma_reorder_buf: '0:32:48:64', idma_data_width: '128:256' }     
+  - dram_count:                 
+      mindeps: { dram_size: '65536-16777216' }                             
+  - fusa_iso26262:
+      bdeps: [ iside_errors, dside_errors ]
+      bcons: [ l2_size ]
+      bsdeps: { iprefetch_entries: '0:8', dprefetch_entries: '0:8',
+                ic_size: '16384:32768:65536:131072', sdc_size: '0:4096:8192:16384:32768:65536:131072',
+                inst_width: '128:256', data_width: '256:512', data_latency: '3:4', loadStoreUnits: '2', 
+                instWidthBytes: '16:20:24:28:32', sys_mif_data_width: '128', fp: 0, perfcounters: '8:16',
+                immu_bgmap: mpu_ca_4kpg }
+      mindeps: { sdc_linesize: '16-128', traxMemBytes: '512-262144' }                
+      exprdeps: 
+      - [ [ 'visionq7==1' ],
+          [ 'bbn_b10==1' ],
+          [ 'bbn_b20==1' ],
+          [ 'fuj6==1' ],       
+          [ 'E: FuSa requires that one of the following processors is selected. (Vision Q7, ConnX B10, ConnX B20 or Fusion J6)' ] ]                                       

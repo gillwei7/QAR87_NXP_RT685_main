@@ -1,0 +1,27 @@
+# Copyright (c) 2017-2021 by Cadence Design Systems, Inc. ALL RIGHTS RESERVED.
+# These coded instructions, statements, and computer programs are the
+# copyrighted works and confidential proprietary information of Cadence.
+# They may not be modified, copied, reproduced, distributed, or disclosed to
+# third parties in any manner, medium, or form, in whole or in part, without
+# the prior written consent of Cadence.
+
+# this files lists all the release and doc links which we would like to modify on the fly. 
+
+release: 
+- links:
+    rel: RI-2023.11 # the current release that this Xplorer serves.
+    otherrels: { show: true, rels: [ RI-2023.11, RI-2022.10, RI-2022.9, RI-2021.8 ] } # if show = false then other rels won't be checked.
+    patch: { cust: '10.0.0.1000-update_tmp.html', xxupdate: '10.0.0.1000-update_tmp.html', url: '${xpgWebServerPref}xplorer/update/xx_1000_ri11/' }
+    download_shared: false # if true only then the SHARED updates will be downloaded and copied to user_home
+    updates: { show: false, file: update.html, xide_ver: '10.0.0.1000' } # if show = false then update info won't be displayed in the welcome page.
+    alerts: { 
+              show: false, # mandatory, default false, decides if the alert should be shown
+              showon: [ startup, build, edit ], # [ startup, build, edit  ] mandatory, decides whe should the alert be shown, either build or startup or edit or all
+             #showonce: false, # optional, default false, if this is set to true the alert will be shown only once to the user, else it will be shown eveytime unless the user chooses to suppresss the alert
+              file: alerts.txt, # optional, if this file is specified the alert will have a line that links to this file.
+             # cfgver: '8.0.15.2010', # optional, this decides which com.tensilica.core.cfg plugin should show the alert, if not defined then Xplorer will show this alert irrespective of the cfg version.
+             # feat: 'debug', # optional, this allows thealert to be shown only to cust with the given features. , is OR and ~ is AND
+             title: 'RI-2020.4 tools patch is available', # the title of the alerts, will also used in the suppress string                      
+             text: 'This patch is required for Tensilica ISO-26262 users and addresses several functional issues in the Tensilica software tools.'
+            }        
+               

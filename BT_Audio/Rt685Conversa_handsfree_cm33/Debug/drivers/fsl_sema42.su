@@ -1,0 +1,8 @@
+../drivers/fsl_clock.h:888:20:CLOCK_EnableClock	24	static
+../drivers/fsl_clock.h:918:20:CLOCK_DisableClock	24	static
+../drivers/fsl_sema42.c:60:10:SEMA42_GetInstance	24	static
+../drivers/fsl_sema42.c:98:6:SEMA42_Init	16	static
+../drivers/fsl_sema42.c:116:6:SEMA42_Deinit	16	static
+../drivers/fsl_sema42.c:137:10:SEMA42_TryLock	24	static
+../drivers/fsl_sema42.c:183:10:SEMA42_Lock	16	static
+../drivers/fsl_sema42.c:213:10:SEMA42_ResetGate	24	static

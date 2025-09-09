@@ -1,0 +1,5 @@
+../bt_ble/port/pal/mcux/bluetooth/pbap_pl.c:50:12:BT_pbap_build_xml_vcard_listing_pl	184	static
+../bt_ble/port/pal/mcux/bluetooth/pbap_pl.c:242:12:BT_pbap_get_vcard_list_pl	552	static
+../bt_ble/port/pal/mcux/bluetooth/pbap_pl.c:376:12:BT_pbap_build_vcard_pl	48	static
+../bt_ble/port/pal/mcux/bluetooth/pbap_pl.c:516:6:pbap_sort_pb_list	216	static
+../bt_ble/port/pal/mcux/bluetooth/pbap_pl.c:543:6:get_vcard_handle	32	static

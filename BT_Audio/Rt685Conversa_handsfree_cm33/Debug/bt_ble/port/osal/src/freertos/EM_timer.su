@@ -1,0 +1,15 @@
+../bt_ble/port/osal/src/freertos/EM_timer.c:33:6:EM_timer_init	16	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:56:6:timer_em_init	32	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:98:6:timer_em_shutdown	24	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:145:11:EM_start_timer	96	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:252:6:timer_timeout_handler	32	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:304:11:EM_stop_timer	40	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:357:11:EM_restart_timer	40	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:422:11:EM_is_active_timer	24	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:457:11:timer_search_entity	24	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:489:11:timer_search_entity_timer_id	24	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:528:11:timer_add_entity	40	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:626:11:timer_del_entity	24	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:707:11:timer_init_entity	16	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:724:11:EM_timer_get_remaining_time	40	static
+../bt_ble/port/osal/src/freertos/EM_timer.c:808:11:EM_list_timer	4	static

@@ -1,0 +1,2 @@
+7 stage HiFi 4 with 
+vFPU, Local Memory, Caches

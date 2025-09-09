@@ -1,0 +1,2 @@
+../bt_ble/bluetooth/export/extension/gatt_db_pl.c:35:12:gatt_db_init_pl	24	static
+../bt_ble/bluetooth/export/extension/gatt_db_pl.c:53:12:gatt_char_handler	24	static

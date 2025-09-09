@@ -1,0 +1,5 @@
+../edgefast/bluetooth/source/porting/sem/sem.c:25:5:k_sem_init	32	static
+../edgefast/bluetooth/source/porting/sem/sem.c:81:5:k_sem_take	24	static
+../edgefast/bluetooth/source/porting/sem/sem.c:143:6:k_sem_give	24	static
+../edgefast/bluetooth/source/porting/sem/sem.c:196:6:k_sem_reset	24	static
+../edgefast/bluetooth/source/porting/sem/sem.c:234:14:k_sem_count_get	24	static
