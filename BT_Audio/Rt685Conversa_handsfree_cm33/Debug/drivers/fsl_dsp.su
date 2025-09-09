@@ -1,6 +1,0 @@
-../drivers/fsl_dsp.h:85:20:DSP_Stop	4	static
-../drivers/fsl_power.h:341:20:POWER_EnablePD	16	static
-../drivers/fsl_power.h:352:20:POWER_DisablePD	16	static
-../drivers/fsl_dsp.c:41:6:DSP_Init	8	static
-../drivers/fsl_dsp.c:73:6:DSP_Deinit	8	static
-../drivers/fsl_dsp.c:90:6:DSP_CopyImage	32	static

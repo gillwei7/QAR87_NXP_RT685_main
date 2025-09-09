@@ -1,8 +1,0 @@
-D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:321:19:mbedtls_ssl_chk_buf_ptr	24	static
-../mbedtls/library/ssl_cookie.c:58:6:mbedtls_ssl_cookie_init	16	static
-../mbedtls/library/ssl_cookie.c:71:6:mbedtls_ssl_cookie_set_timeout	16	static
-../mbedtls/library/ssl_cookie.c:76:6:mbedtls_ssl_cookie_free	16	static
-../mbedtls/library/ssl_cookie.c:87:5:mbedtls_ssl_cookie_setup	72	static
-../mbedtls/library/ssl_cookie.c:117:12:ssl_cookie_hmac	56	static
-../mbedtls/library/ssl_cookie.c:142:5:mbedtls_ssl_cookie_write	48	static
-../mbedtls/library/ssl_cookie.c:187:5:mbedtls_ssl_cookie_check	80	static

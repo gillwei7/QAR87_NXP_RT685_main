@@ -1,7 +1,0 @@
-../wifi/sdio_nxp_abs/fwdnld_sdio.c:26:26:wlan_set_fw_dnld_size	16	static
-../wifi/sdio_nxp_abs/fwdnld_sdio.c:46:13:wlan_card_fw_status	24	static
-../wifi/sdio_nxp_abs/fwdnld_sdio.c:56:13:wlan_sdio_check_fw_status	24	static
-../wifi/sdio_nxp_abs/fwdnld_sdio.c:205:26:sdio_prep_for_fwdnld	16	static
-../wifi/sdio_nxp_abs/fwdnld_sdio.c:211:26:sdio_post_fwdnld_check_conn_ready	16	static
-../wifi/sdio_nxp_abs/fwdnld_sdio.c:261:26:sdio_interface_send	80	static
-../wifi/sdio_nxp_abs/fwdnld_sdio.c:356:16:sdio_init_interface	24	static
