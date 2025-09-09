@@ -6,7 +6,7 @@
  * Generated linker script file for MIMXRT685S
  * Created from memory.ldt by FMCreateLinkMemory
  * Using Freemarker v2.3.30
- * MCUXpresso IDE v24.12 [Build 148] [2025-01-10] on 2025年9月9日 下午2:54:36
+ * MCUXpresso IDE v24.12 [Build 148] [2025-01-10] on 2025年9月9日 下午12:46:36
  */
 
 MEMORY

@@ -1,4 +1,4 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1512:21:net_buf_add_mem	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1512:21:net_buf_add_mem	24	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:141:33:rfcomm_server_lookup_channel	24	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:159:12:rfcomm_accept	40	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:189:12:rfcomm_convert_return_value	24	static

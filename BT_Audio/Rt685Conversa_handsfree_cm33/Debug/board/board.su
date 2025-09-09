@@ -1,4 +1,4 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_clock.h:888:20:CLOCK_EnableClock	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_clock.h:888:20:CLOCK_EnableClock	24	static
 ../board/board.c:379:6:BOARD_SetFlexspiClock	16	static
 ../board/board.c:301:6:BOARD_DeinitXip	16	static
 ../board/board.c:317:6:BOARD_InitXip	32	static
@@ -6,7 +6,7 @@ D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm
 ../board/board.c:453:6:BOARD_RestoreDeepSleepPinConfig	4	static
 ../board/board.c:472:6:BOARD_EnterDeepSleep	16	static
 ../board/board.c:479:6:BOARD_EnterDeepPowerDown	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_power.h:352:20:POWER_DisablePD	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_power.h:352:20:POWER_DisablePD	16	static
 ../board/board.c:47:6:BOARD_InitDebugConsole	24	static
 ../board/board.c:64:17:flexspi_hyper_ram_write_mcr	48	static
 ../board/board.c:83:17:flexspi_hyper_ram_get_mcr	48	static

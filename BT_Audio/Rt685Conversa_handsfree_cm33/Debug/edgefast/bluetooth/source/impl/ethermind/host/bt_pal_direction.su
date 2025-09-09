@@ -1,6 +1,6 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:428:20:atomic_test_bit	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:506:20:atomic_set_bit	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1495:21:net_buf_add	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:428:20:atomic_test_bit	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:506:20:atomic_set_bit	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1495:21:net_buf_add	16	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_direction.c:74:16:get_hci_cte_type	16	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_direction.c:89:12:hci_df_set_cl_cte_tx_params	32	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_direction.c:164:12:hci_df_read_ant_info	40	static

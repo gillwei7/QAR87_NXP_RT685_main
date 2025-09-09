@@ -1,5 +1,5 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\source\porting/thread/thread.h:707:23:k_uptime_get	32	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\source\porting/thread/thread.h:731:24:k_uptime_get_32	8	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\source\porting/thread/thread.h:707:23:k_uptime_get	32	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\source\porting/thread/thread.h:731:24:k_uptime_get_32	8	static
 ../edgefast/bluetooth/source/porting/thread/thread.c:34:19:k_thread_stack_alloc	24	static
 ../edgefast/bluetooth/source/porting/thread/thread.c:62:5:k_thread_stack_free	24	static
 ../edgefast/bluetooth/source/porting/thread/thread.c:77:13:_k_thread_function_wrap	24	static

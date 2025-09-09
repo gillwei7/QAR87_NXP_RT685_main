@@ -1,10 +1,10 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:81:19:bt_addr_cmp	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:91:20:bt_addr_eq	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:105:19:bt_addr_le_cmp	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:118:20:bt_addr_le_eq	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:128:20:bt_addr_copy	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:138:20:bt_addr_le_copy	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:171:20:bt_addr_le_is_rpa	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:81:19:bt_addr_cmp	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:91:20:bt_addr_eq	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:105:19:bt_addr_le_cmp	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:118:20:bt_addr_le_eq	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:128:20:bt_addr_copy	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:138:20:bt_addr_le_copy	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:171:20:bt_addr_le_is_rpa	16	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:49:13:find_key_in_use	40	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:77:13:key_is_in_use	24	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:87:6:bt_keys_reset	8	static

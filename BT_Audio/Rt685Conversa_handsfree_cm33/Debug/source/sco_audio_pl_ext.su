@@ -1,7 +1,7 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_gpio.h:153:20:GPIO_PinWrite	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_mu.h:249:24:MU_ReceiveMsgNonBlocking	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_mu.h:360:24:MU_GetStatusFlags	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_sema42.h:181:20:SEMA42_Unlock	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_gpio.h:153:20:GPIO_PinWrite	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_mu.h:249:24:MU_ReceiveMsgNonBlocking	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_mu.h:360:24:MU_GetStatusFlags	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_sema42.h:181:20:SEMA42_Unlock	16	static
 ../source/sco_audio_pl_ext.c:104:6:SCO_AudioFlow_SemaphorePost	8	static
 ../source/sco_audio_pl_ext.c:132:13:rxMicCallback	24	static
 ../source/sco_audio_pl_ext.c:166:13:txMicCallback	40	static

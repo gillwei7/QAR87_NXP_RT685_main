@@ -1,4 +1,4 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:226:19:bt_addr_to_str	56	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:226:19:bt_addr_to_str	56	static
 ../source/app_connect.c:52:6:app_hf_set_connectable	16	static
 ../source/app_connect.c:79:13:connected	56	static
 ../source/app_connect.c:128:13:disconnected	16	static

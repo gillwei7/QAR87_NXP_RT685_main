@@ -1,8 +1,8 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:934:20:USDHC_EnableInterruptStatus	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:945:20:USDHC_DisableInterruptStatus	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:956:20:USDHC_EnableInterruptSignal	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:967:20:USDHC_DisableInterruptSignal	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\sdmmc\host\usdhc/fsl_sdmmc_host.h:283:20:SDMMCHOST_EnableCardInt	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:934:20:USDHC_EnableInterruptStatus	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:945:20:USDHC_DisableInterruptStatus	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:956:20:USDHC_EnableInterruptSignal	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_usdhc.h:967:20:USDHC_DisableInterruptSignal	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\sdmmc\host\usdhc/fsl_sdmmc_host.h:283:20:SDMMCHOST_EnableCardInt	16	static
 ../wifi/sdio_nxp_abs/mlan_sdio.c:105:5:sdio_drv_creg_read	32	static
 ../wifi/sdio_nxp_abs/mlan_sdio.c:130:5:sdio_drv_creg_write	40	static
 ../wifi/sdio_nxp_abs/mlan_sdio.c:154:5:sdio_drv_read	48	static

@@ -1,5 +1,5 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_clock.h:888:20:CLOCK_EnableClock	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_iopctl.h:88:22:IOPCTL_PinMuxSet	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_clock.h:888:20:CLOCK_EnableClock	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_iopctl.h:88:22:IOPCTL_PinMuxSet	24	static
 ../source/pin_mux.c:40:6:BOARD_InitBootPins	8	static
 ../source/pin_mux.c:75:6:BOARD_InitPins	16	static
 ../source/pin_mux.c:144:6:BOARD_InitDEBUG_UARTPins	24	static

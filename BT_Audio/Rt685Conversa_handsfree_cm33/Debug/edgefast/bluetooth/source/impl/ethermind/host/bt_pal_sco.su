@@ -1,5 +1,5 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1495:21:net_buf_add	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:128:20:bt_addr_copy	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1495:21:net_buf_add	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:128:20:bt_addr_copy	16	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:37:5:bt_sco_server_register	16	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:63:5:bt_sco_server_unregister	16	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:79:6:bt_sco_connected	24	static

@@ -1,6 +1,6 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\CMSIS/core_cm33.h:2555:22:__NVIC_SetPriority	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_dma.h:405:20:DMA_EnableChannel	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_dma.h:515:20:DMA_SetChannelPriority	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\CMSIS/core_cm33.h:2555:22:__NVIC_SetPriority	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_dma.h:405:20:DMA_EnableChannel	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_dma.h:515:20:DMA_SetChannelPriority	24	static
 ../component/audio/fsl_adapter_flexcomm_i2s.c:52:27:HAL_AudioGetStatus	24	static
 ../component/audio/fsl_adapter_flexcomm_i2s.c:79:13:HAL_AudioCallbackDMA	40	static
 ../component/audio/fsl_adapter_flexcomm_i2s.c:94:27:HAL_AudioCommonInit	80	static

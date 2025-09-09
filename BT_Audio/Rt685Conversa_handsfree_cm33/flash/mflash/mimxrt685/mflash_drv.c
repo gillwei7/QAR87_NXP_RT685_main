@@ -11,7 +11,7 @@
 #include "fsl_cache.h"
 #include "board.h"
 
-#define FLASH_PORT kFLEXSPI_PortB1
+#define FLASH_PORT kFLEXSPI_PortA1	//kFLEXSPI_PortB1 //gill
 
 #if MX25U12843G
 

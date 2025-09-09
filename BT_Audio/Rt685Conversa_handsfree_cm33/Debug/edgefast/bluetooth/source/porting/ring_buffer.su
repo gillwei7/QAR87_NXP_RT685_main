@@ -1,6 +1,6 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/ring_buffer.h:198:20:ring_buf_is_empty	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/ring_buffer.h:220:24:ring_buf_space_get	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/ring_buffer.h:256:24:ring_buf_size_get	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/ring_buffer.h:198:20:ring_buf_is_empty	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/ring_buffer.h:220:24:ring_buf_space_get	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/ring_buffer.h:256:24:ring_buf_size_get	16	static
 ../edgefast/bluetooth/source/porting/ring_buffer.c:18:10:ring_buf_put_claim	40	static
 ../edgefast/bluetooth/source/porting/ring_buffer.c:42:5:ring_buf_put_finish	24	static
 ../edgefast/bluetooth/source/porting/ring_buffer.c:63:10:ring_buf_put	40	static

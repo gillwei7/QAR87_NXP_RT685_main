@@ -1,10 +1,10 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/pk.h:657:36:mbedtls_pk_ec	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_ciphersuites.h:470:19:mbedtls_ssl_ciphersuite_uses_srv_cert	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:792:19:mbedtls_ssl_transform_uses_aead	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:894:20:mbedtls_ssl_sig_hash_set_init	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:1054:19:mbedtls_ssl_get_psk	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:1151:33:mbedtls_ssl_own_cert	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:1206:22:mbedtls_ssl_hs_hdr_len	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/pk.h:657:36:mbedtls_pk_ec	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_ciphersuites.h:470:19:mbedtls_ssl_ciphersuite_uses_srv_cert	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:792:19:mbedtls_ssl_transform_uses_aead	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:894:20:mbedtls_ssl_sig_hash_set_init	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:1054:19:mbedtls_ssl_get_psk	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:1151:33:mbedtls_ssl_own_cert	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/ssl_internal.h:1206:22:mbedtls_ssl_hs_hdr_len	16	static
 ../mbedtls/library/ssl_tls.c:58:12:mbedtls_ssl_has_set_hostname_been_called	16	static
 ../mbedtls/library/ssl_tls.c:65:13:mbedtls_ssl_get_hostname_pointer	16	static
 ../mbedtls/library/ssl_tls.c:73:13:mbedtls_ssl_free_hostname	24	static

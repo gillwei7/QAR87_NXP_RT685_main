@@ -1,5 +1,5 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/pk.h:657:36:mbedtls_pk_ec	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/error.h:147:19:mbedtls_error_add	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/pk.h:657:36:mbedtls_pk_ec	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/mbedtls/error.h:147:19:mbedtls_error_add	24	static
 ../mbedtls/library/x509_crt.c:142:12:x509_profile_check_md_alg	16	static
 ../mbedtls/library/x509_crt.c:160:12:x509_profile_check_pk_alg	16	static
 ../mbedtls/library/x509_crt.c:178:12:x509_profile_check_key	24	static

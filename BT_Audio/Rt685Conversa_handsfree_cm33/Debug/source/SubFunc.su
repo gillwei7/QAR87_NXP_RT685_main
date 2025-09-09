@@ -1,5 +1,5 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_gpio.h:153:20:GPIO_PinWrite	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_gpio.h:172:24:GPIO_PinRead	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_gpio.h:153:20:GPIO_PinWrite	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\drivers/fsl_gpio.h:172:24:GPIO_PinRead	24	static
 ../source/SubFunc.c:24:6:OpeningBlink	24	static
 ../source/SubFunc.c:53:6:BlinkDbgPinNTime	24	static
 ../source/SubFunc.c:89:6:InitDbgPin	24	static

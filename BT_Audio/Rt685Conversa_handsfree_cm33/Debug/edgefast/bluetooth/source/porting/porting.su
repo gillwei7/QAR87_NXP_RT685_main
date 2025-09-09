@@ -1,5 +1,5 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:226:19:bt_addr_to_str	56	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:243:19:bt_addr_le_to_str	80	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:226:19:bt_addr_to_str	56	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:243:19:bt_addr_le_to_str	80	static
 ../edgefast/bluetooth/source/porting/porting.c:64:21:RNG_GetPseudoRandomNo	48	static
 ../edgefast/bluetooth/source/porting/porting.c:122:17:RNG_GetPseudoRandomData	24	static
 ../edgefast/bluetooth/source/porting/porting.c:127:9:u8_to_dec	24	static

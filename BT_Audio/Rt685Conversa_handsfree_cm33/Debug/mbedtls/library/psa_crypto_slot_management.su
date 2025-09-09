@@ -1,6 +1,6 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/psa/crypto_values.h:2152:19:mbedtls_svc_key_id_equal	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/psa/crypto_values.h:2164:19:mbedtls_svc_key_id_is_null	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\mbedtls\include/psa/crypto_compat.h:41:19:psa_key_handle_is_null	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/psa/crypto_values.h:2152:19:mbedtls_svc_key_id_equal	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/psa/crypto_values.h:2164:19:mbedtls_svc_key_id_is_null	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\mbedtls\include/psa/crypto_compat.h:41:19:psa_key_handle_is_null	16	static
 ../mbedtls/library/psa_crypto_core.h:95:19:psa_is_key_slot_occupied	16	static
 ../mbedtls/library/psa_crypto_core.h:108:19:psa_is_key_slot_locked	16	static
 ../mbedtls/library/psa_crypto_slot_management.h:42:19:psa_key_id_is_volatile	16	static

@@ -1,7 +1,7 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:385:20:sys_put_le16	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:415:20:sys_put_le32	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:536:24:sys_get_le16	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:566:24:sys_get_le32	24	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:385:20:sys_put_le16	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:415:20:sys_put_le32	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:536:24:sys_get_le16	16	static
+D:\Git\NXP\RT685\RT685-EVK_Conversa_HFP\nxp_rt685\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:566:24:sys_get_le32	24	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_uuid.c:31:13:uuid_to_uuid128	24	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_uuid.c:55:12:uuid128_cmp	56	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_uuid.c:67:5:bt_uuid_cmp	24	static
