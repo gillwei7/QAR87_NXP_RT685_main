@@ -25,6 +25,7 @@
          <pins_profile>
             <processor_version>24.12.10</processor_version>
             <pin_labels>
+               <pin_label pin_num="E1" pin_signal="PIO0_6/FC0_SSEL3/SCT0_GPI1/SCT0_OUT1/CTIMER0_MAT0/SEC_PIO0_6/ADC0_8" label="NXP_PWR_SW1"/>
                <pin_label pin_num="N17" pin_signal="PIO2_29/I3C0_SCL/SCT0_OUT0/CLKOUT" label="PCA9422_I2C_SCL" identifier="I3C_ICM_SCL"/>
                <pin_label pin_num="P16" pin_signal="PIO2_30/I3C0_SDA/SCT0_OUT3/CLKIN/CMP0_OUT" label="PCA9422_I2C_SDA" identifier="I3C_ICM_SDA"/>
             </pin_labels>
@@ -115,6 +116,11 @@
                   <pin peripheral="FLEXCOMM3" signal="TXD_SCL_MISO_WS" pin_num="D8" pin_signal="PIO0_22/FC3_TXD_SCL_MISO_WS/CTIMER3_MAT1/TRACEDATA(0)/SEC_PIO0_22">
                      <pin_features>
                         <pin_feature name="direction" value="OUTPUT"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="GPIO" signal="PIO0, 6" pin_num="E1" pin_signal="PIO0_6/FC0_SSEL3/SCT0_GPI1/SCT0_OUT1/CTIMER0_MAT0/SEC_PIO0_6/ADC0_8">
+                     <pin_features>
+                        <pin_feature name="ibena" value="enabled"/>
                      </pin_features>
                   </pin>
                </pins>

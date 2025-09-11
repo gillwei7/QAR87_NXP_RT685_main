@@ -19,6 +19,11 @@
 //Is the Burning program on the Dev-Board?
 #define USE_DEV_BOARD 1
 
+
+#define PWR_SW1_PORT 0U		//NT98532 POWER ON
+#define PWR_SW1_PIN  6U
+
+
 #define PIO0_28_PORT 0U //J27[3]
 #define PIO0_28_PIN  28U
 

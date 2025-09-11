@@ -32,7 +32,7 @@
 #define PMIC_PCA9422_ENABLE 1
 #define TOUCH_ENABLE 0
 #define CHARGER_ENABLE 0
-#define PMIC_GLF70583_ENABLE 0
+#define PMIC_GLF70583_ENABLE 1
 #define AMP_ENABLE 0
 /*******************************************************************************
  * Prototypes
@@ -165,11 +165,12 @@ int main(void)
 
 #if PMIC_GLF70583_ENABLE
     /* Init GPIO */
-    GPIO_PortInit(GPIO, PIO0_29_PORT);
+    GPIO_PortInit(GPIO, PWR_SW1_PORT);
     gpio_pin_config_t output_int_config = {kGPIO_DigitalOutput, 0,};
-    GPIO_PinInit(GPIO, 0, 29, &output_int_config);
-    GPIO_PinWrite(GPIO, 0, 29, 0);
-#else
+    GPIO_PinInit(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, &output_int_config);
+    GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 0);
+#endif
+
 #if CHARGER_ENABLE
     GPIO_PortInit(GPIO, PIO0_29_PORT);
     GPIO_PinInit(GPIO, PIO0_29_PORT, PIO0_29_PIN, &sw_config);
@@ -177,7 +178,7 @@ int main(void)
     GPIO_SetPinInterruptConfig(GPIO, PIO0_29_PORT, PIO0_29_PIN, &config);
     GPIO_PinEnableInterrupt(GPIO, PIO0_29_PORT, PIO0_29_PIN, kGPIO_InterruptA);
 #endif
-#endif
+
 
 #if AMP_ENABLE
     gpio_pin_config_t amp_config = {
@@ -206,6 +207,12 @@ int main(void)
 	glf70583_i2c_read(GLF70583_A_I2C_ADDR,0x00,&top_stat,1);
 	PRINTF("[GLF70583]top_stat:%X \n",top_stat);
 
+	//Solution: The manufacturer did not set it to LOAD SWITCH
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0xF5, 0xC6);
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB8);
+	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB9);
+
 	// BUCK1 Delay 4ms
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x66, 0x0C);
 	// BUCK2 Delay 2ms
@@ -220,9 +227,9 @@ int main(void)
 	// 0x26->BUCK2 ON、Others off
 	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);
 
-	uint8_t ch = GETCHAR();
-	PRINTF("GPIO_PinWrite(GPIO, 0, 29, 1); \n");
-	GPIO_PinWrite(GPIO, 0, 29, 1);
+	//uint8_t ch = GETCHAR();
+	PRINTF("GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); \n");
+	GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); //Enable GLF70583
 
 #endif
 
