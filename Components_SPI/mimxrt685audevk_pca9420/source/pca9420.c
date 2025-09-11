@@ -28,12 +28,12 @@
 #define PCA9420_LAST_REG (PCA9420_MODECFG_3_3)
 
 
-#define LED_ENABLE 0
-#define PMIC_PCA9422_ENABLE 0
+#define LED_ENABLE 1
+#define PMIC_PCA9422_ENABLE 1
 #define TOUCH_ENABLE 0
 #define CHARGER_ENABLE 0
 #define PMIC_GLF70583_ENABLE 0
-#define AMP_ENABLE 1
+#define AMP_ENABLE 0
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
