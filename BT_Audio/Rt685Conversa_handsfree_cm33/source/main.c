@@ -4,6 +4,8 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+#include "qar87_config.h"
+
 #include "fsl_debug_console.h"
 #include <porting.h>
 #include <string.h>
@@ -28,8 +30,11 @@
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
+#if !PIN_CONFIG_DEV_BOARD
 extern void BOARD_InitHardware(void);
-
+#else
+//extern void dev_BOARD_InitHardware(void);
+#endif
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -40,7 +45,11 @@ extern void BOARD_InitHardware(void);
 
 int main(void)
 {
+#if !PIN_CONFIG_DEV_BOARD
     BOARD_InitHardware();
+#else
+    dev_BOARD_InitHardware();
+#endif
 
     if (xTaskCreate(peripheral_hfp_hf_task, "peripheral_hfp_hf_task", configMINIMAL_STACK_SIZE * 8, NULL,
                     tskIDLE_PRIORITY + 1, NULL) != pdPASS)
