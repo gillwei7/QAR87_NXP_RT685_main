@@ -30,7 +30,7 @@
 
 #define LED_ENABLE 1
 #define PMIC_PCA9422_ENABLE 1
-#define TOUCH_ENABLE 0
+#define TOUCH_ENABLE 1
 #define CHARGER_ENABLE 1
 #define PMIC_GLF70583_ENABLE 1
 #define AMP_ENABLE 0
@@ -45,9 +45,7 @@ static pca9420_handle_t pca9420Handle;
 static volatile bool pca9420IntFlag;
 static uint8_t buffer[PCA9420_LAST_REG + 1];
 
-volatile bool g_PIO0_28_Flag = false;
-volatile bool g_PIO0_29_Flag = false;
-
+volatile bool g_touch_int_flag = false;
 volatile bool g_charger_int_flag = false;
 
 static dma_handle_t s_DmaTxHandle;
@@ -99,15 +97,15 @@ void GPIO_INTA_DriverIRQHandler(void)
 	uint32_t status = GPIO_PortGetInterruptStatus(GPIO, 1, kGPIO_InterruptA);
 
 
-    if (status & (1 << 28)) {
+    if (status & (1 << TOUCH_INT_PIN)) { //Touch
         // 關閉中斷，避免重入
-        GPIO_PinDisableInterrupt(GPIO, PIO0_28_PORT, PIO0_28_PIN, kGPIO_InterruptA);
+        GPIO_PinDisableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
 
-        // PIO0_28 觸發中斷，清除中斷旗標
-        GPIO_PinClearInterruptFlag(GPIO, PIO0_28_PORT, PIO0_28_PIN, kGPIO_InterruptA);
+        // 觸發中斷，清除中斷旗標
+        GPIO_PinClearInterruptFlag(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
 
         // 執行對應處理
-        g_PIO0_28_Flag = true;
+        g_touch_int_flag = true;
         //PRINTF("[Debug] TOUCH_GPIO_INTA_IRQHandler \r\n");
     }
     if (status & (1 << CHARG_INT_PIN)) { //Charger
@@ -156,11 +154,11 @@ int main(void)
     /* Init input switch GPIO. */
     EnableIRQ(GPIO_INTA_IRQn);
 #if TOUCH_ENABLE
-    GPIO_PortInit(GPIO, PIO0_28_PORT);
-    GPIO_PinInit(GPIO, PIO0_28_PORT, PIO0_28_PIN, &sw_config);
+    GPIO_PortInit(GPIO, TOUCH_INT_PORT);
+    GPIO_PinInit(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &sw_config);
     /* Enable GPIO pin interrupt */
-    GPIO_SetPinInterruptConfig(GPIO, PIO0_28_PORT, PIO0_28_PIN, &config);
-    GPIO_PinEnableInterrupt(GPIO, PIO0_28_PORT, PIO0_28_PIN, kGPIO_InterruptA);
+    GPIO_SetPinInterruptConfig(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &config);
+    GPIO_PinEnableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
 #endif
 
 #if PMIC_GLF70583_ENABLE
@@ -356,9 +354,9 @@ int main(void)
 #endif
 
 #if TOUCH_ENABLE
-    	if(g_PIO0_28_Flag )
+    	if(g_touch_int_flag )
     	{
-    		g_PIO0_28_Flag = false;  // 清除旗標以避免重複處理
+    		g_touch_int_flag = false;  // 清除旗標以避免重複處理
 
     		int rc = hal_i2c_mem_read_impl(EKTF_I2C_ADDR_7BIT, data_reg, buf, EWD_FRAME_MAX_LEN);
 
@@ -367,7 +365,7 @@ int main(void)
             }
 
             // 資料處理完畢後，重新啟用中斷
-            GPIO_PinEnableInterrupt(GPIO, PIO0_28_PORT, PIO0_28_PIN, kGPIO_InterruptA);
+            GPIO_PinEnableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
     	}
 #endif
     }

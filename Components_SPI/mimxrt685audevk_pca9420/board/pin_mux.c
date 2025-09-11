@@ -15,6 +15,7 @@ processor_version: 24.12.10
 board: MIMXRT685-AUD-EVK
 pin_labels:
 - {pin_num: E1, pin_signal: PIO0_6/FC0_SSEL3/SCT0_GPI1/SCT0_OUT1/CTIMER0_MAT0/SEC_PIO0_6/ADC0_8, label: NXP_PWR_SW1}
+- {pin_num: B5, pin_signal: PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4, label: NXP_TOUCH_INT}
 - {pin_num: N3, pin_signal: PIO1_15/HS_SPI_SSEL1/CTIMER3_MAT0, label: CHG_INT_N_R}
 - {pin_num: N17, pin_signal: PIO2_29/I3C0_SCL/SCT0_OUT0/CLKOUT, label: PCA9422_I2C_SCL, identifier: I3C_ICM_SCL}
 - {pin_num: P16, pin_signal: PIO2_30/I3C0_SDA/SCT0_OUT3/CLKIN/CMP0_OUT, label: PCA9422_I2C_SDA, identifier: I3C_ICM_SDA}
@@ -59,6 +60,7 @@ BOARD_InitPins:
   - {pin_num: D8, peripheral: FLEXCOMM3, signal: TXD_SCL_MISO_WS, pin_signal: PIO0_22/FC3_TXD_SCL_MISO_WS/CTIMER3_MAT1/TRACEDATA(0)/SEC_PIO0_22, direction: OUTPUT}
   - {pin_num: E1, peripheral: GPIO, signal: 'PIO0, 6', pin_signal: PIO0_6/FC0_SSEL3/SCT0_GPI1/SCT0_OUT1/CTIMER0_MAT0/SEC_PIO0_6/ADC0_8, ibena: enabled}
   - {pin_num: N3, peripheral: GPIO, signal: 'PIO1, 15', pin_signal: PIO1_15/HS_SPI_SSEL1/CTIMER3_MAT0, ibena: enabled}
+  - {pin_num: B5, peripheral: GPIO, signal: 'PIO1, 8', pin_signal: PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4, ibena: enabled}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -261,6 +263,27 @@ void BOARD_InitPins(void)
                                          IOPCTL_PIO_INV_DI);
     /* PORT1 PIN15 (coords: N3) is configured as PIO1_15 */
     IOPCTL_PinMuxSet(IOPCTL, 1U, 15U, port1_pin15_config);
+
+    const uint32_t port1_pin8_config = (/* Pin is configured as PIO1_8 */
+                                        IOPCTL_PIO_FUNC0 |
+                                        /* Disable pull-up / pull-down function */
+                                        IOPCTL_PIO_PUPD_DI |
+                                        /* Enable pull-down function */
+                                        IOPCTL_PIO_PULLDOWN_EN |
+                                        /* Enables input buffer function */
+                                        IOPCTL_PIO_INBUF_EN |
+                                        /* Normal mode */
+                                        IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                        /* Normal drive */
+                                        IOPCTL_PIO_FULLDRIVE_DI |
+                                        /* Analog mux is disabled */
+                                        IOPCTL_PIO_ANAMUX_DI |
+                                        /* Pseudo Output Drain is disabled */
+                                        IOPCTL_PIO_PSEDRAIN_DI |
+                                        /* Input function is not inverted */
+                                        IOPCTL_PIO_INV_DI);
+    /* PORT1 PIN8 (coords: B5) is configured as PIO1_8 */
+    IOPCTL_PinMuxSet(IOPCTL, 1U, 8U, port1_pin8_config);
 }
 
 /* clang-format off */

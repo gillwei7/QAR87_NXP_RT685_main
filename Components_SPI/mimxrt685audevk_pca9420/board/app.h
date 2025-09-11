@@ -19,17 +19,12 @@
 //Is the Burning program on the Dev-Board?
 #define USE_DEV_BOARD 1
 
+#define TOUCH_INT_PORT 1U
+#define TOUCH_INT_PIN  8U
 #define CHARG_INT_PORT 1U
 #define CHARG_INT_PIN  15U
 #define PWR_SW1_PORT 0U		//NT98532 POWER ON
 #define PWR_SW1_PIN  6U
-
-
-#define PIO0_28_PORT 0U //J27[3]
-#define PIO0_28_PIN  28U
-
-#define PIO0_29_PORT 0U //J27[2]
-#define PIO0_29_PIN  29U
 
 //I2S
 #define DEMO_I2S_MASTER_CLOCK_FREQUENCY CLOCK_GetMclkClkFreq()

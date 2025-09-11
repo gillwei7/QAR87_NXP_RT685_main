@@ -26,6 +26,7 @@
             <processor_version>24.12.10</processor_version>
             <pin_labels>
                <pin_label pin_num="E1" pin_signal="PIO0_6/FC0_SSEL3/SCT0_GPI1/SCT0_OUT1/CTIMER0_MAT0/SEC_PIO0_6/ADC0_8" label="NXP_PWR_SW1"/>
+               <pin_label pin_num="B5" pin_signal="PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4" label="NXP_TOUCH_INT"/>
                <pin_label pin_num="N3" pin_signal="PIO1_15/HS_SPI_SSEL1/CTIMER3_MAT0" label="CHG_INT_N_R"/>
                <pin_label pin_num="N17" pin_signal="PIO2_29/I3C0_SCL/SCT0_OUT0/CLKOUT" label="PCA9422_I2C_SCL" identifier="I3C_ICM_SCL"/>
                <pin_label pin_num="P16" pin_signal="PIO2_30/I3C0_SDA/SCT0_OUT3/CLKIN/CMP0_OUT" label="PCA9422_I2C_SDA" identifier="I3C_ICM_SDA"/>
@@ -125,6 +126,11 @@
                      </pin_features>
                   </pin>
                   <pin peripheral="GPIO" signal="PIO1, 15" pin_num="N3" pin_signal="PIO1_15/HS_SPI_SSEL1/CTIMER3_MAT0">
+                     <pin_features>
+                        <pin_feature name="ibena" value="enabled"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="GPIO" signal="PIO1, 8" pin_num="B5" pin_signal="PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4">
                      <pin_features>
                         <pin_feature name="ibena" value="enabled"/>
                      </pin_features>
