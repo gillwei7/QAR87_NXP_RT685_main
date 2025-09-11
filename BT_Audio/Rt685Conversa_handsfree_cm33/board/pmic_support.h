@@ -9,13 +9,14 @@
 #ifndef _PMIC_SUPPORT_H_
 #define _PMIC_SUPPORT_H_
 
-#include "fsl_pca9420.h"
+#include "fsl_pca9422.h"
 #include "fsl_power.h"
+#include "fsl_debug_console.h"
 
 /*******************************************************************************
  * DEFINITION
  ******************************************************************************/
-extern pca9420_handle_t pca9420Handle;
+extern pca9422_handle_t pca9422Handle;
 
 /*******************************************************************************
  * API
@@ -23,8 +24,12 @@ extern pca9420_handle_t pca9420Handle;
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus*/
-void BOARD_SetPmicVoltageForFreq(power_part_temp_range_t temp_range, uint32_t main_clk_freq, uint32_t dsp_main_clk_freq);
 void BOARD_InitPmic(void);
+void BOARD_SetVddCoreVoltage(uint32_t millivolt);
+bool BOARD_SetPmicVoltageForFreq(uint32_t cm33_clk_freq, uint32_t dsp_clk_freq);
+void BOARD_SetPmicVoltageBeforeDeepSleep(void);
+void BOARD_RestorePmicVoltageAfterDeepSleep(void);
+void BOARD_SetPmicVoltageBeforeDeepPowerDown(void);
 #if defined(__cplusplus)
 }
 #endif /* __cplusplus*/

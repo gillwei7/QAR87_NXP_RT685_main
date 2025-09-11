@@ -407,13 +407,7 @@ bool PCA9420_WriteRegs(pca9420_handle_t *handle, uint8_t regBase, uint8_t *val, 
     assert(handle->I2C_SendFunc);
     assert(val);
 
-    /* Ensure size is within the range of uint8_t */
-    if (size > UINT8_MAX)
-    {
-        return false;
-    }
-
-    return (kStatus_Success == handle->I2C_SendFunc(handle->slaveAddress, regBase, 1U, val, (uint8_t)size)) ? true : false;
+    return (kStatus_Success == handle->I2C_SendFunc(handle->slaveAddress, regBase, 1U, val, size)) ? true : false;
 }
 
 bool PCA9420_ReadRegs(pca9420_handle_t *handle, uint8_t regBase, uint8_t *val, uint32_t size)
@@ -422,13 +416,7 @@ bool PCA9420_ReadRegs(pca9420_handle_t *handle, uint8_t regBase, uint8_t *val, u
     assert(handle->I2C_ReceiveFunc);
     assert(val);
 
-    /* Ensure size is within the range of uint8_t */
-    if (size > UINT8_MAX)
-    {
-        return false;
-    }
-
-    return (kStatus_Success == handle->I2C_ReceiveFunc(handle->slaveAddress, regBase, 1U, val, (uint8_t)size)) ? true : false;
+    return (kStatus_Success == handle->I2C_ReceiveFunc(handle->slaveAddress, regBase, 1U, val, size)) ? true : false;
 }
 
 bool PCA9420_ModifyReg(pca9420_handle_t *handle, uint8_t reg, uint8_t mask, uint8_t val)
