@@ -16,6 +16,9 @@
 #define DEMO_PCA9420_INTB_HANDLER PMC_PMIC_IRQHandler
 #define DEMO_PCA9420_INTB_IRQ     PMC_PMIC_IRQn
 
+//Is the Burning program on the Dev-Board?
+#define USE_DEV_BOARD 1
+
 #define PIO0_28_PORT 0U //J27[3]
 #define PIO0_28_PIN  28U
 
