@@ -183,8 +183,8 @@ int main(void)
             kGPIO_DigitalOutput,
             1,
         };
-    GPIO_PortInit(GPIO, 1);
-    GPIO_PinInit(GPIO, 1, 0, &amp_config);
+	GPIO_PortInit(GPIO, AMP_RESET_PORT);
+	GPIO_PinInit(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, &amp_config);
 #endif
 
     BOARD_I3C_Init(BOARD_PMIC_I3C_BASEADDR, BOARD_PMIC_I3C_CLOCK_FREQ);
@@ -320,17 +320,18 @@ int main(void)
 
 #endif
 
+
     while(1)
     {
 #if AMP_ENABLE
-    	uint8_t ch = GETCHAR();
-    	if(ch==0x11)
-    	{
-    		StopSoundPlayback();
-    	}
-    	else if (ch==0x22){
-    		StartSoundPlayback();
-    	}
+//    	uint8_t ch = GETCHAR();
+//    	if(ch==0x11)
+//    	{
+//    		StopSoundPlayback();
+//    	}
+//    	else if (ch==0x22){
+//    		StartSoundPlayback();
+//    	}
 #endif
 #if CHARGER_ENABLE
     	if(g_charger_int_flag )

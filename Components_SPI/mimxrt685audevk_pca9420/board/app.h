@@ -19,6 +19,8 @@
 //Is the Burning program on the Dev-Board?
 #define USE_DEV_BOARD 1
 
+#define AMP_RESET_PORT 0U
+#define AMP_RESET_PIN  0U
 #define TOUCH_INT_PORT 1U
 #define TOUCH_INT_PIN  8U
 #define CHARG_INT_PORT 1U
