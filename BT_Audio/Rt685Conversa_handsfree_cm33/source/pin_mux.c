@@ -33,12 +33,14 @@ pin_labels:
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
+#include "qar87_config.h"
 
 #include "fsl_common.h"
 #include "fsl_gpio.h"
 #include "fsl_iopctl.h"
 #include "pin_mux.h"
 
+#if !PIN_CONFIG_DEV_BOARD
 /*! @name FLEXSPI0A_DATA0 (coord L2), U19[D3]
   @{ */
 /* Routed pin properties */
@@ -2790,6 +2792,7 @@ void BOARD_InitDmicPins(void)
     IOPCTL_PinMuxSet(IOPCTL, BOARD_INITDMICPINS_PDM_DATA67_PORT, BOARD_INITDMICPINS_PDM_DATA67_PIN, PDM_DATA67);
 #endif
 }
+#endif
 /***********************************************************************************************************************
  * EOF
  **********************************************************************************************************************/

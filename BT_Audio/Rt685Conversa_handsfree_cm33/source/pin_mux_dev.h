@@ -93,7 +93,6 @@ extern "C" {
 #define BOARD_INITI3CPINS_I3C0_SDA_PIN_MASK (1U << 30U)
 /* @} */
 
-
 // gill modify to QSPI_A
 /*! @name FLEXSPI0A_DATA0 (coord L2), U19[D3]
   @{ */
@@ -295,33 +294,20 @@ extern "C" {
 /* @} */
 
 
-#define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
-#define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
-#define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
-#define IOPCTL_PIO_INBUF_DI 0x00u         /*!<@brief Disable input buffer function */
-#define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
-#define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
-#define IOPCTL_PIO_PSEDRAIN_DI 0x00u      /*!<@brief Pseudo Output Drain is disabled */
-#define IOPCTL_PIO_PULLDOWN_EN 0x00u      /*!<@brief Enable pull-down function */
-#define IOPCTL_PIO_PUPD_DI 0x00u          /*!<@brief Disable pull-up / pull-down function */
-#define IOPCTL_PIO_SLEW_RATE_NORMAL 0x00u /*!<@brief Normal mode */
-
-
-
-
 /*!
  * @brief Calls initialization functions.
  *
  */
+
 void dev_BOARD_InitBootPins(void);
 void dev_BOARD_InitUSBPins(void); /* Function assigned for the Cortex-M33 */
 void dev_BOARD_InitLEDsPins(void); /* Function assigned for the Cortex-M33 */
 void dev_BOARD_InitDmicPins(void); /* Function assigned for the Cortex-M33 */
-void dev_BOARD_InitAudio_Pins(void);
+void dev_BOARD_InitAMP_Pins(void);
 void dev_BOARD_InitBUTTONsPins(void); /* Function assigned for the Cortex-M33 */
 void dev_BOARD_InitI3CPins(void); /* Function assigned for the Cortex-M33 */
 void dev_BOARD_InitBTUARTPins(void); /* Function assigned for the Cortex-M33 */
-void dev_BOARD_InitAudio_Pins(void); /* Function assigned for the Cortex-M33 */
+void dev_BOARD_InitAMP_Pins(void); /* Function assigned for the Cortex-M33 */
 void dev_BOARD_InitFourDbgPins(void); /* Function assigned for the Cortex-M33 */
 void dev_BOARD_InitFlexSPI0APins(void); /* Function assigned for the Cortex-M33 */
 void dev_BOARD_InitBTScoPins(void); /* Function assigned for the Cortex-M33 */

@@ -27,7 +27,8 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
-
+#include "qar87_config.h"
+#if !PIN_CONFIG_DEV_BOARD
 /*!
  * @brief Calls initialization functions.
  *
@@ -1540,7 +1541,7 @@ void BOARD_InitDmicPins(void); /* Function assigned for the Cortex-M33 */
  * @}
  */
 #endif /* _PIN_MUX_H_ */
-
+#endif // #if !PIN_CONFIG_DEV_BOARD
 /***********************************************************************************************************************
  * EOF
  **********************************************************************************************************************/

@@ -6,10 +6,10 @@
  */
 /*${header:start}*/
 #include "qar87_config.h"
-#if !PIN_CONFIG_DEV_BOARD
+#if PIN_CONFIG_DEV_BOARD
 #include "clock_config.h"
 #include "board.h"
-#include "pin_mux.h"
+#include "pin_mux_dev.h"
 #include "fsl_dma.h"
 #include "fsl_wm8904.h"
 #include "fsl_adapter_audio.h"
@@ -391,67 +391,12 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
     return CLOCK_GetMclkClkFreq();
 }
 
-static void i2c_release_bus_delay(void)
-{
-    uint32_t i = 0;
-    for (i = 0; i < 100; i++)
-    {
-        __NOP();
-    }
-}
+
+#define IOPCTL_PIO_SLEW_RATE_SLOW 0x80u /*!<@brief Slow mode */
 
 
-void BOARD_I3C_ReleaseBus(void)
-{
-    uint8_t i = 0;
-
-    GPIO_PortInit(BOARD_INITI3CPINSASGPIO_I3C0_SDA_PERIPHERAL, BOARD_INITI3CPINSASGPIO_I3C0_SDA_PORT);
-    GPIO_PortInit(BOARD_INITI3CPINSASGPIO_I3C0_SCL_PERIPHERAL, BOARD_INITI3CPINSASGPIO_I3C0_SCL_PORT);
-
-    BOARD_InitI3CPinsAsGPIO();
-
-    /* Drive SDA low first to simulate a start */
-    GPIO_PinWrite(BOARD_INITI3CPINSASGPIO_I3C0_SDA_PERIPHERAL, BOARD_INITI3CPINSASGPIO_I3C0_SDA_PORT,
-                  BOARD_INITI3CPINSASGPIO_I3C0_SDA_PIN, 0U);
-    i2c_release_bus_delay();
-
-    /* Send 9 pulses on SCL */
-    for (i = 0; i < 9; i++)
-    {
-        GPIO_PinWrite(BOARD_INITI3CPINSASGPIO_I3C0_SCL_PERIPHERAL, BOARD_INITI3CPINSASGPIO_I3C0_SCL_PORT,
-                      BOARD_INITI3CPINSASGPIO_I3C0_SCL_PIN, 0U);
-        i2c_release_bus_delay();
-
-        GPIO_PinWrite(BOARD_INITI3CPINSASGPIO_I3C0_SDA_PERIPHERAL, BOARD_INITI3CPINSASGPIO_I3C0_SDA_PORT,
-                      BOARD_INITI3CPINSASGPIO_I3C0_SDA_PIN, 1U);
-        i2c_release_bus_delay();
-
-        GPIO_PinWrite(BOARD_INITI3CPINSASGPIO_I3C0_SCL_PERIPHERAL, BOARD_INITI3CPINSASGPIO_I3C0_SCL_PORT,
-                      BOARD_INITI3CPINSASGPIO_I3C0_SCL_PIN, 1U);
-        i2c_release_bus_delay();
-        i2c_release_bus_delay();
-    }
-
-    /* Send stop */
-    GPIO_PinWrite(BOARD_INITI3CPINSASGPIO_I3C0_SCL_PERIPHERAL, BOARD_INITI3CPINSASGPIO_I3C0_SCL_PORT,
-                  BOARD_INITI3CPINSASGPIO_I3C0_SCL_PIN, 0U);
-    i2c_release_bus_delay();
-
-    GPIO_PinWrite(BOARD_INITI3CPINSASGPIO_I3C0_SDA_PERIPHERAL, BOARD_INITI3CPINSASGPIO_I3C0_SDA_PORT,
-                  BOARD_INITI3CPINSASGPIO_I3C0_SDA_PIN, 0U);
-    i2c_release_bus_delay();
-
-    GPIO_PinWrite(BOARD_INITI3CPINSASGPIO_I3C0_SCL_PERIPHERAL, BOARD_INITI3CPINSASGPIO_I3C0_SCL_PORT,
-                  BOARD_INITI3CPINSASGPIO_I3C0_SCL_PIN, 1U);
-    i2c_release_bus_delay();
-
-    GPIO_PinWrite(BOARD_INITI3CPINSASGPIO_I3C0_SDA_PERIPHERAL, BOARD_INITI3CPINSASGPIO_I3C0_SDA_PORT,
-                  BOARD_INITI3CPINSASGPIO_I3C0_SDA_PIN, 1U);
-    i2c_release_bus_delay();
-}
 extern void UsbAppInit(void);
-
-void BOARD_InitHardware(void)
+void dev_BOARD_InitHardware(void)
 {
     DMA_Type *dmaBases[] = DMA_BASE_PTRS;
     /* Define the init structure for the reset pin*/
@@ -460,15 +405,9 @@ void BOARD_InitHardware(void)
         1,
     };
 
-    BOARD_InitBootPins();
+    dev_BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
-    BOARD_I3C_ReleaseBus();
-    BOARD_InitI3CPins();
-
-    /* Init output reset pin. */
-    GPIO_PortInit(GPIO, 2);
-    GPIO_PinInit(GPIO, 2, 12, &reset_config);
 
     /* Attach AUX0_PLL clock to flexspi with divider 4*/
     BOARD_SetFlexspiClock(2, 8);
@@ -482,7 +421,7 @@ void BOARD_InitHardware(void)
 
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
-	PRINTF("RT685 MCU: ------------ McuVer 0.1.3.1 ---------- \r\n");
+	PRINTF("RT685 MCU: ------------ McuVer 0.1.2 ------------ \r\n");
 	PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
 
 	PRINTF("\r\n");
