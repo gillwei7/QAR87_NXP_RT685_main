@@ -35,7 +35,7 @@
 /*Precharge / Termination Current*/
 #define BQ256XX_IPRECHG_MIN_uA    60000
 #define BQ256XX_IPRECHG_MAX_uA    780000
-#define BQ256XX_ITERM_MIN_uA      60000
+#define BQ256XX_ITERM_MIN_uA      20000//60000
 #define BQ256XX_ITERM_MAX_uA      780000
 
 

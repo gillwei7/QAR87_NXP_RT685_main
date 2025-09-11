@@ -31,7 +31,7 @@
 #define LED_ENABLE 1
 #define PMIC_PCA9422_ENABLE 1
 #define TOUCH_ENABLE 0
-#define CHARGER_ENABLE 0
+#define CHARGER_ENABLE 1
 #define PMIC_GLF70583_ENABLE 1
 #define AMP_ENABLE 0
 /*******************************************************************************
@@ -48,7 +48,7 @@ static uint8_t buffer[PCA9420_LAST_REG + 1];
 volatile bool g_PIO0_28_Flag = false;
 volatile bool g_PIO0_29_Flag = false;
 
-
+volatile bool g_charger_int_flag = false;
 
 static dma_handle_t s_DmaTxHandle;
 static i2s_config_t s_TxConfig;
@@ -96,7 +96,7 @@ static void StartSoundPlayback(void)
 void GPIO_INTA_DriverIRQHandler(void)
 {
 
-	uint32_t status = GPIO_PortGetInterruptStatus(GPIO, 0, kGPIO_InterruptA);
+	uint32_t status = GPIO_PortGetInterruptStatus(GPIO, 1, kGPIO_InterruptA);
 
 
     if (status & (1 << 28)) {
@@ -110,11 +110,11 @@ void GPIO_INTA_DriverIRQHandler(void)
         g_PIO0_28_Flag = true;
         //PRINTF("[Debug] TOUCH_GPIO_INTA_IRQHandler \r\n");
     }
-    if (status & (1 << 29)) {
+    if (status & (1 << CHARG_INT_PIN)) { //Charger
 
-    	GPIO_PinDisableInterrupt(GPIO, PIO0_29_PORT, PIO0_29_PIN, kGPIO_InterruptA);
-        GPIO_PinClearInterruptFlag(GPIO, PIO0_29_PORT, PIO0_29_PIN, kGPIO_InterruptA);
-        g_PIO0_29_Flag = true;
+    	GPIO_PinDisableInterrupt(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
+        GPIO_PinClearInterruptFlag(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
+        g_charger_int_flag = true;
         //PRINTF("[Debug] PIO0_29_INTA_IRQHandler \r\n");
     }
 
@@ -172,11 +172,11 @@ int main(void)
 #endif
 
 #if CHARGER_ENABLE
-    GPIO_PortInit(GPIO, PIO0_29_PORT);
-    GPIO_PinInit(GPIO, PIO0_29_PORT, PIO0_29_PIN, &sw_config);
+    GPIO_PortInit(GPIO, CHARG_INT_PORT);
+    GPIO_PinInit(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, &sw_config);
     /* Enable GPIO pin interrupt */
-    GPIO_SetPinInterruptConfig(GPIO, PIO0_29_PORT, PIO0_29_PIN, &config);
-    GPIO_PinEnableInterrupt(GPIO, PIO0_29_PORT, PIO0_29_PIN, kGPIO_InterruptA);
+    GPIO_SetPinInterruptConfig(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, &config);
+    GPIO_PinEnableInterrupt(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
 #endif
 
 
@@ -272,6 +272,7 @@ int main(void)
 
 #if CHARGER_ENABLE
 
+	status_t bq_ret;
 	uint8_t ch_st,ID;
 
 	bq256xx_read_reg(BQ256XX_REG_PART_INFO,&ID,1);
@@ -279,17 +280,24 @@ int main(void)
 
     // 設定充電器參數
     bq256xx_cfg_t charger_cfg = {
-        .vindpm_uv = 4500000,
-        .iindpm_ua = 2400000,
-        .ichg_ua = 2040000,
-        .vbatreg_uv = 4208000,
-        .iprechg_ua = 180000,
-        .iterm_ua = 180000,
+            .vindpm_uv = 4450000,
+            .iindpm_ua = 2000000,
+            .ichg_ua = 20500,
+            .vbatreg_uv = 4005000,
+            .iprechg_ua = 60000,
+            .iterm_ua = 20000,
+//        .vindpm_uv = 4500000,
+//        .iindpm_ua = 2400000,
+//        .ichg_ua = 2040000,
+//        .vbatreg_uv = 4208000,
+//        .iprechg_ua = 180000,
+//        .iterm_ua = 180000,
         .wdt_ms = 0  // 禁用 Watchdog
     };
 
-    if (bq256xx_init(&charger_cfg) != kStatus_Success) {
-        PRINTF("BQ256xx init failed!\n");
+    bq_ret = bq256xx_init(&charger_cfg);
+    if ( bq_ret!= kStatus_Success) {
+        PRINTF("BQ256xx init failed!,ret:%d \n",bq_ret);
         return -1;
     }
     else{
@@ -327,9 +335,9 @@ int main(void)
     	}
 #endif
 #if CHARGER_ENABLE
-    	if(g_PIO0_29_Flag )
+    	if(g_charger_int_flag )
     	{
-    		g_PIO0_29_Flag = false;
+    		g_charger_int_flag = false;
 
 			// 輪詢充電狀態
 			bq256xx_status_t status;
@@ -343,7 +351,7 @@ int main(void)
 			} else {
 				PRINTF("Failed to read charger status.\n");
 			}
-			GPIO_PinEnableInterrupt(GPIO, PIO0_29_PORT, PIO0_29_PIN, kGPIO_InterruptA);
+			GPIO_PinEnableInterrupt(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
 		}
 #endif
 
