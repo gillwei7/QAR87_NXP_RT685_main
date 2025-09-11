@@ -88,7 +88,7 @@ pin_labels:
 #define BOARD_INITFLEXSPI0APINS_QSPI_A_SCK_SIGNAL FLEXSPI_A_SCLK     /*!<@brief Signal name */
 #define BOARD_INITFLEXSPI0APINS_QSPI_A_SCK_PORT 1U                   /*!<@brief PORT peripheral base pointer */
 #define BOARD_INITFLEXSPI0APINS_QSPI_A_SCK_PIN 18U                  /*!<@brief PORT pin number */
-#define BOARD_INITFLEXSPI0APINS_QSPI_A_SCK_PIN_MASK (1U << 29U)      /*!<@brief PORT pin mask */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_SCK_PIN_MASK (1U << 18U)      /*!<@brief PORT pin mask */
                                                                      /* @} */
 
 /*! @name FLEXSPI0A_SS0_N (coord T2), U19[C2]
