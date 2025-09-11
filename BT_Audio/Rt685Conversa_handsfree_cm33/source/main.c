@@ -7,7 +7,6 @@
 
 #include "qar87_config.h"
 
-
 #include "fsl_debug_console.h"
 #include <porting.h>
 #include <string.h>
