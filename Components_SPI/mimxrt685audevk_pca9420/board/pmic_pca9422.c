@@ -7,6 +7,8 @@
 #include "pmic_pca9422.h"
 #include "fsl_power.h"
 #include <assert.h>
+#include "pmic_support.h"
+
 
 extern pca9422_handle_t pca9422Handle;  // Must be defined elsewhere
 
