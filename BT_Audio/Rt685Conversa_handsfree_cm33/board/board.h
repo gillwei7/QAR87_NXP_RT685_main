@@ -18,7 +18,7 @@
 /*! @brief The board name */
 #define BOARD_NAME      "MIMXRT685-EVK"
 #define BOARD_I3C_CODEC (1)
-
+#if 0
 /*! @brief The UART to use for debug messages. */
 #define BOARD_DEBUG_UART_TYPE     kSerialPort_Uart
 #define BOARD_DEBUG_UART_BASEADDR (uint32_t) USART0
@@ -31,6 +31,19 @@
 #define BOARD_DEBUG_UART_CLKSRC     kCLOCK_Flexcomm0
 #define BOARD_UART_IRQ_HANDLER      FLEXCOMM0_IRQHandler
 #define BOARD_UART_IRQ              FLEXCOMM0_IRQn
+#else // gill for pmic
+#define BOARD_DEBUG_UART_TYPE     kSerialPort_Uart
+#define BOARD_DEBUG_UART_BASEADDR (uint32_t) USART3
+#define BOARD_DEBUG_UART_INSTANCE 3U
+#define BOARD_DEBUG_UART_CLK_FREQ CLOCK_GetFlexCommClkFreq(3U)
+#define BOARD_DEBUG_UART_FRG_CLK \
+    (&(const clock_frg_clk_config_t){3, kCLOCK_FrgPllDiv, 255, 0}) /*!< Select FRG0 mux as frg_pll */
+#define BOARD_DEBUG_UART_CLK_ATTACH kFRG_to_FLEXCOMM3
+#define BOARD_DEBUG_UART_RST        kFC3_RST_SHIFT_RSTn
+#define BOARD_DEBUG_UART_CLKSRC     kCLOCK_Flexcomm3
+#define BOARD_UART_IRQ_HANDLER      FLEXCOMM3_IRQHandler
+#define BOARD_UART_IRQ              FLEXCOMM3_IRQn
+#endif
 
 #ifndef BOARD_DEBUG_UART_BAUDRATE
 #define BOARD_DEBUG_UART_BAUDRATE 115200
@@ -41,7 +54,7 @@
 #ifndef BOARD_ENABLE_PSRAM_CACHE
 #define BOARD_ENABLE_PSRAM_CACHE 1
 #endif
-
+#if 0
 #if BOARD_I3C_CODEC && (defined(SDK_I3C_BASED_COMPONENT_USED) && SDK_I3C_BASED_COMPONENT_USED)
 #define BOARD_CODEC_I2C_BASEADDR   I3C
 #define BOARD_CODEC_I2C_CLOCK_FREQ CLOCK_GetI3cClkFreq()
@@ -56,6 +69,20 @@
 
 #define BOARD_PMIC_I2C_BASEADDR   I2C15
 #define BOARD_PMIC_I2C_CLOCK_FREQ CLOCK_GetFlexCommClkFreq(15U)
+#else // gill for pmic
+#define BOARD_CODEC_I2C_BASEADDR   I2C2
+#define BOARD_CODEC_I2C_CLOCK_FREQ CLOCK_GetFlexCommClkFreq(2U)
+#define BOARD_CODEC_I2C_INSTANCE   2
+
+//#define BOARD_PMIC_I2C_BASEADDR   I2C15
+//#define BOARD_PMIC_I2C_CLOCK_FREQ CLOCK_GetFlexCommClkFreq(15U)
+
+#define BOARD_PMIC_I3C_BASEADDR   I3C
+#define BOARD_PMIC_I3C_CLOCK_FREQ CLOCK_GetI3cClkFreq()
+
+#define BOARD_PMIC_I2C_BASEADDR   I2C4
+#define BOARD_PMIC_I2C_CLOCK_FREQ CLOCK_GetFlexCommClkFreq(4U)
+#endif
 
 #define BOARD_ACCEL_I2C_BASEADDR   I2C2
 #define BOARD_ACCEL_I2C_ADDR       0x1E
@@ -219,17 +246,17 @@
 #define BOARD_LCD_DC_GPIO      GPIO
 #define BOARD_LCD_DC_GPIO_PORT 1U
 #define BOARD_LCD_DC_GPIO_PIN  7U
-
-#define BOARD_BT_UART_INSTANCE 4
+// gill for BT UART
+#define BOARD_BT_UART_INSTANCE 0
 #define BOARD_BT_UART_BAUDRATE 3000000
-#define BOARD_BT_UART_CLK_FREQ CLOCK_GetFlexCommClkFreq(4U)
+#define BOARD_BT_UART_CLK_FREQ CLOCK_GetFlexCommClkFreq(0U)
 #define BOARD_BT_UART_FRG_CLK \
-    (&(const clock_frg_clk_config_t){4, kCLOCK_FrgPllDiv, 255, 4}) /*!< Select FRG0 mux as frg_pll */
-#define BOARD_BT_UART_CLK_ATTACH  kFRG_to_FLEXCOMM4
-#define BOARD_BT_UART_RST         kFC4_RST_SHIFT_RSTn
-#define BOARD_BT_UART_IRQ         FLEXCOMM4_IRQn
-#define BOARD_BT_UART_IRQ_HANDLER FLEXCOMM4_IRQHandler
-#define BOARD_BT_UART_CLKSRC      kCLOCK_Flexcomm4
+    (&(const clock_frg_clk_config_t){0, kCLOCK_FrgPllDiv, 255, 0}) /*!< Select FRG0 mux as frg_pll */
+#define BOARD_BT_UART_CLK_ATTACH  kFRG_to_FLEXCOMM0
+#define BOARD_BT_UART_RST         kFC0_RST_SHIFT_RSTn
+#define BOARD_BT_UART_IRQ         FLEXCOMM0_IRQn
+#define BOARD_BT_UART_IRQ_HANDLER FLEXCOMM0_IRQHandler
+#define BOARD_BT_UART_CLKSRC      kCLOCK_Flexcomm0
 
 /* ERPC SPI configuration */
 #define ERPC_BOARD_SPI_SLAVE_READY_USE_GPIO (1)

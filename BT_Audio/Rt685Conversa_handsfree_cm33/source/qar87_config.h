@@ -9,6 +9,7 @@
 #define QAR87_CONFIG_H_
 
 #define PIN_CONFIG_DEV_BOARD 1
-
+#define PMIC_GLF70583_ENABLE 1
+#define PMIC_PCA9422_ENABLE 1
 
 #endif /* QAR87_CONFIG_H_ */

@@ -766,7 +766,7 @@ void *uart_init_interface(void)
 #if defined(MIMXRT1170_CPU_SERIES) && defined(WIFI_BT_USE_M2_INTERFACE)
                 LPUART2,                /*FW download UART port address*/
 #else
-                USART4, /*FW download UART port address*/
+                USART0, /*FW download UART port address*/
 #endif /*defined(MIMXRT1170_CPU_SERIES)  && defined(WIFI_BT_USE_M2_INTERFACE)*/
                 0,                      /*BT UART clock frequency */
                 115200U,                /*initial baud-rate for boot-loader*/
