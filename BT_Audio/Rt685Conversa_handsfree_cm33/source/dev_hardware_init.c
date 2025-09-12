@@ -535,6 +535,10 @@ void dev_BOARD_InitHardware(void)
 		    dev_BOARD_InitBootPins();
 		    BOARD_InitBootClocks();
 		    BOARD_InitDebugConsole();
+#if (((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP)))
+		    CRYPTO_InitHardware();
+#endif
+
 #endif // gill if 0 for pmic test
 }
 
