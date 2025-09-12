@@ -167,6 +167,7 @@ int main(void)
     gpio_pin_config_t output_int_config = {kGPIO_DigitalOutput, 0,};
     GPIO_PinInit(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, &output_int_config);
     GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 0);
+    GPIO_PinInit(GPIO, RESET553_N_PORT, RESET553_N_PIN, &output_int_config);
 #endif
 
 #if CHARGER_ENABLE
@@ -228,6 +229,10 @@ int main(void)
 	//uint8_t ch = GETCHAR();
 	PRINTF("GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); \n");
 	GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); //Enable GLF70583
+
+	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
+	PRINTF("GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1); \n");
+	GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1);
 
 #endif
 
