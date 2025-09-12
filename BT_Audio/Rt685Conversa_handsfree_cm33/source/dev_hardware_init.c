@@ -396,8 +396,10 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
 
 
 extern void UsbAppInit(void);
+
 void dev_BOARD_InitHardware(void)
 {
+#if 0
     DMA_Type *dmaBases[] = DMA_BASE_PTRS;
     /* Define the init structure for the reset pin*/
     gpio_pin_config_t reset_config = {
@@ -505,13 +507,37 @@ void dev_BOARD_InitHardware(void)
 	#endif
 
 #endif
-
     DMA_Init(dmaBases[EXAMPLE_DMA_INSTANCE]);
 
 #if (((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP)))
     CRYPTO_InitHardware();
 #endif /* CONFIG_BT_SMP */
+#else  // gill if 0 for pmic test
+		//    /* Use 16 MHz clock for the FLEXCOMM15 */
+		//    CLOCK_AttachClk(kSFRO_to_FLEXCOMM15);
+
+		    /* Attach main clock to I3C, 500MHz / 20 = 25Hz. */
+		    CLOCK_AttachClk(kMAIN_CLK_to_I3C_CLK);
+		    CLOCK_SetClkDiv(kCLOCK_DivI3cClk, 20);
+
+		    /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
+		    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
+
+		    // gill for BT USART0
+		    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM0);
+
+		    /* Attach AUX0_PLL clock to flexspi with divider 4*/
+//		        BOARD_SetFlexspiClock(2, 8);
+		        /* attach FRG0 clock to FLEXCOMM0 */
+		        CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
+		        CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
+
+		    dev_BOARD_InitBootPins();
+		    BOARD_InitBootClocks();
+		    BOARD_InitDebugConsole();
+#endif // gill if 0 for pmic test
 }
+
 
 #if defined(WIFI_88W8987_BOARD_AW_CM358_USD) || defined(WIFI_IW416_BOARD_MURATA_1XK_USD) || \
     defined(WIFI_88W8987_BOARD_MURATA_1ZM_USD) || defined(WIFI_IW612_BOARD_MURATA_2EL_USD)

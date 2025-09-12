@@ -609,7 +609,7 @@ int DbgConsole_SendDataReliable(uint8_t *ch, size_t size)
 
         if (totalLength != 0U)
         {
-            serialManagerStatus = (serial_manager_status_t)DbgConsole_Flush();
+            //serialManagerStatus = (serial_manager_status_t)DbgConsole_Flush();
             if (kStatus_SerialManager_Success != serialManagerStatus)
             {
                 break;
