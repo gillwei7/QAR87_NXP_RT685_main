@@ -563,9 +563,8 @@ void dev_BOARD_InitBootPins(void)
     PCA9422_I3C();
     AMP_I2S();
     dev_BOARD_InitBTUARTPins();
+
 }
-
-
 
 #if 0
 void dev_BOARD_InitDebugUART_TxPins(void)

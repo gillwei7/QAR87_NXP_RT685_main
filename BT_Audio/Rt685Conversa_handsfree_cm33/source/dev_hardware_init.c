@@ -401,11 +401,6 @@ void dev_BOARD_InitHardware(void)
 {
 #if 0
     DMA_Type *dmaBases[] = DMA_BASE_PTRS;
-    /* Define the init structure for the reset pin*/
-    gpio_pin_config_t reset_config = {
-        kGPIO_DigitalOutput,
-        1,
-    };
 
     dev_BOARD_InitBootPins();
     BOARD_InitBootClocks();
@@ -513,8 +508,7 @@ void dev_BOARD_InitHardware(void)
     CRYPTO_InitHardware();
 #endif /* CONFIG_BT_SMP */
 #else  // gill if 0 for pmic test
-		//    /* Use 16 MHz clock for the FLEXCOMM15 */
-		//    CLOCK_AttachClk(kSFRO_to_FLEXCOMM15);
+    DMA_Type *dmaBases[] = DMA_BASE_PTRS;
 
 		    /* Attach main clock to I3C, 500MHz / 20 = 25Hz. */
 		    CLOCK_AttachClk(kMAIN_CLK_to_I3C_CLK);
@@ -535,6 +529,99 @@ void dev_BOARD_InitHardware(void)
 		    dev_BOARD_InitBootPins();
 		    BOARD_InitBootClocks();
 		    BOARD_InitDebugConsole();
+
+			PRINTF("RT685 MCU: start\r\n");
+
+		#if EnableConversa==1
+
+			PRINTF("\r\n");
+			PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
+			PRINTF("RT685 MCU: ------------ McuVer 0.1.2 ------------ \r\n");
+			PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
+
+			PRINTF("\r\n");
+			PRINTF("RT685 MCU: size of shared memory structure is %d \r\n", sizeof(VarBlockSharedByDspAndMcu));
+
+			KIN1_InitCycleCounter(); /* enable DWT hardware */
+			KIN1_ResetCycleCounter(); /* reset cycle counter */
+			KIN1_EnableCycleCounter(); /* start counting */
+
+			PRINTF("RT685 MCU: Test get cycle counter without Jlink\r\n");
+			TestGetCycCnt();		//can be closed after debug
+
+			InitDbgPin();
+			OpeningBlink(3);
+
+			#if EnableUsbComAndAudio==1
+				#if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
+					/* attach AUDIO PLL clock to SCTimer input7. */
+					CLOCK_AttachClk(kAUDIO_PLL_to_SCT_CLK);
+					CLOCK_SetClkDiv(kCLOCK_DivSctClk, 1);
+
+					g_composite.audioUnified.curAudioPllFrac = CLKCTL1->AUDIOPLL0NUM;		//starting value is 5040
+					g_composite.audioUnified.curAudioPllFrac_starting = CLKCTL1->AUDIOPLL0NUM;
+				#endif
+				UsbAppInit();
+			#endif
+
+			//boot DSP and handshake with DSP
+			#if 1	//folding
+				PRINTF("RT685 MCU: Booting DSP\r\n");
+				/* Clear MUA reset before run DSP core */
+				RESET_PeripheralReset(kMU_RST_SHIFT_RSTn);
+
+				//INPUTMUX_Init(INPUTMUX);
+				//INPUTMUX_AttachSignal(INPUTMUX, 1U, kINPUTMUX_MuBToDspInterrupt);
+				//INPUTMUX_Deinit(INPUTMUX);
+
+				/* Clear SEMA42 reset */
+				RESET_PeripheralReset(kSEMA_RST_SHIFT_RSTn);
+
+				/* Clear MUA reset */
+				RESET_PeripheralReset(kMU_RST_SHIFT_RSTn);
+
+				/* SEMA42 init */
+				SEMA42_Init(APP_SEMA42);
+				/* Reset the sema42 gate */
+				SEMA42_ResetAllGates(APP_SEMA42);
+				domainId = APP_GetMCoreDomainID();
+
+
+				MU_Init(APP_MU);
+				EnableIRQ(MU_A_IRQn);
+
+				/* Enable transmit and receive interrupt */
+				MU_EnableInterrupts(APP_MU, kMU_Rx0FullInterruptEnable);
+
+				PRINTF("RT685 MCU: Waiting for DSP handshake\r\n");
+				/* Initialize PMIC PCA9420 */
+				 //BOARD_InitPmic(); //gill original on BOARD_DSP_Init();
+				/* Configure PMIC Vddcore value according to main/dsp clock. */
+				//BOARD_SetPmicVoltageForFreq(kPartTemp_N20C_P85C, CLOCK_GetMainClkFreq(), 600000000U);
+
+				BOARD_DSP_Init();
+
+				/* Wait DSP core is Boot Up */
+				while (BOOT_FLAG != MU_GetFlags(APP_MU))
+				{
+					delay_ms(1);
+				};
+
+				memset(&VarBlockSharedByDspAndMcu, 0, sizeof(VarBlockSharedByDspAndMcu));
+
+				VarBlockSharedByDspAndMcu.U32ControlPara[10]=0x1234abcd;		//a flag for DSP side to check
+
+				MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, (U32)&VarBlockSharedByDspAndMcu);
+
+				SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
+			    BOARD_InitDebugConsole();		//not sure --- conflict with DSP init debug console --- earlier prints can not be displayed
+				PRINTF("RT685 MCU: DSP handshake is received\r\n");
+				SEMA42_Unlock(APP_SEMA42, SEMA42_GATE);
+			#endif
+
+		#endif
+		    DMA_Init(dmaBases[EXAMPLE_DMA_INSTANCE]);
+
 #if (((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP)))
 		    CRYPTO_InitHardware();
 #endif
