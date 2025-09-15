@@ -17,6 +17,7 @@
 #include "bq256xx_charger.h"
 #include "glf70583.h"
 #include "aw88166.h"
+#include "glf70302.h"
 
 #include "fsl_dma.h"
 #include "fsl_i2s.h"
@@ -27,7 +28,7 @@
  ******************************************************************************/
 #define PCA9420_LAST_REG (PCA9420_MODECFG_3_3)
 
-
+#define GAUGE_ENABLE 1
 #define LED_ENABLE 1
 #define PMIC_PCA9422_ENABLE 1
 #define TOUCH_ENABLE 1
@@ -325,6 +326,29 @@ int main(void)
 
 #endif
 
+#if GAUGE_ENABLE
+
+    uint8_t soc = 0;
+    uint16_t voltage = 0;
+    int16_t current = 0;
+    int8_t temperature = 0;
+
+    glf70302_set_soc_host(75);
+    glf70302_enable_host_soc();
+
+    glf70302_read_soc(&soc);
+    PRINTF("目前電量: %d%%\r\n", soc);
+
+    glf70302_read_voltage(&voltage);
+    PRINTF("電池電壓: %dmV\r\n", voltage);
+
+    glf70302_read_current(&current);
+    PRINTF("電池電流: %dmA\r\n", current);
+
+    glf70302_read_temperature(&temperature);
+    PRINTF("電池溫度: %d°C\r\n", temperature);
+
+#endif
 
     while(1)
     {
