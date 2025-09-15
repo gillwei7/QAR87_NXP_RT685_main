@@ -30,6 +30,8 @@
 #define USE_EVENT 1
 #define USE_SEMAPHORE 0
 
+#define SCAN_I2C_ADDRESS_ENABLE 1
+
 /*======<SPI>=======*/
 #define FIXED_BUFFER_SIZE (4)
 #define NUM_FRAMES (3)
@@ -566,9 +568,30 @@ static void spi_task(void *pvParameters)
     }
 }
 
+static void Scan_I2C_Devices(I3C_Type *base)
+{
+    uint8_t dummyData = 0x00;
+    status_t result;
+
+    PRINTF("[I2C]Scanning I2C addresses...\n");
+
+    for (uint8_t addr = 0x08; addr <= 0x77; addr++) // I2C valid 7-bit address range
+    {
+        result = BOARD_I3C_Send(base, addr, 0x00, 0, &dummyData, 0);
+
+        if (result == kStatus_Success)
+        {
+        	PRINTF("[I2C]Device found at 0x%02X\n", addr);
+        }
+    }
+
+    PRINTF("[I2C]Scan complete.\n");
+}
+
 int main(void)
 {
     BOARD_InitHardware();
+    BOARD_I3C_Init(BOARD_PMIC_I3C_BASEADDR, BOARD_PMIC_I3C_CLOCK_FREQ);
 
 #if USE_EVENT
     spi_event_group = xEventGroupCreate();
@@ -587,6 +610,11 @@ int main(void)
         while (1);
     }
 #endif
+
+#if SCAN_I2C_ADDRESS_ENABLE
+    Scan_I2C_Devices(BOARD_PMIC_I3C_BASEADDR);
+#endif
+
 
     /* Init GPIO */
     GPIO_PortInit(GPIO, 0);

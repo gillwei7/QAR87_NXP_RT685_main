@@ -465,6 +465,59 @@ void BOARD_EnterDeepPowerDown(const uint32_t exclude_from_pd[4])
     BOARD_RestoreDeepSleepPinConfig();
 }
 
+void BOARD_I3C_Init(I3C_Type *base, uint32_t clkSrc_Hz)
+{
+    i3c_master_config_t i3cConfig;
+
+    I3C_MasterGetDefaultConfig(&i3cConfig);
+    I3C_MasterInit(base, &i3cConfig, clkSrc_Hz);
+}
+
+status_t BOARD_I3C_Send(I3C_Type *base,
+                        uint8_t deviceAddress,
+                        uint32_t subAddress,
+                        uint8_t subaddressSize,
+                        uint8_t *txBuff,
+                        uint8_t txBuffSize)
+{
+    i3c_master_transfer_t masterXfer;
+    /* Prepare transfer structure. */
+    masterXfer.slaveAddress   = deviceAddress;
+    masterXfer.direction      = kI3C_Write;
+    masterXfer.busType        = kI3C_TypeI2C;
+    masterXfer.subaddress     = subAddress;
+    masterXfer.subaddressSize = subaddressSize;
+    masterXfer.data           = txBuff;
+    masterXfer.dataSize       = txBuffSize;
+    masterXfer.flags          = kI3C_TransferDefaultFlag;
+    masterXfer.busType        = kI3C_TypeI2C;
+
+    return I3C_MasterTransferBlocking(base, &masterXfer);
+}
+
+status_t BOARD_I3C_Receive(I3C_Type *base,
+                           uint8_t deviceAddress,
+                           uint32_t subAddress,
+                           uint8_t subaddressSize,
+                           uint8_t *rxBuff,
+                           uint8_t rxBuffSize)
+{
+    i3c_master_transfer_t masterXfer;
+
+    /* Prepare transfer structure. */
+    masterXfer.slaveAddress   = deviceAddress;
+    masterXfer.subaddress     = subAddress;
+    masterXfer.subaddressSize = subaddressSize;
+    masterXfer.data           = rxBuff;
+    masterXfer.dataSize       = rxBuffSize;
+    masterXfer.direction      = kI3C_Read;
+    masterXfer.busType        = kI3C_TypeI2C;
+    masterXfer.flags          = kI3C_TransferDefaultFlag;
+    masterXfer.busType        = kI3C_TypeI2C;
+
+    return I3C_MasterTransferBlocking(base, &masterXfer);
+}
+
 #if defined(SDK_I2C_BASED_COMPONENT_USED) && SDK_I2C_BASED_COMPONENT_USED
 void BOARD_I2C_Init(I2C_Type *base, uint32_t clkSrc_Hz)
 {

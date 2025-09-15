@@ -113,6 +113,42 @@ void BOARD_InitBootPins(void);
  */
 void BOARD_InitPins(void); /* Function assigned for the Cortex-M33 */
 
+#define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
+#define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
+#define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
+#define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
+#define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
+#define IOPCTL_PIO_PSEDRAIN_DI 0x00u      /*!<@brief Pseudo Output Drain is disabled */
+#define IOPCTL_PIO_PULLDOWN_EN 0x00u      /*!<@brief Enable pull-down function */
+#define IOPCTL_PIO_PUPD_DI 0x00u          /*!<@brief Disable pull-up / pull-down function */
+#define IOPCTL_PIO_SLEW_RATE_NORMAL 0x00u /*!<@brief Normal mode */
+
+/*! @name I3C0_SCL (coord N17), J18[1]/U110[13]
+  @{ */
+/* Routed pin properties */
+#define BOARD_I3C_I3C_ICM_SCL_PERIPHERAL I3C            /*!<@brief Peripheral name */
+#define BOARD_I3C_I3C_ICM_SCL_SIGNAL SCL                /*!<@brief Signal name */
+#define BOARD_I3C_I3C_ICM_SCL_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_I3C_I3C_ICM_SCL_PIN 29U                   /*!<@brief PORT pin number */
+#define BOARD_I3C_I3C_ICM_SCL_PIN_MASK (1U << 29U)      /*!<@brief PORT pin mask */
+                                                        /* @} */
+
+/*! @name I3C0_SDA (coord P16), J18[2]/U110[14]
+  @{ */
+/* Routed pin properties */
+#define BOARD_I3C_I3C_ICM_SDA_PERIPHERAL I3C            /*!<@brief Peripheral name */
+#define BOARD_I3C_I3C_ICM_SDA_SIGNAL SDA                /*!<@brief Signal name */
+#define BOARD_I3C_I3C_ICM_SDA_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_I3C_I3C_ICM_SDA_PIN 30U                   /*!<@brief PORT pin number */
+#define BOARD_I3C_I3C_ICM_SDA_PIN_MASK (1U << 30U)      /*!<@brief PORT pin mask */
+                                                        /* @} */
+
+/*!
+ * @brief Configures pin routing and optionally pin electrical features.
+ *
+ */
+void Board_I3C(void); /* Function assigned for the Cortex-M33 */
+
 #if defined(__cplusplus)
 }
 #endif

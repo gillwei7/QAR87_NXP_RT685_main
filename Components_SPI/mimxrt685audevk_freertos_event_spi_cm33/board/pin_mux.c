@@ -32,6 +32,7 @@ pin_labels:
 void BOARD_InitBootPins(void)
 {
     BOARD_InitPins();
+    Board_I3C();
 }
 
 /* clang-format off */
@@ -231,6 +232,71 @@ void BOARD_InitPins(void)
                                         IOPCTL_PIO_INV_DI);
     /* PORT1 PIN6 (coords: J17) is configured as FC5_CTS_SDA_SSEL0 */
     IOPCTL_PinMuxSet(IOPCTL, 1U, 6U, port1_pin6_config);
+}
+
+/* clang-format off */
+/*
+ * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************
+Board_I3C:
+- options: {callFromInitBoot: 'true', coreID: cm33, enableClock: 'true'}
+- pin_list:
+  - {pin_num: N17, peripheral: I3C, signal: SCL, pin_signal: PIO2_29/I3C0_SCL/SCT0_OUT0/CLKOUT, ibena: enabled}
+  - {pin_num: P16, peripheral: I3C, signal: SDA, pin_signal: PIO2_30/I3C0_SDA/SCT0_OUT3/CLKIN/CMP0_OUT, ibena: enabled}
+ * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
+ */
+/* clang-format on */
+
+/* FUNCTION ************************************************************************************************************
+ *
+ * Function Name : Board_I3C
+ * Description   : Configures pin routing and optionally pin electrical features.
+ *
+ * END ****************************************************************************************************************/
+/* Function assigned for the Cortex-M33 */
+void Board_I3C(void)
+{
+
+    const uint32_t I3C_ICM_SCL = (/* Pin is configured as I3C0_SCL */
+                                  IOPCTL_PIO_FUNC1 |
+                                  /* Disable pull-up / pull-down function */
+                                  IOPCTL_PIO_PUPD_DI |
+                                  /* Enable pull-down function */
+                                  IOPCTL_PIO_PULLDOWN_EN |
+                                  /* Enables input buffer function */
+                                  IOPCTL_PIO_INBUF_EN |
+                                  /* Normal mode */
+                                  IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                  /* Normal drive */
+                                  IOPCTL_PIO_FULLDRIVE_DI |
+                                  /* Analog mux is disabled */
+                                  IOPCTL_PIO_ANAMUX_DI |
+                                  /* Pseudo Output Drain is disabled */
+                                  IOPCTL_PIO_PSEDRAIN_DI |
+                                  /* Input function is not inverted */
+                                  IOPCTL_PIO_INV_DI);
+    /* PORT2 PIN29 (coords: N17) is configured as I3C0_SCL */
+    IOPCTL_PinMuxSet(IOPCTL, BOARD_I3C_I3C_ICM_SCL_PORT, BOARD_I3C_I3C_ICM_SCL_PIN, I3C_ICM_SCL);
+
+    const uint32_t I3C_ICM_SDA = (/* Pin is configured as I3C0_SDA */
+                                  IOPCTL_PIO_FUNC1 |
+                                  /* Disable pull-up / pull-down function */
+                                  IOPCTL_PIO_PUPD_DI |
+                                  /* Enable pull-down function */
+                                  IOPCTL_PIO_PULLDOWN_EN |
+                                  /* Enables input buffer function */
+                                  IOPCTL_PIO_INBUF_EN |
+                                  /* Normal mode */
+                                  IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                  /* Normal drive */
+                                  IOPCTL_PIO_FULLDRIVE_DI |
+                                  /* Analog mux is disabled */
+                                  IOPCTL_PIO_ANAMUX_DI |
+                                  /* Pseudo Output Drain is disabled */
+                                  IOPCTL_PIO_PSEDRAIN_DI |
+                                  /* Input function is not inverted */
+                                  IOPCTL_PIO_INV_DI);
+    /* PORT2 PIN30 (coords: P16) is configured as I3C0_SDA */
+    IOPCTL_PinMuxSet(IOPCTL, BOARD_I3C_I3C_ICM_SDA_PORT, BOARD_I3C_I3C_ICM_SDA_PIN, I3C_ICM_SDA);
 }
 /***********************************************************************************************************************
  * EOF

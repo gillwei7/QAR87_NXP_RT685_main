@@ -14,6 +14,7 @@
 #include "fsl_reset.h"
 #include "fsl_gpio.h"
 
+#include "fsl_i3c.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -41,6 +42,9 @@
 #ifndef BOARD_ENABLE_PSRAM_CACHE
 #define BOARD_ENABLE_PSRAM_CACHE 1
 #endif
+
+#define BOARD_PMIC_I3C_BASEADDR   I3C
+#define BOARD_PMIC_I3C_CLOCK_FREQ CLOCK_GetI3cClkFreq()
 
 #define BOARD_CODEC_I2C_BASEADDR   I2C2
 #define BOARD_CODEC_I2C_CLOCK_FREQ CLOCK_GetFlexCommClkFreq(2U)

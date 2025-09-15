@@ -104,6 +104,38 @@
                   <pin peripheral="GPIO" signal="PIO0, 29" pin_num="B10" pin_signal="PIO0_29/FC4_TXD_SCL_MISO_WS/CTIMER4_MAT1/I2S_BRIDGE_WS_OUT/SEC_PIO0_29"/>
                </pins>
             </function>
+            <function name="Board_I3C">
+               <description>Configures pin routing and optionally pin electrical features.</description>
+               <options>
+                  <callFromInitBoot>true</callFromInitBoot>
+                  <coreID>cm33</coreID>
+                  <enableClock>true</enableClock>
+               </options>
+               <dependencies>
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.common" description="Pins initialization requires the COMMON Driver in the project." problem_level="2" source="Pins:Board_I3C">
+                     <feature name="enabled" evaluation="equal" configuration="cm33">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+                  <dependency resourceType="SWComponent" resourceId="platform.drivers.lpc_iopctl" description="Pins initialization requires the LPC_IOPCTL Driver in the project." problem_level="2" source="Pins:Board_I3C">
+                     <feature name="enabled" evaluation="equal" configuration="cm33">
+                        <data>true</data>
+                     </feature>
+                  </dependency>
+               </dependencies>
+               <pins>
+                  <pin peripheral="I3C" signal="SCL" pin_num="N17" pin_signal="PIO2_29/I3C0_SCL/SCT0_OUT0/CLKOUT">
+                     <pin_features>
+                        <pin_feature name="ibena" value="enabled"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="I3C" signal="SDA" pin_num="P16" pin_signal="PIO2_30/I3C0_SDA/SCT0_OUT3/CLKIN/CMP0_OUT">
+                     <pin_features>
+                        <pin_feature name="ibena" value="enabled"/>
+                     </pin_features>
+                  </pin>
+               </pins>
+            </function>
          </functions_list>
       </pins>
       <clocks name="Clocks" version="15.0" enabled="true" update_project_code="true">

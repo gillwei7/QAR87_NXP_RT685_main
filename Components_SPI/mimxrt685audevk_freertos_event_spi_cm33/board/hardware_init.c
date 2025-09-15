@@ -15,6 +15,10 @@
 /*${function:start}*/
 void BOARD_InitHardware(void)
 {
+    /* Attach main clock to I3C, 500MHz / 20 = 25Hz. */
+    CLOCK_AttachClk(kMAIN_CLK_to_I3C_CLK);
+    CLOCK_SetClkDiv(kCLOCK_DivI3cClk, 20);
+
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
