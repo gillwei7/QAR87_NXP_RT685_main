@@ -153,8 +153,11 @@ int main(void)
     gpio_interrupt_config_t config = {kGPIO_PinIntEnableEdge, kGPIO_PinIntEnableLowOrFall};
     /* Init input switch GPIO. */
     EnableIRQ(GPIO_INTA_IRQn);
+
+    GPIO_PortInit(GPIO, GPIO0_PORT);
+    GPIO_PortInit(GPIO, GPIO1_PORT);
+
 #if TOUCH_ENABLE
-    GPIO_PortInit(GPIO, TOUCH_INT_PORT);
     GPIO_PinInit(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &sw_config);
     /* Enable GPIO pin interrupt */
     GPIO_SetPinInterruptConfig(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &config);
@@ -163,7 +166,6 @@ int main(void)
 
 #if PMIC_GLF70583_ENABLE
     /* Init GPIO */
-    GPIO_PortInit(GPIO, PWR_SW1_PORT);
     gpio_pin_config_t output_int_config = {kGPIO_DigitalOutput, 0,};
     GPIO_PinInit(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, &output_int_config);
     GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 0);
@@ -171,7 +173,6 @@ int main(void)
 #endif
 
 #if CHARGER_ENABLE
-    GPIO_PortInit(GPIO, CHARG_INT_PORT);
     GPIO_PinInit(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, &sw_config);
     /* Enable GPIO pin interrupt */
     GPIO_SetPinInterruptConfig(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, &config);
@@ -184,7 +185,6 @@ int main(void)
             kGPIO_DigitalOutput,
             1,
         };
-	GPIO_PortInit(GPIO, AMP_RESET_PORT);
 	GPIO_PinInit(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, &amp_config);
 #endif
 
