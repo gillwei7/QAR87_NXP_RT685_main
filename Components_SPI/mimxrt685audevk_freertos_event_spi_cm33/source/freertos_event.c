@@ -21,6 +21,7 @@
 #include "app.h"
 #include "pmic_support.h"
 #include "pmic_pca9422.h"
+#include "glf70583.h"
 
 #include "fsl_spi.h"
 #include <string.h>
@@ -619,10 +620,15 @@ int main(void)
 
 
     /* Init GPIO */
-    GPIO_PortInit(GPIO, 0);
+    //GPIO_PortInit(GPIO, 0);
+    GPIO_PortInit(GPIO, GPIO0_PORT);
     gpio_pin_config_t output_int_config = {kGPIO_DigitalOutput, 0,};
     GPIO_PinInit(GPIO, 0, 29, &output_int_config);
     GPIO_PinWrite(GPIO, 0, 29, 0);  // 預設為低位
+
+    GPIO_PinInit(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, &output_int_config);
+    GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 0);
+    GPIO_PinInit(GPIO, RESET553_N_PORT, RESET553_N_PIN, &output_int_config);
 
     /* Init PCA9422 PMIC. */
  	BOARD_InitPmic();
@@ -639,6 +645,39 @@ int main(void)
 
     NVIC_SetPriority(EXAMPLE_SPI_SLAVE_IRQ, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
     EnableIRQ(EXAMPLE_SPI_SLAVE_IRQ);
+
+    /* ======================PMIC PCA9422================== */
+	uint8_t top_stat = 0;
+	glf70583_i2c_read(GLF70583_A_I2C_ADDR,0x00,&top_stat,1);
+	PRINTF("[GLF70583]top_stat:%X \n",top_stat);
+
+	//Solution: The manufacturer did not set it to LOAD SWITCH
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0xF5, 0xC6);
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB8);
+	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB9);
+
+	// BUCK1 Delay 4ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x66, 0x0C);
+	// BUCK2 Delay 2ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x67, 0x08);
+	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x67, 0x08);
+	// BUCK3 Delay 0ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x68, 0x00);
+	// LDO1 Delay 5ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x6A, 0x12);
+	// 0x25->BUCK4、LDO2 off
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x26, 0xE8);
+	// 0x26->BUCK2 ON、Others off
+	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);
+
+	//uint8_t ch = GETCHAR();
+	PRINTF("GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); \n");
+	GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); //Enable GLF70583
+
+	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
+	PRINTF("GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1); \n");
+	GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1);
 
     /* create tasks */
     if (xTaskCreate(console_task, "CONSOLE", configMINIMAL_STACK_SIZE + 500, NULL,

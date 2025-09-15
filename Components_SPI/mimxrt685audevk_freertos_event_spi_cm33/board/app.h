@@ -30,6 +30,14 @@
 
 #define USE_DEV_BOARD 1
 
+#define GPIO0_PORT 0U
+#define GPIO1_PORT 1U
+
+#define PWR_SW1_PORT 0U		//NT98532 POWER ON
+#define PWR_SW1_PIN  6U
+#define RESET553_N_PORT 0U
+#define RESET553_N_PIN  27U
+
 /*${macro:end}*/
 
 /*******************************************************************************
