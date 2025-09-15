@@ -302,5 +302,24 @@ status_t BOARD_PMIC_I2C_Send(
 status_t BOARD_PMIC_I2C_Receive(
 	uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize);
 
+status_t BOARD_PMIC_I2C_Send(
+	uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, const uint8_t *txBuff, uint8_t txBuffSize);
+status_t BOARD_PMIC_I2C_Receive(
+	uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize);
 
+status_t BOARD_I3C_Send(I3C_Type *base,
+                        uint8_t deviceAddress,
+                        uint32_t subAddress,
+                        uint8_t subaddressSize,
+                        uint8_t *txBuff,
+                        uint8_t txBuffSize);
+
+status_t BOARD_I3C_Receive(I3C_Type *base,
+                           uint8_t deviceAddress,
+                           uint32_t subAddress,
+                           uint8_t subaddressSize,
+                           uint8_t *rxBuff,
+                           uint8_t rxBuffSize);
+
+void BOARD_I3C_Init(I3C_Type *base, uint32_t clkSrc_Hz);
 #endif /* _BOARD_H_ */

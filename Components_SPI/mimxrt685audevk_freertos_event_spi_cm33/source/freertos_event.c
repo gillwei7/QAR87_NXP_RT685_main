@@ -19,6 +19,8 @@
 #include "fsl_debug_console.h"
 #include "board.h"
 #include "app.h"
+#include "pmic_support.h"
+#include "pmic_pca9422.h"
 
 #include "fsl_spi.h"
 #include <string.h>
