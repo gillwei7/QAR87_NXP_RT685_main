@@ -53,45 +53,6 @@ extern "C" {
 #define IOPCTL_PIO_PUPD_EN 0x10u          /*!<@brief Enable pull-up / pull-down function */
 #define IOPCTL_PIO_SLEW_RATE_NORMAL 0x00u /*!<@brief Normal mode */
 
-/*! @name I3C0_SCL (coord N17), J18[1]/U8[2]/U17[A6]/SCL_CODEC
-  @{ */
-/* Routed pin properties */
-/*!
- * @brief Peripheral name */
-#define BOARD_INITI3CPINS_I3C0_SCL_PERIPHERAL I3C
-/*!
- * @brief Signal name */
-#define BOARD_INITI3CPINS_I3C0_SCL_SIGNAL SCL
-/*!
- * @brief PORT peripheral base pointer */
-#define BOARD_INITI3CPINS_I3C0_SCL_PORT 2U
-/*!
- * @brief PORT pin number */
-#define BOARD_INITI3CPINS_I3C0_SCL_PIN 29U
-/*!
- * @brief PORT pin mask */
-#define BOARD_INITI3CPINS_I3C0_SCL_PIN_MASK (1U << 29U)
-/* @} */
-
-/*! @name I3C0_SDA (coord P16), J18[2]/U8[3]/U17[B6]/SDA_CODEC
-  @{ */
-/* Routed pin properties */
-/*!
- * @brief Peripheral name */
-#define BOARD_INITI3CPINS_I3C0_SDA_PERIPHERAL I3C
-/*!
- * @brief Signal name */
-#define BOARD_INITI3CPINS_I3C0_SDA_SIGNAL SDA
-/*!
- * @brief PORT peripheral base pointer */
-#define BOARD_INITI3CPINS_I3C0_SDA_PORT 2U
-/*!
- * @brief PORT pin number */
-#define BOARD_INITI3CPINS_I3C0_SDA_PIN 30U
-/*!
- * @brief PORT pin mask */
-#define BOARD_INITI3CPINS_I3C0_SDA_PIN_MASK (1U << 30U)
-/* @} */
 
 // gill modify to QSPI_A
 /*! @name FLEXSPI0A_DATA0 (coord L2), U19[D3]
@@ -438,6 +399,74 @@ void AMP_I2S(void); /* Function assigned for the Cortex-M33 */
 #define PWR_SW1_PIN  6U
 
 #endif
+
+/*! @name PDM_CLK01 (coord R1), U40[4]/U41[4]/PDM_CLK01_OnBoard
+  @{ */
+/* Routed pin properties */
+/*!
+ * @brief Peripheral name */
+#define BOARD_INITDMICPINS_PDM_CLK01_PERIPHERAL DMIC0
+/*!
+ * @brief Signal name */
+#define BOARD_INITDMICPINS_PDM_CLK01_SIGNAL CLK
+/*!
+ * @brief Signal channel */
+#define BOARD_INITDMICPINS_PDM_CLK01_CHANNEL 0_1
+/*!
+ * @brief PORT peripheral base pointer */
+#define BOARD_INITDMICPINS_PDM_CLK01_PORT 2U
+/*!
+ * @brief PORT pin number */
+#define BOARD_INITDMICPINS_PDM_CLK01_PIN 16U
+/*!
+ * @brief PORT pin mask */
+#define BOARD_INITDMICPINS_PDM_CLK01_PIN_MASK (1U << 16U)
+/* @} */
+
+/*! @name PDM_DATA01 (coord U2), U40[1]/U41[1]/PDM_DATA01_OnBoard
+  @{ */
+/* Routed pin properties */
+/*!
+ * @brief Peripheral name */
+#define BOARD_INITDMICPINS_PDM_DATA01_PERIPHERAL DMIC0
+/*!
+ * @brief Signal name */
+#define BOARD_INITDMICPINS_PDM_DATA01_SIGNAL DATA
+/*!
+ * @brief Signal channel */
+#define BOARD_INITDMICPINS_PDM_DATA01_CHANNEL 0_1
+/*!
+ * @brief PORT peripheral base pointer */
+#define BOARD_INITDMICPINS_PDM_DATA01_PORT 2U
+/*!
+ * @brief PORT pin number */
+#define BOARD_INITDMICPINS_PDM_DATA01_PIN 20U
+/*!
+ * @brief PORT pin mask */
+#define BOARD_INITDMICPINS_PDM_DATA01_PIN_MASK (1U << 20U)
+/* @} */
+
+/*! @name PDM_DATA23 (coord R3), J31[6]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITDMICPINS_PDM_DATA23_PERIPHERAL DMIC0          /*!<@brief Peripheral name */
+#define BOARD_INITDMICPINS_PDM_DATA23_SIGNAL DATA               /*!<@brief Signal name */
+#define BOARD_INITDMICPINS_PDM_DATA23_CHANNEL 2_3               /*!<@brief Signal channel */
+#define BOARD_INITDMICPINS_PDM_DATA23_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITDMICPINS_PDM_DATA23_PIN 21U                   /*!<@brief PORT pin number */
+#define BOARD_INITDMICPINS_PDM_DATA23_PIN_MASK (1U << 21U)      /*!<@brief PORT pin mask */
+                                                                /* @} */
+
+/*! @name PDM_CLK23 (coord U1), U19[D5]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITDMICPINS_PDM_CLK23_PERIPHERAL DMIC0          /*!<@brief Peripheral name */
+#define BOARD_INITDMICPINS_PDM_CLK23_SIGNAL CLK                /*!<@brief Signal name */
+#define BOARD_INITDMICPINS_PDM_CLK23_CHANNEL 2_3               /*!<@brief Signal channel */
+#define BOARD_INITDMICPINS_PDM_CLK23_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITDMICPINS_PDM_CLK23_PIN 17U                   /*!<@brief PORT pin number */
+#define BOARD_INITDMICPINS_PDM_CLK23_PIN_MASK (1U << 17U)      /*!<@brief PORT pin mask */
+                                                                   /* @} */
 
 #if defined(__cplusplus)
 }

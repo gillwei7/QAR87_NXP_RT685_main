@@ -594,10 +594,6 @@ void dev_BOARD_InitHardware(void)
 				MU_EnableInterrupts(APP_MU, kMU_Rx0FullInterruptEnable);
 
 				PRINTF("RT685 MCU: Waiting for DSP handshake\r\n");
-				/* Initialize PMIC PCA9420 */
-				 //BOARD_InitPmic(); //gill original on BOARD_DSP_Init();
-				/* Configure PMIC Vddcore value according to main/dsp clock. */
-				//BOARD_SetPmicVoltageForFreq(kPartTemp_N20C_P85C, CLOCK_GetMainClkFreq(), 600000000U);
 
 				BOARD_DSP_Init();
 
