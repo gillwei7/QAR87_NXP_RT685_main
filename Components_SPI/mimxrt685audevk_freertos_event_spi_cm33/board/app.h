@@ -27,6 +27,9 @@
 #define APP_SW_CONNECTED_LEVEL   0U
 #define APP_SW_NAME              "SW2"
 
+
+#define USE_DEV_BOARD 1
+
 /*${macro:end}*/
 
 /*******************************************************************************
