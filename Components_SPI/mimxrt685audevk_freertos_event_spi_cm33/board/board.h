@@ -285,4 +285,10 @@ status_t BOARD_Accel_I2C_Receive(
 }
 #endif /* __cplusplus */
 
+status_t BOARD_PMIC_I2C_Send(
+	uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, const uint8_t *txBuff, uint8_t txBuffSize);
+status_t BOARD_PMIC_I2C_Receive(
+	uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize);
+
+
 #endif /* _BOARD_H_ */

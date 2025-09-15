@@ -622,6 +622,13 @@ int main(void)
     GPIO_PinInit(GPIO, 0, 29, &output_int_config);
     GPIO_PinWrite(GPIO, 0, 29, 0);  // 預設為低位
 
+    /* Init PCA9422 PMIC. */
+ 	BOARD_InitPmic();
+ 	PRINTF("-------------- PCA9422 BOARD_InitPmic OK--------------\r\n");
+ 	/* Apply PMIC mode and voltage settings */
+ 	BOARD_Init_PMICConfigure();
+ 	PRINTF("-------------- PCA9422 BOARD_Init_PMICConfigure OK--------------\r\n");
+
     /* init SPI peripheral */
     spi_slave_config_t slave_config = {0};
     SPI_SlaveGetDefaultConfig(&slave_config);

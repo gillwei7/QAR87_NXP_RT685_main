@@ -234,7 +234,9 @@ typedef struct _power_pad_vrange
     uint32_t Vdde0Range : 2; /*!< VDDE0 voltage range for VDDIO_0. @ref power_pad_vrange_val_t */
     uint32_t Vdde1Range : 2; /*!< VDDE1 voltage range for VDDIO_1. @ref power_pad_vrange_val_t */
     uint32_t Vdde2Range : 2; /*!< VDDE2 voltage range for VDDIO_2. @ref power_pad_vrange_val_t */
-    uint32_t : 26;           /*!< Reserved. */
+    uint32_t Vdde3Range : 2; /*!< VDDE3 voltage range for VDDIO_3. @ref power_pad_vrange_val_t */
+    uint32_t Vdde4Range : 2; /*!< VDDE4 voltage range for VDDIO_4. @ref power_pad_vrange_val_t */
+    uint32_t : 22;           /*!< Reserved. */
 } power_pad_vrange_t;
 
 /*!

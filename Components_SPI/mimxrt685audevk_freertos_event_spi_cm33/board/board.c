@@ -518,6 +518,23 @@ status_t BOARD_I3C_Receive(I3C_Type *base,
     return I3C_MasterTransferBlocking(base, &masterXfer);
 }
 
+status_t BOARD_PMIC_I2C_Send(
+    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, const uint8_t *txBuff, uint8_t txBuffSize)
+{
+//    return BOARD_I2C_Send(BOARD_PMIC_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, (uint8_t *)txBuff,
+//                          txBuffSize);
+	  return BOARD_I3C_Send(BOARD_PMIC_I3C_BASEADDR, deviceAddress, subAddress, subAddressSize, (uint8_t *)txBuff,
+	                          txBuffSize);
+}
+
+status_t BOARD_PMIC_I2C_Receive(
+    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize)
+{
+//    return BOARD_I2C_Receive(BOARD_PMIC_I2C_BASEADDR, deviceAddress, subAddress, subAddressSize, rxBuff, rxBuffSize);
+    return BOARD_I3C_Receive(BOARD_PMIC_I3C_BASEADDR, deviceAddress, subAddress, subAddressSize, rxBuff, rxBuffSize);
+
+}
+
 #if defined(SDK_I2C_BASED_COMPONENT_USED) && SDK_I2C_BASED_COMPONENT_USED
 void BOARD_I2C_Init(I2C_Type *base, uint32_t clkSrc_Hz)
 {
