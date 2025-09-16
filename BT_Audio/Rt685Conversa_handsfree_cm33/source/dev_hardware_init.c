@@ -508,6 +508,7 @@ void dev_BOARD_InitHardware(void)
     CRYPTO_InitHardware();
 #endif /* CONFIG_BT_SMP */
 #else  // gill if 0 for pmic test
+#if !DMIC_TO_NOVATEK
     DMA_Type *dmaBases[] = DMA_BASE_PTRS;
 
 		    /* Attach main clock to I3C, 500MHz / 20 = 25Hz. */
@@ -621,8 +622,9 @@ void dev_BOARD_InitHardware(void)
 #if (((defined(CONFIG_BT_SMP)) && (CONFIG_BT_SMP)))
 		    CRYPTO_InitHardware();
 #endif
-
+#endif // DMIC_TO_NOVATEK
 #endif // gill if 0 for pmic test
+
 }
 
 
