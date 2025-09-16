@@ -593,24 +593,6 @@ status_t BOARD_PMIC_I2C_Receive(
 
 }
 
-void BOARD_Accel_I2C_Init(void)
-{
-    BOARD_I2C_Init(BOARD_ACCEL_I2C_BASEADDR, BOARD_ACCEL_I2C_CLOCK_FREQ);
-}
-
-status_t BOARD_Accel_I2C_Send(uint8_t deviceAddress, uint32_t subAddress, uint8_t subaddressSize, uint32_t txBuff)
-{
-    uint8_t data = (uint8_t)txBuff;
-
-    return BOARD_I2C_Send(BOARD_ACCEL_I2C_BASEADDR, deviceAddress, subAddress, subaddressSize, &data, 1);
-}
-
-status_t BOARD_Accel_I2C_Receive(
-    uint8_t deviceAddress, uint32_t subAddress, uint8_t subaddressSize, uint8_t *rxBuff, uint8_t rxBuffSize)
-{
-    return BOARD_I2C_Receive(BOARD_ACCEL_I2C_BASEADDR, deviceAddress, subAddress, subaddressSize, rxBuff, rxBuffSize);
-}
-
 
 void BOARD_I3C_Init(I3C_Type *base, uint32_t clkSrc_Hz)
 {

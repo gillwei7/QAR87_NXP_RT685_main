@@ -9,13 +9,11 @@
 #include <stdlib.h>
 
 #include "arm_math.h"
-#include "pin_mux.h"
 #include "fsl_device_registers.h"
 #include "clock_config.h"
 #include "board.h"
 #include "fsl_debug_console.h"
 #include "fsl_gpio.h"
-#include "pin_mux.h"
 #include "fsl_iopctl.h"
 #include "GlobalDef.h"
 

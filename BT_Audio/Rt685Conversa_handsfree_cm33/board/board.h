@@ -7,6 +7,7 @@
 #ifndef _BOARD_H_
 #define _BOARD_H_
 
+#include "qar87_config.h"
 #include "clock_config.h"
 #include "fsl_common.h"
 #include "fsl_reset.h"
@@ -18,7 +19,7 @@
 /*! @brief The board name */
 #define BOARD_NAME      "MIMXRT685-EVK"
 #define BOARD_I3C_CODEC (1)
-#if 0
+#if !PIN_CONFIG_DEV_BOARD
 /*! @brief The UART to use for debug messages. */
 #define BOARD_DEBUG_UART_TYPE     kSerialPort_Uart
 #define BOARD_DEBUG_UART_BASEADDR (uint32_t) USART0
@@ -54,7 +55,7 @@
 #ifndef BOARD_ENABLE_PSRAM_CACHE
 #define BOARD_ENABLE_PSRAM_CACHE 1
 #endif
-#if 0
+#if !PIN_CONFIG_DEV_BOARD
 #if BOARD_I3C_CODEC && (defined(SDK_I3C_BASED_COMPONENT_USED) && SDK_I3C_BASED_COMPONENT_USED)
 #define BOARD_CODEC_I2C_BASEADDR   I3C
 #define BOARD_CODEC_I2C_CLOCK_FREQ CLOCK_GetI3cClkFreq()
@@ -74,19 +75,12 @@
 #define BOARD_CODEC_I2C_CLOCK_FREQ CLOCK_GetFlexCommClkFreq(2U)
 #define BOARD_CODEC_I2C_INSTANCE   2
 
-//#define BOARD_PMIC_I2C_BASEADDR   I2C15
-//#define BOARD_PMIC_I2C_CLOCK_FREQ CLOCK_GetFlexCommClkFreq(15U)
-
 #define BOARD_PMIC_I3C_BASEADDR   I3C
 #define BOARD_PMIC_I3C_CLOCK_FREQ CLOCK_GetI3cClkFreq()
 
 #define BOARD_PMIC_I2C_BASEADDR   I2C4
 #define BOARD_PMIC_I2C_CLOCK_FREQ CLOCK_GetFlexCommClkFreq(4U)
 #endif
-
-#define BOARD_ACCEL_I2C_BASEADDR   I2C2
-#define BOARD_ACCEL_I2C_ADDR       0x1E
-#define BOARD_ACCEL_I2C_CLOCK_FREQ CLOCK_GetFlexCommClkFreq(2U)
 
 /* Board led color mapping */
 #define LOGIC_LED_ON  1U

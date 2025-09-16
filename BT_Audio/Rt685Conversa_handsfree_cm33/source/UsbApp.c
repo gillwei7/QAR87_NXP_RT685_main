@@ -40,7 +40,6 @@
 #include "usb_phy.h"
 #endif
 
-#include "pin_mux.h"
 #include "fsl_i2c.h"
 #include "fsl_i2s.h"
 #include "fsl_i2s_dma.h"

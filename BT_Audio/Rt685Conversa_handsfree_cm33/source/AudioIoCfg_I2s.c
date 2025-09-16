@@ -1,7 +1,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "pin_mux.h"
 #include "board.h"
 #include "fsl_debug_console.h"
 #include "fsl_device_registers.h"
