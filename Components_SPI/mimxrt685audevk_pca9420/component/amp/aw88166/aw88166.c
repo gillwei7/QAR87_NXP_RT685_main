@@ -47,7 +47,8 @@ static status_t aw_dev0_i2c_read_func(uint16_t dev_addr, uint8_t reg_addr,
 
 static void aw_dev0_reset_gpio_ctl(bool State)
 {
-    GPIO_PinWrite(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, State ? 1U : 0U);
+    //GPIO_PinWrite(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, State ? 1U : 0U);
+	GPIO_PinWrite(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, 1U);
 }
 
 extern int aw883xx_pid_2066_dev_init(void *aw883xx);

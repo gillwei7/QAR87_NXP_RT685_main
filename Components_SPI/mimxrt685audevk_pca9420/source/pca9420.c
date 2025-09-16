@@ -34,7 +34,7 @@
 #define TOUCH_ENABLE 1
 #define CHARGER_ENABLE 1
 #define PMIC_GLF70583_ENABLE 1
-#define AMP_ENABLE 0
+#define AMP_ENABLE 1
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -69,6 +69,7 @@ static void StopSoundPlayback(void)
     PRINTF("[I2S1]Stopping sound playback\r\n");
 
     close_aw88166_pa(AW_DEV_0);
+    close_aw88166_pa(AW_DEV_1);
 
     I2S_TransferAbortDMA(DEMO_I2S_TX, &s_TxHandle);
 
@@ -89,6 +90,7 @@ static void StartSoundPlayback(void)
     I2S_TxTransferSendDMA(DEMO_I2S_TX, &s_TxHandle, s_TxTransfer);
 
     start_aw88166_pa(AW_DEV_0, "Music");
+    start_aw88166_pa(AW_DEV_1, "Music");
 
 }
 
@@ -250,7 +252,7 @@ int main(void)
     // I2S 32bits
     s_TxConfig.dataLength  = 32;
     s_TxConfig.frameLength = 64;
-    s_TxConfig.divider     = (24576000U / 16000U / 32U / 2);//DEMO_I2S_CLOCK_DIVIDER;
+    s_TxConfig.divider     = 8;//(24576000U / 16000U / 32U / 2);//DEMO_I2S_CLOCK_DIVIDER;
     s_TxConfig.masterSlave = DEMO_I2S_TX_MODE;
 
     I2S_TxInit(DEMO_I2S_TX, &s_TxConfig);
