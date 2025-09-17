@@ -38,7 +38,6 @@
 #define BQ256XX_ITERM_MIN_uA      20000//60000
 #define BQ256XX_ITERM_MAX_uA      780000
 
-
 /* Register Map */
 #define BQ256XX_REG_INPUT_LIMIT   0x00
 #define BQ256XX_REG_PUMP_CONTROL  0x01
@@ -59,7 +58,7 @@
 #define BQ256XX_WDT_DISABLE       (0x0 << 4)
 #define BQ256XX_WDT_40S           (0x1 << 4)
 #define BQ256XX_WDT_80S           (0x2 << 4)
-#define BQ256XX_WDT_1600S         (0x3 << 4)
+#define BQ256XX_WDT_160S          (0x3 << 4)
 
 /* REG06 (CHG_CTRL2) */
 #define BQ256XX_VINDPM_MASK       0x0F        // bits[3:0]
@@ -71,8 +70,8 @@
 #define BQ256XX_ICHG_MASK         0x7F        // bits[6:0]
 
 /* REG03 (PRECHG/TERM) */
-#define BQ256XX_IPRE_MASK         0x0F        // bits[3:0]
-#define BQ256XX_ITERM_MASK        0xF0        // bits[7:4]
+#define BQ256XX_IPRE_MASK         0xF0        // bits[7:4]
+#define BQ256XX_ITERM_MASK        0x0F        // bits[3:0]
 
 /* REG04 (VBAT LIMIT) */
 #define BQ256XX_VBATREG_MASK      0xF8        // bits[7:3]
@@ -91,7 +90,7 @@ typedef struct {
     uint32_t vbatreg_uv;    // Battery regulation voltage (uV)
     uint32_t iprechg_ua;    // Pre-charge current (uA)
     uint32_t iterm_ua;      // Termination current (uA)
-    uint32_t wdt_ms;        // Watchdog timeout (0=disable, else 40s/80s/1600s)
+    uint32_t wdt_ms;        // Watchdog timeout (0=disable, else 40s/80s/160s)
 } bq256xx_cfg_t;
 
 /* Charger runtime status */

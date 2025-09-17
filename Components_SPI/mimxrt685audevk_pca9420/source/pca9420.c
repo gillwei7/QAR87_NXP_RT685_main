@@ -282,14 +282,14 @@ int main(void)
 	uint8_t ch_st,ID;
 
 	bq256xx_read_reg(BQ256XX_REG_PART_INFO,&ID,1);
-	PRINTF("BQ25618 ID:(0x%02X)\n",ID);
+	PRINTF("bq256xx ID:(0x%02X)\n",ID);
 
     // 設定充電器參數
     bq256xx_cfg_t charger_cfg = {
             .vindpm_uv = 4450000,
             .iindpm_ua = 2000000,
-            .ichg_ua = 20500,
-            .vbatreg_uv = 4005000,
+            .ichg_ua = 205000,
+            .vbatreg_uv = 4208000,//4005000,
             .iprechg_ua = 60000,
             .iterm_ua = 20000,
 //        .vindpm_uv = 4500000,
@@ -303,13 +303,34 @@ int main(void)
 
     bq_ret = bq256xx_init(&charger_cfg);
     if ( bq_ret!= kStatus_Success) {
-        PRINTF("BQ256xx init failed!,ret:%d \n",bq_ret);
+        PRINTF("bq256xx init failed!,ret:%d \n",bq_ret);
         return -1;
     }
     else{
-        PRINTF("BQ256xx initialized.OK \n");
+        PRINTF("bq256xx initialized.OK \n");
     }
 
+    bq256xx_write_reg(0x00, 0x53); // TS_IGNORE + IINDPM = 2000mA
+    bq256xx_write_reg(0x02, 0xA8); // ICHG = 800mA->0xA8
+    bq256xx_write_reg(0x03, 0x31); // IPRECHG = 60mA, ITERM = 20mA
+
+/*
+    uint8_t reg_val = 0;
+
+    for (uint8_t reg = 0x00; reg <= 0x7; reg++)
+    {
+
+        if (bq256xx_read_reg(reg, &reg_val, 1) == kStatus_Success)
+        {
+            PRINTF("[Debug][bq256xx] REG%02X = 0x%02X\r\n", reg, reg_val);
+        }
+        else
+        {
+            PRINTF("[Debug][bq256xx] Failed to read REG%02X\r\n", reg);
+        }
+
+    }
+*/
 #endif
 
 #if TOUCH_ENABLE
