@@ -17,6 +17,7 @@ pin_labels:
 - {pin_num: E1, pin_signal: PIO0_6/FC0_SSEL3/SCT0_GPI1/SCT0_OUT1/CTIMER0_MAT0/SEC_PIO0_6/ADC0_8, label: NXP_PWR_SW1}
 - {pin_num: B3, pin_signal: PIO0_27/FC3_SSEL3/SCT0_GPI7/SCT0_OUT7/CTIMER0_MAT3/SEC_PIO0_27/ADC0_11, label: AP533_RST_N}
 - {pin_num: B10, pin_signal: PIO0_29/FC4_TXD_SCL_MISO_WS/CTIMER4_MAT1/I2S_BRIDGE_WS_OUT/SEC_PIO0_29, label: 'J27[2]', identifier: Output_INT}
+- {pin_num: T2, pin_signal: PIO2_19/PDM_CLK67/FLEXSPI0B_SS0_N, label: FUN_KEY1_N, identifier: QSPI_B_CS0}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -56,6 +57,7 @@ BOARD_InitPins:
   - {pin_num: D8, peripheral: FLEXCOMM3, signal: TXD_SCL_MISO_WS, pin_signal: PIO0_22/FC3_TXD_SCL_MISO_WS/CTIMER3_MAT1/TRACEDATA(0)/SEC_PIO0_22, direction: OUTPUT}
   - {pin_num: B3, peripheral: GPIO, signal: 'PIO0, 27', pin_signal: PIO0_27/FC3_SSEL3/SCT0_GPI7/SCT0_OUT7/CTIMER0_MAT3/SEC_PIO0_27/ADC0_11}
   - {pin_num: E1, peripheral: GPIO, signal: 'PIO0, 6', pin_signal: PIO0_6/FC0_SSEL3/SCT0_GPI1/SCT0_OUT1/CTIMER0_MAT0/SEC_PIO0_6/ADC0_8}
+  - {pin_num: T2, peripheral: GPIO, signal: 'PIO2, 19', pin_signal: PIO2_19/PDM_CLK67/FLEXSPI0B_SS0_N, ibena: enabled}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -300,6 +302,27 @@ void BOARD_InitPins(void)
                                         IOPCTL_PIO_INV_DI);
     /* PORT1 PIN6 (coords: J17) is configured as FC5_CTS_SDA_SSEL0 */
     IOPCTL_PinMuxSet(IOPCTL, 1U, 6U, port1_pin6_config);
+
+    const uint32_t QSPI_B_CS0 = (/* Pin is configured as PIO2_19 */
+                                 IOPCTL_PIO_FUNC0 |
+                                 /* Disable pull-up / pull-down function */
+                                 IOPCTL_PIO_PUPD_DI |
+                                 /* Enable pull-down function */
+                                 IOPCTL_PIO_PULLDOWN_EN |
+                                 /* Enables input buffer function */
+                                 IOPCTL_PIO_INBUF_EN |
+                                 /* Normal mode */
+                                 IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                 /* Normal drive */
+                                 IOPCTL_PIO_FULLDRIVE_DI |
+                                 /* Analog mux is disabled */
+                                 IOPCTL_PIO_ANAMUX_DI |
+                                 /* Pseudo Output Drain is disabled */
+                                 IOPCTL_PIO_PSEDRAIN_DI |
+                                 /* Input function is not inverted */
+                                 IOPCTL_PIO_INV_DI);
+    /* PORT2 PIN19 (coords: T2) is configured as PIO2_19 */
+    IOPCTL_PinMuxSet(IOPCTL, BOARD_INITPINS_QSPI_B_CS0_PORT, BOARD_INITPINS_QSPI_B_CS0_PIN, QSPI_B_CS0);
 }
 
 /* clang-format off */

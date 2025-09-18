@@ -107,6 +107,21 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_Output_INT_PIN_MASK (1U << 29U)      /*!<@brief PORT pin mask */
                                                             /* @} */
 
+/*! @name PIO2_19 (coord T2), FUN_KEY1_N
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITPINS_QSPI_B_CS0_PERIPHERAL GPIO           /*!<@brief Peripheral name */
+#define BOARD_INITPINS_QSPI_B_CS0_SIGNAL PIO2               /*!<@brief Signal name */
+#define BOARD_INITPINS_QSPI_B_CS0_CHANNEL 19                /*!<@brief Signal channel */
+
+/* Symbols to be used with GPIO driver */
+#define BOARD_INITPINS_QSPI_B_CS0_GPIO GPIO                 /*!<@brief GPIO peripheral base pointer */
+#define BOARD_INITPINS_QSPI_B_CS0_GPIO_PIN_MASK (1U << 19U) /*!<@brief GPIO pin mask */
+#define BOARD_INITPINS_QSPI_B_CS0_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITPINS_QSPI_B_CS0_PIN 19U                   /*!<@brief PORT pin number */
+#define BOARD_INITPINS_QSPI_B_CS0_PIN_MASK (1U << 19U)      /*!<@brief PORT pin mask */
+                                                            /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

@@ -78,13 +78,16 @@ static uint8_t* currentSrcBuff = NULL;
 #define EVT_ALL_FRAMES_DONE (1UL << 1)
 #define EVT_PASSIVE_RX_DONE (1UL << 2)
 #define EVT_PASSIVE_NEED_INIT (1UL << 3)
+#define EVT_BUTTON_EVENT (1UL << 4)
 
+static EventGroupHandle_t button_event_group = NULL;
 static EventGroupHandle_t spi_event_group = NULL;
 static SemaphoreHandle_t spi_semaphore = NULL;
 
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
+static void button_task(void *pvParameters);
 static void console_task(void *pvParameters);
 static void spi_task(void *pvParameters);
 static void passive_handler_task(void *pvParameters);
@@ -270,12 +273,6 @@ void SPI_SLAVE_IRQHandler(void)
         portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
     }
 
-    SDK_ISR_EXIT_BARRIER;
-}
-
-void APP_GPIO_INTA_IRQHandler(void)
-{
-    GPIO_PinClearInterruptFlag(GPIO, APP_SW_PORT, APP_SW_PIN, 0);
     SDK_ISR_EXIT_BARRIER;
 }
 
@@ -571,6 +568,68 @@ static void spi_task(void *pvParameters)
     }
 }
 
+static void button_task(void *pvParameters)
+{
+    const TickType_t double_click_gap = pdMS_TO_TICKS(300);
+    const TickType_t long_press_ticks = pdMS_TO_TICKS(1000);
+
+    TickType_t last_press_time = 0;
+    TickType_t press_start_time = 0;
+
+    bool is_pressed = false;
+    bool short_press_pending = false;
+    bool double_click_detected = false;  // 雙擊旗標
+
+    while (1)
+    {
+        int pin_state = GPIO_PinRead(GPIO, FUN_KEY1_N_PORT, FUN_KEY1_N_PIN);
+        TickType_t now = xTaskGetTickCount();
+
+        if (pin_state == 0 && !is_pressed) {
+            is_pressed = true;
+
+            if ((now - last_press_time) < double_click_gap) {
+                // 雙擊偵測
+                PRINTF("[Button] Double Click detected \r\n");
+                short_press_pending = false;
+                double_click_detected = true;  // 設置雙擊旗標
+            }
+
+            last_press_time = now;
+            press_start_time = now;
+        }
+        else if (pin_state == 1 && is_pressed) {
+            is_pressed = false;
+
+            TickType_t press_duration = now - press_start_time;
+            if (press_duration >= long_press_ticks) {
+                PRINTF("[Button] Long Press detected \r\n");
+                short_press_pending = false;
+            } else {
+                if (!double_click_detected) {
+                    // 只有非雙擊時才標記短按候選
+                    short_press_pending = true;
+                    last_press_time = now;
+                }
+            }
+        }
+
+        // 短按候選超時檢查
+        if (short_press_pending && (now - last_press_time) > double_click_gap) {
+            PRINTF("[Button] Short Press detected\r\n");
+            short_press_pending = false;
+        }
+
+        // 雙擊旗標超時清除（避免下一次按下被誤認為雙擊）
+        if (double_click_detected && (now - last_press_time) > double_click_gap) {
+            double_click_detected = false;
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+
 static void Scan_I2C_Devices(I3C_Type *base)
 {
     uint8_t dummyData = 0x00;
@@ -596,6 +655,7 @@ int main(void)
     BOARD_InitHardware();
     BOARD_I3C_Init(BOARD_PMIC_I3C_BASEADDR, BOARD_PMIC_I3C_CLOCK_FREQ);
 
+    button_event_group = xEventGroupCreate();
 #if USE_EVENT
     spi_event_group = xEventGroupCreate();
     if (spi_event_group == NULL)
@@ -618,10 +678,12 @@ int main(void)
     Scan_I2C_Devices(BOARD_PMIC_I3C_BASEADDR);
 #endif
 
-
+//    NVIC_SetPriority(GPIO_INTA_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
+//    EnableIRQ(GPIO_INTA_IRQn);
     /* Init GPIO */
     //GPIO_PortInit(GPIO, 0);
     GPIO_PortInit(GPIO, GPIO0_PORT);
+    GPIO_PortInit(GPIO, GPIO2_PORT);
     gpio_pin_config_t output_int_config = {kGPIO_DigitalOutput, 0,};
     GPIO_PinInit(GPIO, 0, 29, &output_int_config);
     GPIO_PinWrite(GPIO, 0, 29, 0);  // 預設為低位
@@ -629,6 +691,15 @@ int main(void)
     GPIO_PinInit(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, &output_int_config);
     GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 0);
     GPIO_PinInit(GPIO, RESET553_N_PORT, RESET553_N_PIN, &output_int_config);
+
+    /*  Init FUN_KEY1 */
+    gpio_pin_config_t sw_config    = {kGPIO_DigitalInput, 0};
+    gpio_interrupt_config_t config_l = {kGPIO_PinIntEnableEdge, kGPIO_PinIntEnableLowOrFall};
+    gpio_interrupt_config_t config_h = {kGPIO_PinIntEnableEdge, kGPIO_PinIntEnableHighOrRise};
+    GPIO_PinInit(GPIO, FUN_KEY1_N_PORT, FUN_KEY1_N_PIN, &sw_config);
+    /* Enable GPIO pin interrupt */
+//    GPIO_SetPinInterruptConfig(GPIO, FUN_KEY1_N_PORT, FUN_KEY1_N_PIN, &config_l);
+//    GPIO_PinEnableInterrupt(GPIO, FUN_KEY1_N_PORT, FUN_KEY1_N_PIN, kGPIO_InterruptA);
 
     /* Init PCA9422 PMIC. */
  	BOARD_InitPmic();
@@ -700,6 +771,13 @@ int main(void)
         PRINTF("Task creation failed!.\r\n");
         while (1);
     }
+    if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 100, NULL, tskIDLE_PRIORITY + 3, NULL)!= pdPASS)
+    {
+        PRINTF(" BUTTON Task creation failed!.\r\n");
+        while (1);
+    }
+
+
 
     vTaskStartScheduler();
 

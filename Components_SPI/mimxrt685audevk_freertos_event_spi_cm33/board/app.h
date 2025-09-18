@@ -20,24 +20,18 @@
 #define EXAMPLE_SPI_SSEL 0
 #define EXAMPLE_SPI_SPOL kSPI_SpolActiveAllLow
 
-#define APP_SW_PORT              BOARD_SW2_GPIO_PORT
-#define APP_SW_PIN               BOARD_SW2_GPIO_PIN
-#define APP_GPIO_INTA_IRQHandler GPIO_INTA_DriverIRQHandler
-#define APP_SW_IRQ               GPIO_INTA_IRQn
-#define APP_SW_CONNECTED_LEVEL   0U
-#define APP_SW_NAME              "SW2"
-
-
 #define USE_DEV_BOARD 1
 
 #define GPIO0_PORT 0U
 #define GPIO1_PORT 1U
+#define GPIO2_PORT 2U
 
 #define PWR_SW1_PORT 0U		//NT98532 POWER ON
 #define PWR_SW1_PIN  6U
 #define RESET553_N_PORT 0U
 #define RESET553_N_PIN  27U
-
+#define FUN_KEY1_N_PORT 2U
+#define FUN_KEY1_N_PIN  19U
 /*${macro:end}*/
 
 /*******************************************************************************
