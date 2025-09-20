@@ -467,6 +467,7 @@ void AMP_I2S(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITDMICPINS_PDM_CLK23_PIN 17U                   /*!<@brief PORT pin number */
 #define BOARD_INITDMICPINS_PDM_CLK23_PIN_MASK (1U << 17U)      /*!<@brief PORT pin mask */
                                                                    /* @} */
+void dev_BOARD_InitBootPins(void);
 
 #if defined(__cplusplus)
 }

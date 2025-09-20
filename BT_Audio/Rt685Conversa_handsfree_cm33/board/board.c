@@ -48,31 +48,15 @@ AT_QUICKACCESS_SECTION_DATA(static uint32_t s_flexspiPin[10]);
 /* Initialize debug console. */
 void BOARD_InitDebugConsole(void)
 {
-	#if 0
     uint32_t uartClkSrcFreq;
 
     /* attach FRG0 clock to FLEXCOMM0 (debug console) */
     CLOCK_SetFRGClock(BOARD_DEBUG_UART_FRG_CLK);
     CLOCK_AttachClk(BOARD_DEBUG_UART_CLK_ATTACH);
 
-    /* attach FRG0 clock to FLEXCOMM4*/
-    CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
-    CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
-
     uartClkSrcFreq = BOARD_DEBUG_UART_CLK_FREQ;
 
     DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
-    #else
-        uint32_t uartClkSrcFreq;
-
-    /* attach FRG0 clock to FLEXCOMM0 (debug console) */
-    CLOCK_SetFRGClock(BOARD_DEBUG_UART_FRG_CLK);
-    CLOCK_AttachClk(BOARD_DEBUG_UART_CLK_ATTACH);
-
-    uartClkSrcFreq = BOARD_DEBUG_UART_CLK_FREQ;
-
-    DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
-    #endif
 }
 
 static status_t flexspi_hyper_ram_write_mcr(FLEXSPI_Type *base, uint8_t regAddr, uint32_t *mrVal)

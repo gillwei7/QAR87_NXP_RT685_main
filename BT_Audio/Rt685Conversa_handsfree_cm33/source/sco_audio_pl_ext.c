@@ -4,6 +4,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+#include "qar87_config.h"
 
 
 
@@ -490,7 +491,8 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 	#if EnableConversa==1
 		if (samplingRate > 0U)
 		{
-			PRINTF("Init Audio SCO SAI and CODEC samplingRate :%d  bitWidth:%d \r\n", samplingRate, bitWidth);
+		    // Do not print anything before Audio PLL and Debug console reset
+			///PRINTF("Init Audio SCO SAI and CODEC samplingRate :%d  bitWidth:%d \r\n", samplingRate, bitWidth);
 
 			/* Enable clock */
 	    	//no matter BT side is 16KHz or 8KHz, CODEC is always 16KHz
@@ -629,7 +631,8 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)
 
     if (samplingRate > 0U)
     {
-		PRINTF("Init RingTone Audio SCO SAI and CODEC samplingRate :%d  bitWidth:%d \r\n", samplingRate, bitWidth);
+        // Do not print anything before Audio PLL and Debug console reset
+		//PRINTF("Init RingTone Audio SCO SAI and CODEC samplingRate :%d  bitWidth:%d \r\n", samplingRate, bitWidth);
 
         /* Enable clock */
         src_clk_hz = BOARD_SwitchAudioFreq(samplingRate);
@@ -1001,7 +1004,9 @@ void SCO_Edma_Task(void *handle)
 		#endif
 
 		USB_DeviceCdcVcomTask();	//can be placed to other place if here is not good (when other new task is needed and created)
+#if !DEV_AUDIO_DEBUG_GPIO
 		ButtonEventProcess();		//this button process can be placed to other place if here is not good (when other new task is needed and created)
+#endif
 		//DbgPin7Dn();
     }
 }
