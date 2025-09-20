@@ -18,6 +18,7 @@
 #include "GlobalDef.h"
 
 #include "SubFunc.h"
+#include "qar87_config.h"
 
 void OpeningBlink(U32 l)
 {
@@ -84,6 +85,7 @@ gpio_pin_config_t GPIO_Output_config =
     1,
 };
 
+#if !DEV_AUDIO_DEBUG_GPIO
 void InitDbgPin(void)
 {
 	GPIO_PortInit(GPIO, 0);
@@ -133,6 +135,32 @@ void InitDbgPin(void)
 		}
 	}
 }
+#else
+void dev_InitDbgPin(void)
+{
+    GPIO_PortInit(GPIO, 0);
+    GPIO_PinInit(GPIO, DbgPin5Port, DbgPin5, &GPIO_Output_config);
+    GPIO_PinInit(GPIO, DbgPin7Port, DbgPin7, &GPIO_Output_config);
+
+    DbgPin5Dn();
+    DbgPin7Dn();
+
+    delay_ms(1);
+
+    for(int i=0;i<5;i++)
+    {
+        DbgPin5Up();delay_ms(1);
+        DbgPin5Dn();delay_ms(1);
+    }
+
+    for(int i=0;i<7;i++)
+    {
+        DbgPin7Up();delay_ms(1);
+        DbgPin7Dn();delay_ms(1);
+    }
+
+}
+#endif
 
 void delay_us(U32 d)
 {

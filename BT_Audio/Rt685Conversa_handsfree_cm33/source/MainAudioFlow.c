@@ -1,4 +1,5 @@
 
+#include "qar87_config.h"
 
 #include "clock_config.h"
 #include "board.h"
@@ -374,9 +375,9 @@ void ProcessAudio_AfterAudioInputBufIsReady(void)
 				if(CycCntInfoIdx2>3) CycCntInfoIdx2=0;
 			}
 		#endif
-
+#if !DEV_AUDIO_DEBUG_GPIO
 		GenBtnEvt();
-
+#endif
 	#endif
 
 
