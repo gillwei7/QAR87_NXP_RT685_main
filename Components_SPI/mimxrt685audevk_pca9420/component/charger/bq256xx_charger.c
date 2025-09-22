@@ -120,7 +120,7 @@ status_t bq256xx_set_ichg(uint32_t ua)
     if (ua > BQ256XX_ICHG_MAX_uA)
         return kStatus_Fail;
 
-    uint8_t val = ua / BQ256XX_ICHG_STEP_uA;
+    uint8_t val = ua / BQ25618_ICHG_STEP_uA;
     return bq256xx_update_bits(BQ256XX_REG_CHG_CURRENT, BQ256XX_ICHG_MASK, val);
 }
 
@@ -138,7 +138,7 @@ status_t bq256xx_set_iprechg(uint32_t ua)
     if (ua < BQ256XX_IPRECHG_MIN_uA || ua > BQ256XX_IPRECHG_MAX_uA)
         return kStatus_Fail;
 
-    uint8_t val = (ua - BQ256XX_IPRECHG_MIN_uA) / BQ256XX_IPRECHG_MIN_uA;
+    uint8_t val = (ua - BQ25618_IPRECHG_MIN_uA) / BQ25618_IPRECHG_MIN_uA;
     val <<= 4;  // 放到 bits[7:4]
 
     return bq256xx_update_bits(BQ256XX_REG_PRE_TERM_CURR, BQ256XX_IPRE_MASK, val);
@@ -146,10 +146,10 @@ status_t bq256xx_set_iprechg(uint32_t ua)
 
 status_t bq256xx_set_iterm(uint32_t ua)
 {
-    if (ua < BQ256XX_ITERM_MIN_uA || ua > BQ256XX_ITERM_MAX_uA)
+    if (ua < BQ25618_ITERM_MIN_uA || ua > BQ256XX_ITERM_MAX_uA)
         return kStatus_Fail;
 
-    uint8_t val = ((ua - BQ256XX_ITERM_MIN_uA) / BQ256XX_ITERM_MIN_uA) ;//<< 4;
+    uint8_t val = ((ua - BQ25618_ITERM_MIN_uA) / BQ25618_ITERM_MIN_uA) ;//<< 4;
     return bq256xx_update_bits(BQ256XX_REG_PRE_TERM_CURR, BQ256XX_ITERM_MASK, val);
 }
 

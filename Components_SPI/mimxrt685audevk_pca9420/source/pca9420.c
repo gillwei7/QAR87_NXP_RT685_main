@@ -29,16 +29,16 @@
  ******************************************************************************/
 #define PCA9420_LAST_REG (PCA9420_MODECFG_3_3)
 
-#define GAUGE_ENABLE 1
+#define GAUGE_ENABLE 0
 #define LED_ENABLE 1
 #define PMIC_PCA9422_ENABLE 1
-#define TOUCH_ENABLE 1
+#define TOUCH_ENABLE 0
 #if TOUCH_ENABLE
 #define TOUCH_AW93305_ENABLE 1
 #endif
 #define CHARGER_ENABLE 1
 #define PMIC_GLF70583_ENABLE 1
-#define AMP_ENABLE 1
+#define AMP_ENABLE 0
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -292,8 +292,8 @@ int main(void)
     bq256xx_cfg_t charger_cfg = {
             .vindpm_uv = 4450000,
             .iindpm_ua = 2000000,
-            .ichg_ua = 205000,
-            .vbatreg_uv = 4208000,//4005000,
+            .ichg_ua = 530000,
+            .vbatreg_uv = 4005000,
             .iprechg_ua = 60000,
             .iterm_ua = 20000,
 //        .vindpm_uv = 4500000,
@@ -314,8 +314,8 @@ int main(void)
         PRINTF("bq256xx initialized.OK \n");
     }
 
-    bq256xx_write_reg(0x00, 0x53); // TS_IGNORE + IINDPM = 2000mA
-    bq256xx_write_reg(0x02, 0xA8); // ICHG = 800mA->0xA8
+    //bq256xx_write_reg(0x00, 0x53); // TS_IGNORE + IINDPM = 2000mA
+    //bq256xx_write_reg(0x02, 0xA8); // ICHG = 800mA->0xA8
     bq256xx_write_reg(0x03, 0x31); // IPRECHG = 60mA, ITERM = 20mA
 
 /*

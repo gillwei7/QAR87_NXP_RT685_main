@@ -26,6 +26,7 @@
 #define BQ256XX_IINDPM_STEP_uA    100000
 #define BQ256XX_IINDPM_OFFSET_uA  100000
 /*Charge Current (ICHG)*/
+#define BQ25618_ICHG_STEP_uA      20000
 #define BQ256XX_ICHG_STEP_uA      60000
 #define BQ256XX_ICHG_MAX_uA       3000000
 /*Battery Regulation Voltage (VBATREG)*/
@@ -33,9 +34,11 @@
 #define BQ2560X_VBATREG_MAX_uV    4624000
 #define BQ2560X_VBATREG_STEP_uV   32000
 /*Precharge / Termination Current*/
+#define BQ25618_IPRECHG_MIN_uA	  20000
 #define BQ256XX_IPRECHG_MIN_uA    60000
 #define BQ256XX_IPRECHG_MAX_uA    780000
-#define BQ256XX_ITERM_MIN_uA      20000//60000
+#define BQ25618_ITERM_MIN_uA      20000
+#define BQ256XX_ITERM_MIN_uA      60000
 #define BQ256XX_ITERM_MAX_uA      780000
 
 /* Register Map */
