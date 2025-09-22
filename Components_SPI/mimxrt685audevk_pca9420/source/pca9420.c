@@ -18,6 +18,7 @@
 #include "glf70583.h"
 #include "aw88166.h"
 #include "glf70302.h"
+#include "aw93305.h"
 
 #include "fsl_dma.h"
 #include "fsl_i2s.h"
@@ -32,6 +33,9 @@
 #define LED_ENABLE 1
 #define PMIC_PCA9422_ENABLE 1
 #define TOUCH_ENABLE 1
+#if TOUCH_ENABLE
+#define TOUCH_AW93305_ENABLE 1
+#endif
 #define CHARGER_ENABLE 1
 #define PMIC_GLF70583_ENABLE 1
 #define AMP_ENABLE 1
@@ -335,6 +339,19 @@ int main(void)
 
 #if TOUCH_ENABLE
 
+#if TOUCH_AW93305_ENABLE
+    //    uint8_t data[4] = {0};  // IRQSRC 是 32-bit，需讀取 4 bytes
+    //    status_t  ret = BOARD_I3C_Receive(BOARD_PMIC_I3C_BASEADDR,
+    //                               0x12,         // 預設 I2C 地址（CS2 浮接）
+    //                               0xF080,       // IRQSRC 暫存器地址
+    //                               2,            // subAddressSize = 2 bytes (16-bit register address)
+    //                               data,
+    //                               sizeof(data));
+    //
+    //       PRINTF("IRQSRC Read Result: %d, Data: %02X %02X %02X %02X\r\n", ret, data[0], data[1], data[2], data[3]);
+
+    awinic_single_enter();
+#else
 	uint16_t fw_version = 0;
 	int ret = elan_touch_get_fw_version(&fw_version);
 
@@ -346,6 +363,9 @@ int main(void)
 
     const uint8_t data_reg = 0xC0;
     uint8_t buf[EWD_FRAME_MAX_LEN];
+
+#endif
+
 
 #endif
 
@@ -407,16 +427,19 @@ int main(void)
 #endif
 
 #if TOUCH_ENABLE
+
     	if(g_touch_int_flag )
     	{
     		g_touch_int_flag = false;  // 清除旗標以避免重複處理
-
+#if TOUCH_AW93305_ENABLE
+    		AW93305_EXTI_Callback();
+#else
     		int rc = hal_i2c_mem_read_impl(EKTF_I2C_ADDR_7BIT, data_reg, buf, EWD_FRAME_MAX_LEN);
 
             if (rc == 0) {
                 elan_parse_and_report_data(buf, EWD_FRAME_MAX_LEN);
             }
-
+#endif
             // 資料處理完畢後，重新啟用中斷
             GPIO_PinEnableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
     	}
