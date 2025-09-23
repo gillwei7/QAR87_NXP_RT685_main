@@ -1446,6 +1446,13 @@ usb_status_t USB_DeviceLpc3511IpInit(uint8_t controllerId,
     lpc3511IpState->registerBase->LPM |= USB_LPC3511IP_USB_LPM_HIRD_SW(4);
     lpc3511IpState->registerBase->DEVCMDSTAT &= ~(USB_LPC3511IP_DEVCMDSTAT_FORCE_NEEDCLK_MASK);
 #endif
+
+    // gill
+        uint32_t devState;
+        devState = lpc3511IpState->registerBase->DEVCMDSTAT;
+        devState |= (USBHSD_DEVCMDSTAT_FORCE_VBUS_MASK | USBHSD_DEVCMDSTAT_DCON_MASK);
+         lpc3511IpState->registerBase->DEVCMDSTAT = devState;
+
     lpc3511IpState->deviceHandle = handle;
     *controllerHandle            = lpc3511IpState;
 
