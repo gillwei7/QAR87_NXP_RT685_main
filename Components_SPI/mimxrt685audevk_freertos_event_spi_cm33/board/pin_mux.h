@@ -77,36 +77,6 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_DEBUG_UART_RXD_PIN_MASK (1U << 2U)
 /* @} */
 
-/*! @name PIO0_10 (coord J3), SW2
-  @{ */
-/* Routed pin properties */
-#define BOARD_INITPINS_SW2_PERIPHERAL GPIO           /*!<@brief Peripheral name */
-#define BOARD_INITPINS_SW2_SIGNAL PIO0               /*!<@brief Signal name */
-#define BOARD_INITPINS_SW2_CHANNEL 10                /*!<@brief Signal channel */
-
-/* Symbols to be used with GPIO driver */
-#define BOARD_INITPINS_SW2_GPIO GPIO                 /*!<@brief GPIO peripheral base pointer */
-#define BOARD_INITPINS_SW2_GPIO_PIN_MASK (1U << 10U) /*!<@brief GPIO pin mask */
-#define BOARD_INITPINS_SW2_PORT 0U                   /*!<@brief PORT peripheral base pointer */
-#define BOARD_INITPINS_SW2_PIN 10U                   /*!<@brief PORT pin number */
-#define BOARD_INITPINS_SW2_PIN_MASK (1U << 10U)      /*!<@brief PORT pin mask */
-                                                     /* @} */
-
-/*! @name PIO0_29 (coord B10), J27[2]
-  @{ */
-/* Routed pin properties */
-#define BOARD_INITPINS_Output_INT_PERIPHERAL GPIO           /*!<@brief Peripheral name */
-#define BOARD_INITPINS_Output_INT_SIGNAL PIO0               /*!<@brief Signal name */
-#define BOARD_INITPINS_Output_INT_CHANNEL 29                /*!<@brief Signal channel */
-
-/* Symbols to be used with GPIO driver */
-#define BOARD_INITPINS_Output_INT_GPIO GPIO                 /*!<@brief GPIO peripheral base pointer */
-#define BOARD_INITPINS_Output_INT_GPIO_PIN_MASK (1U << 29U) /*!<@brief GPIO pin mask */
-#define BOARD_INITPINS_Output_INT_PORT 0U                   /*!<@brief PORT peripheral base pointer */
-#define BOARD_INITPINS_Output_INT_PIN 29U                   /*!<@brief PORT pin number */
-#define BOARD_INITPINS_Output_INT_PIN_MASK (1U << 29U)      /*!<@brief PORT pin mask */
-                                                            /* @} */
-
 /*! @name PIO2_19 (coord T2), FUN_KEY1_N
   @{ */
 /* Routed pin properties */
@@ -121,6 +91,46 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_QSPI_B_CS0_PIN 19U                   /*!<@brief PORT pin number */
 #define BOARD_INITPINS_QSPI_B_CS0_PIN_MASK (1U << 19U)      /*!<@brief PORT pin mask */
                                                             /* @} */
+
+/*! @name HS_SPI_MOSI (coord N1), JP38[2]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITPINS_QSPI_B_DATA2_PERIPHERAL FLEXCOMM14     /*!<@brief Peripheral name */
+#define BOARD_INITPINS_QSPI_B_DATA2_SIGNAL MOSI               /*!<@brief Signal name */
+#define BOARD_INITPINS_QSPI_B_DATA2_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITPINS_QSPI_B_DATA2_PIN 13U                   /*!<@brief PORT pin number */
+#define BOARD_INITPINS_QSPI_B_DATA2_PIN_MASK (1U << 13U)      /*!<@brief PORT pin mask */
+                                                              /* @} */
+
+/*! @name HS_SPI_MISO (coord M2), JP37[2]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITPINS_QSPI_B_DATA1_PERIPHERAL FLEXCOMM14     /*!<@brief Peripheral name */
+#define BOARD_INITPINS_QSPI_B_DATA1_SIGNAL MISO               /*!<@brief Signal name */
+#define BOARD_INITPINS_QSPI_B_DATA1_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITPINS_QSPI_B_DATA1_PIN 12U                   /*!<@brief PORT pin number */
+#define BOARD_INITPINS_QSPI_B_DATA1_PIN_MASK (1U << 12U)      /*!<@brief PORT pin mask */
+                                                              /* @} */
+
+/*! @name HS_SPI_SCK (coord L2), JP36[2]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITPINS_QSPI_B_DATA0_PERIPHERAL FLEXCOMM14     /*!<@brief Peripheral name */
+#define BOARD_INITPINS_QSPI_B_DATA0_SIGNAL SCK                /*!<@brief Signal name */
+#define BOARD_INITPINS_QSPI_B_DATA0_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITPINS_QSPI_B_DATA0_PIN 11U                   /*!<@brief PORT pin number */
+#define BOARD_INITPINS_QSPI_B_DATA0_PIN_MASK (1U << 11U)      /*!<@brief PORT pin mask */
+                                                              /* @} */
+
+/*! @name HS_SPI_SSEL0 (coord N2), JP39[2]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITPINS_QSPI_B_DATA3_PERIPHERAL FLEXCOMM14     /*!<@brief Peripheral name */
+#define BOARD_INITPINS_QSPI_B_DATA3_SIGNAL SSEL0              /*!<@brief Signal name */
+#define BOARD_INITPINS_QSPI_B_DATA3_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITPINS_QSPI_B_DATA3_PIN 14U                   /*!<@brief PORT pin number */
+#define BOARD_INITPINS_QSPI_B_DATA3_PIN_MASK (1U << 14U)      /*!<@brief PORT pin mask */
+                                                              /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.

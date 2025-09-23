@@ -13,9 +13,9 @@
  ******************************************************************************/
 /*${macro:start}*/
 
-#define EXAMPLE_SPI_SLAVE     SPI5
-#define EXAMPLE_SPI_SLAVE_IRQ FLEXCOMM5_IRQn
-#define SPI_SLAVE_IRQHandler  FLEXCOMM5_IRQHandler
+#define EXAMPLE_SPI_SLAVE     SPI14
+#define EXAMPLE_SPI_SLAVE_IRQ FLEXCOMM14_IRQn
+#define SPI_SLAVE_IRQHandler  FLEXCOMM14_IRQHandler
 
 #define EXAMPLE_SPI_SSEL 0
 #define EXAMPLE_SPI_SPOL kSPI_SpolActiveAllLow
