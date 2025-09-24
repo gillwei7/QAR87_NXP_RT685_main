@@ -163,6 +163,7 @@ int main(void)
 
     GPIO_PortInit(GPIO, GPIO0_PORT);
     GPIO_PortInit(GPIO, GPIO1_PORT);
+    GPIO_PortInit(GPIO, GPIO2_PORT);
 
 #if TOUCH_ENABLE
     GPIO_PinInit(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &sw_config);
@@ -199,6 +200,15 @@ int main(void)
     Scan_I2C_Devices(BOARD_PMIC_I3C_BASEADDR);
 
 #if PMIC_PCA9422_ENABLE
+    /* Init PCA9422 GPIO */
+    gpio_pin_config_t PCA9422_output_config = {kGPIO_DigitalOutput, 1,};
+    GPIO_PinInit(GPIO, DVS_CTR0_PORT, DVS_CTR0_PIN, &PCA9422_output_config);
+    GPIO_PinInit(GPIO, DVS_CTR1_PORT, DVS_CTR1_PIN, &PCA9422_output_config);
+    GPIO_PinInit(GPIO, DVS_CTR2_PORT, DVS_CTR2_PIN, &PCA9422_output_config);
+    GPIO_PinInit(GPIO, SLEEP_MODE0_PORT, SLEEP_MODE0_PIN, &PCA9422_output_config);
+    GPIO_PinInit(GPIO, STBY_MODE0_PORT, STBY_MODE0_PIN, &PCA9422_output_config);
+    GPIO_PinInit(GPIO, PCA9422_INTB_PORT, PCA9422_INTB_PIN, &sw_config);
+
    /* Init PCA9422 PMIC. */
 	BOARD_InitPmic();
 	PRINTF("-------------- PCA9422 BOARD_InitPmic OK--------------\r\n");

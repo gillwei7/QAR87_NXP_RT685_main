@@ -85,7 +85,9 @@ void BOARD_InitPins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
+#define IOPCTL_PIO_FUNC0 0x00u            /*!<@brief Selects pin function 0 */
 #define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
+#define IOPCTL_PIO_INBUF_DI 0x00u         /*!<@brief Disable input buffer function */
 #define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
 #define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
 #define IOPCTL_PIO_PSEDRAIN_DI 0x00u      /*!<@brief Pseudo Output Drain is disabled */
@@ -112,6 +114,96 @@ void BOARD_InitPins(void); /* Function assigned for the Cortex-M33 */
 #define PCA9422_I3C_I3C_ICM_SDA_PIN 30U                   /*!<@brief PORT pin number */
 #define PCA9422_I3C_I3C_ICM_SDA_PIN_MASK (1U << 30U)      /*!<@brief PORT pin mask */
                                                           /* @} */
+
+/*! @name PIO1_9 (coord B1), J28[1]
+  @{ */
+/* Routed pin properties */
+#define PCA9422_I3C_DVS_CTR0_PERIPHERAL GPIO          /*!<@brief Peripheral name */
+#define PCA9422_I3C_DVS_CTR0_SIGNAL PIO1              /*!<@brief Signal name */
+#define PCA9422_I3C_DVS_CTR0_CHANNEL 9                /*!<@brief Signal channel */
+
+/* Symbols to be used with GPIO driver */
+#define PCA9422_I3C_DVS_CTR0_GPIO GPIO                /*!<@brief GPIO peripheral base pointer */
+#define PCA9422_I3C_DVS_CTR0_GPIO_PIN_MASK (1U << 9U) /*!<@brief GPIO pin mask */
+#define PCA9422_I3C_DVS_CTR0_PORT 1U                  /*!<@brief PORT peripheral base pointer */
+#define PCA9422_I3C_DVS_CTR0_PIN 9U                   /*!<@brief PORT pin number */
+#define PCA9422_I3C_DVS_CTR0_PIN_MASK (1U << 9U)      /*!<@brief PORT pin mask */
+                                                      /* @} */
+
+/*! @name PIO0_29 (coord B10), J27[2]
+  @{ */
+/* Routed pin properties */
+#define PCA9422_I3C_DVS_CTR1_PERIPHERAL GPIO           /*!<@brief Peripheral name */
+#define PCA9422_I3C_DVS_CTR1_SIGNAL PIO0               /*!<@brief Signal name */
+#define PCA9422_I3C_DVS_CTR1_CHANNEL 29                /*!<@brief Signal channel */
+
+/* Symbols to be used with GPIO driver */
+#define PCA9422_I3C_DVS_CTR1_GPIO GPIO                 /*!<@brief GPIO peripheral base pointer */
+#define PCA9422_I3C_DVS_CTR1_GPIO_PIN_MASK (1U << 29U) /*!<@brief GPIO pin mask */
+#define PCA9422_I3C_DVS_CTR1_PORT 0U                   /*!<@brief PORT peripheral base pointer */
+#define PCA9422_I3C_DVS_CTR1_PIN 29U                   /*!<@brief PORT pin number */
+#define PCA9422_I3C_DVS_CTR1_PIN_MASK (1U << 29U)      /*!<@brief PORT pin mask */
+                                                       /* @} */
+
+/*! @name PIO2_31 (coord B6), J18[3]
+  @{ */
+/* Routed pin properties */
+#define PCA9422_I3C_DVS_CTR2_PERIPHERAL GPIO           /*!<@brief Peripheral name */
+#define PCA9422_I3C_DVS_CTR2_SIGNAL PIO2               /*!<@brief Signal name */
+#define PCA9422_I3C_DVS_CTR2_CHANNEL 31                /*!<@brief Signal channel */
+
+/* Symbols to be used with GPIO driver */
+#define PCA9422_I3C_DVS_CTR2_GPIO GPIO                 /*!<@brief GPIO peripheral base pointer */
+#define PCA9422_I3C_DVS_CTR2_GPIO_PIN_MASK (1U << 31U) /*!<@brief GPIO pin mask */
+#define PCA9422_I3C_DVS_CTR2_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define PCA9422_I3C_DVS_CTR2_PIN 31U                   /*!<@brief PORT pin number */
+#define PCA9422_I3C_DVS_CTR2_PIN_MASK (1U << 31U)      /*!<@brief PORT pin mask */
+                                                       /* @} */
+
+/*! @name PIO2_27 (coord M14), U13[A2]
+  @{ */
+/* Routed pin properties */
+#define PCA9422_I3C_SLEEP_MODE0_PERIPHERAL GPIO           /*!<@brief Peripheral name */
+#define PCA9422_I3C_SLEEP_MODE0_SIGNAL PIO2               /*!<@brief Signal name */
+#define PCA9422_I3C_SLEEP_MODE0_CHANNEL 27                /*!<@brief Signal channel */
+
+/* Symbols to be used with GPIO driver */
+#define PCA9422_I3C_SLEEP_MODE0_GPIO GPIO                 /*!<@brief GPIO peripheral base pointer */
+#define PCA9422_I3C_SLEEP_MODE0_GPIO_PIN_MASK (1U << 27U) /*!<@brief GPIO pin mask */
+#define PCA9422_I3C_SLEEP_MODE0_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define PCA9422_I3C_SLEEP_MODE0_PIN 27U                   /*!<@brief PORT pin number */
+#define PCA9422_I3C_SLEEP_MODE0_PIN_MASK (1U << 27U)      /*!<@brief PORT pin mask */
+                                                          /* @} */
+
+/*! @name PIO0_24 (coord B9), J19[18]/J38[26]
+  @{ */
+/* Routed pin properties */
+#define PCA9422_I3C_STBY_MODE1_PERIPHERAL GPIO           /*!<@brief Peripheral name */
+#define PCA9422_I3C_STBY_MODE1_SIGNAL PIO0               /*!<@brief Signal name */
+#define PCA9422_I3C_STBY_MODE1_CHANNEL 24                /*!<@brief Signal channel */
+
+/* Symbols to be used with GPIO driver */
+#define PCA9422_I3C_STBY_MODE1_GPIO GPIO                 /*!<@brief GPIO peripheral base pointer */
+#define PCA9422_I3C_STBY_MODE1_GPIO_PIN_MASK (1U << 24U) /*!<@brief GPIO pin mask */
+#define PCA9422_I3C_STBY_MODE1_PORT 0U                   /*!<@brief PORT peripheral base pointer */
+#define PCA9422_I3C_STBY_MODE1_PIN 24U                   /*!<@brief PORT pin number */
+#define PCA9422_I3C_STBY_MODE1_PIN_MASK (1U << 24U)      /*!<@brief PORT pin mask */
+                                                         /* @} */
+
+/*! @name PIO2_28 (coord N15), Q1[1]
+  @{ */
+/* Routed pin properties */
+#define PCA9422_I3C_PCA9422_INTB_PERIPHERAL GPIO           /*!<@brief Peripheral name */
+#define PCA9422_I3C_PCA9422_INTB_SIGNAL PIO2               /*!<@brief Signal name */
+#define PCA9422_I3C_PCA9422_INTB_CHANNEL 28                /*!<@brief Signal channel */
+
+/* Symbols to be used with GPIO driver */
+#define PCA9422_I3C_PCA9422_INTB_GPIO GPIO                 /*!<@brief GPIO peripheral base pointer */
+#define PCA9422_I3C_PCA9422_INTB_GPIO_PIN_MASK (1U << 28U) /*!<@brief GPIO pin mask */
+#define PCA9422_I3C_PCA9422_INTB_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define PCA9422_I3C_PCA9422_INTB_PIN 28U                   /*!<@brief PORT pin number */
+#define PCA9422_I3C_PCA9422_INTB_PIN_MASK (1U << 28U)      /*!<@brief PORT pin mask */
+                                                           /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.

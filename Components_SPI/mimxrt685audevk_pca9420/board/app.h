@@ -21,6 +21,21 @@
 
 #define GPIO0_PORT 0U
 #define GPIO1_PORT 1U
+#define GPIO2_PORT 2U
+
+/*PCA9422*/
+#define DVS_CTR0_PORT 	  1U
+#define DVS_CTR0_PIN  	  9U
+#define DVS_CTR1_PORT 	  0U
+#define DVS_CTR1_PIN  	 29U
+#define DVS_CTR2_PORT 	  2U
+#define DVS_CTR2_PIN  	 31U
+#define SLEEP_MODE0_PORT  2U
+#define SLEEP_MODE0_PIN  27U
+#define STBY_MODE0_PORT   0U
+#define STBY_MODE0_PIN   24U
+#define PCA9422_INTB_PORT 2U
+#define PCA9422_INTB_PIN 28U
 
 #define RESET553_N_PORT 0U
 #define RESET553_N_PIN  27U

@@ -15,12 +15,20 @@ processor_version: 24.12.10
 board: MIMXRT685-AUD-EVK
 pin_labels:
 - {pin_num: G1, pin_signal: PIO0_0/FC0_SCK/CTIMER0_MAT0/I2S_BRIDGE_CLK_IN/GPIO_INT_BMAT/SEC_PIO0_0, label: GPIO_AMP_RESET_R}
+- {pin_num: F4, pin_signal: PIO0_5/FC0_SSEL2/SCT0_GPI0/SCT0_OUT0/CTIMER_INP1/SEC_PIO0_5/ADC0_0, label: NXP_BQ_MR_N}
 - {pin_num: E1, pin_signal: PIO0_6/FC0_SSEL3/SCT0_GPI1/SCT0_OUT1/CTIMER0_MAT0/SEC_PIO0_6/ADC0_8, label: NXP_PWR_SW1}
+- {pin_num: B9, pin_signal: PIO0_24/FC3_CTS_SDA_SSEL0/CTIMER3_MAT3/FC2_SSEL2/TRACEDATA(2)/CLKOUT/SEC_PIO0_24, label: 'J19[18]/J38[26]', identifier: STBY_MODE1}
 - {pin_num: B3, pin_signal: PIO0_27/FC3_SSEL3/SCT0_GPI7/SCT0_OUT7/CTIMER0_MAT3/SEC_PIO0_27/ADC0_11, label: RESET_553_N}
+- {pin_num: B10, pin_signal: PIO0_29/FC4_TXD_SCL_MISO_WS/CTIMER4_MAT1/I2S_BRIDGE_WS_OUT/SEC_PIO0_29, label: 'J27[2]', identifier: DVS_CTR1}
 - {pin_num: B5, pin_signal: PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4, label: NXP_TOUCH_INT}
+- {pin_num: B1, pin_signal: PIO1_9/FC5_SSEL3/SCT0_GPI7/UTICK_CAP1/CTIMER1_MAT3/ADC0_12, label: 'J28[1]', identifier: DVS_CTR0}
 - {pin_num: N3, pin_signal: PIO1_15/HS_SPI_SSEL1/CTIMER3_MAT0, label: CHG_INT_N_R}
+- {pin_num: T2, pin_signal: PIO2_19/PDM_CLK67/FLEXSPI0B_SS0_N, label: FUN_KEY1_N, identifier: QSPI_B_CS0}
+- {pin_num: M14, pin_signal: PIO2_27/USB1_OVERCURRENTN, label: 'U13[A2]', identifier: SLEEP_MODE0}
+- {pin_num: N15, pin_signal: PIO2_28/USB1_PORTPWRN, label: 'Q1[1]', identifier: PCA9422_INTB}
 - {pin_num: N17, pin_signal: PIO2_29/I3C0_SCL/SCT0_OUT0/CLKOUT, label: PCA9422_I2C_SCL, identifier: I3C_ICM_SCL}
 - {pin_num: P16, pin_signal: PIO2_30/I3C0_SDA/SCT0_OUT3/CLKIN/CMP0_OUT, label: PCA9422_I2C_SDA, identifier: I3C_ICM_SDA}
+- {pin_num: B6, pin_signal: PIO2_31/I3C0_PUR/SCT0_OUT7/UTICK_CAP3/CTIMER_INP15/SWO/CMP0_B, label: 'J18[3]', identifier: I3C0_PUR;DVS_CTR2}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -249,6 +257,12 @@ PCA9422_I3C:
 - pin_list:
   - {pin_num: N17, peripheral: I3C, signal: SCL, pin_signal: PIO2_29/I3C0_SCL/SCT0_OUT0/CLKOUT, ibena: enabled}
   - {pin_num: P16, peripheral: I3C, signal: SDA, pin_signal: PIO2_30/I3C0_SDA/SCT0_OUT3/CLKIN/CMP0_OUT, ibena: enabled}
+  - {pin_num: B1, peripheral: GPIO, signal: 'PIO1, 9', pin_signal: PIO1_9/FC5_SSEL3/SCT0_GPI7/UTICK_CAP1/CTIMER1_MAT3/ADC0_12}
+  - {pin_num: B10, peripheral: GPIO, signal: 'PIO0, 29', pin_signal: PIO0_29/FC4_TXD_SCL_MISO_WS/CTIMER4_MAT1/I2S_BRIDGE_WS_OUT/SEC_PIO0_29}
+  - {pin_num: B6, peripheral: GPIO, signal: 'PIO2, 31', pin_signal: PIO2_31/I3C0_PUR/SCT0_OUT7/UTICK_CAP3/CTIMER_INP15/SWO/CMP0_B, identifier: DVS_CTR2}
+  - {pin_num: M14, peripheral: GPIO, signal: 'PIO2, 27', pin_signal: PIO2_27/USB1_OVERCURRENTN}
+  - {pin_num: B9, peripheral: GPIO, signal: 'PIO0, 24', pin_signal: PIO0_24/FC3_CTS_SDA_SSEL0/CTIMER3_MAT3/FC2_SSEL2/TRACEDATA(2)/CLKOUT/SEC_PIO0_24}
+  - {pin_num: N15, peripheral: GPIO, signal: 'PIO2, 28', pin_signal: PIO2_28/USB1_PORTPWRN, ibena: enabled}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -262,6 +276,111 @@ PCA9422_I3C:
 /* Function assigned for the Cortex-M33 */
 void PCA9422_I3C(void)
 {
+
+    const uint32_t STBY_MODE1 = (/* Pin is configured as PIO0_24 */
+                                 IOPCTL_PIO_FUNC0 |
+                                 /* Disable pull-up / pull-down function */
+                                 IOPCTL_PIO_PUPD_DI |
+                                 /* Enable pull-down function */
+                                 IOPCTL_PIO_PULLDOWN_EN |
+                                 /* Disable input buffer function */
+                                 IOPCTL_PIO_INBUF_DI |
+                                 /* Normal mode */
+                                 IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                 /* Normal drive */
+                                 IOPCTL_PIO_FULLDRIVE_DI |
+                                 /* Analog mux is disabled */
+                                 IOPCTL_PIO_ANAMUX_DI |
+                                 /* Pseudo Output Drain is disabled */
+                                 IOPCTL_PIO_PSEDRAIN_DI |
+                                 /* Input function is not inverted */
+                                 IOPCTL_PIO_INV_DI);
+    /* PORT0 PIN24 (coords: B9) is configured as PIO0_24 */
+    IOPCTL_PinMuxSet(IOPCTL, PCA9422_I3C_STBY_MODE1_PORT, PCA9422_I3C_STBY_MODE1_PIN, STBY_MODE1);
+
+    const uint32_t DVS_CTR1 = (/* Pin is configured as PIO0_29 */
+                               IOPCTL_PIO_FUNC0 |
+                               /* Disable pull-up / pull-down function */
+                               IOPCTL_PIO_PUPD_DI |
+                               /* Enable pull-down function */
+                               IOPCTL_PIO_PULLDOWN_EN |
+                               /* Disable input buffer function */
+                               IOPCTL_PIO_INBUF_DI |
+                               /* Normal mode */
+                               IOPCTL_PIO_SLEW_RATE_NORMAL |
+                               /* Normal drive */
+                               IOPCTL_PIO_FULLDRIVE_DI |
+                               /* Analog mux is disabled */
+                               IOPCTL_PIO_ANAMUX_DI |
+                               /* Pseudo Output Drain is disabled */
+                               IOPCTL_PIO_PSEDRAIN_DI |
+                               /* Input function is not inverted */
+                               IOPCTL_PIO_INV_DI);
+    /* PORT0 PIN29 (coords: B10) is configured as PIO0_29 */
+    IOPCTL_PinMuxSet(IOPCTL, PCA9422_I3C_DVS_CTR1_PORT, PCA9422_I3C_DVS_CTR1_PIN, DVS_CTR1);
+
+    const uint32_t DVS_CTR0 = (/* Pin is configured as PIO1_9 */
+                               IOPCTL_PIO_FUNC0 |
+                               /* Disable pull-up / pull-down function */
+                               IOPCTL_PIO_PUPD_DI |
+                               /* Enable pull-down function */
+                               IOPCTL_PIO_PULLDOWN_EN |
+                               /* Disable input buffer function */
+                               IOPCTL_PIO_INBUF_DI |
+                               /* Normal mode */
+                               IOPCTL_PIO_SLEW_RATE_NORMAL |
+                               /* Normal drive */
+                               IOPCTL_PIO_FULLDRIVE_DI |
+                               /* Analog mux is disabled */
+                               IOPCTL_PIO_ANAMUX_DI |
+                               /* Pseudo Output Drain is disabled */
+                               IOPCTL_PIO_PSEDRAIN_DI |
+                               /* Input function is not inverted */
+                               IOPCTL_PIO_INV_DI);
+    /* PORT1 PIN9 (coords: B1) is configured as PIO1_9 */
+    IOPCTL_PinMuxSet(IOPCTL, PCA9422_I3C_DVS_CTR0_PORT, PCA9422_I3C_DVS_CTR0_PIN, DVS_CTR0);
+
+    const uint32_t SLEEP_MODE0 = (/* Pin is configured as PIO2_27 */
+                                  IOPCTL_PIO_FUNC0 |
+                                  /* Disable pull-up / pull-down function */
+                                  IOPCTL_PIO_PUPD_DI |
+                                  /* Enable pull-down function */
+                                  IOPCTL_PIO_PULLDOWN_EN |
+                                  /* Disable input buffer function */
+                                  IOPCTL_PIO_INBUF_DI |
+                                  /* Normal mode */
+                                  IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                  /* Normal drive */
+                                  IOPCTL_PIO_FULLDRIVE_DI |
+                                  /* Analog mux is disabled */
+                                  IOPCTL_PIO_ANAMUX_DI |
+                                  /* Pseudo Output Drain is disabled */
+                                  IOPCTL_PIO_PSEDRAIN_DI |
+                                  /* Input function is not inverted */
+                                  IOPCTL_PIO_INV_DI);
+    /* PORT2 PIN27 (coords: M14) is configured as PIO2_27 */
+    IOPCTL_PinMuxSet(IOPCTL, PCA9422_I3C_SLEEP_MODE0_PORT, PCA9422_I3C_SLEEP_MODE0_PIN, SLEEP_MODE0);
+
+    const uint32_t PCA9422_INTB = (/* Pin is configured as PIO2_28 */
+                                   IOPCTL_PIO_FUNC0 |
+                                   /* Disable pull-up / pull-down function */
+                                   IOPCTL_PIO_PUPD_DI |
+                                   /* Enable pull-down function */
+                                   IOPCTL_PIO_PULLDOWN_EN |
+                                   /* Enables input buffer function */
+                                   IOPCTL_PIO_INBUF_EN |
+                                   /* Normal mode */
+                                   IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                   /* Normal drive */
+                                   IOPCTL_PIO_FULLDRIVE_DI |
+                                   /* Analog mux is disabled */
+                                   IOPCTL_PIO_ANAMUX_DI |
+                                   /* Pseudo Output Drain is disabled */
+                                   IOPCTL_PIO_PSEDRAIN_DI |
+                                   /* Input function is not inverted */
+                                   IOPCTL_PIO_INV_DI);
+    /* PORT2 PIN28 (coords: N15) is configured as PIO2_28 */
+    IOPCTL_PinMuxSet(IOPCTL, PCA9422_I3C_PCA9422_INTB_PORT, PCA9422_I3C_PCA9422_INTB_PIN, PCA9422_INTB);
 
     const uint32_t I3C_ICM_SCL = (/* Pin is configured as I3C0_SCL */
                                   IOPCTL_PIO_FUNC1 |
@@ -304,6 +423,27 @@ void PCA9422_I3C(void)
                                   IOPCTL_PIO_INV_DI);
     /* PORT2 PIN30 (coords: P16) is configured as I3C0_SDA */
     IOPCTL_PinMuxSet(IOPCTL, PCA9422_I3C_I3C_ICM_SDA_PORT, PCA9422_I3C_I3C_ICM_SDA_PIN, I3C_ICM_SDA);
+
+    const uint32_t DVS_CTR2 = (/* Pin is configured as PIO2_31 */
+                               IOPCTL_PIO_FUNC0 |
+                               /* Disable pull-up / pull-down function */
+                               IOPCTL_PIO_PUPD_DI |
+                               /* Enable pull-down function */
+                               IOPCTL_PIO_PULLDOWN_EN |
+                               /* Disable input buffer function */
+                               IOPCTL_PIO_INBUF_DI |
+                               /* Normal mode */
+                               IOPCTL_PIO_SLEW_RATE_NORMAL |
+                               /* Normal drive */
+                               IOPCTL_PIO_FULLDRIVE_DI |
+                               /* Analog mux is disabled */
+                               IOPCTL_PIO_ANAMUX_DI |
+                               /* Pseudo Output Drain is disabled */
+                               IOPCTL_PIO_PSEDRAIN_DI |
+                               /* Input function is not inverted */
+                               IOPCTL_PIO_INV_DI);
+    /* PORT2 PIN31 (coords: B6) is configured as PIO2_31 */
+    IOPCTL_PinMuxSet(IOPCTL, PCA9422_I3C_DVS_CTR2_PORT, PCA9422_I3C_DVS_CTR2_PIN, DVS_CTR2);
 }
 
 /* clang-format off */
