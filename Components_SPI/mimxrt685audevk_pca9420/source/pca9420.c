@@ -32,13 +32,13 @@
 #define GAUGE_ENABLE 0
 #define LED_ENABLE 1
 #define PMIC_PCA9422_ENABLE 1
-#define TOUCH_ENABLE 0
+#define TOUCH_ENABLE 1
 #if TOUCH_ENABLE
-#define TOUCH_AW93305_ENABLE 1
+#define TOUCH_AW93305_ENABLE 0
 #endif
 #define CHARGER_ENABLE 1
 #define PMIC_GLF70583_ENABLE 1
-#define AMP_ENABLE 0
+#define AMP_ENABLE 1
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
