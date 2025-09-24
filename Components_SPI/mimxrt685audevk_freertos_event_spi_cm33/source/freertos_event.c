@@ -13,6 +13,7 @@
 #include "timers.h"
 #include "event_groups.h"
 #include "semphr.h"
+#include "fsl_pint.h"
 
 /* Freescale includes. */
 #include "fsl_device_registers.h"
@@ -77,6 +78,18 @@ static uint8_t* currentSrcBuff = NULL;
 #define EVT_ALL_FRAMES_DONE (1UL << 1)
 #define EVT_PASSIVE_RX_DONE (1UL << 2)
 #define EVT_PASSIVE_NEED_INIT (1UL << 3)
+#define BTN_NOTIFY_EDGE   (1UL << 4)  // 來自 PINT ISR 的雙邊緣事件
+#define BTN_NOTIFY_DBL    (1UL << 5)  // 雙擊計時器到時
+
+/* === 按鍵行為參數 === */
+#define BTN_ACTIVE_LEVEL          0   // active-low: 按下=0，放開=1；若相反改為 1
+#define BTN_DEBOUNCE_MS          30
+#define BTN_LONG_MS            1000
+#define BTN_DBLCLICK_GAP_MS     300
+#define FUN_KEY1_PINT_CH  		  1   // PINT 通道
+/* === 按鈕任務的 handle 與軟體定時器 === */
+static TaskHandle_t   sButtonTaskHandle = NULL;
+static TimerHandle_t  sBtnDblTimer  = NULL;
 
 // <<< MODIFIED: 核心架構變更，使用 Queue 取代 Event Group 進行任務間通訊 >>>
 static QueueHandle_t spi_request_queue = NULL;
@@ -453,6 +466,21 @@ static void spi_task(void *pvParameters)
     }
 }
 
+
+/* 讀腳位 */
+static inline uint8_t btn_raw_read(void)
+{
+    return (uint8_t)GPIO_PinRead(GPIO, FUN_KEY1_N_PORT, FUN_KEY1_N_PIN);
+}
+
+/* 雙擊計時器回呼：只通知任務 */
+static void vBtnDblTimerCb(TimerHandle_t xTimer)
+{
+    if (sButtonTaskHandle) {
+        (void)xTaskNotify(sButtonTaskHandle, BTN_NOTIFY_DBL, eSetBits);
+    }
+}
+
 /**
  * @brief 按鈕處理任務 (生產者)。
  * @details 此任務持續監控一個 GPIO 按鈕的狀態，並能區分短按和長按。
@@ -461,61 +489,102 @@ static void spi_task(void *pvParameters)
  */
 static void button_task(void *pvParameters)
 {
-    const TickType_t double_click_gap = pdMS_TO_TICKS(300);
-    const TickType_t long_press_ticks = pdMS_TO_TICKS(1000);
+	   const TickType_t debounceTicks   = pdMS_TO_TICKS(BTN_DEBOUNCE_MS);
+	   const TickType_t longTicks       = pdMS_TO_TICKS(BTN_LONG_MS);
 
-    TickType_t last_press_time = 0;
-    TickType_t press_start_time = 0;
+	    sButtonTaskHandle = xTaskGetCurrentTaskHandle();
 
-    bool is_pressed = false;
-    bool short_press_pending = false;
-    bool double_click_detected = false;
+	    /* 只需要「雙擊」單次定時器 */
+	    sBtnDblTimer  = xTimerCreate("btn_dbl", pdMS_TO_TICKS(BTN_DBLCLICK_GAP_MS),
+	                                 pdFALSE, NULL, vBtnDblTimerCb);
+	    configASSERT(sBtnDblTimer);
 
-    while (1)
-    {
-        int pin_state = GPIO_PinRead(GPIO, FUN_KEY1_N_PORT, FUN_KEY1_N_PIN);
-        TickType_t now = xTaskGetTickCount();
+	    /* 初始狀態 */
+	    uint8_t stable_level = btn_raw_read();
+	    bool    is_pressed   = (stable_level == BTN_ACTIVE_LEVEL);
+	    bool    dbl_pending  = false;            // 是否正在等待第二次短按
+	    TickType_t press_start_tick = 0;
 
-        if (pin_state == 0 && !is_pressed) {
-            is_pressed = true;
-            if ((now - last_press_time) < double_click_gap) {
-                PRINTF("[Button] Double Click detected. No action assigned.\r\n");
-                // uint8_t value_to_send = 0xXX;
-                // xQueueSend(spi_request_queue, &value_to_send, (TickType_t)0);
-                short_press_pending = false;
-                double_click_detected = true;
-            }
-            last_press_time = now;
-            press_start_time = now;
-        } else if (pin_state == 1 && is_pressed) {
-            is_pressed = false;
-            TickType_t press_duration = now - press_start_time;
-            if (press_duration >= long_press_ticks) {
-                PRINTF("[Button] Long Press detected. Sending 0x%02X to queue.\r\n", LONG_PRESS_HEX_VALUE);
-                uint8_t value_to_send = LONG_PRESS_HEX_VALUE;
-                xQueueSend(spi_request_queue, &value_to_send, (TickType_t)0);
-                short_press_pending = false;
-            } else {
-                if (!double_click_detected) {
-                    short_press_pending = true;
-                    last_press_time = now;
-                }
-            }
-        }
+	    if (is_pressed) {
+	        // 上電時剛好按住：當作剛按下
+	        press_start_tick = xTaskGetTickCount();
+	    }
 
-        if (short_press_pending && (now - last_press_time) > double_click_gap) {
-            PRINTF("[Button] Short Press detected. Sending 0x%02X to queue.\r\n", SHORT_PRESS_HEX_VALUE);
-            uint8_t value_to_send = SHORT_PRESS_HEX_VALUE;
-            xQueueSend(spi_request_queue, &value_to_send, (TickType_t)0);
-            short_press_pending = false;
-        }
+	    for (;;)
+	    {
+	        uint32_t notifyBits = 0;
+	        (void)xTaskNotifyWait(0, 0xFFFFFFFFu, &notifyBits, portMAX_DELAY);
 
-        if (double_click_detected && (now - last_press_time) > double_click_gap) {
-            double_click_detected = false;
-        }
+	        /* A) 雙擊窗口到期：若仍在等待第二下且目前沒有按住 → 單擊成立 */
+	        if (notifyBits & BTN_NOTIFY_DBL) {
+	            if (dbl_pending && !is_pressed) {
+	                dbl_pending = false;
+	                PRINTF("[Button] Short Press detected.\r\n");
+	                //PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
+	                //uint8_t v = SHORT_PRESS_HEX_VALUE;
+	                //(void)xQueueSend(spi_request_queue, &v, 0);
+	            }
+	            // 若此時已經在第二次按壓中（is_pressed==true），不回報短按，
+	            // 等放開時再判斷是雙擊或長按（第二次按壓可能超過 1 秒而成為長按）
+	        }
 
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
+	        /* B) 來自 PINT 的邊緣事件：去抖後判斷按下/放開 */
+	        if (notifyBits & BTN_NOTIFY_EDGE) {
+	            uint8_t l1 = btn_raw_read();
+	            vTaskDelay(debounceTicks);
+	            uint8_t l2 = btn_raw_read();
+	            uint8_t new_level = l2;
+
+	            if (new_level != stable_level) {
+	                stable_level = new_level;
+	                bool now_pressed = (stable_level == BTN_ACTIVE_LEVEL);
+	                TickType_t now = xTaskGetTickCount();
+
+	                if (now_pressed && !is_pressed) {
+	                    /* 放開 -> 按下：記錄開始時間 */
+	                    is_pressed = true;
+	                    press_start_tick = now;
+	                    // 不動 dbl_pending，讓第二次按壓可以覆蓋成「雙擊或長按」
+	                }
+	                else if (!now_pressed && is_pressed) {
+	                    /* 按下 -> 放開：在此刻才判定長按/短按/雙擊 */
+	                    is_pressed = false;
+	                    TickType_t press_dur = now - press_start_tick;
+
+	                    if (press_dur >= longTicks) {
+	                        /* 長按（放開才觸發）→ 最高優先權 */
+	                        PRINTF("[Button] Long Press (on-release) detected. \r\n");
+	                        //PRINTF("[Button] Long Press (on-release) detected. Sending 0x%02X\r\n",
+	                        //       LONG_PRESS_HEX_VALUE);
+	                        //uint8_t v = LONG_PRESS_HEX_VALUE;
+	                        //(void)xQueueSend(spi_request_queue, &v, 0);
+
+	                        /* 任何待定的單擊作廢 */
+	                        dbl_pending = false;
+	                        (void)xTimerStop(sBtnDblTimer, 0);
+	                    } else {
+	                        /* 未達長按：處理短按/雙擊 */
+	                        if (dbl_pending) {
+	                            /* 第二次在時間窗內完成 → 雙擊 */
+	                            dbl_pending = false;
+	                            (void)xTimerStop(sBtnDblTimer, 0);
+	                            PRINTF("[Button] Double Click detected.\r\n");
+	                            //PRINTF("[Button] Double Click detected. Sending 0x%02X\r\n",
+	                            //      DOUBLE_CLICK_HEX_VALUE);
+	                            //uint8_t v = DOUBLE_CLICK_HEX_VALUE;
+	                            //(void)xQueueSend(spi_request_queue, &v, 0);
+	                        } else {
+	                            /* 第一次短按：開窗等第二下 */
+	                            dbl_pending = true;
+	                            (void)xTimerStop(sBtnDblTimer, 0);
+	                            (void)xTimerStart(sBtnDblTimer, 0);
+	                        }
+	                    }
+	                }
+	            } // level changed
+	        } // EDGE
+	    } // for
+
 }
 
 /**
@@ -545,6 +614,31 @@ static void Scan_I2C_Devices(I3C_Type *base)
     PRINTF("[I2C]Scan complete.\n");
 }
 
+void pint_intr_callback(pint_pin_int_t pintr, uint32_t pmatch_status)
+{
+
+    if (pintr == FUN_KEY1_PINT_CH) {
+        BaseType_t xHPW = pdFALSE;
+        (void)xTaskNotifyFromISR(sButtonTaskHandle, BTN_NOTIFY_EDGE, eSetBits, &xHPW);
+        portYIELD_FROM_ISR(xHPW);
+    }
+
+	/*
+    PRINTF("\f\r\nPINT Pin Interrupt %d event detected.\r\n", pintr);
+    uint8_t pin_state;
+    if(pintr==0)
+    {
+    	pin_state = GPIO_PinRead(GPIO,POWER_KEY_PORT,POWER_KEY_PIN);
+
+    }
+    else if(pintr==1)
+    {
+    	pin_state = GPIO_PinRead(GPIO,FUN_KEY1_N_PORT,FUN_KEY1_N_PIN);
+    }
+    PRINTF(" pin_state:%d \r\n",pin_state);
+    */
+}
+
 /**
  * @brief 主程式進入點。
  * @details 負責初始化硬體、時鐘、GPIO、I2C 和 SPI 等周邊設備。
@@ -554,6 +648,7 @@ static void Scan_I2C_Devices(I3C_Type *base)
 int main(void)
 {
 	BOARD_InitHardware();
+
 	BOARD_I3C_Init(BOARD_PMIC_I3C_BASEADDR, BOARD_PMIC_I3C_CLOCK_FREQ);
 
 #if USE_EVENT
@@ -598,9 +693,14 @@ int main(void)
     GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 0);
     GPIO_PinInit(GPIO, RESET553_N_PORT, RESET553_N_PIN, &output_int_config);
 
-    /* Init FUN_KEY1 */
-    gpio_pin_config_t sw_config    = {kGPIO_DigitalInput, 0};
-    GPIO_PinInit(GPIO, FUN_KEY1_N_PORT, FUN_KEY1_N_PIN, &sw_config);
+    /* Initialize PINT */ /* Init FUN_KEY1 & Power_Key*/
+	PINT_Init(EXAMPLE_PINT_BASE);
+	NVIC_SetPriority(PIN_INT0_IRQn + FUN_KEY1_PINT_CH, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
+
+	PINT_PinInterruptConfig(EXAMPLE_PINT_BASE, kPINT_PinInt0, kPINT_PinIntEnableBothEdges, pint_intr_callback);
+	PINT_EnableCallbackByIndex(EXAMPLE_PINT_BASE, kPINT_PinInt0);
+	PINT_PinInterruptConfig(EXAMPLE_PINT_BASE, kPINT_PinInt1, kPINT_PinIntEnableBothEdges, pint_intr_callback);
+	PINT_EnableCallbackByIndex(EXAMPLE_PINT_BASE, kPINT_PinInt1);
 
     /* Init PCA9422 PMIC. */
  	BOARD_InitPmic();
@@ -673,7 +773,7 @@ int main(void)
         while (1);
     }
 
-	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 100, NULL, tskIDLE_PRIORITY + 3, NULL)!= pdPASS)
+	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 100, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
     {
         PRINTF(" BUTTON Task creation failed!.\r\n");
         while (1);

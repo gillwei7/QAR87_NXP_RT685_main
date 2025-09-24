@@ -30,8 +30,15 @@
 #define PWR_SW1_PIN  6U
 #define RESET553_N_PORT 0U
 #define RESET553_N_PIN  27U
-#define FUN_KEY1_N_PORT 2U
-#define FUN_KEY1_N_PIN  19U
+
+#define EXAMPLE_PINT_BASE PINT
+#define POWERKEY_PINT_PIN_INT0_SRC kINPUTMUX_GpioPort0Pin5ToPintsel  /* Power Key */
+#define FUNKEY_PINT_PIN_INT1_SRC kINPUTMUX_GpioPort0Pin26ToPintsel   /* Fun Key */
+#define POWER_KEY_PORT 0U
+#define POWER_KEY_PIN  5U
+#define FUN_KEY1_N_PORT 0U
+#define FUN_KEY1_N_PIN  26U
+
 /*${macro:end}*/
 
 /*******************************************************************************
