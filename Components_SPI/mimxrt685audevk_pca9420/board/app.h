@@ -37,6 +37,14 @@
 #define PCA9422_INTB_PORT 2U
 #define PCA9422_INTB_PIN 28U
 
+#define EXAMPLE_PINT_BASE PINT
+#define POWERKEY_PINT_PIN_INT0_SRC kINPUTMUX_GpioPort0Pin5ToPintsel  /* Power Key */
+#define FUNKEY_PINT_PIN_INT1_SRC kINPUTMUX_GpioPort0Pin26ToPintsel   /* Fun Key */
+#define POWER_KEY_PORT 0U
+#define POWER_KEY_PIN  5U
+#define FUN_KEY1_N_PORT 0U
+#define FUN_KEY1_N_PIN  26U
+
 #define RESET553_N_PORT 0U
 #define RESET553_N_PIN  27U
 #define AMP_RESET_PORT 0U

@@ -77,6 +77,21 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_DEBUG_UART_RXD_PIN_MASK (1U << 2U)
 /* @} */
 
+/*! @name PIO0_26 (coord A2), FUN_KEY1_N
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITPINS_LED_BLUE_PERIPHERAL GPIO           /*!<@brief Peripheral name */
+#define BOARD_INITPINS_LED_BLUE_SIGNAL PIO0               /*!<@brief Signal name */
+#define BOARD_INITPINS_LED_BLUE_CHANNEL 26                /*!<@brief Signal channel */
+
+/* Symbols to be used with GPIO driver */
+#define BOARD_INITPINS_LED_BLUE_GPIO GPIO                 /*!<@brief GPIO peripheral base pointer */
+#define BOARD_INITPINS_LED_BLUE_GPIO_PIN_MASK (1U << 26U) /*!<@brief GPIO pin mask */
+#define BOARD_INITPINS_LED_BLUE_PORT 0U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITPINS_LED_BLUE_PIN 26U                   /*!<@brief PORT pin number */
+#define BOARD_INITPINS_LED_BLUE_PIN_MASK (1U << 26U)      /*!<@brief PORT pin mask */
+                                                          /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

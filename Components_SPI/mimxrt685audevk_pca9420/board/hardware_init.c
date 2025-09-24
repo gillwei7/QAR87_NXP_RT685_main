@@ -10,6 +10,8 @@
 #include "clock_config.h"
 #include "board.h"
 #include "app.h"
+#include "fsl_inputmux.h"
+#include "fsl_pint.h"
 /*${header:end}*/
 
 /*${function:start}*/
@@ -28,6 +30,13 @@ void BOARD_InitHardware(void)
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
+
+    /* Connect trigger sources to PINT */
+    INPUTMUX_Init(INPUTMUX);
+    INPUTMUX_AttachSignal(INPUTMUX, kPINT_PinInt0, POWERKEY_PINT_PIN_INT0_SRC);
+    INPUTMUX_AttachSignal(INPUTMUX, kPINT_PinInt1, FUNKEY_PINT_PIN_INT1_SRC);
+    /* Turnoff clock to inputmux to save power. Clock is only needed to make changes */
+    INPUTMUX_Deinit(INPUTMUX);
 }
 
 void BOARD_ConfigPMICModes(pca9420_modecfg_t *cfg, uint32_t num)

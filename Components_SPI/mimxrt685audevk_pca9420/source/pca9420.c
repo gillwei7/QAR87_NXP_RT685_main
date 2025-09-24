@@ -20,6 +20,7 @@
 #include "glf70302.h"
 #include "aw93305.h"
 
+#include "fsl_pint.h"
 #include "fsl_dma.h"
 #include "fsl_i2s.h"
 #include "fsl_i2s_dma.h"
@@ -146,6 +147,21 @@ static void Scan_I2C_Devices(I3C_Type *base)
     PRINTF("[I2C]Scan complete.\n");
 }
 
+void pint_intr_callback(pint_pin_int_t pintr, uint32_t pmatch_status)
+{
+    PRINTF("\f\r\nPINT Pin Interrupt %d event detected.\r\n", pintr);
+    uint8_t pin_state;
+    if(pintr==0)
+    {
+    	pin_state = GPIO_PinRead(GPIO,POWER_KEY_PORT,POWER_KEY_PIN);
+
+    }
+    else if(pintr==1)
+    {
+    	pin_state = GPIO_PinRead(GPIO,FUN_KEY1_N_PORT,FUN_KEY1_N_PIN);
+    }
+    PRINTF(" pin_state:%d \r\n",pin_state);
+}
 
 /*! @brief Main function */
 int main(void)
@@ -164,6 +180,13 @@ int main(void)
     GPIO_PortInit(GPIO, GPIO0_PORT);
     GPIO_PortInit(GPIO, GPIO1_PORT);
     GPIO_PortInit(GPIO, GPIO2_PORT);
+
+    /* Initialize PINT */
+    PINT_Init(EXAMPLE_PINT_BASE);
+    PINT_PinInterruptConfig(EXAMPLE_PINT_BASE, kPINT_PinInt0, kPINT_PinIntEnableBothEdges, pint_intr_callback);
+    PINT_EnableCallbackByIndex(EXAMPLE_PINT_BASE, kPINT_PinInt0);
+    PINT_PinInterruptConfig(EXAMPLE_PINT_BASE, kPINT_PinInt1, kPINT_PinIntEnableBothEdges, pint_intr_callback);
+    PINT_EnableCallbackByIndex(EXAMPLE_PINT_BASE, kPINT_PinInt1);
 
 #if TOUCH_ENABLE
     GPIO_PinInit(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &sw_config);
