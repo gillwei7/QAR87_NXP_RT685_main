@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2015 - 2016, Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 
 #ifndef __Main_H__
 #define __Main_H__ 1

@@ -1,9 +1,10 @@
 /*
- * Copyright 2018-2019 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 
 #include <xtensa/config/core.h>
 #include <xtensa/xos.h>
@@ -112,7 +113,7 @@ void XOS_EnableMuIntr(void)
     }
 	/* Enable transmit and receive interrupt */
 	MU_EnableInterrupts(APP_MU, kMU_Rx0FullInterruptEnable);
-	PRINTF("RT685 DSP: intr is configured \r\n");
+	//PRINTF("RT685 DSP: intr is configured \r\n");
 }
 /*
 void BOARD_InitClock(void)
@@ -205,12 +206,14 @@ volatile void *StackEndPtr;
 extern XosSem 	 		  g_audioTask_audioVitProcessSemaphore;   						// Audio VIT task semaphore used to control the DSP audio process start/wait state.
 extern XosMutex 		  g_audio_vitBufferMutex;										// VIT buffer mutex for accessing VIT buffer on Audio and VIT task
 extern T_CircularAudioBuf_S16  VitCircBuff;
+extern T_CircularAudioBuf_S16  VitCircBuff_RawMic;
 extern VIT_DetectionStatus_en 	g_vitDetectionResult;
 extern PL_UINT16 				g_vitVcDetectionId;
 extern PL_UINT32 g_vitFramecount;
 
 extern status_t swProcessVIT( AUDIO_vit_st* 	 p_definitionVIT,
 					   PL_INT16*     			 p_inputAudioData,
+					   PL_INT16*     			 p_inputAudioData_RawMic,
 					   PL_INT32	     			 inputAudioDataSize_sample,
 					   VIT_DetectionStatus_en* 	 p_vitDetectionResult,
 					   PL_UINT16* 	 			 p_vitVcDetectionId);
@@ -263,10 +266,11 @@ int main(void)
 
     SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
     	PRINTF("RT685 DSP: Started -----IW611 BT HFP with Conversa------- \r\n");
-		PRINTF("RT685 DSP: started ----------- DspVer 0.1.2 ------------- \r\n");
+		PRINTF("RT685 DSP: started ----------- DspVer 0.1.3 ------------- \r\n");
     	PRINTF("RT685 DSP: Started -----IW611 BT HFP with Conversa------- \r\n");
     SEMA42_Unlock(APP_SEMA42, SEMA42_GATE);
 
+	InitVit();
 
 	/* Send flag to CM33 core to indicate DSP Core has started */
 	MU_SetFlags(APP_MU, BOOT_FLAG);
@@ -306,14 +310,10 @@ int main(void)
 	void *HeapPtr1;
 	HeapPtr1=GetCurrentHeapTail(32);
 
-	SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
-	PRINTF("RT685 DSP: heap base address, %x\r\n", (U32)HeapPtr1);
-	SEMA42_Unlock(APP_SEMA42, SEMA42_GATE);
-
-
-
-
-	InitVit();
+	//SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
+	//PRINTF("RT685 DSP: heap base address, %x\r\n", (U32)HeapPtr1);
+	//SEMA42_Unlock(APP_SEMA42, SEMA42_GATE);
+	//InitVit();
 
 	HeapPtr1=GetCurrentHeapTail(32);
 	SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
@@ -369,6 +369,7 @@ int main(void)
 	status_t retStatusFunc = kStatus_Success;
 	AUDIO_vit_st*       p_swIpVIT_handle    	 = &vitPluginParams;
 	PL_INT16*           p_conversaToVitBuff_16b  = NULL;
+	PL_INT16*           p_conversaToVitBuff_16b_RawMic  = NULL;
 
 
 	PRINTF("\n*************************************\r\n");
@@ -400,6 +401,8 @@ int main(void)
 		{
 			//xos_mutex_lock(&g_audio_vitBufferMutex);
 			p_conversaToVitBuff_16b = CirAudioBuf_ReadSamples_GetRdPtr_S16(&VitCircBuff, p_swIpVIT_handle->vitConfig.framesize);
+			p_conversaToVitBuff_16b_RawMic= CirAudioBuf_ReadSamples_GetRdPtr_S16(&VitCircBuff_RawMic, p_swIpVIT_handle->vitConfig.framesize);
+
 			//xos_mutex_unlock(&g_audio_vitBufferMutex);
 
 			/********************************************************************
@@ -412,6 +415,7 @@ int main(void)
 			DbgPin8Up();
 			VIT_Status = swProcessVIT( p_swIpVIT_handle,
 									   p_conversaToVitBuff_16b,
+									   p_conversaToVitBuff_16b_RawMic,
 									   p_swIpVIT_handle->vitConfig.framesize,
 									   &g_vitDetectionResult,
 									   &g_vitVcDetectionId

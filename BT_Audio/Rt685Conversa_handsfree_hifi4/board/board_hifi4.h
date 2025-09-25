@@ -1,10 +1,10 @@
 /*
- * Copyright 2018 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
- *
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 
 #ifndef _BOARD_HIFI4_H_
 #define _BOARD_HIFI4_H_

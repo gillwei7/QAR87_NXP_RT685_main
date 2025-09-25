@@ -1,3 +1,0 @@
-7 stage HiFi 5 with SP-vFPU, 
-HP-vFPU, NN extn and DMA 
-for high end AI-Speech enabled devices

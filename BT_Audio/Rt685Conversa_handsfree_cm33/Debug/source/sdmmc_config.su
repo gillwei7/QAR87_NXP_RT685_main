@@ -1,7 +1,7 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\CMSIS/core_cm33.h:2555:22:__NVIC_SetPriority	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_clock.h:888:20:CLOCK_EnableClock	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_power.h:352:20:POWER_DisablePD	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_iopctl.h:88:22:IOPCTL_PinMuxSet	24	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\CMSIS/core_cm33.h:2555:22:__NVIC_SetPriority	16	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_clock.h:888:20:CLOCK_EnableClock	24	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_power.h:352:20:POWER_DisablePD	16	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_iopctl.h:88:22:IOPCTL_PinMuxSet	24	static
 ../source/sdmmc_config.c:50:10:BOARD_USDHC0ClockConfiguration	8	static
 ../source/sdmmc_config.c:68:6:BOARD_SDCardDAT3PullFunction	16	static
 ../source/sdmmc_config.c:80:6:BOARD_SDCardDetectInit	16	static

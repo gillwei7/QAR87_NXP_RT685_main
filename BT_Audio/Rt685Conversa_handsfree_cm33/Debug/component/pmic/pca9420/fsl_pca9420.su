@@ -1,4 +1,4 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_power.h:431:24:POWER_GetPmicMode	24	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\drivers/fsl_power.h:431:24:POWER_GetPmicMode	24	static
 ../component/pmic/pca9420/fsl_pca9420.c:26:6:PCA9420_GetDefaultConfig	16	static
 ../component/pmic/pca9420/fsl_pca9420.c:71:6:PCA9420_Init	32	static
 ../component/pmic/pca9420/fsl_pca9420.c:106:6:PCA9420_GetDefaultModeConfig	16	static

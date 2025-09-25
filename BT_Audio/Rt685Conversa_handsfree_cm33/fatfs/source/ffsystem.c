@@ -1,3 +1,10 @@
+/*
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 /*------------------------------------------------------------------------*/
 /* A Sample Code of User Provided OS Dependent Functions for FatFs        */
 /*------------------------------------------------------------------------*/

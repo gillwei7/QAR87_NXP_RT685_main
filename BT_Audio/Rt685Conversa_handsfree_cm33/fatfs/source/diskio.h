@@ -1,3 +1,10 @@
+/*
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 /*-----------------------------------------------------------------------/
 /  Low level disk interface modlue include file   (C)ChaN, 2019          /
 /-----------------------------------------------------------------------*/

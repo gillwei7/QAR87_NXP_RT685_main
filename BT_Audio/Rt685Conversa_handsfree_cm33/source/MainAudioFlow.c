@@ -1,3 +1,10 @@
+/*
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 
 
 #include "pin_mux.h"
@@ -83,6 +90,7 @@ extern U16 UsbDnStreamingStopMonitorCnt;
 extern U16 UsbUpStreamingIsStarted;
 extern U16 UsbDnStreamingIsStarted;
 
+//main local PDMI2S audio flow
 __attribute__((section("CodeQuickAccess")))
 void ProcessAudio_AfterAudioInputBufIsReady(void)
 {
@@ -107,15 +115,22 @@ void ProcessAudio_AfterAudioInputBufIsReady(void)
 
 	#if 1	//folding --- prepare mic input pointers, and get int type of mic signal data
 		//take real mic audio input as incoming data
-
+#if EnableMic01 == 1
 		PdmCh0DmaTransferringIsUsingBufA=GetPdmCh0DmaTransferringIsUsingBufAOrB();
+#endif
+#if EnableMic23 == 1
 		PdmCh2DmaTransferringIsUsingBufA=GetPdmCh2DmaTransferringIsUsingBufAOrB();
+#endif
+#if EnableMic45 == 1
 		PdmCh4DmaTransferringIsUsingBufA=GetPdmCh4DmaTransferringIsUsingBufAOrB();
+#endif
+#if EnableMic67 == 1
 		PdmCh6DmaTransferringIsUsingBufA=GetPdmCh6DmaTransferringIsUsingBufAOrB();
+#endif
 
 		I2S1DmaTransferringIsUsingBufA=GetI2S1DmaTransferringIsUsingBufAOrB();
 		I2S3DmaTransferringIsUsingBufA=GetI2S3DmaTransferringIsUsingBufAOrB();
-
+#if EnableMic01 == 1
 		if(PdmCh0DmaTransferringIsUsingBufA)
 		{
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
@@ -127,6 +142,8 @@ void ProcessAudio_AfterAudioInputBufIsReady(void)
 			MicInputCh0Ptr=MicInputDmaDualBuf_0 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh1Ptr=MicInputDmaDualBuf_1 + 0 * AudioFrameSizeInSamplePerCh;
 		}
+#endif
+#if EnableMic23 == 1
 		if(PdmCh2DmaTransferringIsUsingBufA)
 		{
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
@@ -138,6 +155,8 @@ void ProcessAudio_AfterAudioInputBufIsReady(void)
 			MicInputCh2Ptr=MicInputDmaDualBuf_2 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh3Ptr=MicInputDmaDualBuf_3 + 0 * AudioFrameSizeInSamplePerCh;
 		}
+#endif
+#if EnableMic45 == 1
 		if(PdmCh4DmaTransferringIsUsingBufA)
 		{
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
@@ -149,6 +168,8 @@ void ProcessAudio_AfterAudioInputBufIsReady(void)
 			MicInputCh4Ptr=MicInputDmaDualBuf_4 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh5Ptr=MicInputDmaDualBuf_5 + 0 * AudioFrameSizeInSamplePerCh;
 		}
+#endif
+#if EnableMic67 == 1
 		if(PdmCh6DmaTransferringIsUsingBufA)
 		{
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
@@ -160,19 +181,27 @@ void ProcessAudio_AfterAudioInputBufIsReady(void)
 			MicInputCh6Ptr=MicInputDmaDualBuf_6 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh7Ptr=MicInputDmaDualBuf_7 + 0 * AudioFrameSizeInSamplePerCh;
 		}
-
+#endif
 		//left shift 8 bits to have mic signal reach the full scale --- raw data is 24 bit effective located in the lower 24bits
 		for(int i=0;i<AudioFrameSizeInSamplePerCh;i++)
 		{
+#if EnableMic01 == 1
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[0][i]=(MicInputCh0Ptr[i]<<8);
 			//VarBlockSharedByDspAndMcu.PdmInAudioBuf[0][i]=i*0x100000;
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[1][i]=(MicInputCh1Ptr[i]<<8);
+#endif
+#if EnableMic23 == 1
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[2][i]=(MicInputCh2Ptr[i]<<8);
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[3][i]=(MicInputCh3Ptr[i]<<8);
+#endif
+#if EnableMic45 == 1
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[4][i]=(MicInputCh4Ptr[i]<<8);
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[5][i]=(MicInputCh5Ptr[i]<<8);
+#endif
+#if EnableMic67 == 1
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[6][i]=(MicInputCh6Ptr[i]<<8);
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[7][i]=(MicInputCh7Ptr[i]<<8);
+#endif
 		}
 
 		if(I2S1DmaTransferringIsUsingBufA)
@@ -348,7 +377,7 @@ void ProcessAudio_AfterAudioInputBufIsReady(void)
 			UartComReportValue_S32_3=(int)VarBlockSharedByDspAndMcu.MonitorInfoArray1[CycCntInfoIdx1*4+2];
 			UartComReportValue_S32_4=(int)VarBlockSharedByDspAndMcu.MonitorInfoArray1[CycCntInfoIdx1*4+3];
 
-            sprintf((char *)s_currSendBuf,"W#%d,%d,%d,%d,%d\r\n",CycCntInfoIdx1,UartComReportValue_S32_1,UartComReportValue_S32_2,UartComReportValue_S32_3,UartComReportValue_S32_4);
+//B36932 make log simpler          sprintf((char *)s_currSendBuf,"W#%d,%d,%d,%d,%d\r\n",CycCntInfoIdx1,UartComReportValue_S32_1,UartComReportValue_S32_2,UartComReportValue_S32_3,UartComReportValue_S32_4);
 			VarBlockSharedByDspAndMcu.MonitorInfoArray1[3]=0;
 
 			SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);

@@ -1,7 +1,7 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:506:20:atomic_set_bit	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1495:21:net_buf_add	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1512:21:net_buf_add_mem	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:2078:21:net_buf_pull_mem	16	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:506:20:atomic_set_bit	24	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1495:21:net_buf_add	16	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1512:21:net_buf_add_mem	24	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:2078:21:net_buf_pull_mem	16	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_l2cap_internal.h:242:19:bt_l2cap_send	32	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_l2cap.c:111:6:bt_l2cap_register_ecred_cb	16	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_l2cap.c:230:6:bt_l2cap_chan_remove	24	static

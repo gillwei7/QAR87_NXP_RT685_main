@@ -1,9 +1,10 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 
 #ifndef __SubFunc___
 #define __SubFunc___
@@ -45,13 +46,13 @@
 #define     LedOn_B()                   GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 1)
 #define     LedOff_B()                  GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 0)
 
-#define     BtnPin1Port                   0
-#define     BtnPin2Port                   1
+#define     BtnPin1Port                   1
+#define     BtnPin2Port                   0
 //#define     BtnPin3Port                   2
 //#define     BtnPin4Port                   2
 
-#define     BtnPin1                       10
-#define     BtnPin2                       1
+#define     BtnPin1                       1
+#define     BtnPin2                       10
 //#define     BtnPin3                       8
 //#define     BtnPin4                       9
 
@@ -68,6 +69,9 @@ extern void OpeningBlink(U32 l);
 extern void InitDbgPin(void);
 extern void delay_us(U32 d);
 extern void delay_ms(U32 d);
+
+void DelayMsByReadingCycCnt(int MsToDelay);
+void DelayUsByReadingCycCnt(int UsToDelay);
 
 extern void TestGetCycCnt(void);
 

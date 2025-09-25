@@ -1,9 +1,11 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
 #include "fsl_debug_console.h"
 #include <porting.h>
 #include <string.h>

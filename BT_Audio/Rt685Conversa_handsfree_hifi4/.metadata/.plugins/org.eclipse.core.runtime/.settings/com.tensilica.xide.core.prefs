@@ -1,6 +1,0 @@
-eclipse.preferences.version=1
-multipleSystemMode=true
-searchpath=C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/nxp_rt500_RI23_11_newlib/config/nxp_rt500_RI23_11_newlib-params;C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/XRC_FusionF1_All_cache/config/XRC_FusionF1_All_cache-params;C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/nxp_rt600_RI23_11_newlib/config/nxp_rt600_RI23_11_newlib-params;C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/hifi3z_ss_spfpu_7/config/hifi3z_ss_spfpu_7-params;C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/tie_dev1/config/tie_dev1-params;C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/hifi4_ss_spfpu_7/config/hifi4_ss_spfpu_7-params;C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/hifi3_ss_spfpu_7/config/hifi3_ss_spfpu_7-params;C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/tie_dev2/config/tie_dev2-params;C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/sample_flix/config/sample_flix-params;C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/sample_controller/config/sample_controller-params;C\:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/sample_config/config/sample_config-params
-startup.discoverbuilds=false
-ws.open.count=01
-xtensaVersionPref=RI-2019.1

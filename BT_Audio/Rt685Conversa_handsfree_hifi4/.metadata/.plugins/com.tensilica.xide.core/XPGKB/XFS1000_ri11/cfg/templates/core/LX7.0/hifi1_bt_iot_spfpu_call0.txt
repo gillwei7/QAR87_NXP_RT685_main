@@ -1,1 +1,0 @@
-5 stage hifi1 with sp-vfpu for bluetooth and iot devices

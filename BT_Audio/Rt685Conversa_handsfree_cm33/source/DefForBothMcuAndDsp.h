@@ -1,9 +1,10 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 
 #ifndef __DefForBothMcuAndDsp_h__
 #define __DefForBothMcuAndDsp_h__

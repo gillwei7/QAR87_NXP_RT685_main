@@ -1,4 +1,4 @@
-../source/AudioProcess.c:65:6:CheckI2SInputBufAodAndAdjustAudioPll	24	static
-../source/AudioProcess.c:194:6:GenerateSinWav_S32	32	static
-../source/AudioProcess.c:205:6:GenerateSinWav_S16_LRMixed	24	static
-../source/AudioProcess.c:216:6:GenerateSinWav_S16_SingleCh	24	static
+../source/AudioProcess.c:72:6:CheckI2SInputBufAodAndAdjustAudioPll	24	static
+../source/AudioProcess.c:201:6:GenerateSinWav_S32	32	static
+../source/AudioProcess.c:212:6:GenerateSinWav_S16_LRMixed	24	static
+../source/AudioProcess.c:223:6:GenerateSinWav_S16_SingleCh	24	static

@@ -1,0 +1,61 @@
+go homeaiconversation
+answer the phone
+reject the phone
+hang up the phone
+take photo
+take picture
+start translation
+start video ai
+start ai conversation
+go media player
+play
+pause
+previous
+next
+volume upmediaplayer
+volume downmediaplayer
+go homemediaplayer
+play music
+pause music
+previous song
+next song
+volume upmusicplayer
+volume downmusicplayer
+go homemusicplayer
+go homephoto
+go hometranslation
+go homevideoai
+go homevideorecording
+
+
+
+      [AIConversation]       {Home}                               go homeaiconversation
+      [Call]                 {answer}                             answer the phone
+      [Call]                 {hang_up}                            hang up the phone
+      [Call]                 {reject}                             reject the phone
+      [Home]                 {AIConversation}                     start ai conversation
+      [Home]                 {MediaPlayer}                        go media player
+      [Home]                 {Photo}                              take photo / take picture
+      [Home]                 {Translation}                        start translation
+      [Home]                 {VideoAI}                            start video ai
+      [Home]                 {VideoRecording}                     start recording
+      [MediaPlayer]          {Home}                               go homemediaplayer
+      [MediaPlayer]          {down}                               volume downmediaplayer
+      [MediaPlayer]          {next}                               next
+      [MediaPlayer]          {pause}                              pause
+      [MediaPlayer]          {play}                               play
+      [MediaPlayer]          {previous}                           previous
+      [MediaPlayer]          {up}                                 volume upmediaplayer
+      [MusicPlayer]          {Home}                               go homemusicplayer
+      [MusicPlayer]          {down}                               volume downmusicplayer
+      [MusicPlayer]          {next}                               next song
+      [MusicPlayer]          {pause}                              pause music
+      [MusicPlayer]          {play}                               play music
+      [MusicPlayer]          {previous}                           previous song
+      [MusicPlayer]          {up}                                 volume upmusicplayer
+      [Photo]                {Home}                               go homephoto
+      [Translation]          {Home}                               go hometranslation
+      [VideoAI]              {Home}                               go homevideoai
+      [VideoRecording]       {Home}                               go homevideorecording
+      
+      

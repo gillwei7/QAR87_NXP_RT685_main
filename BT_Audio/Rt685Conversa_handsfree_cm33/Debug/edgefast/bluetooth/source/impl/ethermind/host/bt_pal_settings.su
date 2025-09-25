@@ -1,5 +1,5 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:428:20:atomic_test_bit	24	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:446:20:atomic_test_and_clear_bit	24	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:428:20:atomic_test_bit	24	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/atomic.h:446:20:atomic_test_and_clear_bit	24	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_settings.c:25:6:bt_settings_encode_key	80	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_settings.c:95:5:bt_settings_decode_key	24	static
 ../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_settings.c:118:12:set_setting	48	static

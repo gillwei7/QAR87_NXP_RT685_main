@@ -1,3 +1,10 @@
+/*
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 
 #ifndef __AudioIoCfg_i2s_h__
 #define __AudioIoCfg_i2s_h__

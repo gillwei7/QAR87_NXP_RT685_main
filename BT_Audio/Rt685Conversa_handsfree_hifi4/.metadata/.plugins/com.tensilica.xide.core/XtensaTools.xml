@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<XtensaToolsRegistry>
-    <entry path="C:/usr/xtensa/XtDevTools/install/tools/RI-2019.1-win32/XtensaTools" version="RI-2019.1"/>
-    <entry path="C:/usr/xtensa/XtDevTools/install/tools/RI-2021.8-win32/XtensaTools" version="RI-2021.8"/>
-    <entry path="C:/usr/xtensa/XtDevTools/install/tools/RI-2023.11-win32/XtensaTools" version="RI-2023.11"/>
-</XtensaToolsRegistry>

@@ -1,2 +1,0 @@
-7 stage HiFi 5 with SP-vFPU 
-for smart speaker type devices

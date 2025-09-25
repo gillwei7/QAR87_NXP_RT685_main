@@ -1,10 +1,10 @@
 /*
- * Copyright 2022 NXP
- * Copyright 2021-2025 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 
 #ifndef NXP_CONVERSA_TUNING_PARAM_H
 #define NXP_CONVERSA_TUNING_PARAM_H

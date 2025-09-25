@@ -1,7 +1,7 @@
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:385:20:sys_put_le16	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:400:20:sys_put_le24	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1495:21:net_buf_add	16	static
-D:\Git\NXP\RT685\NXP_RT685_BU8\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:243:19:bt_addr_le_to_str	80	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:385:20:sys_put_le16	16	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/sys/byteorder.h:400:20:sys_put_le24	16	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/net/buf.h:1495:21:net_buf_add	16	static
+D:\Git\NXP\RT685\Q_dev_board_BT_V1_3_1\nxp_rt685_bu8\BT_Audio\Rt685Conversa_handsfree_cm33\edgefast\bluetooth\include/bluetooth/addr.h:243:19:bt_addr_le_to_str	80	static
 ../source/app_handsfree.c:114:13:auth_cancel	48	static
 ../source/app_handsfree.c:123:13:passkey_display	16	static
 ../source/app_handsfree.c:143:13:connected	16	static

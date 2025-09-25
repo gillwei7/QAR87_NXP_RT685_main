@@ -1,10 +1,11 @@
 /*
- * Copyright 2019 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
- *
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
 #ifndef _DSP_CONFIG_H_
 #define _DSP_CONFIG_H_
 

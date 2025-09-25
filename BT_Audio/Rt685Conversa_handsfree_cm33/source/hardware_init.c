@@ -399,75 +399,6 @@ static void i2c_release_bus_delay(void)
 }
 
 
-
-
-
-
-/*! @name PIO2_30 (coord P16), J18[2]/U8[3]/U17[B6]/SDA_CODEC
-  @{ */
-/* Routed pin properties */
-/*!
- * @brief Peripheral name */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SDA_PERIPHERAL GPIO
-/*!
- * @brief Signal name */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SDA_SIGNAL PIO2
-/*!
- * @brief Signal channel */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SDA_CHANNEL 30
-
-/* Symbols to be used with GPIO driver */
-/*!
- * @brief GPIO peripheral base pointer */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SDA_GPIO GPIO
-/*!
- * @brief GPIO pin mask */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SDA_GPIO_PIN_MASK (1U << 30U)
-/*!
- * @brief PORT peripheral base pointer */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SDA_PORT 2U
-/*!
- * @brief PORT pin number */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SDA_PIN 30U
-/*!
- * @brief PORT pin mask */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SDA_PIN_MASK (1U << 30U)
-/* @} */
-
-/*! @name PIO2_29 (coord N17), J18[1]/U8[2]/U17[A6]/SCL_CODEC
-  @{ */
-/* Routed pin properties */
-/*!
- * @brief Peripheral name */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SCL_PERIPHERAL GPIO
-/*!
- * @brief Signal name */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SCL_SIGNAL PIO2
-/*!
- * @brief Signal channel */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SCL_CHANNEL 29
-
-/* Symbols to be used with GPIO driver */
-/*!
- * @brief GPIO peripheral base pointer */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SCL_GPIO GPIO
-/*!
- * @brief GPIO pin mask */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SCL_GPIO_PIN_MASK (1U << 29U)
-/*!
- * @brief PORT peripheral base pointer */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SCL_PORT 2U
-/*!
- * @brief PORT pin number */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SCL_PIN 29U
-/*!
- * @brief PORT pin mask */
-#define BOARD_INITI3CPINSASGPIO_I3C0_SCL_PIN_MASK (1U << 29U)
-/* @} */
-
-#define IOPCTL_PIO_SLEW_RATE_SLOW 0x80u /*!<@brief Slow mode */
-
-
 void BOARD_I3C_ReleaseBus(void)
 {
     uint8_t i = 0;
@@ -517,6 +448,7 @@ void BOARD_I3C_ReleaseBus(void)
     i2c_release_bus_delay();
 }
 extern void UsbAppInit(void);
+
 void BOARD_InitHardware(void)
 {
     DMA_Type *dmaBases[] = DMA_BASE_PTRS;
@@ -548,7 +480,7 @@ void BOARD_InitHardware(void)
 
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
-	PRINTF("RT685 MCU: ------------ McuVer 0.1.2 ------------ \r\n");
+	PRINTF("RT685 MCU: ------------ McuVer 0.1.3.1 ---------- \r\n");
 	PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
 
 	PRINTF("\r\n");

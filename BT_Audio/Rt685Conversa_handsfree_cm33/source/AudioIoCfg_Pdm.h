@@ -1,3 +1,10 @@
+/*
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 
 #ifndef __AudioIoCfg_pdm_h__
 #define __AudioIoCfg_pdm_h__
@@ -15,8 +22,8 @@
 
 #define EnableMic01		1
 #define EnableMic23		1
-#define EnableMic45		1
-#define EnableMic67		1
+#define EnableMic45		0
+#define EnableMic67		0
 
 #define DMAREQ_DMIC0 16U
 #define DMAREQ_DMIC1 17U

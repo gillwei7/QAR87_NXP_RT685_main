@@ -1,10 +1,11 @@
-
 /*
- * Copyright 2021, 2024 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
 
 #include "sco_audio_pl.h"
 #include "clock_config.h"
@@ -546,7 +547,7 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 
 				//PDM, fc3, fc1 and chained DMA configuring
 				//we open pdm ports here
-				Init_MicDmaCfgCh(0xff);	//mic0,1,2,3,4,5,6,7
+				Init_MicDmaCfgCh(0xff);	//mic0,1,2,3,4,5
 				BOARD_Init_DMA_PDM(0xff);
 				BOARD_Init_DMIC(0xff,0); //0: no skip general Dmic init. If not the first mic init, then should skip.
 				ConfigDmicChainedDma(0xff);
@@ -854,10 +855,20 @@ void ButtonEventProcess(void)
 		if(VarBlockSharedByDspAndMcu.MonitorInfoArray1[0]>1)
 			VarBlockSharedByDspAndMcu.MonitorInfoArray1[0]=0;
 
+		//on board user button 1 is short pressed
+		VarBlockSharedByDspAndMcu.U32ControlPara[0]=1;
+
 		BtnEvtVarGroup[0].BtnEvt1=0;
 	}
 	if(BtnEvtVarGroup[1].BtnEvt1==1)
 	{
+		VarBlockSharedByDspAndMcu.MonitorInfoArray1[0]++;
+		if(VarBlockSharedByDspAndMcu.MonitorInfoArray1[0]>1)
+			VarBlockSharedByDspAndMcu.MonitorInfoArray1[0]=0;
+
+		//on board user button 2 is short pressed
+		VarBlockSharedByDspAndMcu.U32ControlPara[1]=1;
+
 		BtnEvtVarGroup[1].BtnEvt1=0;
 	}
 }
