@@ -61,9 +61,11 @@
 #define DEMO_AUDIO_BIT_WIDTH            (16)
 #define DEMO_AUDIO_SAMPLE_RATE          (48000)
 #define DEMO_AUDIO_PROTOCOL             kCODEC_BusI2S
-#define DEMO_I2S_TX                     (I2S1)//(I2S3)
+#define DEMO_I2S_TX_toAmp               (I2S1)//(I2S3)
+#define DEMO_I2S_TX_toNova              (I2S5)
 #define DEMO_DMA                        (DMA0)
-#define DEMO_I2S_TX_CHANNEL             (3)//(7)
+#define DEMO_I2S_TX_CHANNEL_toAmp       (3)//(7)
+#define DEMO_I2S_TX_CHANNEL_toNova      (11)
 #define DEMO_I2S_CLOCK_DIVIDER          16
 #define DEMO_I2S_TX_MODE                kI2S_MasterSlaveNormalMaster
 #define DEMO_CODEC_VOLUME               100U

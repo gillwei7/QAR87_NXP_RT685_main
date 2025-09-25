@@ -76,7 +76,8 @@ static void StopSoundPlayback(void)
     close_aw88166_pa(AW_DEV_0);
     close_aw88166_pa(AW_DEV_1);
 
-    I2S_TransferAbortDMA(DEMO_I2S_TX, &s_TxHandle);
+    I2S_TransferAbortDMA(DEMO_I2S_TX_toAmp, &s_TxHandle);
+    //I2S_TransferAbortDMA(DEMO_I2S_TX_toNova, &s_TxHandle);
 
 
 }
@@ -88,11 +89,12 @@ static void StartSoundPlayback(void)
     s_TxTransfer.data     = &g_Music[0];
     s_TxTransfer.dataSize = sizeof(g_Music);
 
-    I2S_TxTransferCreateHandleDMA(DEMO_I2S_TX, &s_TxHandle, &s_DmaTxHandle, TxCallback, (void *)&s_TxTransfer);
+    I2S_TxTransferCreateHandleDMA(DEMO_I2S_TX_toAmp, &s_TxHandle, &s_DmaTxHandle, TxCallback, (void *)&s_TxTransfer);
+    //I2S_TxTransferCreateHandleDMA(DEMO_I2S_TX_toNova, &s_TxHandle, &s_DmaTxHandle, TxCallback, (void *)&s_TxTransfer);
     /* need to queue two transmit buffers so when the first one
      * finishes transfer, the other immediatelly starts */
-    I2S_TxTransferSendDMA(DEMO_I2S_TX, &s_TxHandle, s_TxTransfer);
-    I2S_TxTransferSendDMA(DEMO_I2S_TX, &s_TxHandle, s_TxTransfer);
+    I2S_TxTransferSendDMA(DEMO_I2S_TX_toAmp, &s_TxHandle, s_TxTransfer);
+    //I2S_TxTransferSendDMA(DEMO_I2S_TX_toNova, &s_TxHandle, s_TxTransfer);
 
     start_aw88166_pa(AW_DEV_0, "Music");
     start_aw88166_pa(AW_DEV_1, "Music");
@@ -292,13 +294,18 @@ int main(void)
     s_TxConfig.divider     = 8;//(24576000U / 16000U / 32U / 2);//DEMO_I2S_CLOCK_DIVIDER;
     s_TxConfig.masterSlave = DEMO_I2S_TX_MODE;
 
-    I2S_TxInit(DEMO_I2S_TX, &s_TxConfig);
+    I2S_TxInit(DEMO_I2S_TX_toAmp, &s_TxConfig);
+    //I2S_TxInit(DEMO_I2S_TX_toNova, &s_TxConfig);
 
     DMA_Init(DEMO_DMA);
 
-    DMA_EnableChannel(DEMO_DMA, DEMO_I2S_TX_CHANNEL);
-    DMA_SetChannelPriority(DEMO_DMA, DEMO_I2S_TX_CHANNEL, kDMA_ChannelPriority3);
-    DMA_CreateHandle(&s_DmaTxHandle, DEMO_DMA, DEMO_I2S_TX_CHANNEL);
+    DMA_EnableChannel(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp);
+    DMA_SetChannelPriority(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp, kDMA_ChannelPriority3);
+    DMA_CreateHandle(&s_DmaTxHandle, DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp);
+
+    //DMA_EnableChannel(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toNova);
+    //DMA_SetChannelPriority(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toNova, kDMA_ChannelPriority3);
+    //DMA_CreateHandle(&s_DmaTxHandle, DEMO_DMA, DEMO_I2S_TX_CHANNEL_toNova);
 
     StartSoundPlayback();
 

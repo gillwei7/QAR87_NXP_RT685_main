@@ -27,6 +27,9 @@ void BOARD_InitHardware(void)
     /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
     CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
 
+    /* attach AUDIO PLL clock to FLEXCOMM1 (I2S5) */
+    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
+
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
