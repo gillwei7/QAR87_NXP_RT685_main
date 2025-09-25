@@ -233,7 +233,7 @@ int main(void)
     /* Init board hardware. */
     CLOCK_SetXtalFreq(24000000U);                    /* Sets external XTAL OSC freq */
     INPUTMUX_Init(INPUTMUX);
-	BOARD_InitDebugConsole();	//already inited in MCU
+	//BOARD_InitDebugConsole();	//already inited in MCU
 	//BOARD_InitClock();			//this function cannot be removed --- !
 
     INPUTMUX_AttachSignal(INPUTMUX, 1U, kINPUTMUX_MuBToDspInterrupt);
