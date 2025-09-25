@@ -663,6 +663,7 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)
 
 		HAL_AudioTxInit((hal_audio_handle_t)&tx_speaker_handle[0], &txSpeakerConfig);
 		HAL_AudioTxInstallCallback((hal_audio_handle_t)&tx_speaker_handle[0], txSpeakerCallback, NULL);
+		PRINTF("Init_Board_RingTone_Audio finished \r\n");
 #if !DEV_AUDIO_DEBUG_GPIO
 		if (CODEC_Init(&codec_handle, &boardCodecScoConfig1) != kStatus_Success)
 		{

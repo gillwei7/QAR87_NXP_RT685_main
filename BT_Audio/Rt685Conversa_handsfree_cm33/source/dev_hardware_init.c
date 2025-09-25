@@ -319,8 +319,12 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
 
         /* attach AUDIO PLL clock to FLEXCOMM1 (I2S2) */
         CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);
+
+        // gill new
+        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
+
         /* attach AUDIO PLL clock to FLEXCOMM3 (I2S5) */
-        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
+        //CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
 
         DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, CLOCK_GetFlexCommClkFreq(5U));
         PRINTF("DbgConsole_Init on FC5");
@@ -354,6 +358,7 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
 		SYSCTL1->FCCTRLSEL[4] = SYSCTL1_FCCTRLSEL_SCKINSEL(2) | SYSCTL1_FCCTRLSEL_WSINSEL(2);
 #endif
 
+		// gill AMP initial 8K or 16K
 #if !PIN_CONFIG_DEV_BOARD
         switch (sampleRate)
         {
@@ -417,19 +422,19 @@ void dev_BOARD_InitHardware(void)
     CLOCK_SetClkDiv(kCLOCK_DivI3cClk, 20);
 
     /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
-    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
+    // gill remove
+    //CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
 
     /* Attach AUX0_PLL clock to flexspi with divider 4*/
 //		        BOARD_SetFlexspiClock(2, 8);
 
-    // gill for BT USART0
-    /* attach FRG0 clock to FLEXCOMM0 */
-    CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
-    CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
-
     dev_BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
+
+    // gill for BT USART0
+    CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
+    CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
 
     PRINTF("RT685 MCU: start\r\n");
 
