@@ -79,14 +79,14 @@
 #define DEMO_MICBUF_TX_INSTANCE (2U)
 #define DEMO_MICBUF_RX_INSTANCE (1U)
 #define DEMO_SPKBUF_TX_INSTANCE (3U)
-#define DEMO_SPKBUF_RX_INSTANCE (5U)
+#define DEMO_SPKBUF_RX_INSTANCE (4U)//(5U) // gill modify BT receive FC5->FC4
 
 /* DMA */
 #define EXAMPLE_DMA_INSTANCE      (0U)
 #define EXAMPLE_MICBUF_TX_CHANNEL (5U)
 #define EXAMPLE_MICBUF_RX_CHANNEL (2U)
 #define EXAMPLE_SPKBUF_TX_CHANNEL (7U)
-#define EXAMPLE_SPKBUF_RX_CHANNEL (10U)
+#define EXAMPLE_SPKBUF_RX_CHANNEL (8U)//(10U) // gill modify BT receive DMA10->DMA8
 
 /* demo audio data channel */
 #define DEMO_MICBUF_TX_CHANNEL (kHAL_AudioMono)
@@ -314,28 +314,43 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
         // For debug UART
         /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
         CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3); // Do not need FROG?
-        DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, CLOCK_GetFlexCommClkFreq(3U));
-        PRINTF("DbgConsole_Init\n");
 
         /* attach AUDIO PLL clock to FLEXCOMM1 (I2S2) */
         CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);
         /* attach AUDIO PLL clock to FLEXCOMM3 (I2S5) */
         CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
 
+        DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, CLOCK_GetFlexCommClkFreq(5U));
+        PRINTF("DbgConsole_Init on FC5");
+
         /* attach AUDIO PLL clock to MCLK (AudioPll * (18 / 26) / 15 / 1 = 24.576MHz / 22.5792MHz) */
         CLOCK_AttachClk(kAUDIO_PLL_to_MCLK_CLK);
         CLOCK_SetClkDiv(kCLOCK_DivMclkClk, 1);
         SYSCTL1->MCLKPINDIR = SYSCTL1_MCLKPINDIR_MCLKPINDIR_MASK;
 
+        // gill
+        // Send to BT on FC2, Receive from BT FC5->FC4
+#if 0
         /* Set shared signal set 0: SCK, WS from Flexcomm1 */
         SYSCTL1->SHAREDCTRLSET[0] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(1) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(1);
         /* Set flexcomm3 SCK, WS from shared signal set 0 */
-        //SYSCTL1->FCCTRLSEL[3] = SYSCTL1_FCCTRLSEL_SCKINSEL(1) | SYSCTL1_FCCTRLSEL_WSINSEL(1);
-
+        SYSCTL1->FCCTRLSEL[3] = SYSCTL1_FCCTRLSEL_SCKINSEL(1) | SYSCTL1_FCCTRLSEL_WSINSEL(1);
         /* Set shared signal set 1: SCK, WS from Flexcomm5 */
         SYSCTL1->SHAREDCTRLSET[1] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(5) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(5);
         /* Set flexcomm2 SCK, WS from shared signal set 1 */
         SYSCTL1->FCCTRLSEL[2] = SYSCTL1_FCCTRLSEL_SCKINSEL(2) | SYSCTL1_FCCTRLSEL_WSINSEL(2);
+#else
+        // FC1, FC3 not changed
+        /* Set shared signal set 0: SCK, WS from Flexcomm1 */
+        SYSCTL1->SHAREDCTRLSET[0] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(1) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(1);
+        /* Set flexcomm3 SCK, WS from shared signal set 0 */
+        SYSCTL1->FCCTRLSEL[3] = SYSCTL1_FCCTRLSEL_SCKINSEL(1) | SYSCTL1_FCCTRLSEL_WSINSEL(1);
+
+        /* Set shared signal set 1: SCK, WS from Flexcomm2 */
+        SYSCTL1->SHAREDCTRLSET[1] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(2) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(2);
+        /* Set flexcomm4 SCK, WS from shared signal set 1 */
+        SYSCTL1->FCCTRLSEL[4] = SYSCTL1_FCCTRLSEL_SCKINSEL(2) | SYSCTL1_FCCTRLSEL_WSINSEL(2);
+#endif
 
         switch (sampleRate)
         {
