@@ -115,6 +115,7 @@ const clock_audio_pll_config_t audioPllConfig = {
     .audio_pll_mult = kCLOCK_AudioPllMult22  /* Divide by 22 */
 };
 
+#if !PIN_CONFIG_DEV_BOARD
 //boardCodecScoConfig and wm8904ScoConfig is for audio after ring tone
 wm8904_config_t wm8904ScoConfig = {
     .i2cConfig          = {.codecI2CInstance = BOARD_CODEC_I2C_INSTANCE, .codecI2CSourceClock = 25010526},
@@ -149,6 +150,7 @@ wm8904_config_t wm8904ScoConfig1 = {
     .master             = true,
 };
 codec_config_t boardCodecScoConfig1 = {.codecDevType = kCODEC_WM8904, .codecDevConfig = &wm8904ScoConfig1};
+#endif
 
 hal_audio_dma_config_t txSpeakerDmaConfig = {
     .instance             = EXAMPLE_DMA_INSTANCE,
@@ -352,6 +354,7 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
 		SYSCTL1->FCCTRLSEL[4] = SYSCTL1_FCCTRLSEL_SCKINSEL(2) | SYSCTL1_FCCTRLSEL_WSINSEL(2);
 #endif
 
+#if !PIN_CONFIG_DEV_BOARD
         switch (sampleRate)
         {
             case 8000:
@@ -391,6 +394,7 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
         wm8904ScoConfig1.format.sampleRate             = wm8904ScoConfig.format.sampleRate;
         wm8904ScoConfig1.i2cConfig.codecI2CSourceClock = wm8904ScoConfig.i2cConfig.codecI2CSourceClock;
         wm8904ScoConfig1.mclk_HZ                       = wm8904ScoConfig.mclk_HZ;
+#endif
     }
 
     return CLOCK_GetMclkClkFreq();

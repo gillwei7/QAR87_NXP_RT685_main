@@ -65,9 +65,10 @@
 #define HFP_CODEC_HP_VOLUME  (70U)  /* Range: 0 ~ 100 */
 
 /* --------------------------------------------- External Global Variables */
-
+#if !PIN_CONFIG_DEV_BOARD
 extern codec_config_t boardCodecScoConfig;
 extern codec_config_t boardCodecScoConfig1;
+#endif
 
 extern hal_audio_config_t txSpeakerConfig;
 extern hal_audio_config_t rxMicConfig;
