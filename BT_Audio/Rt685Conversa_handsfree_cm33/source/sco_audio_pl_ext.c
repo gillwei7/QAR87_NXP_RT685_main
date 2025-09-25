@@ -6,8 +6,6 @@
  */
 #include "qar87_config.h"
 
-
-
 #include "sco_audio_pl.h"
 #include "clock_config.h"
 #include "board.h"
@@ -88,7 +86,9 @@ AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(rx_mic_handle), 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(tx_mic_handle), 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(rx_speaker_handle), 4);
 static codec_handle_t codec_handle;
+#if !DEV_AUDIO_DEBUG_GPIO
 static uint8_t codec_inited = 0;
+#endif
 
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t MicBuffer    [BUFFER_NUMBER * BUFFER_SIZE], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t SpeakerBuffer[BUFFER_NUMBER * BUFFER_SIZE], 4);
@@ -447,10 +447,12 @@ static void rxSpeakerCallback(hal_audio_handle_t handle, hal_audio_status_t comp
 static void Deinit_Board_Audio(void)
 {
 	#if EnableConversa==1
+#if !DEV_AUDIO_DEBUG_GPIO
 		if (codec_inited == 0)
 		{
 			return ;
 		}
+#endif
 		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
 
 		//close all I2S and related DMA --- if need to just close the wanted, just call one of the 3 grouped functions
@@ -467,7 +469,9 @@ static void Deinit_Board_Audio(void)
 		HAL_AudioRxDeinit((hal_audio_handle_t)&rx_speaker_handle[0]);
 
 		(void)BOARD_SwitchAudioFreq(0U);
+#if !DEV_AUDIO_DEBUG_GPIO
 		codec_inited = 0;
+#endif
 		PRINTF("Deinit_Board_Audio is done \r\n");
 	#else
 		if (codec_inited == 0)
@@ -505,12 +509,13 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			CLOCK_SetClkDiv(kCLOCK_DivDmicClk, 8);		//PDM clk is: 24.576/8 =3.072MHz --- OSR to be 48, PDM stream after CIC is: 3072k/48=64K --> then half down to 32KHz --> then half down to 16KHz (don't use 2Fs)
 
 			BTAudioBitWidth=bitWidth;
+			PRINTF("Init_Board_Sco_Audio sampling rate:%d,bitwidth:%d\r\n",samplingRate,bitWidth);
 			if(BTAudioBitWidth!=16)
 			{
 				PRINTF("Init_Board_Sco_Audio error --- BT bit width is NOT 16 \r\n");
 			}
 			BTAudioFs=samplingRate;
-			if((BTAudioFs!=8000)&&(BTAudioFs!=8000))
+			if((BTAudioFs!=8000)&&(BTAudioFs!=16000))
 			{
 				PRINTF("Init_Board_Sco_Audio error --- BT bit Fs is NOT 8kHz or 16kHz \r\n");
 			}
@@ -529,6 +534,7 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			HAL_AudioRxInstallCallback((hal_audio_handle_t)&rx_speaker_handle[0], rxSpeakerCallback, NULL);
 
 	    	DbgPin8Up();
+#if !DEV_AUDIO_DEBUG_GPIO
 			/* Codec */
 			if (CODEC_Init(&codec_handle, &boardCodecScoConfig) != kStatus_Success)
 			{
@@ -537,14 +543,16 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			}else
 			{
 		    	DbgPin8Dn();
+
 				CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
 				//CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, txSpeakerConfig.sampleRate_Hz, txSpeakerConfig.bitWidth);
 				CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, 16000, 32);
 				CODEC_SetVolume(&codec_handle, kCODEC_VolumeDAC, HFP_CODEC_DAC_VOLUME);
 				CODEC_SetVolume(&codec_handle, kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight, HFP_CODEC_HP_VOLUME);
 				CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
-				codec_inited = 1;
 
+				codec_inited = 1;
+#endif
 				InitAudioCircularBuf();
 
 				//PDM, fc3, fc1 and chained DMA configuring
@@ -566,7 +574,9 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 								EnableI2S1Rx0DmaChannel();
 								EnableI2S3Tx0DmaChannel();
 				PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
+#if !DEV_AUDIO_DEBUG_GPIO
 			}
+#endif
 		}
 	#else
 		if (samplingRate > 0U)
@@ -652,7 +662,7 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)
 
 		HAL_AudioTxInit((hal_audio_handle_t)&tx_speaker_handle[0], &txSpeakerConfig);
 		HAL_AudioTxInstallCallback((hal_audio_handle_t)&tx_speaker_handle[0], txSpeakerCallback, NULL);
-
+#if !DEV_AUDIO_DEBUG_GPIO
 		if (CODEC_Init(&codec_handle, &boardCodecScoConfig1) != kStatus_Success)
 		{
 			PRINTF("Init_Board_RingTone_Audio is failed --- CODEC init failure \r\n");
@@ -666,6 +676,7 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			codec_inited = 1;
 			PRINTF("Init_Board_RingTone_Audio is successful and finished \r\n");
 		}
+#endif
     }
 }
 
