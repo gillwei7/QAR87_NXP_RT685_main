@@ -78,18 +78,26 @@ static uint8_t* currentSrcBuff = NULL;
 #define EVT_ALL_FRAMES_DONE (1UL << 1)
 #define EVT_PASSIVE_RX_DONE (1UL << 2)
 #define EVT_PASSIVE_NEED_INIT (1UL << 3)
-#define BTN_NOTIFY_EDGE   (1UL << 4)  // 來自 PINT ISR 的雙邊緣事件
-#define BTN_NOTIFY_DBL    (1UL << 5)  // 雙擊計時器到時
+
+#define BTN_NOTIFY_EDGE   (1UL << 0)  // 在sButtonTaskHandle，來自 FunKey PINT ISR 的雙邊緣事件，
+#define BTN_NOTIFY_DBL    (1UL << 1)  // 在sButtonTaskHandle，雙擊計時器到時，
+#define PWR_NOTIFY_EDGE   (1UL << 0)  // 在sPowerKeyTaskHandle，來自 PowerKey PINT ISR 的邊緣事件
 
 /* === 按鍵行為參數 === */
 #define BTN_ACTIVE_LEVEL          0   // active-low: 按下=0，放開=1；若相反改為 1
 #define BTN_DEBOUNCE_MS          30
 #define BTN_LONG_MS            1000
 #define BTN_DBLCLICK_GAP_MS     300
+#define PWR_ACTIVE_LEVEL          0      // active-low: 按下=0；若為 active-high 改為 1
+#define PWR_DEBOUNCE_MS          30      // 軟體去抖
+#define PWR_LONG_MS            3000      // 長按 3 秒（放開才判斷）
+#define PWR_MIN_SHORT_MS         50      // 太短的抖動/誤觸（<50ms）不算短按
+#define POWER_KEY_PINT_CH  		  0   // PINT 通道
 #define FUN_KEY1_PINT_CH  		  1   // PINT 通道
 /* === 按鈕任務的 handle 與軟體定時器 === */
 static TaskHandle_t   sButtonTaskHandle = NULL;
 static TimerHandle_t  sBtnDblTimer  = NULL;
+static TaskHandle_t sPowerKeyTaskHandle = NULL;
 
 // <<< MODIFIED: 核心架構變更，使用 Queue 取代 Event Group 進行任務間通訊 >>>
 static QueueHandle_t spi_request_queue = NULL;
@@ -467,6 +475,13 @@ static void spi_task(void *pvParameters)
 }
 
 
+
+/* 讀腳位 */
+static inline uint8_t pwr_raw_read(void)
+{
+    return (uint8_t)GPIO_PinRead(GPIO, POWER_KEY_PORT, POWER_KEY_PIN);
+}
+
 /* 讀腳位 */
 static inline uint8_t btn_raw_read(void)
 {
@@ -587,6 +602,74 @@ static void button_task(void *pvParameters)
 
 }
 
+
+static void power_key_task(void *pvParameters)
+{
+
+    const TickType_t debounceTicks = pdMS_TO_TICKS(PWR_DEBOUNCE_MS);
+    const TickType_t longTicks     = pdMS_TO_TICKS(PWR_LONG_MS);
+    const TickType_t minShortTicks = pdMS_TO_TICKS(PWR_MIN_SHORT_MS);
+
+    sPowerKeyTaskHandle = xTaskGetCurrentTaskHandle();
+
+    /* 取當前穩定狀態 */
+    uint8_t stable_level = pwr_raw_read();
+    bool    is_pressed   = (stable_level == PWR_ACTIVE_LEVEL);
+    TickType_t press_start_tick = 0;
+
+    if (is_pressed) {
+        /* 上電時剛好被按住：當作剛按下，等待放開後再判斷是否為長按 */
+        press_start_tick = xTaskGetTickCount();
+    }
+
+    for (;;)
+    {
+        uint32_t notifyBits = 0;
+        (void)xTaskNotifyWait(0, 0xFFFFFFFFu, &notifyBits, portMAX_DELAY);
+
+        if (notifyBits & PWR_NOTIFY_EDGE) {
+            /* 軟體去抖：延遲後再讀取一次，採用第二次結果 */
+            uint8_t l1 = pwr_raw_read();
+            (void)l1; // 可視需要使用
+            vTaskDelay(debounceTicks);
+            uint8_t l2 = pwr_raw_read();
+            uint8_t new_level = l2;
+
+            if (new_level != stable_level) {
+                stable_level = new_level;
+                bool now_pressed = (stable_level == PWR_ACTIVE_LEVEL);
+                TickType_t now = xTaskGetTickCount();
+
+                if (now_pressed && !is_pressed) {
+                    /* 放開 -> 按下：記錄開始時間 */
+                    is_pressed = true;
+                    press_start_tick = now;
+                }
+                else if (!now_pressed && is_pressed) {
+                    /* 按下 -> 放開：在放開此刻判斷短按或長按 */
+                    is_pressed = false;
+
+                    TickType_t press_dur = now - press_start_tick;
+
+                    if (press_dur >= longTicks) {
+                        /* 長按（放開才觸發） */
+                        PRINTF("[PWR] Long Press (>=%ums) detected.\r\n",(unsigned)PWR_LONG_MS);
+
+                    } else if (press_dur >= minShortTicks) {
+                        /* 短按 */
+                        PRINTF("[PWR] Short Press detected.\r\n");
+
+                    } else {
+                        /* 小於最小短按時間：視為抖動/誤觸，忽略 */
+                        // no-op
+                    }
+                }
+                /* 其他情況（例如重複相同邏輯電平）不需處理 */
+            }
+        }
+    }
+}
+
 /**
  * @brief 掃描 I2C 總線上的設備。
  * @details 此函式遍歷所有有效的 7 位 I2C 地址 (從 0x08 到 0x77)，
@@ -617,11 +700,20 @@ static void Scan_I2C_Devices(I3C_Type *base)
 void pint_intr_callback(pint_pin_int_t pintr, uint32_t pmatch_status)
 {
 
-    if (pintr == FUN_KEY1_PINT_CH) {
-        BaseType_t xHPW = pdFALSE;
+    BaseType_t xHPW = pdFALSE;
+
+    /* FUN_KEY1：通知 button 任務 */
+    if ((pintr == FUN_KEY1_PINT_CH) && (sButtonTaskHandle != NULL)) {
         (void)xTaskNotifyFromISR(sButtonTaskHandle, BTN_NOTIFY_EDGE, eSetBits, &xHPW);
-        portYIELD_FROM_ISR(xHPW);
     }
+
+    /* PowerKey：通知 power key 任務 */
+    if ((pintr == POWER_KEY_PINT_CH) && (sPowerKeyTaskHandle != NULL)) {
+        (void)xTaskNotifyFromISR(sPowerKeyTaskHandle, PWR_NOTIFY_EDGE, eSetBits, &xHPW);
+    }
+
+    portYIELD_FROM_ISR(xHPW);
+
 
 	/*
     PRINTF("\f\r\nPINT Pin Interrupt %d event detected.\r\n", pintr);
@@ -696,6 +788,7 @@ int main(void)
     /* Initialize PINT */ /* Init FUN_KEY1 & Power_Key*/
 	PINT_Init(EXAMPLE_PINT_BASE);
 	NVIC_SetPriority(PIN_INT0_IRQn + FUN_KEY1_PINT_CH, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
+	NVIC_SetPriority(PIN_INT0_IRQn + POWER_KEY_PINT_CH, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
 
 	PINT_PinInterruptConfig(EXAMPLE_PINT_BASE, kPINT_PinInt0, kPINT_PinIntEnableBothEdges, pint_intr_callback);
 	PINT_EnableCallbackByIndex(EXAMPLE_PINT_BASE, kPINT_PinInt0);
@@ -776,6 +869,11 @@ int main(void)
 	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 100, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
     {
         PRINTF(" BUTTON Task creation failed!.\r\n");
+        while (1);
+    }
+	if (xTaskCreate(power_key_task, "POWER_KEY", configMINIMAL_STACK_SIZE + 100, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
+    {
+        PRINTF(" POWER_KEY Task creation failed!.\r\n");
         while (1);
     }
 
