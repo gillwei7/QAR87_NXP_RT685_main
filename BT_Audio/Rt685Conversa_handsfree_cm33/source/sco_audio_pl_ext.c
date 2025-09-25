@@ -87,7 +87,7 @@ AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(rx_mic_handle), 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(tx_mic_handle), 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(rx_speaker_handle), 4);
 static codec_handle_t codec_handle;
-static uint8_t codec_inited = 0;
+//static uint8_t codec_inited = 0;
 
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t MicBuffer    [BUFFER_NUMBER * BUFFER_SIZE], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t SpeakerBuffer[BUFFER_NUMBER * BUFFER_SIZE], 4);
@@ -446,10 +446,10 @@ static void rxSpeakerCallback(hal_audio_handle_t handle, hal_audio_status_t comp
 static void Deinit_Board_Audio(void)
 {
 	#if EnableConversa==1
-		if (codec_inited == 0)
-		{
-			return ;
-		}
+//		if (codec_inited == 0)
+//		{
+//			return ;
+//		}
 		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
 
 		//close all I2S and related DMA --- if need to just close the wanted, just call one of the 3 grouped functions
@@ -466,7 +466,7 @@ static void Deinit_Board_Audio(void)
 		HAL_AudioRxDeinit((hal_audio_handle_t)&rx_speaker_handle[0]);
 
 		(void)BOARD_SwitchAudioFreq(0U);
-		codec_inited = 0;
+		//codec_inited = 0;
 		PRINTF("Deinit_Board_Audio is done \r\n");
 	#else
 		if (codec_inited == 0)
@@ -509,7 +509,7 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 				PRINTF("Init_Board_Sco_Audio error --- BT bit width is NOT 16 \r\n");
 			}
 			BTAudioFs=samplingRate;
-			if((BTAudioFs!=8000)&&(BTAudioFs!=8000))
+			if((BTAudioFs!=8000)&&(BTAudioFs!=16000))
 			{
 				PRINTF("Init_Board_Sco_Audio error --- BT bit Fs is NOT 8kHz or 16kHz \r\n");
 			}
@@ -529,25 +529,25 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 
 	    	DbgPin8Up();
 			/* Codec */
-			if (CODEC_Init(&codec_handle, &boardCodecScoConfig) != kStatus_Success)
-			{
-		    	DbgPin8Dn();
-				PRINTF("Init_Board_Sco_Audio is failed --- CODEC init failure \r\n");
-			}else
-			{
-		    	DbgPin8Dn();
-				CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
-				//CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, txSpeakerConfig.sampleRate_Hz, txSpeakerConfig.bitWidth);
-				CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, 16000, 32);
-				CODEC_SetVolume(&codec_handle, kCODEC_VolumeDAC, HFP_CODEC_DAC_VOLUME);
-				CODEC_SetVolume(&codec_handle, kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight, HFP_CODEC_HP_VOLUME);
-				CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
-				codec_inited = 1;
+//			if (CODEC_Init(&codec_handle, &boardCodecScoConfig) != kStatus_Success)
+//			{
+//		    	DbgPin8Dn();
+//				PRINTF("Init_Board_Sco_Audio is failed --- CODEC init failure \r\n");
+//			}else
+//			{
+//
+//				CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
+//				//CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, txSpeakerConfig.sampleRate_Hz, txSpeakerConfig.bitWidth);
+//				CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, 16000, 32);
+//				CODEC_SetVolume(&codec_handle, kCODEC_VolumeDAC, HFP_CODEC_DAC_VOLUME);
+//				CODEC_SetVolume(&codec_handle, kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight, HFP_CODEC_HP_VOLUME);
+//				CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
+				//codec_inited = 1;
 
 				InitAudioCircularBuf();
-
-				//PDM, fc3, fc1 and chained DMA configuring
-				//we open pdm ports here
+//
+//				//PDM, fc3, fc1 and chained DMA configuring
+//				//we open pdm ports here
 				Init_MicDmaCfgCh(0xff);	//mic0,1,2,3,4,5,6,7
 				BOARD_Init_DMA_PDM(0xff);
 				BOARD_Init_DMIC(0xff,0); //0: no skip general Dmic init. If not the first mic init, then should skip.
@@ -565,7 +565,8 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 								EnableI2S1Rx0DmaChannel();
 								EnableI2S3Tx0DmaChannel();
 				PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
-			}
+				DbgPin8Dn();
+	//		}
 		}
 	#else
 		if (samplingRate > 0U)
@@ -662,7 +663,7 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			CODEC_SetVolume(&codec_handle, kCODEC_VolumeDAC, HFP_CODEC_DAC_VOLUME);
 			CODEC_SetVolume(&codec_handle, kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight, HFP_CODEC_HP_VOLUME);
 			CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
-			codec_inited = 1;
+			//codec_inited = 1;
 			PRINTF("Init_Board_RingTone_Audio is successful and finished \r\n");
 		}
     }
