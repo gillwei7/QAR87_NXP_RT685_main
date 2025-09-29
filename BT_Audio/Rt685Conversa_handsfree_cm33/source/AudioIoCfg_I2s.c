@@ -167,8 +167,9 @@ void BOARD_Init_I2S_Fc3(void)
 
 	I2S_Tx_config.position    =  0;
 	I2S_Tx_config.oneChannel  = false;
-
-	I2S_Tx_config.masterSlave = DEMO_I2S1Rx0_MODE;
+    // gill
+	//I2S_Tx_config.masterSlave = DEMO_I2S1Rx0_MODE;
+	I2S_Tx_config.masterSlave = DEMO_I2S3Tx0_MODE;
 	I2S_TxInit(DEMO_I2S3Tx0, &I2S_Tx_config);
 }
 void BOARD_Init_I2S_Fc1(void)
@@ -187,7 +188,8 @@ void BOARD_Init_I2S_Fc1(void)
 	I2S_Rx_config.position    =  0;
 	I2S_Rx_config.oneChannel  = false;
 
-	I2S_Rx_config.masterSlave = DEMO_I2S3Tx0_MODE;
+	//I2S_Rx_config.masterSlave = DEMO_I2S3Tx0_MODE;
+	I2S_Rx_config.masterSlave = DEMO_I2S1Rx0_MODE;
 	I2S_RxInit(DEMO_I2S1Rx0, &I2S_Rx_config);
 }
 #endif

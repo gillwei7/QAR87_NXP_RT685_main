@@ -454,7 +454,7 @@ static void Deinit_Board_Audio(void)
 			return ;
 		}
 #endif
-		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
+//		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
 
 		//close all I2S and related DMA --- if need to just close the wanted, just call one of the 3 grouped functions
 		CloseI2sDma((I2S_Type *)DEMO_I2S1Rx0);

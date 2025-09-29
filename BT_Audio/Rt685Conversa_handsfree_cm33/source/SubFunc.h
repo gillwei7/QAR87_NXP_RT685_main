@@ -55,15 +55,21 @@
 #define     DbgPin7Port                 1
 #define     DbgPin7                     2
 
+#define     DbgPin6Port                 2
+#define     DbgPin6                     15
+
+#define     DbgPin8Port                 0
+#define     DbgPin8                     21
+
 #define     DbgPin5Up()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 1)
 #define     DbgPin5Dn()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 0)
-#define     DbgPin6Up()
-#define     DbgPin6Dn()
+#define     DbgPin6Up()					GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 1)
+#define     DbgPin6Dn()					GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 0)
 
 #define     DbgPin7Up()                 GPIO_PinWrite(GPIO, DbgPin7Port, DbgPin7, 1)
 #define     DbgPin7Dn()                 GPIO_PinWrite(GPIO, DbgPin7Port, DbgPin7, 0)
-#define     DbgPin8Up()
-#define     DbgPin8Dn()
+#define     DbgPin8Up()					GPIO_PinWrite(GPIO, DbgPin8Port, DbgPin8, 1)
+#define     DbgPin8Dn()					GPIO_PinWrite(GPIO, DbgPin8Port, DbgPin8, 0)
 // LED
 #define     LedOn_G()
 #define     LedOff_G()

@@ -144,12 +144,19 @@ void InitDbgPin(void)
 #else
 void dev_InitDbgPin(void)
 {
-    GPIO_PortInit(GPIO, 0);
+	GPIO_PortInit(GPIO, 0);
+	GPIO_PortInit(GPIO, 1);
+	GPIO_PortInit(GPIO, 2);
+
     GPIO_PinInit(GPIO, DbgPin5Port, DbgPin5, &GPIO_Output_config);
+    GPIO_PinInit(GPIO, DbgPin6Port, DbgPin6, &GPIO_Output_config);
     GPIO_PinInit(GPIO, DbgPin7Port, DbgPin7, &GPIO_Output_config);
+    GPIO_PinInit(GPIO, DbgPin8Port, DbgPin8, &GPIO_Output_config);
 
     DbgPin5Dn();
+    DbgPin6Dn();
     DbgPin7Dn();
+    DbgPin8Dn();
 
     delay_ms(1);
 
@@ -159,10 +166,21 @@ void dev_InitDbgPin(void)
         DbgPin5Dn();delay_ms(1);
     }
 
-    for(int i=0;i<7;i++)
+    for(int i=0;i<6;i++)
     {
-        DbgPin7Up();delay_ms(1);
-        DbgPin7Dn();delay_ms(1);
+        DbgPin6Up();delay_ms(1);
+        DbgPin6Dn();delay_ms(1);
+    }
+
+    for(int i=0;i<7;i++)
+	{
+		DbgPin7Up();delay_ms(1);
+		DbgPin7Dn();delay_ms(1);
+	}
+    for(int i=0;i<8;i++)
+    {
+        DbgPin8Up();delay_ms(1);
+        DbgPin8Dn();delay_ms(1);
     }
 
 }
