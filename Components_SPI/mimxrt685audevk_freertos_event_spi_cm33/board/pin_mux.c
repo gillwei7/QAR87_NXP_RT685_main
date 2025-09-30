@@ -55,10 +55,10 @@ BOARD_InitPins:
   - {pin_num: E1, peripheral: GPIO, signal: 'PIO0, 6', pin_signal: PIO0_6/FC0_SSEL3/SCT0_GPI1/SCT0_OUT1/CTIMER0_MAT0/SEC_PIO0_6/ADC0_8}
   - {pin_num: F4, peripheral: GPIO, signal: 'PIO0, 5', pin_signal: PIO0_5/FC0_SSEL2/SCT0_GPI0/SCT0_OUT0/CTIMER_INP1/SEC_PIO0_5/ADC0_0, ibena: enabled}
   - {pin_num: A2, peripheral: GPIO, signal: 'PIO0, 26', pin_signal: PIO0_26/FC3_SSEL2/SCT0_GPI6/SCT0_OUT6/CTIMER_INP7/SEC_PIO0_26/ADC0_3, ibena: enabled}
-  - {pin_num: N2, peripheral: FLEXCOMM14, signal: SSEL0, pin_signal: PIO1_14/HS_SPI_SSEL0/CTIMER2_MAT3/FLEXSPI0B_DATA3, ibena: enabled}
   - {pin_num: L2, peripheral: FLEXCOMM14, signal: SCK, pin_signal: PIO1_11/HS_SPI_SCK/CTIMER2_MAT0/FLEXSPI0B_DATA0, ibena: enabled}
   - {pin_num: N1, peripheral: FLEXCOMM14, signal: MOSI, pin_signal: PIO1_13/HS_SPI_MOSI/CTIMER2_MAT2/FLEXSPI0B_DATA2, ibena: enabled}
   - {pin_num: M2, peripheral: FLEXCOMM14, signal: MISO, pin_signal: PIO1_12/HS_SPI_MISO/CTIMER2_MAT1/FLEXSPI0B_DATA1, ibena: enabled}
+  - {pin_num: N2, peripheral: FLEXCOMM14, signal: SSEL0, pin_signal: PIO1_14/HS_SPI_SSEL0/CTIMER2_MAT3/FLEXSPI0B_DATA3, ibena: enabled}
   - {pin_num: E2, peripheral: GPIO, signal: 'PIO2, 15', pin_signal: PIO2_15/SCT0_OUT9/CLKIN/CMP0_D}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */

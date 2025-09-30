@@ -92,16 +92,6 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_LED_BLUE_PIN_MASK (1U << 26U)      /*!<@brief PORT pin mask */
                                                           /* @} */
 
-/*! @name HS_SPI_SSEL0 (coord N2), JP39[2]
-  @{ */
-/* Routed pin properties */
-#define BOARD_INITPINS_QSPI_B_DATA3_PERIPHERAL FLEXCOMM14     /*!<@brief Peripheral name */
-#define BOARD_INITPINS_QSPI_B_DATA3_SIGNAL SSEL0              /*!<@brief Signal name */
-#define BOARD_INITPINS_QSPI_B_DATA3_PORT 1U                   /*!<@brief PORT peripheral base pointer */
-#define BOARD_INITPINS_QSPI_B_DATA3_PIN 14U                   /*!<@brief PORT pin number */
-#define BOARD_INITPINS_QSPI_B_DATA3_PIN_MASK (1U << 14U)      /*!<@brief PORT pin mask */
-                                                              /* @} */
-
 /*! @name HS_SPI_SCK (coord L2), JP36[2]
   @{ */
 /* Routed pin properties */
@@ -130,6 +120,16 @@ void BOARD_InitBootPins(void);
 #define BOARD_INITPINS_QSPI_B_DATA1_PORT 1U                   /*!<@brief PORT peripheral base pointer */
 #define BOARD_INITPINS_QSPI_B_DATA1_PIN 12U                   /*!<@brief PORT pin number */
 #define BOARD_INITPINS_QSPI_B_DATA1_PIN_MASK (1U << 12U)      /*!<@brief PORT pin mask */
+                                                              /* @} */
+
+/*! @name HS_SPI_SSEL0 (coord N2), JP39[2]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITPINS_QSPI_B_DATA3_PERIPHERAL FLEXCOMM14     /*!<@brief Peripheral name */
+#define BOARD_INITPINS_QSPI_B_DATA3_SIGNAL SSEL0              /*!<@brief Signal name */
+#define BOARD_INITPINS_QSPI_B_DATA3_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITPINS_QSPI_B_DATA3_PIN 14U                   /*!<@brief PORT pin number */
+#define BOARD_INITPINS_QSPI_B_DATA3_PIN_MASK (1U << 14U)      /*!<@brief PORT pin mask */
                                                               /* @} */
 
 /*!
