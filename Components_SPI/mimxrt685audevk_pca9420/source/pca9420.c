@@ -30,7 +30,7 @@
  ******************************************************************************/
 #define PCA9420_LAST_REG (PCA9420_MODECFG_3_3)
 
-#define GAUGE_ENABLE 0
+#define GAUGE_ENABLE 1
 #define LED_ENABLE 1
 #define PMIC_PCA9422_ENABLE 1
 #define TOUCH_ENABLE 1
@@ -53,6 +53,7 @@ static uint8_t buffer[PCA9420_LAST_REG + 1];
 
 volatile bool g_touch_int_flag = false;
 volatile bool g_charger_int_flag = false;
+volatile bool g_gauge_int_flag = false;
 
 static dma_handle_t s_DmaTxHandle;
 static i2s_config_t s_TxConfig;
@@ -104,10 +105,11 @@ static void StartSoundPlayback(void)
 void GPIO_INTA_DriverIRQHandler(void)
 {
 
-	uint32_t status = GPIO_PortGetInterruptStatus(GPIO, 1, kGPIO_InterruptA);
+	uint32_t status_1 = GPIO_PortGetInterruptStatus(GPIO, GPIO1_PORT, kGPIO_InterruptA);
+	uint32_t status_2 = GPIO_PortGetInterruptStatus(GPIO, GPIO2_PORT, kGPIO_InterruptA);
 
 
-    if (status & (1 << TOUCH_INT_PIN)) { //Touch
+    if (status_1 & (1 << TOUCH_INT_PIN)) { //Touch
         // 關閉中斷，避免重入
         GPIO_PinDisableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
 
@@ -118,12 +120,19 @@ void GPIO_INTA_DriverIRQHandler(void)
         g_touch_int_flag = true;
         //PRINTF("[Debug] TOUCH_GPIO_INTA_IRQHandler \r\n");
     }
-    if (status & (1 << CHARG_INT_PIN)) { //Charger
+    if (status_1 & (1 << CHARG_INT_PIN)) { //Charger
 
     	GPIO_PinDisableInterrupt(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
         GPIO_PinClearInterruptFlag(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
         g_charger_int_flag = true;
         //PRINTF("[Debug] PIO0_29_INTA_IRQHandler \r\n");
+    }
+    if (status_2 & (1 << GAUGE_INT_PIN)) { //Gauge
+
+    	GPIO_PinDisableInterrupt(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, kGPIO_InterruptA);
+        GPIO_PinClearInterruptFlag(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, kGPIO_InterruptA);
+        g_gauge_int_flag = true;
+        //PRINTF("[Debug] GAUGE_INT_PIN_INTA_IRQHandler \r\n");
     }
 
     SDK_ISR_EXIT_BARRIER;
@@ -411,25 +420,16 @@ int main(void)
 
 #if GAUGE_ENABLE
 
-    uint8_t soc = 0;
-    uint16_t voltage = 0;
-    int16_t current = 0;
-    int8_t temperature = 0;
+    GPIO_PinInit(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, &sw_config);
+    /* Enable GPIO pin interrupt */
+    GPIO_SetPinInterruptConfig(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, &config);
+    GPIO_PinEnableInterrupt(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, kGPIO_InterruptA);
 
-    glf70302_set_soc_host(75);
-    glf70302_enable_host_soc();
+    //glf70302_set_soc_host(75);
+    //glf70302_enable_host_soc();
 
-    glf70302_read_soc(&soc);
-    PRINTF("目前電量: %d%%\r\n", soc);
-
-    glf70302_read_voltage(&voltage);
-    PRINTF("電池電壓: %dmV\r\n", voltage);
-
-    glf70302_read_current(&current);
-    PRINTF("電池電流: %dmA\r\n", current);
-
-    glf70302_read_temperature(&temperature);
-    PRINTF("電池溫度: %d°C\r\n", temperature);
+    BatteryInfo battery;
+	glf70302_read_battery(&battery);
 
 #endif
 
@@ -444,6 +444,17 @@ int main(void)
 //    	else if (ch==0x22){
 //    		StartSoundPlayback();
 //    	}
+#endif
+#if GAUGE_ENABLE
+
+    	if(g_gauge_int_flag)
+    	{
+    		g_gauge_int_flag = false;
+
+    		glf70302_read_battery(&battery);
+
+			GPIO_PinEnableInterrupt(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, kGPIO_InterruptA);
+    	}
 #endif
 #if CHARGER_ENABLE
     	if(g_charger_int_flag )

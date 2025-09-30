@@ -43,6 +43,15 @@
 #define REG_VBAT_MSB     0x3D
 #define REG_FLAG         0x4E
 
+
+typedef struct {
+    uint8_t soc;         // 電量百分比 (%)
+    uint16_t voltage;    // 電壓 (mV)
+    int16_t current;     // 電流 (mA)
+    int8_t temperature;  // 溫度 (°C)
+} BatteryInfo;
+
+
 // Function prototypes
 bool glf70302_init(void);
 bool glf70302_read_register(uint8_t reg, uint8_t *value);
@@ -55,6 +64,8 @@ bool glf70302_read_soc(uint8_t *soc);
 
 bool glf70302_set_soc_host(uint8_t soc);
 bool glf70302_enable_host_soc(void);
+
+bool glf70302_read_battery(BatteryInfo *info);
 
 
 #endif /* GAUGE_GLF70302_H_ */

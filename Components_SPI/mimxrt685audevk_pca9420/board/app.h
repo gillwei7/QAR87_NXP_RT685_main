@@ -45,6 +45,8 @@
 #define FUN_KEY1_N_PORT 0U
 #define FUN_KEY1_N_PIN  26U
 
+#define GAUGE_INT_PORT 2U
+#define GAUGE_INT_PIN  18U
 #define RESET553_N_PORT 0U
 #define RESET553_N_PIN  27U
 #define AMP_RESET_PORT 0U
