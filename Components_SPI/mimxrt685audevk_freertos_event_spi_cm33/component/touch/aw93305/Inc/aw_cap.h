@@ -7,10 +7,10 @@
 
 #if (defined(AW_STM32H7_P) && (AW_STM32H7_P == 1))
 #define AW933XX_INF(fmt, ...) PRINTF("[%s:%d] INF: "fmt" \r\n", __func__, __LINE__, ##__VA_ARGS__)
-#define AW933XX_DBG(fmt, ...) PRINTF("[%s:%d] DBG: "fmt" \r\n", __func__, __LINE__, ##__VA_ARGS__)
+#define AW933XX_DBG(fmt, ...) printf("[%s:%d] DBG: "fmt" \r\n", __func__, __LINE__, ##__VA_ARGS__)
 #define AW933XX_ERR(fmt, ...) PRINTF("[%s:%d] ERR: "fmt" \r\n", __func__, __LINE__, ##__VA_ARGS__)
 #define AWLOGI(fmt, ...) PRINTF("[%s:%d] INF: "fmt" \r\n", __func__, __LINE__, ##__VA_ARGS__)
-#define AWLOGD(fmt, ...) PRINTF("[%s:%d] DBG: "fmt" \r\n", __func__, __LINE__, ##__VA_ARGS__)
+#define AWLOGD(fmt, ...) printf("[%s:%d] DBG: "fmt" \r\n", __func__, __LINE__, ##__VA_ARGS__)
 #define AWLOGE(fmt, ...) PRINTF("[%s:%d] ERR: "fmt" \r\n", __func__, __LINE__, ##__VA_ARGS__)
 #endif
 

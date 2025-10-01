@@ -23,8 +23,8 @@
 
 static void aw_delay(AW_U32 ms)
 {
-	//SDK_DelayAtLeastUs(ms * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk));
-	vTaskDelay(pdMS_TO_TICKS(ms));
+	SDK_DelayAtLeastUs(ms * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk));
+	//vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
 void (*aw933xx_irq_cb)(void);

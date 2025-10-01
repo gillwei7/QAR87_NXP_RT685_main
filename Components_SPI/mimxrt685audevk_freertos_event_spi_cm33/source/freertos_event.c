@@ -731,6 +731,20 @@ void pint_intr_callback(pint_pin_int_t pintr, uint32_t pmatch_status)
     */
 }
 
+void GPIO_INTA_DriverIRQHandler(void)
+{
+
+	uint32_t status_1 = GPIO_PortGetInterruptStatus(GPIO, GPIO1_PORT, kGPIO_InterruptA);
+
+    if (status_1 & (1 << TOUCH_INT_PIN)) { //Touch
+        GPIO_PinDisableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
+        GPIO_PinClearInterruptFlag(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
+
+        //PRINTF("[Debug] TOUCH_GPIO_INTA_IRQHandler \r\n");
+    }
+    SDK_ISR_EXIT_BARRIER;
+}
+
 /**
  * @brief 主程式進入點。
  * @details 負責初始化硬體、時鐘、GPIO、I2C 和 SPI 等周邊設備。
@@ -796,6 +810,11 @@ int main(void)
     GPIO_SetPinInterruptConfig(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &config);
     GPIO_PinEnableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
 
+//    // 先清 GPIO 周邊任何可能的既有中斷旗標
+//    GPIO_PinClearInterruptFlag(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
+//    NVIC_ClearPendingIRQ(GPIO_INTA_IRQn);
+
+
     /* Initialize PINT */ /* Init FUN_KEY1 & Power_Key*/
 	PINT_Init(EXAMPLE_PINT_BASE);
 	NVIC_SetPriority(PIN_INT0_IRQn + FUN_KEY1_PINT_CH, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
@@ -856,8 +875,7 @@ int main(void)
 	GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1);
 
 	/* Init I2C Component */
-	//awinic_single_enter();
-	//PRINTF("xTaskCreate .......\r\n");
+	awinic_single_enter();
 
 	/* 建立 tasks */
     /* <<< MODIFIED: 建立 spi_handler_task 來取代舊的 console_task >>> */
@@ -894,6 +912,8 @@ int main(void)
     }
 
 	vTaskStartScheduler();
+
+
 
     for (;;);
 }
