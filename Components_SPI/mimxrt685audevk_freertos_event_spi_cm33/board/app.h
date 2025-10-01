@@ -31,6 +31,10 @@
 #define RESET553_N_PORT 0U
 #define RESET553_N_PIN  27U
 
+/* I2C Component*/
+#define TOUCH_INT_PORT 1U
+#define TOUCH_INT_PIN  8U
+
 #define EXAMPLE_PINT_BASE PINT
 #define POWERKEY_PINT_PIN_INT0_SRC kINPUTMUX_GpioPort0Pin5ToPintsel  /* Power Key */
 #define FUNKEY_PINT_PIN_INT1_SRC kINPUTMUX_GpioPort0Pin26ToPintsel   /* Fun Key */

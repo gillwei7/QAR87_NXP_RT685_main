@@ -785,6 +785,17 @@ int main(void)
     GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 0);
     GPIO_PinInit(GPIO, RESET553_N_PORT, RESET553_N_PIN, &output_int_config);
 
+    /* Define the init structure for the input switch pin */
+    gpio_pin_config_t sw_config    = {kGPIO_DigitalInput, 0};
+    gpio_interrupt_config_t config = {kGPIO_PinIntEnableEdge, kGPIO_PinIntEnableLowOrFall};
+    NVIC_SetPriority(GPIO_INTA_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
+    EnableIRQ(GPIO_INTA_IRQn);
+
+    /* Touch GPIO*/
+    GPIO_PinInit(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &sw_config);
+    GPIO_SetPinInterruptConfig(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &config);
+    GPIO_PinEnableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
+
     /* Initialize PINT */ /* Init FUN_KEY1 & Power_Key*/
 	PINT_Init(EXAMPLE_PINT_BASE);
 	NVIC_SetPriority(PIN_INT0_IRQn + FUN_KEY1_PINT_CH, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
@@ -843,6 +854,10 @@ int main(void)
 	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
 	PRINTF("GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1); \n");
 	GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1);
+
+	/* Init I2C Component */
+	//awinic_single_enter();
+	//PRINTF("xTaskCreate .......\r\n");
 
 	/* 建立 tasks */
     /* <<< MODIFIED: 建立 spi_handler_task 來取代舊的 console_task >>> */

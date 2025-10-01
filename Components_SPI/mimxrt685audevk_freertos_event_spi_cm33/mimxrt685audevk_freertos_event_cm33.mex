@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding= "UTF-8" ?>
-<configuration name="MIMXRT685S" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_18 http://mcuxpresso.nxp.com/XSD/mex_configuration_18.xsd" uuid="61b3a8e4-b892-4d51-bdaa-7e3368c8d69a" version="18" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_18" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<configuration name="MIMXRT685S" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_17 http://mcuxpresso.nxp.com/XSD/mex_configuration_17.xsd" uuid="61b3a8e4-b892-4d51-bdaa-7e3368c8d69a" version="17" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_17" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
    <common>
       <processor>MIMXRT685S</processor>
       <package>MIMXRT685SFVKB</package>
@@ -14,7 +14,6 @@
       <validate_boot_init_only>true</validate_boot_init_only>
       <generate_code_modified_registers_only>false</generate_code_modified_registers_only>
       <update_include_paths>true</update_include_paths>
-      <enable_parallel_routing>true</enable_parallel_routing>
       <generate_registers_defines>false</generate_registers_defines>
    </preferences>
    <tools>
@@ -24,13 +23,14 @@
             <file path="board/pin_mux.h" update_enabled="true"/>
          </generated_project_files>
          <pins_profile>
-            <processor_version>25.06.10</processor_version>
+            <processor_version>24.12.10</processor_version>
             <pin_labels>
                <pin_label pin_num="F4" pin_signal="PIO0_5/FC0_SSEL2/SCT0_GPI0/SCT0_OUT0/CTIMER_INP1/SEC_PIO0_5/ADC0_0" label="NXP_BQ_MR_N"/>
                <pin_label pin_num="E1" pin_signal="PIO0_6/FC0_SSEL3/SCT0_GPI1/SCT0_OUT1/CTIMER0_MAT0/SEC_PIO0_6/ADC0_8" label="NXP_PWR_SW1"/>
                <pin_label pin_num="A2" pin_signal="PIO0_26/FC3_SSEL2/SCT0_GPI6/SCT0_OUT6/CTIMER_INP7/SEC_PIO0_26/ADC0_3" label="FUN_KEY1_N" identifier="LED_BLUE"/>
                <pin_label pin_num="B3" pin_signal="PIO0_27/FC3_SSEL3/SCT0_GPI7/SCT0_OUT7/CTIMER0_MAT3/SEC_PIO0_27/ADC0_11" label="AP533_RST_N"/>
                <pin_label pin_num="B10" pin_signal="PIO0_29/FC4_TXD_SCL_MISO_WS/CTIMER4_MAT1/I2S_BRIDGE_WS_OUT/SEC_PIO0_29" label="J27[2]" identifier="Output_INT"/>
+               <pin_label pin_num="B5" pin_signal="PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4" label="NXP_TOUCH_INT"/>
                <pin_label pin_num="T2" pin_signal="PIO2_19/PDM_CLK67/FLEXSPI0B_SS0_N" label="FUN_KEY1_N" identifier="QSPI_B_CS0"/>
             </pin_labels>
          </pins_profile>
@@ -119,6 +119,11 @@
                      </pin_features>
                   </pin>
                   <pin peripheral="GPIO" signal="PIO2, 15" pin_num="E2" pin_signal="PIO2_15/SCT0_OUT9/CLKIN/CMP0_D"/>
+                  <pin peripheral="GPIO" signal="PIO1, 8" pin_num="B5" pin_signal="PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4">
+                     <pin_features>
+                        <pin_feature name="ibena" value="enabled"/>
+                     </pin_features>
+                  </pin>
                </pins>
             </function>
             <function name="Board_I3C">
@@ -155,13 +160,13 @@
             </function>
          </functions_list>
       </pins>
-      <clocks name="Clocks" version="17.0" enabled="true" update_project_code="true">
+      <clocks name="Clocks" version="15.0" enabled="true" update_project_code="true">
          <generated_project_files>
             <file path="board/clock_config.c" update_enabled="true"/>
             <file path="board/clock_config.h" update_enabled="true"/>
          </generated_project_files>
          <clocks_profile>
-            <processor_version>25.06.10</processor_version>
+            <processor_version>24.12.10</processor_version>
          </clocks_profile>
          <clock_configurations>
             <clock_configuration name="BOARD_BootClockRUN" id_prefix="" prefix_user_defined="false">
