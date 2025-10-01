@@ -104,6 +104,20 @@ static QueueHandle_t spi_request_queue = NULL;
 static EventGroupHandle_t spi_event_group = NULL;
 static SemaphoreHandle_t spi_semaphore = NULL;
 
+/*****************************************************************************************************/
+/* ===== I2C EventGroup bits (for unified I2C_Task) ===== */
+#define TOUCH_EVENT_BIT      (1UL << 0)
+#define CHARGER_EVENT_BIT    (1UL << 1)
+
+/* ===== I2C synchronization objects ===== */
+static EventGroupHandle_t i2c_event_group = NULL;
+static SemaphoreHandle_t  i2c_mutex       = NULL;
+static TaskHandle_t       sI2CTaskHandle  = NULL;
+
+/* ===== I2C task prototype & external device handlers ===== */
+static void I2C_Task(void *pvParameters);
+
+
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -670,6 +684,39 @@ static void power_key_task(void *pvParameters)
     }
 }
 
+
+static void I2C_Task(void *pvParameters)
+{
+    (void)pvParameters;
+
+    for (;;)
+    {
+        EventBits_t bits = xEventGroupWaitBits(
+            i2c_event_group,
+            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT,
+            pdTRUE,     /* clear on exit */
+            pdFALSE,    /* wait for any bit */
+            portMAX_DELAY);
+
+        /* --- TOUCH event --- */
+        if ((bits & TOUCH_EVENT_BIT) != 0)
+        {
+            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
+            {
+                /* 由你既有的 aw93305.c/.h 提供 */
+            	AW93305_EXTI_Callback();
+                xSemaphoreGive(i2c_mutex);
+            }
+
+            /* 任務側重新啟用觸控中斷（先清旗標再開） */
+            GPIO_PinClearInterruptFlag(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
+            GPIO_PinEnableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
+        }
+
+    }
+}
+
+
 /**
  * @brief 掃描 I2C 總線上的設備。
  * @details 此函式遍歷所有有效的 7 位 I2C 地址 (從 0x08 到 0x77)，
@@ -734,14 +781,25 @@ void pint_intr_callback(pint_pin_int_t pintr, uint32_t pmatch_status)
 void GPIO_INTA_DriverIRQHandler(void)
 {
 
+	BaseType_t xHPW = pdFALSE;
+
 	uint32_t status_1 = GPIO_PortGetInterruptStatus(GPIO, GPIO1_PORT, kGPIO_InterruptA);
 
     if (status_1 & (1 << TOUCH_INT_PIN)) { //Touch
         GPIO_PinDisableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
         GPIO_PinClearInterruptFlag(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
 
+
+        if (i2c_event_group)
+        {
+            xEventGroupSetBitsFromISR(i2c_event_group, TOUCH_EVENT_BIT, &xHPW);
+        }
+
+
         //PRINTF("[Debug] TOUCH_GPIO_INTA_IRQHandler \r\n");
     }
+
+    portYIELD_FROM_ISR(xHPW);
     SDK_ISR_EXIT_BARRIER;
 }
 
@@ -810,11 +868,6 @@ int main(void)
     GPIO_SetPinInterruptConfig(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &config);
     GPIO_PinEnableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
 
-//    // 先清 GPIO 周邊任何可能的既有中斷旗標
-//    GPIO_PinClearInterruptFlag(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
-//    NVIC_ClearPendingIRQ(GPIO_INTA_IRQn);
-
-
     /* Initialize PINT */ /* Init FUN_KEY1 & Power_Key*/
 	PINT_Init(EXAMPLE_PINT_BASE);
 	NVIC_SetPriority(PIN_INT0_IRQn + FUN_KEY1_PINT_CH, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
@@ -877,6 +930,16 @@ int main(void)
 	/* Init I2C Component */
 	awinic_single_enter();
 
+
+
+	/* ===== A. 建立 I2C EventGroup 與 Mutex ===== */
+	i2c_event_group = xEventGroupCreate();
+	configASSERT(i2c_event_group);
+
+	i2c_mutex = xSemaphoreCreateMutex();
+	configASSERT(i2c_mutex);
+
+
 	/* 建立 tasks */
     /* <<< MODIFIED: 建立 spi_handler_task 來取代舊的 console_task >>> */
     if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 500, NULL,
@@ -910,6 +973,17 @@ int main(void)
         PRINTF(" POWER_KEY Task creation failed!.\r\n");
         while (1);
     }
+	/* ===== C. 建立 I2C_Task（建議比 passive_handler_task 略高，避免事件延遲） ===== */
+	if (xTaskCreate(I2C_Task, "I2C_TASK",
+	                configMINIMAL_STACK_SIZE + 256,
+	                NULL,
+	                tskIDLE_PRIORITY + 3,
+	                &sI2CTaskHandle) != pdPASS)
+	{
+	    PRINTF("I2C_TASK creation failed!\r\n");
+	    while (1) { ; }
+	}
+
 
 	vTaskStartScheduler();
 
