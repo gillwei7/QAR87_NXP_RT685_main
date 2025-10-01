@@ -8,7 +8,7 @@
 #include "aw933xx_reg.h"
 #include "aw_bin_parse.h"
 #define AW933XX_DRIVER_VERSION		"V0.7.0"
-static struct aw933xx_dev aw933xx;
+volatile struct aw933xx_dev aw933xx;
 
 #if (defined(AW933XX_SPP_USED) && (AW933XX_SPP_USED == 1))
 static void aw933xx_dbg_send_curve_dat(void);

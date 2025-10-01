@@ -23,6 +23,8 @@
 #include "pmic_support.h"
 #include "pmic_pca9422.h"
 #include "glf70583.h"
+#include "aw933xx.h"
+#include "aw93305.h"
 
 #include "fsl_spi.h"
 #include <string.h>
@@ -118,6 +120,7 @@ static TaskHandle_t       sI2CTaskHandle  = NULL;
 static void I2C_Task(void *pvParameters);
 
 
+extern volatile struct aw933xx_dev aw933xx;
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -703,9 +706,35 @@ static void I2C_Task(void *pvParameters)
         {
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
-                /* 由你既有的 aw93305.c/.h 提供 */
             	AW93305_EXTI_Callback();
                 xSemaphoreGive(i2c_mutex);
+
+                if(aw933xx.event.click >0)
+                {
+                	unsigned int btn_event = aw933xx.event.click;
+                	PRINTF("[Touch] click= %d \n",btn_event);
+                }
+                else if(aw933xx.event.press)
+                {
+                	PRINTF("[Touch] press \n");
+                }
+                else if(aw933xx.event.long_press)
+                {
+                	PRINTF("[Touch] long_press \n");
+                }
+                else if(aw933xx.event.super_long_press)
+                {
+                	PRINTF("[Touch] super_long_press \n");
+                }
+                else if(aw933xx.event.right_wareds)
+                {
+                	PRINTF("[Touch] slide_right \n");
+                }
+                else if(aw933xx.event.left_wareds)
+                {
+                	PRINTF("[Touch] slide_left \n");
+                }
+
             }
 
             /* 任務側重新啟用觸控中斷（先清旗標再開） */
