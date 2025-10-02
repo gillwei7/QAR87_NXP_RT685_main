@@ -34,6 +34,8 @@
 /* I2C Component*/
 #define TOUCH_INT_PORT 1U
 #define TOUCH_INT_PIN  8U
+#define CHARG_INT_PORT 1U
+#define CHARG_INT_PIN  15U
 
 #define EXAMPLE_PINT_BASE PINT
 #define POWERKEY_PINT_PIN_INT0_SRC kINPUTMUX_GpioPort0Pin5ToPintsel  /* Power Key */

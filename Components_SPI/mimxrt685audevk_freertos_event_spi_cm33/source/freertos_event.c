@@ -25,6 +25,7 @@
 #include "glf70583.h"
 #include "aw933xx.h"
 #include "aw93305.h"
+#include "bq256xx_charger.h"
 
 #include "fsl_spi.h"
 #include <string.h>
@@ -818,14 +819,24 @@ void GPIO_INTA_DriverIRQHandler(void)
         GPIO_PinDisableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
         GPIO_PinClearInterruptFlag(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
 
-
         if (i2c_event_group)
         {
             xEventGroupSetBitsFromISR(i2c_event_group, TOUCH_EVENT_BIT, &xHPW);
         }
 
-
         //PRINTF("[Debug] TOUCH_GPIO_INTA_IRQHandler \r\n");
+    }
+    if (status_1 & (1 << CHARG_INT_PIN)) { //Charger
+    	GPIO_PinDisableInterrupt(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
+        GPIO_PinClearInterruptFlag(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
+
+        if (i2c_event_group)
+        {
+            xEventGroupSetBitsFromISR(i2c_event_group, CHARGER_EVENT_BIT, &xHPW);
+        }
+
+
+        //PRINTF("[Debug] CHARG_INT_INTA_IRQHandler \r\n");
     }
 
     portYIELD_FROM_ISR(xHPW);
@@ -892,10 +903,14 @@ int main(void)
     NVIC_SetPriority(GPIO_INTA_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
     EnableIRQ(GPIO_INTA_IRQn);
 
-    /* Touch GPIO*/
+    /* Touch INT GPIO*/
     GPIO_PinInit(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &sw_config);
     GPIO_SetPinInterruptConfig(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &config);
     GPIO_PinEnableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
+    /* Charger INT GPIO */
+    GPIO_PinInit(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, &sw_config);
+    GPIO_SetPinInterruptConfig(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, &config);
+    GPIO_PinEnableInterrupt(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
 
     /* Initialize PINT */ /* Init FUN_KEY1 & Power_Key*/
 	PINT_Init(EXAMPLE_PINT_BASE);
@@ -957,9 +972,28 @@ int main(void)
 	GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1);
 
 	/* Init I2C Component */
-	awinic_single_enter();
+	awinic_single_enter(); //Touch Init
 
-
+	/* ============== Charger Init Start==============*/
+		bq256xx_cfg_t charger_cfg = {
+				.vindpm_uv = 4450000,
+				.iindpm_ua = 2000000,
+				.ichg_ua = 530000,
+				.vbatreg_uv = 4005000,
+				.iprechg_ua = 60000,
+				.iterm_ua = 20000,
+				.wdt_ms = 0
+		};
+		status_t bq_ret = bq256xx_init(&charger_cfg);
+		if ( bq_ret!= kStatus_Success) {
+			PRINTF("[Charger] bq256xx init failed!,ret:%d \n",bq_ret);
+			return -1;
+		}
+		else{
+			PRINTF("[Charger] bq256xx initialized.OK \n");
+		}
+		bq256xx_write_reg(0x03, 0x31); // IPRECHG = 60mA, ITERM = 20mA
+	/* ============== Charger Init End==============*/
 
 	/* ===== A. 建立 I2C EventGroup 與 Mutex ===== */
 	i2c_event_group = xEventGroupCreate();

@@ -20,6 +20,7 @@ pin_labels:
 - {pin_num: B3, pin_signal: PIO0_27/FC3_SSEL3/SCT0_GPI7/SCT0_OUT7/CTIMER0_MAT3/SEC_PIO0_27/ADC0_11, label: AP533_RST_N}
 - {pin_num: B10, pin_signal: PIO0_29/FC4_TXD_SCL_MISO_WS/CTIMER4_MAT1/I2S_BRIDGE_WS_OUT/SEC_PIO0_29, label: 'J27[2]', identifier: Output_INT}
 - {pin_num: B5, pin_signal: PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4, label: NXP_TOUCH_INT}
+- {pin_num: N3, pin_signal: PIO1_15/HS_SPI_SSEL1/CTIMER3_MAT0, label: CHG_INT_N_R}
 - {pin_num: T2, pin_signal: PIO2_19/PDM_CLK67/FLEXSPI0B_SS0_N, label: FUN_KEY1_N, identifier: QSPI_B_CS0}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
@@ -62,6 +63,7 @@ BOARD_InitPins:
   - {pin_num: N2, peripheral: FLEXCOMM14, signal: SSEL0, pin_signal: PIO1_14/HS_SPI_SSEL0/CTIMER2_MAT3/FLEXSPI0B_DATA3, ibena: enabled}
   - {pin_num: E2, peripheral: GPIO, signal: 'PIO2, 15', pin_signal: PIO2_15/SCT0_OUT9/CLKIN/CMP0_D}
   - {pin_num: B5, peripheral: GPIO, signal: 'PIO1, 8', pin_signal: PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4, ibena: enabled}
+  - {pin_num: N3, peripheral: GPIO, signal: 'PIO1, 15', pin_signal: PIO1_15/HS_SPI_SSEL1/CTIMER3_MAT0, ibena: enabled}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -306,6 +308,27 @@ void BOARD_InitPins(void)
                                    IOPCTL_PIO_INV_DI);
     /* PORT1 PIN14 (coords: N2) is configured as HS_SPI_SSEL0 */
     IOPCTL_PinMuxSet(IOPCTL, BOARD_INITPINS_QSPI_B_DATA3_PORT, BOARD_INITPINS_QSPI_B_DATA3_PIN, QSPI_B_DATA3);
+
+    const uint32_t port1_pin15_config = (/* Pin is configured as PIO1_15 */
+                                         IOPCTL_PIO_FUNC0 |
+                                         /* Disable pull-up / pull-down function */
+                                         IOPCTL_PIO_PUPD_DI |
+                                         /* Enable pull-down function */
+                                         IOPCTL_PIO_PULLDOWN_EN |
+                                         /* Enables input buffer function */
+                                         IOPCTL_PIO_INBUF_EN |
+                                         /* Normal mode */
+                                         IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                         /* Normal drive */
+                                         IOPCTL_PIO_FULLDRIVE_DI |
+                                         /* Analog mux is disabled */
+                                         IOPCTL_PIO_ANAMUX_DI |
+                                         /* Pseudo Output Drain is disabled */
+                                         IOPCTL_PIO_PSEDRAIN_DI |
+                                         /* Input function is not inverted */
+                                         IOPCTL_PIO_INV_DI);
+    /* PORT1 PIN15 (coords: N3) is configured as PIO1_15 */
+    IOPCTL_PinMuxSet(IOPCTL, 1U, 15U, port1_pin15_config);
 
     const uint32_t port1_pin8_config = (/* Pin is configured as PIO1_8 */
                                         IOPCTL_PIO_FUNC0 |
