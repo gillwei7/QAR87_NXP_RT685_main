@@ -274,8 +274,9 @@ int main(void)
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x6A, 0x12);
 	// 0x25->BUCK4、LDO2 off
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x26, 0xE8);
-	// 0x26->BUCK2 ON、Others off
-	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);
+	// 0x26->BUCK1、2、4 ON、Others off
+	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0xD0);
+	//glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);//BUCK2 ON、Others off
 
 	//uint8_t ch = GETCHAR();
 	PRINTF("GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); \n");
