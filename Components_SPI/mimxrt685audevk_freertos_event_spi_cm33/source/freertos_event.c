@@ -26,6 +26,7 @@
 #include "aw933xx.h"
 #include "aw93305.h"
 #include "bq256xx_charger.h"
+#include "glf70302.h"
 
 #include "fsl_spi.h"
 #include <string.h>
@@ -111,7 +112,9 @@ static SemaphoreHandle_t spi_semaphore = NULL;
 /* ===== I2C EventGroup bits (for unified I2C_Task) ===== */
 #define TOUCH_EVENT_BIT      (1UL << 0)
 #define CHARGER_EVENT_BIT    (1UL << 1)
+#define GAUGE_EVENT_BIT      (1UL << 2)
 
+BatteryInfo battery;
 /* ===== I2C synchronization objects ===== */
 static EventGroupHandle_t i2c_event_group = NULL;
 static SemaphoreHandle_t  i2c_mutex       = NULL;
@@ -697,7 +700,7 @@ static void I2C_Task(void *pvParameters)
     {
         EventBits_t bits = xEventGroupWaitBits(
             i2c_event_group,
-            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT,
+            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT,
             pdTRUE,     /* clear on exit */
             pdFALSE,    /* wait for any bit */
             portMAX_DELAY);
@@ -743,7 +746,6 @@ static void I2C_Task(void *pvParameters)
             GPIO_PinEnableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
         }
 
-
         /* --- CHARGER event --- */
         if ((bits & CHARGER_EVENT_BIT) != 0)
         {
@@ -768,7 +770,19 @@ static void I2C_Task(void *pvParameters)
 
         }
 
+        /* --- GAUGE event --- */
+        if ((bits & GAUGE_EVENT_BIT) != 0)
+        {
+            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
+            {
+            	glf70302_read_battery(&battery);
+                xSemaphoreGive(i2c_mutex);
+            }
 
+            GPIO_PinClearInterruptFlag(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, kGPIO_InterruptA);
+            GPIO_PinEnableInterrupt(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, kGPIO_InterruptA);
+
+        }
     }
 }
 
@@ -840,6 +854,7 @@ void GPIO_INTA_DriverIRQHandler(void)
 	BaseType_t xHPW = pdFALSE;
 
 	uint32_t status_1 = GPIO_PortGetInterruptStatus(GPIO, GPIO1_PORT, kGPIO_InterruptA);
+	uint32_t status_2 = GPIO_PortGetInterruptStatus(GPIO, GPIO2_PORT, kGPIO_InterruptA);
 
     if (status_1 & (1 << TOUCH_INT_PIN)) { //Touch
         GPIO_PinDisableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
@@ -861,8 +876,19 @@ void GPIO_INTA_DriverIRQHandler(void)
             xEventGroupSetBitsFromISR(i2c_event_group, CHARGER_EVENT_BIT, &xHPW);
         }
 
-
         //PRINTF("[Debug] CHARG_INT_INTA_IRQHandler \r\n");
+    }
+    if (status_2 & (1 << GAUGE_INT_PIN)) { //Gauge
+
+    	GPIO_PinDisableInterrupt(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, kGPIO_InterruptA);
+        GPIO_PinClearInterruptFlag(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, kGPIO_InterruptA);
+
+        if (i2c_event_group)
+        {
+            xEventGroupSetBitsFromISR(i2c_event_group, GAUGE_EVENT_BIT, &xHPW);
+        }
+
+        //PRINTF("[Debug] GAUGE_INT_PIN_INTA_IRQHandler \r\n");
     }
 
     portYIELD_FROM_ISR(xHPW);
@@ -937,6 +963,10 @@ int main(void)
     GPIO_PinInit(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, &sw_config);
     GPIO_SetPinInterruptConfig(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, &config);
     GPIO_PinEnableInterrupt(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
+    /* Gauge INT GPIO */
+    GPIO_PinInit(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, &sw_config);
+    GPIO_SetPinInterruptConfig(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, &config);
+    GPIO_PinEnableInterrupt(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, kGPIO_InterruptA);
 
     /* Initialize PINT */ /* Init FUN_KEY1 & Power_Key*/
 	PINT_Init(EXAMPLE_PINT_BASE);
@@ -1020,6 +1050,8 @@ int main(void)
 		}
 		bq256xx_write_reg(0x03, 0x31); // IPRECHG = 60mA, ITERM = 20mA
 	/* ============== Charger Init End==============*/
+	glf70302_read_battery(&battery); //Read the battery level after powering on
+
 
 	/* ===== A. 建立 I2C EventGroup 與 Mutex ===== */
 	i2c_event_group = xEventGroupCreate();

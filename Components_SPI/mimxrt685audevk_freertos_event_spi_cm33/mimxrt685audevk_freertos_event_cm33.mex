@@ -32,6 +32,7 @@
                <pin_label pin_num="B10" pin_signal="PIO0_29/FC4_TXD_SCL_MISO_WS/CTIMER4_MAT1/I2S_BRIDGE_WS_OUT/SEC_PIO0_29" label="J27[2]" identifier="Output_INT"/>
                <pin_label pin_num="B5" pin_signal="PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4" label="NXP_TOUCH_INT"/>
                <pin_label pin_num="N3" pin_signal="PIO1_15/HS_SPI_SSEL1/CTIMER3_MAT0" label="CHG_INT_N_R"/>
+               <pin_label pin_num="R2" pin_signal="PIO2_18/PDM_CLK45/FLEXSPI0B_DATA5" label="GAUGE_INT"/>
                <pin_label pin_num="T2" pin_signal="PIO2_19/PDM_CLK67/FLEXSPI0B_SS0_N" label="FUN_KEY1_N" identifier="QSPI_B_CS0"/>
             </pin_labels>
          </pins_profile>
@@ -126,6 +127,11 @@
                      </pin_features>
                   </pin>
                   <pin peripheral="GPIO" signal="PIO1, 15" pin_num="N3" pin_signal="PIO1_15/HS_SPI_SSEL1/CTIMER3_MAT0">
+                     <pin_features>
+                        <pin_feature name="ibena" value="enabled"/>
+                     </pin_features>
+                  </pin>
+                  <pin peripheral="GPIO" signal="PIO2, 18" pin_num="R2" pin_signal="PIO2_18/PDM_CLK45/FLEXSPI0B_DATA5">
                      <pin_features>
                         <pin_feature name="ibena" value="enabled"/>
                      </pin_features>
