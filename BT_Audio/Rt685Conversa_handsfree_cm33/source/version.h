@@ -20,7 +20,7 @@ static uint8_t version[20] = "0.01";
 #if MCU_APP_RELEASE
 static uint8_t version_time[15] = "";
 #else
-static uint8_t version_time[15] = "_251002_1101";
+static uint8_t version_time[15] = "_251002_1637";
 #endif
 
 

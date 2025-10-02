@@ -198,7 +198,7 @@ int main(void)
 	EnableIRQ(GPIO_INTA_IRQn);
 #if PMIC_GLF70583_ENABLE
     /* Init GPIO */
-    GPIO_PortInit(GPIO, PWR_SW1_PORT);
+    //GPIO_PortInit(GPIO, PWR_SW1_PORT);
     gpio_pin_config_t output_int_config = {kGPIO_DigitalOutput, 0,};
     GPIO_PinInit(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, &output_int_config);
     GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 0);

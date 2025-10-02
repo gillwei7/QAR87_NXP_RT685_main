@@ -1,3 +1,9 @@
 BT_Audio/Rt685Conversa_handsfree_cm33/Debug/
 *.launch
 BT_Audio/Rt685Conversa_handsfree_cm33/.settings/language.settings.xml
+BT_Audio/.metabinary/
+BT_Audio/.metadata/
+BT_Audio/Rt685Conversa_handsfree_hifi4/bin/
+BT_Audio/XtensaInfo/
+BT_Audio/libc_RI-2021.8/
+BT_Audio/Rt685Conversa_handsfree_cm33/.settings/org.eclipse.cdt.managedbuilder.core.prefs
