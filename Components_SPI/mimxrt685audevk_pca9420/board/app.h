@@ -79,17 +79,17 @@
 
 #if DMIC_ENABLE
 
-//#define DMAREQ_DMIC0                    16U
-//#define DEMO_I2S_MASTER_CLOCK_FREQUENCY CLOCK_GetMclkClkFreq()
-//#define DEMO_I2S_TX                     (I2S5)
-//#define DEMO_I2S_CLOCK_DIVIDER          16
-//#define DEMO_I2S_TX_CHANNEL             (11)
-
 #define DMAREQ_DMIC0                    16U
 #define DEMO_I2S_MASTER_CLOCK_FREQUENCY CLOCK_GetMclkClkFreq()
-#define DEMO_I2S_TX                     (I2S1)
+#define DEMO_I2S_TX                     (I2S5)
 #define DEMO_I2S_CLOCK_DIVIDER          16
-#define DEMO_I2S_TX_CHANNEL             (3)
+#define DEMO_I2S_TX_CHANNEL             (11)
+
+//#define DMAREQ_DMIC0                    16U
+//#define DEMO_I2S_MASTER_CLOCK_FREQUENCY CLOCK_GetMclkClkFreq()
+//#define DEMO_I2S_TX                     (I2S1)
+//#define DEMO_I2S_CLOCK_DIVIDER          16
+//#define DEMO_I2S_TX_CHANNEL             (3)
 
 #define DEMO_DMA                        (DMA0)
 

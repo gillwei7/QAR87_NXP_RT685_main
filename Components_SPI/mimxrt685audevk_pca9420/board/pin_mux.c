@@ -601,8 +601,6 @@ void AMP_I2S(void)
                                         IOPCTL_PIO_INV_DI);
     /* PORT0 PIN9 (coords: L3) is configured as FC1_RXD_SDA_MOSI_DATA */
     IOPCTL_PinMuxSet(IOPCTL, 0U, 9U, port0_pin9_config);
-<<<<<<< Updated upstream
-=======
 
     const uint32_t port1_pin3_config = (/* Pin is configured as FC5_SCK */
                                         IOPCTL_PIO_FUNC1 |
@@ -750,10 +748,6 @@ void AMP_I2S(void)
                                          IOPCTL_PIO_INV_DI);
     /* PORT2 PIN21 (coords: R3) is configured as PDM_DATA23 */
     IOPCTL_PinMuxSet(IOPCTL, 2U, 21U, port2_pin21_config);
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 }
 /***********************************************************************************************************************
  * EOF
