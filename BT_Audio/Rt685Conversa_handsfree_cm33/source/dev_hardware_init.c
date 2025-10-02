@@ -61,6 +61,8 @@
 
 #include "UsbApp.h"
 
+#include "version.h" //gill
+
 #endif
 
 #endif
@@ -115,6 +117,8 @@ const clock_audio_pll_config_t audioPllConfig = {
     .audio_pll_mult = kCLOCK_AudioPllMult22  /* Divide by 22 */
 };
 
+
+#if !PIN_CONFIG_DEV_BOARD
 //boardCodecScoConfig and wm8904ScoConfig is for audio after ring tone
 wm8904_config_t wm8904ScoConfig = {
     .i2cConfig          = {.codecI2CInstance = BOARD_CODEC_I2C_INSTANCE, .codecI2CSourceClock = 25010526},
@@ -149,6 +153,8 @@ wm8904_config_t wm8904ScoConfig1 = {
     .master             = true,
 };
 codec_config_t boardCodecScoConfig1 = {.codecDevType = kCODEC_WM8904, .codecDevConfig = &wm8904ScoConfig1};
+#endif
+
 
 hal_audio_dma_config_t txSpeakerDmaConfig = {
     .instance             = EXAMPLE_DMA_INSTANCE,
@@ -317,8 +323,12 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
 
         /* attach AUDIO PLL clock to FLEXCOMM1 (I2S2) */
         CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);
+
+        // gill new
+        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
+
         /* attach AUDIO PLL clock to FLEXCOMM3 (I2S5) */
-        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
+        //CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
 
         DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, CLOCK_GetFlexCommClkFreq(5U));
         PRINTF("DbgConsole_Init on FC5");
@@ -331,27 +341,29 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
         // gill
         // Send to BT on FC2, Receive from BT FC5->FC4
 #if 0
-        /* Set shared signal set 0: SCK, WS from Flexcomm1 */
-        SYSCTL1->SHAREDCTRLSET[0] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(1) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(1);
-        /* Set flexcomm3 SCK, WS from shared signal set 0 */
-        SYSCTL1->FCCTRLSEL[3] = SYSCTL1_FCCTRLSEL_SCKINSEL(1) | SYSCTL1_FCCTRLSEL_WSINSEL(1);
-        /* Set shared signal set 1: SCK, WS from Flexcomm5 */
-        SYSCTL1->SHAREDCTRLSET[1] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(5) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(5);
-        /* Set flexcomm2 SCK, WS from shared signal set 1 */
-        SYSCTL1->FCCTRLSEL[2] = SYSCTL1_FCCTRLSEL_SCKINSEL(2) | SYSCTL1_FCCTRLSEL_WSINSEL(2);
+		/* Set shared signal set 0: SCK, WS from Flexcomm1 */
+		SYSCTL1->SHAREDCTRLSET[0] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(1) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(1);
+		/* Set flexcomm3 SCK, WS from shared signal set 0 */
+		SYSCTL1->FCCTRLSEL[3] = SYSCTL1_FCCTRLSEL_SCKINSEL(1) | SYSCTL1_FCCTRLSEL_WSINSEL(1);
+		/* Set shared signal set 1: SCK, WS from Flexcomm5 */
+		SYSCTL1->SHAREDCTRLSET[1] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(5) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(5);
+		/* Set flexcomm2 SCK, WS from shared signal set 1 */
+		SYSCTL1->FCCTRLSEL[2] = SYSCTL1_FCCTRLSEL_SCKINSEL(2) | SYSCTL1_FCCTRLSEL_WSINSEL(2);
 #else
-        // FC1, FC3 not changed
-        /* Set shared signal set 0: SCK, WS from Flexcomm1 */
-        SYSCTL1->SHAREDCTRLSET[0] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(1) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(1);
-        /* Set flexcomm3 SCK, WS from shared signal set 0 */
-        SYSCTL1->FCCTRLSEL[3] = SYSCTL1_FCCTRLSEL_SCKINSEL(1) | SYSCTL1_FCCTRLSEL_WSINSEL(1);
+		// FC1, FC3 not changed
+		/* Set shared signal set 0: SCK, WS from Flexcomm1 */
+		SYSCTL1->SHAREDCTRLSET[0] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(1) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(1);
+		/* Set flexcomm3 SCK, WS from shared signal set 0 */
+		SYSCTL1->FCCTRLSEL[3] = SYSCTL1_FCCTRLSEL_SCKINSEL(1) | SYSCTL1_FCCTRLSEL_WSINSEL(1);
 
-        /* Set shared signal set 1: SCK, WS from Flexcomm2 */
-        SYSCTL1->SHAREDCTRLSET[1] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(2) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(2);
-        /* Set flexcomm4 SCK, WS from shared signal set 1 */
-        SYSCTL1->FCCTRLSEL[4] = SYSCTL1_FCCTRLSEL_SCKINSEL(2) | SYSCTL1_FCCTRLSEL_WSINSEL(2);
+		/* Set shared signal set 1: SCK, WS from Flexcomm2 */
+		SYSCTL1->SHAREDCTRLSET[1] = SYSCTL1_SHAREDCTRLSET_SHAREDSCKSEL(2) | SYSCTL1_SHAREDCTRLSET_SHAREDWSSEL(2);
+		/* Set flexcomm4 SCK, WS from shared signal set 1 */
+		SYSCTL1->FCCTRLSEL[4] = SYSCTL1_FCCTRLSEL_SCKINSEL(2) | SYSCTL1_FCCTRLSEL_WSINSEL(2);
 #endif
 
+		// gill AMP initial 8K or 16K
+#if !PIN_CONFIG_DEV_BOARD
         switch (sampleRate)
         {
             case 8000:
@@ -391,6 +403,7 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
         wm8904ScoConfig1.format.sampleRate             = wm8904ScoConfig.format.sampleRate;
         wm8904ScoConfig1.i2cConfig.codecI2CSourceClock = wm8904ScoConfig.i2cConfig.codecI2CSourceClock;
         wm8904ScoConfig1.mclk_HZ                       = wm8904ScoConfig.mclk_HZ;
+#endif
     }
 
     return CLOCK_GetMclkClkFreq();
@@ -413,19 +426,21 @@ void dev_BOARD_InitHardware(void)
     CLOCK_SetClkDiv(kCLOCK_DivI3cClk, 20);
 
     /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
-    CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
+    // gill remove
+    //CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
+
 
     /* Attach AUX0_PLL clock to flexspi with divider 4*/
 //		        BOARD_SetFlexspiClock(2, 8);
 
-    // gill for BT USART0
-    /* attach FRG0 clock to FLEXCOMM0 */
-    CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
-    CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
-
     dev_BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
+
+    // gill for BT USART0
+    CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
+    CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
+    PRINTF("[System] SW version: %s%s\r\n", MCU_APP_VERSION, MCU_APP_VERSION_TIME);
 
     PRINTF("RT685 MCU: start\r\n");
 
@@ -433,7 +448,7 @@ void dev_BOARD_InitHardware(void)
 
     PRINTF("\r\n");
     PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
-    PRINTF("RT685 MCU: ------------ McuVer 0.1.2 ------------ \r\n");
+    PRINTF("RT685 MCU: ------------ McuVer 0.1.3.1 ------------ \r\n");
     PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
 
     PRINTF("\r\n");

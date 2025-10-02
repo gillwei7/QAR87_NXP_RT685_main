@@ -1,3 +1,10 @@
+/*
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 
 #include <stdlib.h>
 #include <string.h>
@@ -160,8 +167,9 @@ void BOARD_Init_I2S_Fc3(void)
 
 	I2S_Tx_config.position    =  0;
 	I2S_Tx_config.oneChannel  = false;
-
-	I2S_Tx_config.masterSlave = DEMO_I2S1Rx0_MODE;
+    // gill
+	//I2S_Tx_config.masterSlave = DEMO_I2S1Rx0_MODE;
+	I2S_Tx_config.masterSlave = DEMO_I2S3Tx0_MODE;
 	I2S_TxInit(DEMO_I2S3Tx0, &I2S_Tx_config);
 }
 void BOARD_Init_I2S_Fc1(void)
@@ -180,7 +188,8 @@ void BOARD_Init_I2S_Fc1(void)
 	I2S_Rx_config.position    =  0;
 	I2S_Rx_config.oneChannel  = false;
 
-	I2S_Rx_config.masterSlave = DEMO_I2S3Tx0_MODE;
+	//I2S_Rx_config.masterSlave = DEMO_I2S3Tx0_MODE;
+	I2S_Rx_config.masterSlave = DEMO_I2S1Rx0_MODE;
 	I2S_RxInit(DEMO_I2S1Rx0, &I2S_Rx_config);
 }
 #endif
@@ -333,7 +342,23 @@ void I2S3Tx0_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t complet
 	DmaTxRxIsDone|=AudioI2sPortsBitMapFlag_Fc3;
 	StartI2SAudioDmaFromDmicDmaIntr_Cnt=0;
 
-	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+	//if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+	//if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23))
+	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3
+		#if EnableMic01==1
+					|AudioPdmPortsBitMapFlag_Mic01
+		#endif
+		#if EnableMic23==1
+					|AudioPdmPortsBitMapFlag_Mic23
+		#endif
+		#if EnableMic45==1
+					|AudioPdmPortsBitMapFlag_Mic45
+		#endif
+		#if EnableMic67==1
+					|AudioPdmPortsBitMapFlag_Mic67
+		#endif
+					))
+
 		#if CallAudioFrameProcessInIntr==1
 			ProcessAudio_AfterAudioInputBufIsReady();
 		#else
@@ -352,7 +377,22 @@ void I2S1Rx0_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t complet
 	DmaTxRxIsDone|=AudioI2sPortsBitMapFlag_Fc1;
 	StartI2SAudioDmaFromDmicDmaIntr_Cnt=0;
 
-	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+	//if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+	//if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23))
+	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3
+		#if EnableMic01==1
+					|AudioPdmPortsBitMapFlag_Mic01
+		#endif
+		#if EnableMic23==1
+					|AudioPdmPortsBitMapFlag_Mic23
+		#endif
+		#if EnableMic45==1
+					|AudioPdmPortsBitMapFlag_Mic45
+		#endif
+		#if EnableMic67==1
+					|AudioPdmPortsBitMapFlag_Mic67
+		#endif
+					))
 		#if CallAudioFrameProcessInIntr==1
 			ProcessAudio_AfterAudioInputBufIsReady();
 		#else

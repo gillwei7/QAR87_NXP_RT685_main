@@ -1,4 +1,0 @@
-This is an example little-endian 5-stage LX CPU.
-It provides a typical configuration with a single load-store unit, zero-overhead loops, 32-bit multiplier, and integer divider. 
-The core is configured to use tighly-coupled memories with 64KB instruction RAM and 64KB data RAM, along with an AHB-Lite interface to the system. 
-From this configuration, users can do multiple experiments on the impact of various configuration operations on their code.

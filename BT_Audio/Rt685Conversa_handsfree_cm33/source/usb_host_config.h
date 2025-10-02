@@ -1,8 +1,11 @@
 /*
- * Copyright 2025 NXP
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
 #if 0
 
 #ifndef _USB_HOST_CONFIG_H_

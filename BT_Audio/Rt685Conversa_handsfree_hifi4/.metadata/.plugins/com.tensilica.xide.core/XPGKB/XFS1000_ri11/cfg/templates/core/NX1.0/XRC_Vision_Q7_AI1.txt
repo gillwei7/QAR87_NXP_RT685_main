@@ -1,5 +1,0 @@
-Vision Q7 fixed-point AI reference configuration. 
-Provides 512 8x8 MACs and 128 16x16 MACs. 
-
-Fixed-point NN applications in addition to 
-general imaging and vision applications.

@@ -1,11 +1,10 @@
-
-
 /*
- * Copyright 2024 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 
 
 #define Pi_Value		3.1415926535897932384626

@@ -1,14 +1,22 @@
 /*
-Copyright 2021 by Retune DSP
-Copyright 2022-2023 NXP
-
-NXP Confidential. This software is owned or controlled by NXP and may only be used strictly in accordance with the applicable license terms.  By expressly accepting such terms or by downloading, installing, activating and/or otherwise using the software, you are agreeing that you have read, and that you agree to comply with and are bound by, such license terms.  If you do not agree to be bound by the applicable license terms, then you may not retain, install, activate or otherwise use the software.
-*/
+ * Copyright 2021 by Retune DSP
+ * Copyright 2022-2023, 2025 NXP
+ *
+ * NXP Confidential and Proprietary. This software is owned or controlled by NXP
+ * and may only be used strictly in accordance with the applicable license terms.
+ * By expressly accepting such terms or by downloading, installing,
+ * activating and/or otherwise using the software, you are agreeing that you have read,
+ * and that you agree to comply with and are bound by, such license terms.
+ * If you do not agree to be bound by the applicable license terms,
+ * then you may not retain, install, activate or otherwise use the software.
+ */
 
 #ifndef NXP_TYPES_H_
 #define NXP_TYPES_H_
 
 #include "NxpPlatforms.h"
+
+#define BIT(x)          (1UL << x)
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,6 +37,22 @@ typedef enum
 	NXP_SIG_TYPE_MAXENUM = 2147483647
 }conversa_signal_types;
 
+
+/** @enum
+ *   Bit position of Conversa internal output enum used in Conversa.
+ *   These enum can be used in nxp_conversa_plugin_config_t::internal_output_selector to construct output_selector
+ *
+ */
+enum
+{
+    NXP_AEC_OUT_BITPOS      = 0,                            ///< Bit position for Accoustic Echo Canceller linear output
+    NXP_BF_OUT_BITPOS       = 1,                            ///< Bit position for BeamFormer output
+    NXP_NLP_OUT_BITPOS      = 2,                            ///< Bit position for Non-Linear Processing output
+    NXP_AEC_FREQ_OUT_BITPOS = 3,                            ///< Bit position for Accoustic Echo Canceller linear output in spectrum domain
+    NXP_BF_FREQ_OUT_BITPOS  = 4,                            ///< Bit position for BeamFormer output in spectrum domain
+    NXP_NLP_FREQ_OUT_BITPOS = 5,                            ///< Bit position for Non-Linear Processing output in spectrum domain
+};
+
 /** @enum conversa_internal_output
  *   Conversa internal output enum used in Conversa.
  *   These fields can be used in nxp_conversa_plugin_config_t::internal_output_selector to select which intermediate internal buffer to extract.
@@ -36,11 +60,14 @@ typedef enum
  */
 typedef enum
 {
-	NXP_AEC_OUT = 1,							///< extract Accoustic Echo Canceller linear output
-	NXP_BF_OUT = 2,								///< extract BeamFormer output
-	NXP_NLP_OUT = 4,							///< extract Non-Linear Processing output
-	NXP_INTERNAL_OUT_MAXENUM = 2147483647
-}conversa_internal_output;
+    NXP_AEC_OUT         = BIT(NXP_AEC_OUT_BITPOS),          ///< extract Accoustic Echo Canceller linear output
+    NXP_BF_OUT          = BIT(NXP_BF_OUT_BITPOS),           ///< extract BeamFormer output
+    NXP_NLP_OUT         = BIT(NXP_NLP_OUT_BITPOS),          ///< extract Non-Linear Processing output
+    NXP_AEC_FREQ_OUT    = BIT(NXP_AEC_FREQ_OUT_BITPOS),     ///< extract Accoustic Echo Canceller linear output in spectrum domain
+    NXP_BF_FREQ_OUT     = BIT(NXP_BF_FREQ_OUT_BITPOS),      ///< extract BeamFormer output in spectrum domain
+    NXP_NLP_FREQ_OUT    = BIT(NXP_NLP_FREQ_OUT_BITPOS),     ///< extract Non-Linear Processing output in spectrum domain
+    NXP_INTERNAL_OUT_MAXENUM = 2147483647
+} conversa_internal_output;
 
 /*
  * NXP types				IEEE754			HIFI4 / FUSIONF1

@@ -1,5 +1,0 @@
-This is a sample_controller with secure mode enabled. 
-
-The local I/D RAM has secure memories defined and vectors are placed in secure IRAM.
-
-Other System RAM and ROM has secure memory defined. 

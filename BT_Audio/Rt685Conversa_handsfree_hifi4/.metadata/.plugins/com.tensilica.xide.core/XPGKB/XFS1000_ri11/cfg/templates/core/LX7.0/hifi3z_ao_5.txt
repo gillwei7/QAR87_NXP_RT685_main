@@ -1,2 +1,0 @@
-5 stage HiFi 3z with 
-vFPU, Local Memory, Caches

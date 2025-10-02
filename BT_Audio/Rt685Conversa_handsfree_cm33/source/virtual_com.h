@@ -1,10 +1,11 @@
 /*
- * Copyright (c) 2015 - 2016, Freescale Semiconductor, Inc.
- * Copyright 2016 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
+
 #ifndef _USB_CDC_VCOM_H_
 #define _USB_CDC_VCOM_H_ 1
 

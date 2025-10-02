@@ -1,2 +1,0 @@
-5 stage hifi mini config 
-for bluetooth and iot devices

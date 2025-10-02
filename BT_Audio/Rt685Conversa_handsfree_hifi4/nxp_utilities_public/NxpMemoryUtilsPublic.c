@@ -1,7 +1,7 @@
 /*Copyright 2021 Retune DSP 
-* Copyright 2022-2023 NXP 
+* Copyright 2022-2023,2025 NXP 
 *
-* NXP Confidential. This software is owned or controlled by NXP 
+* NXP Confidential and Proprietary. This software is owned or controlled by NXP 
 * and may only be used strictly in accordance with the applicable license terms.  
 * By expressly accepting such terms or by downloading, installing, 
 * activating and/or otherwise using the software, you are agreeing that you have read, 
@@ -121,7 +121,7 @@ void* nxp_plugin_malloc(size_t Asize, MemAlign_t Aalign) {
 
 #if NXP_MEMORY_UTILS_USES_STDLIB
 #if _WIN32
-		pRet = _aligned_malloc(mem_size, Aalign);
+		pRet = (uintptr_t)_aligned_malloc(mem_size, Aalign);
 #else
 		pRet = aligned_malloc(Aalign, mem_size);
 #endif
@@ -210,7 +210,7 @@ void* nxp_plugin_noncache_malloc(size_t Asize, MemAlign_t Aalign) {
 
 #if NXP_MEMORY_UTILS_USES_STDLIB
 #if _WIN32
-		pRet = _aligned_malloc(mem_size, Aalign);
+		pRet = (uintptr_t)_aligned_malloc(mem_size, Aalign);
 #else
 		pRet = aligned_malloc(Aalign, mem_size);
 #endif
@@ -311,7 +311,7 @@ void* nxp_plugin_scratch_malloc(size_t Asize, MemAlign_t Aalign) {
 
 #if NXP_MEMORY_UTILS_USES_STDLIB
 #if _WIN32
-	pRet = _aligned_malloc(mem_size, Aalign);
+	pRet = (uintptr_t)_aligned_malloc(mem_size, Aalign);
 #else
 	pRet = aligned_malloc(Aalign, mem_size);
 #endif

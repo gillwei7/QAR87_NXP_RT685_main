@@ -1,8 +1,0 @@
-The above tables provide information about the LX and NX FuSa releases and their Software and Hardware certification types.
-To build FuSa compliant OR certified software/hardware your account needs to have the FuSa feature. Based on the release you select your build can either be:
-
-<a>Not Certified:</a> This means that the config built on XPG (sw/hw) will NOT be FuSa Certified.
-<a>Certified:</a> This means that the config built on XPG (sw/hw) will be FuSa Certified.
-<a>Certification Planned:</a> This means that the config built on XPG (sw/hw) is compliant with the FuSa rules but is currently under certification.
-
-Please note that only the releases mentioned in the tables above are FuSa Compliant, and hence other releases will not be available in the release combo when you try to submit/upload a FuSa Config.

@@ -1,3 +1,12 @@
+/*
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+
+
 #ifndef __AudioProcVit_H___
 #define __AudioProcVit_H___
 
@@ -17,6 +26,74 @@
 
 #define MEMORY_ALIGNMENT            8       		// In bytes
 //#define DEVICE_ID					VIT_IMXRT600	// Device ID
+
+
+#define VIT_OPERATING_MODE_WW  (VIT_WAKEWORD_ENABLE)
+#define VIT_OPERATING_MODE_S2I (VIT_SPEECHTOINTENT_ENABLE)
+
+#define configPRINTF PRINTF
+
+
+/* Configure the detection period in second for each command
+   VIT will return UNKNOWN if no command is recognized during this time span.
+   When only activating one mode, WWD or CMD, even timeout event trigger,
+   no model switching happens automatically. Set it to 60s aligned with UI session.
+ */
+#define VIT_COMMAND_TIME_SPAN 8
+
+
+typedef enum _asr_session
+{
+    ASR_SESSION_STOPPED,
+    ASR_SESSION_WAKE_WORD,
+    ASR_SESSION_INTENT,
+} asr_session_t;
+
+
+typedef enum _VoiceCommandMenu
+{
+    ASR_Menu_Home,
+	ASR_Menu_VidioAi,
+	ASR_Menu_AiConversation,
+	ASR_Menu_Translation,
+	ASR_Menu_TakePhoto,
+	ASR_Menu_VideoRecording,
+	ASR_Menu_MediaPlayer,
+	ASR_Menu_PhoneCall,
+	ASR_Menu_MusicPlayer,
+} VoiceCommandMenu_t;
+
+typedef enum _VoiceCommandItem
+{
+	ASR_VoiceCommand_GoHomeAiconversation,
+	ASR_VoiceCommand_AnswerThePhone,
+	ASR_VoiceCommand_RejectThePhone,
+	ASR_VoiceCommand_HangUpThePhone,
+	ASR_VoiceCommand_TakePhoto,				//this one covers both take photo and take picture
+	ASR_VoiceCommand_StartRecording,
+	ASR_VoiceCommand_StartTranslation,
+	ASR_VoiceCommand_StartVideoAi,
+	ASR_VoiceCommand_StartAiConversation,
+	ASR_VoiceCommand_GoMediaPlayer,
+	ASR_VoiceCommand_Play,
+	ASR_VoiceCommand_Pause,
+	ASR_VoiceCommand_Previous,
+	ASR_VoiceCommand_Next,
+	ASR_VoiceCommand_VolumeUpMediaplayer,
+	ASR_VoiceCommand_VolumeDownMediaplayer,
+	ASR_VoiceCommand_GoHomeMediaplayer,
+	ASR_VoiceCommand_PlayMusic,
+	ASR_VoiceCommand_PauseMusic,
+	ASR_VoiceCommand_PreviousSong,
+	ASR_VoiceCommand_NextSong,
+	ASR_VoiceCommand_VolumeUpMusicplayer,
+	ASR_VoiceCommand_VolumeDownMusicplayer,
+	ASR_VoiceCommand_GoHomeMusicplayer,
+	ASR_VoiceCommand_GoHomePhoto,
+	ASR_VoiceCommand_GoHomeTranslation,
+	ASR_VoiceCommand_GoHomeVideoAi,
+	ASR_VoiceCommand_GoHomeVideoRecording,
+} VoiceCommandItem_t;
 
 
 typedef enum

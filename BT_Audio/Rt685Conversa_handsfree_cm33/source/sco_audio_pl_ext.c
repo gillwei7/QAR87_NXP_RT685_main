@@ -1,6 +1,5 @@
-
 /*
- * Copyright 2021, 2024 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -66,9 +65,10 @@
 #define HFP_CODEC_HP_VOLUME  (70U)  /* Range: 0 ~ 100 */
 
 /* --------------------------------------------- External Global Variables */
-
+#if !PIN_CONFIG_DEV_BOARD
 extern codec_config_t boardCodecScoConfig;
 extern codec_config_t boardCodecScoConfig1;
+#endif
 
 extern hal_audio_config_t txSpeakerConfig;
 extern hal_audio_config_t rxMicConfig;
@@ -87,7 +87,9 @@ AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(rx_mic_handle), 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(tx_mic_handle), 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(rx_speaker_handle), 4);
 static codec_handle_t codec_handle;
-//static uint8_t codec_inited = 0;
+#if !DEV_AUDIO_DEBUG_GPIO
+static uint8_t codec_inited = 0;
+#endif
 
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t MicBuffer    [BUFFER_NUMBER * BUFFER_SIZE], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t SpeakerBuffer[BUFFER_NUMBER * BUFFER_SIZE], 4);
@@ -446,11 +448,13 @@ static void rxSpeakerCallback(hal_audio_handle_t handle, hal_audio_status_t comp
 static void Deinit_Board_Audio(void)
 {
 	#if EnableConversa==1
-//		if (codec_inited == 0)
-//		{
-//			return ;
-//		}
-		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
+#if !DEV_AUDIO_DEBUG_GPIO
+		if (codec_inited == 0)
+		{
+			return ;
+		}
+	CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
+#endif
 
 		//close all I2S and related DMA --- if need to just close the wanted, just call one of the 3 grouped functions
 		CloseI2sDma((I2S_Type *)DEMO_I2S1Rx0);
@@ -466,7 +470,9 @@ static void Deinit_Board_Audio(void)
 		HAL_AudioRxDeinit((hal_audio_handle_t)&rx_speaker_handle[0]);
 
 		(void)BOARD_SwitchAudioFreq(0U);
-		//codec_inited = 0;
+#if !DEV_AUDIO_DEBUG_GPIO
+		codec_inited = 0;
+#endif
 		PRINTF("Deinit_Board_Audio is done \r\n");
 	#else
 		if (codec_inited == 0)
@@ -504,6 +510,7 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			CLOCK_SetClkDiv(kCLOCK_DivDmicClk, 8);		//PDM clk is: 24.576/8 =3.072MHz --- OSR to be 48, PDM stream after CIC is: 3072k/48=64K --> then half down to 32KHz --> then half down to 16KHz (don't use 2Fs)
 
 			BTAudioBitWidth=bitWidth;
+			PRINTF("Init_Board_Sco_Audio sampling rate:%d,bitwidth:%d\r\n",samplingRate,bitWidth);
 			if(BTAudioBitWidth!=16)
 			{
 				PRINTF("Init_Board_Sco_Audio error --- BT bit width is NOT 16 \r\n");
@@ -528,27 +535,31 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			HAL_AudioRxInstallCallback((hal_audio_handle_t)&rx_speaker_handle[0], rxSpeakerCallback, NULL);
 
 	    	DbgPin8Up();
+#if !DEV_AUDIO_DEBUG_GPIO
 			/* Codec */
-//			if (CODEC_Init(&codec_handle, &boardCodecScoConfig) != kStatus_Success)
-//			{
-//		    	DbgPin8Dn();
-//				PRINTF("Init_Board_Sco_Audio is failed --- CODEC init failure \r\n");
-//			}else
-//			{
-//
-//				CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
-//				//CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, txSpeakerConfig.sampleRate_Hz, txSpeakerConfig.bitWidth);
-//				CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, 16000, 32);
-//				CODEC_SetVolume(&codec_handle, kCODEC_VolumeDAC, HFP_CODEC_DAC_VOLUME);
-//				CODEC_SetVolume(&codec_handle, kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight, HFP_CODEC_HP_VOLUME);
-//				CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
-				//codec_inited = 1;
+			if (CODEC_Init(&codec_handle, &boardCodecScoConfig) != kStatus_Success)
+			{
+		    	DbgPin8Dn();
+				PRINTF("Init_Board_Sco_Audio is failed --- CODEC init failure \r\n");
+			}else
+			{
+		    	DbgPin8Dn();
 
+				CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
+				//CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, txSpeakerConfig.sampleRate_Hz, txSpeakerConfig.bitWidth);
+				CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, 16000, 32);
+				CODEC_SetVolume(&codec_handle, kCODEC_VolumeDAC, HFP_CODEC_DAC_VOLUME);
+				CODEC_SetVolume(&codec_handle, kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight, HFP_CODEC_HP_VOLUME);
+				CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
+
+				codec_inited = 1;
+#endif
 				InitAudioCircularBuf();
-//
-//				//PDM, fc3, fc1 and chained DMA configuring
-//				//we open pdm ports here
-				Init_MicDmaCfgCh(0xff);	//mic0,1,2,3,4,5,6,7
+
+				//PDM, fc3, fc1 and chained DMA configuring
+				//we open pdm ports here
+				Init_MicDmaCfgCh(0xff);	//mic0,1,2,3,4,5
+
 				BOARD_Init_DMA_PDM(0xff);
 				BOARD_Init_DMIC(0xff,0); //0: no skip general Dmic init. If not the first mic init, then should skip.
 				ConfigDmicChainedDma(0xff);
@@ -566,7 +577,13 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 								EnableI2S3Tx0DmaChannel();
 				PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
 				DbgPin8Dn();
-	//		}
+
+#if !DEV_AUDIO_DEBUG_GPIO
+			}
+#endif
+		}
+		else{
+			PRINTF("Init_Board_Sco_Audio stop samplingRate:%d\r\n",samplingRate);
 		}
 	#else
 		if (samplingRate > 0U)
@@ -652,7 +669,8 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)
 
 		HAL_AudioTxInit((hal_audio_handle_t)&tx_speaker_handle[0], &txSpeakerConfig);
 		HAL_AudioTxInstallCallback((hal_audio_handle_t)&tx_speaker_handle[0], txSpeakerCallback, NULL);
-
+		PRINTF("Init_Board_RingTone_Audio finished \r\n");
+#if !DEV_AUDIO_DEBUG_GPIO
 		if (CODEC_Init(&codec_handle, &boardCodecScoConfig1) != kStatus_Success)
 		{
 			PRINTF("Init_Board_RingTone_Audio is failed --- CODEC init failure \r\n");
@@ -666,6 +684,7 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			//codec_inited = 1;
 			PRINTF("Init_Board_RingTone_Audio is successful and finished \r\n");
 		}
+#endif
     }
 }
 
@@ -858,10 +877,20 @@ void ButtonEventProcess(void)
 		if(VarBlockSharedByDspAndMcu.MonitorInfoArray1[0]>1)
 			VarBlockSharedByDspAndMcu.MonitorInfoArray1[0]=0;
 
+		//on board user button 1 is short pressed
+		VarBlockSharedByDspAndMcu.U32ControlPara[0]=1;
+
 		BtnEvtVarGroup[0].BtnEvt1=0;
 	}
 	if(BtnEvtVarGroup[1].BtnEvt1==1)
 	{
+		VarBlockSharedByDspAndMcu.MonitorInfoArray1[0]++;
+		if(VarBlockSharedByDspAndMcu.MonitorInfoArray1[0]>1)
+			VarBlockSharedByDspAndMcu.MonitorInfoArray1[0]=0;
+
+		//on board user button 2 is short pressed
+		VarBlockSharedByDspAndMcu.U32ControlPara[1]=1;
+
 		BtnEvtVarGroup[1].BtnEvt1=0;
 	}
 }

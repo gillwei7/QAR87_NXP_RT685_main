@@ -1,7 +1,7 @@
 /*Copyright 2021 Retune DSP 
-* Copyright 2022-2023 NXP 
+* Copyright 2022-2023, 2025 NXP 
 *
-* NXP Confidential. This software is owned or controlled by NXP 
+* NXP Confidential and Proprietary. This software is owned or controlled by NXP 
 * and may only be used strictly in accordance with the applicable license terms.  
 * By expressly accepting such terms or by downloading, installing, 
 * activating and/or otherwise using the software, you are agreeing that you have read, 
@@ -42,7 +42,7 @@ typedef struct {
 
 #ifdef _WIN32
 #define NXP_MEM_ALIGN
-#elif defined(HIFI4) || defined(FUSIONDSP) || defined(HIFI4)
+#elif defined(HIFI4) || defined(FUSIONDSP) || defined(HIFI1)
 #define NXP_MEM_ALIGN __attribute__((aligned(8)))
 #else
 #define NXP_MEM_ALIGN __attribute__((aligned(NXP_ALIGN_SIZE)))

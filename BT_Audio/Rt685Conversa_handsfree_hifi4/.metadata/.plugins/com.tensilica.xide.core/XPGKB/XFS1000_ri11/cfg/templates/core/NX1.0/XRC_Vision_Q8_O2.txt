@@ -1,1 +1,0 @@
-Identical to "O" + 4-bit MAC

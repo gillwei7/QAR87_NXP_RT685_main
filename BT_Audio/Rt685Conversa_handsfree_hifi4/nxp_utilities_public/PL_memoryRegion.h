@@ -7,11 +7,16 @@
 
 /** @file
  *  Header file defining the standard PL_types for use in the application layer
- *  interface
+ *  interface of VIT module
  */
 
 #ifndef PL_MEMORY_REGION_H
 #define PL_MEMORY_REGION_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 
 
 /****************************************************************************************/
@@ -116,5 +121,9 @@ typedef struct
 /*                                                                                      */
 /****************************************************************************************/
 
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif  /* PL_MEMORY_REGION_H */

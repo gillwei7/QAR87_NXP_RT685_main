@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -371,6 +371,13 @@ void InitConversa(void)
 		PRINTF("\tFAIL - DSP process init: Conversa failed to set parameter files (error code = %i)\r\n", retStatusConversa);
 		return;
 	}
+
+	PRINTF("\DMIC Interface:\r\n");
+	PRINTF("DMIC0 - PDM_DATA01(PIO2_20)- DMIC SEL = low\r\n");
+	PRINTF("DMIC1 - PDM_DATA01(PIO2_20)- DMIC SEL = high\r\n");
+	PRINTF("DMIC2 - PDM_DATA23(PIO2_21)- DMIC SEL = low\r\n");
+	PRINTF("DMIC3 - PDM_DATA23(PIO2_21)- DMIC SEL = high\r\n");
+
 	/* At this step Conversa instance is created */
 }
 
@@ -379,8 +386,9 @@ void Init_AudioProcessOnEachFrame(void)
 
 }
 extern T_CircularAudioBuf_S16  VitCircBuff;
+extern T_CircularAudioBuf_S16  VitCircBuff_RawMic;
 extern XosSem g_audioTask_audioVitProcessSemaphore;
-
+ 
 __attribute__((__section__(".iram.text")))
 void AudioProcessOnEachFrame(void)
 {
@@ -396,6 +404,8 @@ void AudioProcessOnEachFrame(void)
 	S32 *Ptr_Mic5=PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[5];
 	S32 *Ptr_Mic6=PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[6];
 	S32 *Ptr_Mic7=PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[7];
+
+	S16 RawMicSignal16BitForVitRef[AudioFrameSizeInSamplePerCh];
 
 	S16 i;
 
@@ -438,19 +448,22 @@ void AudioProcessOnEachFrame(void)
 			PRINTF("DSP: audio flow error --- BT fs is not 8Khz or 16KHz \r\n");
 		}
 
+		for(int i=0;i<AudioFrameSizeInSamplePerCh;i++)
+			RawMicSignal16BitForVitRef[i]=(Ptr_Mic0[i]>>16);
+
 		vec_int2float((float *)Ptr_Mic0, (const int *)Ptr_Mic0,	-31,  AudioFrameSizeInSamplePerCh);
-		//vec_int2float((float *)Ptr_Mic1, (const int *)Ptr_Mic1,	-31,  AudioFrameSizeInSamplePerCh);
+		vec_int2float((float *)Ptr_Mic1, (const int *)Ptr_Mic1,	-31,  AudioFrameSizeInSamplePerCh);
 		vec_int2float((float *)Ptr_Mic2, (const int *)Ptr_Mic2,	-31,  AudioFrameSizeInSamplePerCh);
-		//vec_int2float((float *)Ptr_Mic3, (const int *)Ptr_Mic3,	-31,  AudioFrameSizeInSamplePerCh);
-		vec_int2float((float *)Ptr_Mic4, (const int *)Ptr_Mic4,	-31,  AudioFrameSizeInSamplePerCh);
+		vec_int2float((float *)Ptr_Mic3, (const int *)Ptr_Mic3,	-31,  AudioFrameSizeInSamplePerCh);
+		//vec_int2float((float *)Ptr_Mic4, (const int *)Ptr_Mic4,	-31,  AudioFrameSizeInSamplePerCh);
 		//vec_int2float((float *)Ptr_Mic5, (const int *)Ptr_Mic5,	-31,  AudioFrameSizeInSamplePerCh);
-		vec_int2float((float *)Ptr_Mic6, (const int *)Ptr_Mic6,	-31,  AudioFrameSizeInSamplePerCh);
+		//vec_int2float((float *)Ptr_Mic6, (const int *)Ptr_Mic6,	-31,  AudioFrameSizeInSamplePerCh);
 		//vec_int2float((float *)Ptr_Mic7, (const int *)Ptr_Mic7,	-31,  AudioFrameSizeInSamplePerCh);
 
 		memcpy(RawMic32BitBuf0,Ptr_Mic0,sizeof(S32)*AudioFrameSizeInSamplePerCh);
-		memcpy(RawMic32BitBuf1,Ptr_Mic2,sizeof(S32)*AudioFrameSizeInSamplePerCh);
-		memcpy(RawMic32BitBuf2,Ptr_Mic4,sizeof(S32)*AudioFrameSizeInSamplePerCh);
-		memcpy(RawMic32BitBuf3,Ptr_Mic6,sizeof(S32)*AudioFrameSizeInSamplePerCh);
+		memcpy(RawMic32BitBuf1,Ptr_Mic1,sizeof(S32)*AudioFrameSizeInSamplePerCh);
+		memcpy(RawMic32BitBuf2,Ptr_Mic2,sizeof(S32)*AudioFrameSizeInSamplePerCh);
+		memcpy(RawMic32BitBuf3,Ptr_Mic3,sizeof(S32)*AudioFrameSizeInSamplePerCh);
 	#endif
 
 	#if 1	//folding --- step2: Conversa processing
@@ -468,9 +481,15 @@ void AudioProcessOnEachFrame(void)
 		PL_FLOAT*  ConversaTmpOutputPtr			= NULL;
 		PL_FLOAT** pp_outputAudioData_Rx_FLT 	= NULL;
 
-		pp_inputAudioData_Tx_FLT[0]=(float *)Ptr_Mic2;
-		pp_inputAudioData_Tx_FLT[1]=(float *)Ptr_Mic4;
-		pp_inputAudioData_Tx_FLT[2]=(float *)Ptr_Mic6;
+//For Quanta EVK board
+		pp_inputAudioData_Tx_FLT[0]=(float *)Ptr_Mic0; //A3
+		pp_inputAudioData_Tx_FLT[1]=(float *)Ptr_Mic1; //C7
+		pp_inputAudioData_Tx_FLT[2]=(float *)Ptr_Mic2; //C8
+		//pp_inputAudioData_Tx_FLT[3]=(float *)Ptr_Mic3; //??
+//For RT685-EVK + Quanta type C glasses		
+		//pp_inputAudioData_Tx_FLT[0]=(float *)Ptr_Mic2;
+		//pp_inputAudioData_Tx_FLT[1]=(float *)Ptr_Mic4;
+		//pp_inputAudioData_Tx_FLT[2]=(float *)Ptr_Mic6;
 
 		//memset(BtRxInBuf,0,sizeof(BtRxInBuf));
 		pp_inputAudioData_Rx_FLT[0]=(float *)BtRxInBuf;
@@ -550,6 +569,7 @@ void AudioProcessOnEachFrame(void)
 		{
 			//PRINTF(".\r\n");
 			CirAudioBuf_WriteSamples_S16(&VitCircBuff, AudioFrameSizeInSamplePerCh, VitInTmpBuf16Bit);
+			CirAudioBuf_WriteSamples_S16(&VitCircBuff_RawMic, AudioFrameSizeInSamplePerCh, RawMicSignal16BitForVitRef);
 		}
 
 		//trigger VIT task to step on

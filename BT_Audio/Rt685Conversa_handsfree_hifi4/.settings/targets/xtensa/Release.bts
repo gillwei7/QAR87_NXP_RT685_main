@@ -97,8 +97,7 @@
                         <key>Libraries</key>
                         <value flag="-l" inheritance="prepend">
                             <ListEntry>NXP_Conversa_RT685HiFi4</ListEntry>
-                            <ListEntry>HiFi4_VFPU_library</ListEntry>
-                            <ListEntry>VIT_HIFI4_v04_11_00</ListEntry>
+                            <ListEntry>VIT_v6.6.0_EngineeringRelease</ListEntry>
                             <ListEntry>naturedsp</ListEntry>
                             <ListEntry>xa_asrc_src_pp</ListEntry>
                             <ListEntry>xa_nn</ListEntry>

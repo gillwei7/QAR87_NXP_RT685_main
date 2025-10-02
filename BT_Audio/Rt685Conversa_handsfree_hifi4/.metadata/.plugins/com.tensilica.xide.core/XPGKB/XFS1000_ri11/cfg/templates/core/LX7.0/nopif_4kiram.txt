@@ -1,7 +1,0 @@
-The "nopif_4kiram" template is a very small processor configuration that has no system memories or caches, and has the smallest possible instruction RAM by limiting the number of interrupt levels and by requiring just 16 AR registers. 
-
-One IRAM and one DRAM are configured for program / data.
-
-NOTE: this template is little-endian.
-
-Byte ordering and all other options can be changed in the configuration editor - but consider carefully any compatibility needs.

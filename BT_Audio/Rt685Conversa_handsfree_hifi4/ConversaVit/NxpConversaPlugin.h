@@ -1,8 +1,8 @@
 /*
  * Copyright 2021 Retune DSP
- * Copyright 2022-2023 NXP
+ * Copyright 2022-2023, 2025 NXP
  * 
- * NXP Confidential & Proprietary. This software is owned or controlled by NXP
+ * NXP Confidential and Proprietary. This software is owned or controlled by NXP
  * and may only be used strictly in accordance with the applicable license terms.
  * By expressly accepting such terms or by downloading, installing,
  *  activating and/or otherwise using the software, you are agreeing that you have read,
@@ -18,6 +18,10 @@
 #include "NxpConversaStatusCodes.h"
 #include "NxpDeviceConfig.h"
 #include "NxpTypes.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** @struct nxp_conversa_plugin_constants_t
  *   Conversa constants that can be queried with NxpConversa_Plugin_GetConstants().
@@ -51,7 +55,6 @@ typedef struct nxp_conversa_plugin_config_s {
 	uint8_t* se_model_ptr;						///< Set the pointer to the SE model data.
 	uint32_t se_model_size;						///< Set the size of the SE model data.
 	uint32_t se_model_is_permuted;				///< Select whether the SE model data is permuted. Unpermuted models will be copied to the Conversa heap and permuted there.
-	//nxp_float* fbf_steer_ptr;					///< Set the pointer to the fixed beamformer steering array
 	uint32_t enable_tuning_tool_signal_buffer;	///< Set enable_tuning_tool_signal_buffer = 1 to enable additional tuning tool signals. Can be disabled after tuning to save memory.
 	uint32_t internal_output_selector;			///< Bitfield to select the internal(s) buffer(s) to be extracted. see conversa_internal_output enum for details.
 	uint32_t device_id;							///< Set the NXP device ID for hardware identification.
@@ -269,6 +272,31 @@ extern nxp_float* NxpConversa_Plugin_GetTxAecOut(nxp_conversa_plugin_t *APluginI
 extern nxp_float* NxpConversa_Plugin_GetTxBfOut(nxp_conversa_plugin_t* APluginInit_s);
 
 /**
+ * Returns a pointer to the NLP freq output.
+ *
+ *  @param [in] APluginInit_s Pointer to the Conversa plugin instance.
+ *  @return a pointer to the Nlp frequencies output bins in complex floating-point form.
+ */
+extern nxp_complex* NxpConversa_Plugin_GetTxNlpFreqOut(nxp_conversa_plugin_t* APluginInit_s);
+
+/**
+ * Returns a pointer to the AEC freq (linear part) output.
+ *
+ *  @param [in] APluginInit_s Pointer to the Conversa plugin instance.
+ *  @param [in] ch_index select which AEC channel to extract.
+ *  @return a pointer to the AEC frequencies output bins in complex floating-point form.
+ */
+extern nxp_complex* NxpConversa_Plugin_GetTxAecFreqOut(nxp_conversa_plugin_t* APluginInit_s, uint32_t ch_index);
+
+/**
+ * Get pointer to the Tx beamformer output.
+ *
+ *  @param [in] APluginInit_s Pointer to the Conversa plugin instance.
+ *  @return  a pointer to the beamformer frequencies output bins in complex floating-point form.
+ */
+extern nxp_complex* NxpConversa_Plugin_GetTxBfFreqOut(nxp_conversa_plugin_t* APluginInit_s);
+
+/**
  * Returns a pointer to the Conversa control data struct for the tuning tool connection.
  *
  *  @param [in,out] APluginInit_s Pointer to the Conversa plugin instance.
@@ -333,5 +361,8 @@ extern NXP_STATUS NxpConversa_Plugin_PrintMemoryUsage(void);
  */
 extern NXP_STATUS NxpConversa_Plugin_PrintCycleCount(void);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif // NXP_CONVERSA_PLUGIN_H_

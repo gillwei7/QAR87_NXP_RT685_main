@@ -1,7 +1,7 @@
-/*Copyright 2021 Retune DSP 
- * Copyright 2022 NXP
+/* Copyright 2021 Retune DSP 
+ * Copyright 2022,2025 NXP
  *
- * NXP Confidential. This software is owned or controlled by NXP
+ * NXP Confidential and Proprietary. This software is owned or controlled by NXP
  * and may only be used strictly in accordance with the applicable license terms.
  * By expressly accepting such terms or by downloading, installing,
  * activating and/or otherwise using the software, you are agreeing that you have read,
@@ -273,7 +273,7 @@ NXP_STATIC int32_t nxp_wav_read(int32_t **Abuffer, int32_t Anum_samples, nxp_wav
 	}
 
 	Awav_file->num_read += num_read;
-	return num_read;
+	return (int32_t)num_read;
 }
 
 NXP_STATIC void update_chunk_size(int32_t Anum_channels, int32_t Anum_samples, nxp_wav_file_t *Awav_file) {
@@ -375,7 +375,7 @@ NXP_STATIC int32_t nxp_wav_write_int16(int16_t **Abuffer, int32_t Anum_channels,
 			*p++ = Abuffer[j][i];
 	}
 
-	size_t write_count = 0;
+	int32_t write_count = 0;
 	int32_t bits_per_sample = Awav_file->wav_header.fmt.bits_per_sample;
 	if (bits_per_sample == 16) {
 		write_count = nxp_fwrite(tmp_buf_int, sizeof(int16_t), Anum_channels * Anum_samples, Awav_file->fid);
@@ -404,7 +404,7 @@ NXP_STATIC int32_t nxp_wav_write_int32(int32_t **Abuffer, int32_t Anum_channels,
 			*p++ = Abuffer[j][i];
 	}
 
-	size_t write_count = 0;
+	int32_t write_count = 0;
 	int32_t bits_per_sample = Awav_file->wav_header.fmt.bits_per_sample;
 	if (bits_per_sample == 32) {
 		write_count = nxp_fwrite(tmp_buf_int, sizeof(int32_t), Anum_channels * Anum_samples, Awav_file->fid);
@@ -459,7 +459,7 @@ NXP_STATIC int32_t nxp_wav_write_float(nxp_float **Abuffer, int32_t Anum_channel
 
 	update_chunk_size(Anum_channels, Anum_samples, Awav_file);
 
-	return write_count;
+	return (int32_t)write_count;
 }
 
 NXP_STATIC void nxp_wav_close(nxp_wav_file_t *Awav_file) {

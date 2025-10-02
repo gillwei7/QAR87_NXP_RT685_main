@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding= "UTF-8" ?>
-<configuration name="MIMXRT685S" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_17 http://mcuxpresso.nxp.com/XSD/mex_configuration_17.xsd" uuid="0e5dbdb7-6162-4ed5-8938-735a99dac5ad" version="17" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_17" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<configuration name="MIMXRT685S" xsi:schemaLocation="http://mcuxpresso.nxp.com/XSD/mex_configuration_18 http://mcuxpresso.nxp.com/XSD/mex_configuration_18.xsd" uuid="0e5dbdb7-6162-4ed5-8938-735a99dac5ad" version="18" xmlns="http://mcuxpresso.nxp.com/XSD/mex_configuration_18" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
    <common>
       <processor>MIMXRT685S</processor>
       <package>MIMXRT685SFVKB</package>
@@ -14,6 +14,7 @@
       <validate_boot_init_only>true</validate_boot_init_only>
       <generate_code_modified_registers_only>false</generate_code_modified_registers_only>
       <update_include_paths>true</update_include_paths>
+      <enable_parallel_routing>true</enable_parallel_routing>
       <generate_registers_defines>false</generate_registers_defines>
    </preferences>
    <tools>
@@ -23,7 +24,7 @@
             <file path="source/pin_mux.h" update_enabled="true"/>
          </generated_project_files>
          <pins_profile>
-            <processor_version>24.12.10</processor_version>
+            <processor_version>25.06.10</processor_version>
             <pin_labels>
                <pin_label pin_num="H2" pin_signal="PIO0_3/FC0_CTS_SDA_SSEL0/CTIMER0_MAT3/FC1_SSEL2/SEC_PIO0_3" label="J1[3]/J36[4]/J45[58]" identifier="DbgPin5"/>
                <pin_label pin_num="J1" pin_signal="PIO0_4/FC0_RTS_SCL_SSEL1/CTIMER_INP0/FC1_SSEL3/CMP0_OUT/SEC_PIO0_4" label="J1[5]/J45[60]" identifier="DbgPin6"/>
@@ -1391,13 +1392,13 @@
             </function>
          </functions_list>
       </pins>
-      <clocks name="Clocks" version="15.0" enabled="true" update_project_code="true">
+      <clocks name="Clocks" version="17.0" enabled="true" update_project_code="true">
          <generated_project_files>
             <file path="board/clock_config.c" update_enabled="true"/>
             <file path="board/clock_config.h" update_enabled="true"/>
          </generated_project_files>
          <clocks_profile>
-            <processor_version>24.12.10</processor_version>
+            <processor_version>25.06.10</processor_version>
          </clocks_profile>
          <clock_configurations>
             <clock_configuration name="BOARD_BootClockRUN" id_prefix="" prefix_user_defined="false">

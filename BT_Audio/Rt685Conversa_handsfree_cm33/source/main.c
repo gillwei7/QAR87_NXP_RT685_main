@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
@@ -189,7 +189,7 @@ int main(void)
 #else
     dev_BOARD_InitHardware();
 
-    PRINTF("-------------- PCA9422 BOARD_InitHardware OK--------------\r\n");
+    PRINTF("-------------- PCA9422 BOARD_InitHardware OK---------------\r\n");
 
 	/* Define the init structure for the input switch pin */
 	gpio_pin_config_t sw_config    = {kGPIO_DigitalInput, 0};

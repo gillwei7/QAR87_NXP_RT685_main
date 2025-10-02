@@ -1,4 +1,0 @@
-This is an example "Tiny" little-endian 5-stage LX CPU.
-It provides a tiny configuration with a single load-store unit, 16-bit multiplier, and several arithmetic selections. 
-The core is configured to use tighly-coupled memories with 64KB instruction RAM and 64KB data RAM. 
-From this configuration, users can do multiple experiments on the impact of various configuration operations on their code.

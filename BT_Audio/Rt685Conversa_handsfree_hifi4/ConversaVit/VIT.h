@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2024 NXP
+ * Copyright 2020-2025 NXP
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
@@ -14,6 +14,10 @@ private.
 
 #ifndef VIT_H_
 #define VIT_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 /****************************************************************************************/
 /*                                                                                      */
@@ -60,15 +64,16 @@ typedef enum
     VIT_INVALID_API_VERSION             = 9,                  ///< wrong API version
     VIT_INVALID_STATE                   = 10,                 ///< State machine error
     VIT_INVALID_DEVICE                  = 11,                 ///< VIT not running on expected Device
-    VIT_LICENSE_EXPIRED                 = 12,                 ///< VIT SpeechToIntent reached trial timeout (demo version) 
+    VIT_LICENSE_EXPIRED                 = 12,                 ///< VIT SpeechToIntent reached trial timeout (demo version)
     VIT_SYSTEM_ERROR                    = 13,                 ///< System error
-    VIT_ERROR_UNDEFINED                 = 14,                 ///< Unknow error
+    VIT_MODE_ERROR                      = 14,                 ///< Mode error
+    VIT_ERROR_UNDEFINED                 = 15,                 ///< Unknow error
     VIT_DUMMY_ERROR                     = PL_MAXENUM
 }VIT_ReturnStatus_en;
 
 
-#define VIT_API_VERSION_MAJOR 3
-#define VIT_API_VERSION_MINOR 4
+#define VIT_API_VERSION_MAJOR 4
+#define VIT_API_VERSION_MINOR 0
 #define VIT_API_VERSION       ((VIT_API_VERSION_MAJOR<<16) | (VIT_API_VERSION_MINOR<<8))
 
 /****************************************************************************************/
@@ -134,7 +139,7 @@ typedef enum
     VIT_RW610,                                 // RW610      : VIT running on Cortex-M33-noDSP
     VIT_LPC55S69,                              // LPC55S69   : VIT running on Cortex-M33+PowerQuad
     VIT_MCXN94X,                               // MCXN94X    : VIT running on Cortex-M33-Core0+PowerQuad
-    VIT_IMX8MA53,                              // I.MX8MA53  : VIT running on Cortex-A53 (i.MX8MPlus, i.MX8MMini, i.MX8MNano and i.MX8QM)
+    VIT_IMX8MA53,                              // I.MX8MA53  : VIT running on Cortex-A53 (i.MX8MPlus, i.MX8MMini, i.MX8MNano, i.MX8MQ and i.MX8QM)
     VIT_IMX8ULPA35,                            // I.MX8ULPA35: VIT running on Cortex-A35 (i.MX8ULP)
     VIT_IMX9XA55,                              // I.MX9XA55  : VIT running on Cortex-A (i.MX91, i.MX93, i.MX95)
 
@@ -177,6 +182,7 @@ typedef struct
     const char                   *pName;
     PL_UINT32                    StartOffset;                 // in samples
     PL_UINT32                    EndOffset;                   // in samples
+    PL_FLOAT                     dB_Energy;                   // in dB
 } VIT_WakeWord_st;
 
 /* Voice Command structure */
@@ -209,9 +215,18 @@ typedef struct
 typedef struct
 {
     VIT_OperatingMode_en         OperatingMode;
-    PL_FLOAT                     Command_Time_Span;    // Corresponding to the detection period in second for each command (Max allowed 8.0 seconds)
-                                                       // VIT will return UNKNOWN if no command is recognized during this time span.
-    PL_BOOL                      Feature_LowRes;       // Compute features in low resolution - considered only if OperatingMode equals to VIT_ALL_MODULE_DISABLE
+    PL_FLOAT                     Input_Noise_Floor;       // Noise floor at the input of VIT
+                                                          // The RMS value of an audio segment should be measured in silence (with using tool like audacity) 
+                                                          // and this value should be put in deciBel as Input_Noise_Floor
+    PL_FLOAT                     Noise_Floor_Threshold;   // Noise_Floor_Threshold is the dB value from which a WakeWord RMS energy value should be higher than the input_Noise_Floor to be validated
+                                                          // Wake Word energy > Input_Noise_Floor + Noise_Floor_Threshold
+    PL_FLOAT                     Command_Time_Span;       // Corresponding to the detection period in second for each command (Max allowed 8.0 seconds)
+                                                          // VIT will return UNKNOWN if no command is recognized during this time span.
+    PL_BOOL                      WakeWordDelayRecovering; // When Zero Wake Word Delay is enabled, Wake Word can trigger during voice command which implies an additional delay 
+                                                          // for the following voice command detection.
+                                                          // WakeWordDelayRecovering should be set to PL_TRUE to recover from this additional delay with an impact on CPU load during few frames.
+                                                          // By enabling WakeWordDelayRecovering to PL_TRUE real time is recovered, otherwise there is a delay for voice command or intent detection
+    PL_BOOL                      Feature_LowRes;          // Compute features in low resolution - considered only if OperatingMode equals to VIT_ALL_MODULE_DISABLE
     PL_UINT32                    Reserved;
 } VIT_ControlParams_st;
 
@@ -228,8 +243,10 @@ typedef struct
     PL_UINT16                    NbOfIntentSlotTag;
     const char                   *pIntentSlotTag_List;
     PL_UINT16                    NbOfWords;
-}
-VIT_ModelInfo_st;
+    PL_BOOL                      ZeroWakeWordDelay;           // Inform whether the model is integrating WakeWord Delay feature
+                                                              // Wake Word and Command can be pronunciate in the same voice flow whithout pause
+    PL_BOOL                      WakeWordAdvanceModel;        // Wake Word meta data added to the model to improve FP rejection
+} VIT_ModelInfo_st;
 
 /* VIT_Lib_Info_st structure */
 typedef struct
@@ -251,7 +268,7 @@ typedef struct
     VIT_DeviceId_en               Device_Selected;
     PL_UINT16                     VIT_Sequencer_Slot;
     PL_BOOL                       LPVAD_EventDetected;
-    PL_UINT8                      Reserved[20];
+    PL_UINT8                      Reserved[30];
 } VIT_StatusParams_st;
 
 
@@ -462,6 +479,7 @@ VIT_ReturnStatus_en VIT_ResetInstance(VIT_Handle_t phInstance);
 * @pre phInstance should be valid handle.
 * @pre VIT_SetControlParameters should be called successfully once before
 * the first call to VIT_Process
+* @pre  pVIT_MicRefBuffer is filled with the microphone input samples for RMS processing (no front end processing on).
 * @pre  pVIT_InputBuffer is filled with the input samples to process.
 * @pre  pVIT_DetectionResults should be allocated by caller.
 * @post pVIT_DetectionResults will return detection status of VIT.
@@ -471,6 +489,7 @@ VIT_ReturnStatus_en VIT_ResetInstance(VIT_Handle_t phInstance);
 *
 */
 VIT_ReturnStatus_en VIT_Process(  VIT_Handle_t            phInstance,
+                                  void                    *pVIT_MicRefBuffer,
                                   void                    *pVIT_InputBuffer,
                                   VIT_DetectionStatus_en  *pVIT_DetectionResults
                                );
@@ -560,23 +579,49 @@ VIT_ReturnStatus_en VIT_GetVoiceCommandFound ( VIT_Handle_t         pVIT_Instanc
 * The function will return VIT_INVALID_STATE if the calling sequence is not followed (i.e VIT_GetIntentFound() to be called after VIT_Process()
 * only if an intent has been detected). 
 *
-* @param phInstance                   Instance handle
+* @param pVIT_Instance                   Instance handle
 *
-* @pre   phInstance should be valid handle.
+* @pre   pVIT_Instance should be valid handle.
 *
 * @pre   pIntent should be allocated by caller.
 * @post  pIntent will be filled with the Slot and Value Id of the intent detected.
 *
 * @return VIT_SUCCESS                  Succeeded
-* @return VIT_INVALID_NULLADDRESS      When phInstance or pIntent is NULL
+* @return VIT_INVALID_NULLADDRESS      When pVIT_Instance or pIntent is NULL
 *
 * @note The function shall be called only when VIT_Process() is informing that an Intent is detected (*pVIT_DetectionResults==VIT_INTENT_DETECTED)
 *
 */
-
 VIT_ReturnStatus_en VIT_GetIntentFound ( VIT_Handle_t pVIT_Instance,
                                          VIT_Intent_st *pSpeechIntent
                                        );
+
+/**
+* @brief Configure the intent slot mask
+*
+* This function takes the intent slot mask table provided by the device and give the authorization to decode or not an intent slot from the list described in the model header (ie. tuple [intent]-{slot_tag}).
+* The function shall be called only when Speech To Intent module is activated.
+* The function shall be called only when VIT_Process() is informing that a Wakeword is detected (*pVIT_DetectionResults==VIT_WW_DETECTED).
+* Regarding the state of the device, certain intent slot are allowed and others not to be decoded.
+*
+* @param pVIT_Instance       Instance Handle
+* @param pIntentSlotMask     Pointer to the table of boolean intent slot mask
+* @param NumberOfIntentSlots Number of tuple [intent]-{slot_tag} supported by the device (see VIT_model_xxx.h)
+*
+* @pre pVIT_Instance should be valid handle.
+* @pre pIntentMask should be set to true or false if the tuple intent slot is allowed or not regarding the state of the device.
+*
+* @return VIT_SUCCESS                        Succeeded
+* @return VIT_INVALID_NULLADDRESS            When pVIT_Instance or pIntentMask is NULL
+* @return VIT_MODE_ERROR                     When VIT_ConfigureIntentMask() is called while Voice Commands module is activated
+* @return VIT_INVALID_PARAMETER_OUTOFRANGE   When NumberOfIntents is not matching the number of tuple intent slot present in the model
+
+*
+*/
+VIT_ReturnStatus_en VIT_ConfigureIntentSlotMask ( VIT_Handle_t   pVIT_Instance,
+                                                  const PL_BOOL  *pIntentSlotMask,
+                                                  PL_INT16       NumberOfIntentSlots
+                                                );
 
 /**
 * @brief Retrieve information of the VIT model.
@@ -627,6 +672,11 @@ VIT_ReturnStatus_en VIT_GetModelInfo ( VIT_ModelInfo_st *pModel_Info);
 * @note The VIT_GetLibInfo function can be called at any time during processing.
 */
 VIT_ReturnStatus_en VIT_GetLibInfo(VIT_LibInfo_st    *pLib_Info);
+
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif      /* VIT_H_ */
 

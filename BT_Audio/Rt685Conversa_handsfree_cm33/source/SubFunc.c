@@ -1,9 +1,10 @@
 /*
- * Copyright 2022 NXP
+ * Copyright 2018-2025 NXP
  * All rights reserved.
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,10 +86,14 @@ gpio_pin_config_t GPIO_Output_config =
     1,
 };
 
+int aa;
+int bb;
+
 #if !DEV_AUDIO_DEBUG_GPIO
 void InitDbgPin(void)
 {
 	GPIO_PortInit(GPIO, 0);
+	GPIO_PortInit(GPIO, 1);
 
     GPIO_PinInit(GPIO, LedBluPinPort, LedBluPin, &GPIO_Output_config);
     GPIO_PinInit(GPIO, LedRedPinPort, LedRedPin, &GPIO_Output_config);
@@ -99,8 +104,8 @@ void InitDbgPin(void)
     GPIO_PinInit(GPIO, DbgPin7Port, DbgPin7, &GPIO_Output_config);
     GPIO_PinInit(GPIO, DbgPin8Port, DbgPin8, &GPIO_Output_config);
 
-    GPIO_PinInit(GPIO, BtnPin1Port, BtnPin1, &GPIO_Input_config);
-    GPIO_PinInit(GPIO, BtnPin2Port, BtnPin2, &GPIO_Input_config);
+    //GPIO_PinInit(GPIO, BtnPin1Port, BtnPin1, &GPIO_Input_config);
+    //GPIO_PinInit(GPIO, BtnPin2Port, BtnPin2, &GPIO_Input_config);
     //GPIO_PinInit(GPIO, BtnPin3Port, BtnPin3, &GPIO_Input_config);
     //GPIO_PinInit(GPIO, BtnPin4Port, BtnPin4, &GPIO_Input_config);
 
@@ -115,35 +120,42 @@ void InitDbgPin(void)
 	{
 		for(int i=0;i<5;i++)
 		{
-			DbgPin5Up();delay_ms(1);
-			DbgPin5Dn();delay_ms(1);
+			DbgPin5Up();DelayMsByReadingCycCnt(1);
+			DbgPin5Dn();DelayMsByReadingCycCnt(1);
 		}
 		for(int i=0;i<6;i++)
 		{
-			DbgPin6Up();delay_ms(1);
-			DbgPin6Dn();delay_ms(1);
+			DbgPin6Up();DelayMsByReadingCycCnt(10);
+			DbgPin6Dn();DelayMsByReadingCycCnt(10);
 		}
 		for(int i=0;i<7;i++)
 		{
-			DbgPin7Up();delay_ms(1);
-			DbgPin7Dn();delay_ms(1);
+			DbgPin7Up();DelayUsByReadingCycCnt(1);
+			DbgPin7Dn();DelayUsByReadingCycCnt(1);
 		}
 		for(int i=0;i<8;i++)
 		{
-			DbgPin8Up();delay_ms(1);
-			DbgPin8Dn();delay_ms(1);
+			DbgPin8Up();DelayUsByReadingCycCnt(10);
+			DbgPin8Dn();DelayUsByReadingCycCnt(10);
 		}
 	}
 }
 #else
 void dev_InitDbgPin(void)
 {
-    GPIO_PortInit(GPIO, 0);
+	GPIO_PortInit(GPIO, 0);
+	GPIO_PortInit(GPIO, 1);
+	GPIO_PortInit(GPIO, 2);
+
     GPIO_PinInit(GPIO, DbgPin5Port, DbgPin5, &GPIO_Output_config);
+    GPIO_PinInit(GPIO, DbgPin6Port, DbgPin6, &GPIO_Output_config);
     GPIO_PinInit(GPIO, DbgPin7Port, DbgPin7, &GPIO_Output_config);
+    GPIO_PinInit(GPIO, DbgPin8Port, DbgPin8, &GPIO_Output_config);
 
     DbgPin5Dn();
+    DbgPin6Dn();
     DbgPin7Dn();
+    DbgPin8Dn();
 
     delay_ms(1);
 
@@ -153,10 +165,21 @@ void dev_InitDbgPin(void)
         DbgPin5Dn();delay_ms(1);
     }
 
-    for(int i=0;i<7;i++)
+    for(int i=0;i<6;i++)
     {
-        DbgPin7Up();delay_ms(1);
-        DbgPin7Dn();delay_ms(1);
+        DbgPin6Up();delay_ms(1);
+        DbgPin6Dn();delay_ms(1);
+    }
+
+    for(int i=0;i<7;i++)
+	{
+		DbgPin7Up();delay_ms(1);
+		DbgPin7Dn();delay_ms(1);
+	}
+    for(int i=0;i<8;i++)
+    {
+        DbgPin8Up();delay_ms(1);
+        DbgPin8Dn();delay_ms(1);
     }
 
 }
@@ -179,6 +202,49 @@ void delay_ms(U32 d)
 		{
 			__NOP();
 		}
+}
+
+void DelayMsByReadingCycCnt(int MsToDelay)
+{
+	static volatile unsigned int DelayMsByReadingCycCnt_CurrentCnt;
+	unsigned int TargetCycleCnt;
+	GET_CYCLE_COUNTER(DelayMsByReadingCycCnt_CurrentCnt);
+	TargetCycleCnt=DelayMsByReadingCycCnt_CurrentCnt + MsToDelay*250000;
+
+	if(TargetCycleCnt<DelayMsByReadingCycCnt_CurrentCnt)
+	{
+		//target value is round back
+		while(DelayMsByReadingCycCnt_CurrentCnt>TargetCycleCnt)
+			GET_CYCLE_COUNTER(DelayMsByReadingCycCnt_CurrentCnt);
+		while(DelayMsByReadingCycCnt_CurrentCnt<TargetCycleCnt)
+			GET_CYCLE_COUNTER(DelayMsByReadingCycCnt_CurrentCnt);
+	}else
+	{
+		//target value is NOT round back
+		while(DelayMsByReadingCycCnt_CurrentCnt<TargetCycleCnt)
+			GET_CYCLE_COUNTER(DelayMsByReadingCycCnt_CurrentCnt);
+	}
+}
+void DelayUsByReadingCycCnt(int UsToDelay)
+{
+	static volatile unsigned int DelayMsByReadingCycCnt_CurrentCnt;
+	unsigned int TargetCycleCnt;
+	GET_CYCLE_COUNTER(DelayMsByReadingCycCnt_CurrentCnt);
+	TargetCycleCnt=DelayMsByReadingCycCnt_CurrentCnt + UsToDelay*250;
+
+	if(TargetCycleCnt<DelayMsByReadingCycCnt_CurrentCnt)
+	{
+		//target value is round back
+		while(DelayMsByReadingCycCnt_CurrentCnt>TargetCycleCnt)
+			GET_CYCLE_COUNTER(DelayMsByReadingCycCnt_CurrentCnt);
+		while(DelayMsByReadingCycCnt_CurrentCnt<TargetCycleCnt)
+			GET_CYCLE_COUNTER(DelayMsByReadingCycCnt_CurrentCnt);
+	}else
+	{
+		//target value is NOT round back
+		while(DelayMsByReadingCycCnt_CurrentCnt<TargetCycleCnt)
+			GET_CYCLE_COUNTER(DelayMsByReadingCycCnt_CurrentCnt);
+	}
 }
 
 void TestGetCycCnt(void)
@@ -208,7 +274,7 @@ void GenBtnEvt(void)
     uint8_t i;
     TBtnEvtVarGroup *TmpPtr1;
     RawBtnState = ((RdBtn1Input()<<0)|(RdBtn2Input()<<1));
-    RawBtnState=~RawBtnState;
+    RawBtnState = ~RawBtnState;
 
     // Y = ((~A)&(B&C))|(A&(B|C))
     FilteredBtnState = ((~FilteredBtnStatePre)&(RawBtnStatePre&RawBtnState))|(FilteredBtnStatePre&(RawBtnStatePre|RawBtnState));

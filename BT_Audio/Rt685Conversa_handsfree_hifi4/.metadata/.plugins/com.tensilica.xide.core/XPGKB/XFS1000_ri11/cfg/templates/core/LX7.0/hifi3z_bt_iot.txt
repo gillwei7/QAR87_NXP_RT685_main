@@ -1,2 +1,0 @@
-5 stage hifi3z for 
-bluetooth and iot devices

@@ -1,3 +1,10 @@
+/*
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
 
 #include <stdlib.h>
 #include <string.h>
@@ -891,6 +898,7 @@ int GetPdmCh6DmaTransferringIsUsingBufAOrB(void)
 	return ((*(DmaDscrPtr_Dmic6+3)==(unsigned int)&MicInputDmaPingpongDscr[6][0]));
 }
 
+#if EnableMic01==1
 __attribute__((section("CodeQuickAccess")))
 void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
 {
@@ -943,8 +951,23 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	}
 	DmaTxRxIsDone|=AudioPdmPortsBitMapFlag_Mic01;
 
-	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
-		#if CallAudioFrameProcessInIntr==1
+	//B36932 if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+	//if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23))
+	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3
+	#if EnableMic01==1
+				|AudioPdmPortsBitMapFlag_Mic01
+	#endif
+	#if EnableMic23==1
+				|AudioPdmPortsBitMapFlag_Mic23
+	#endif
+	#if EnableMic45==1
+				|AudioPdmPortsBitMapFlag_Mic45
+	#endif
+	#if EnableMic67==1
+				|AudioPdmPortsBitMapFlag_Mic67
+	#endif
+				))
+	#if CallAudioFrameProcessInIntr==1
 			ProcessAudio_AfterAudioInputBufIsReady();
 		#else
 			SCO_AudioFlow_SemaphorePost();
@@ -953,6 +976,8 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DbgPin7Dn();
 	return;
 }
+#endif
+#if EnableMic23==1
 __attribute__((section("CodeQuickAccess")))
 void DMicRx_Callback2(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
 {
@@ -963,7 +988,22 @@ void DMicRx_Callback2(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	}
 	DmaTxRxIsDone|=AudioPdmPortsBitMapFlag_Mic23;
 
-	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+	//B36932 if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+//	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23))
+	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3
+#if EnableMic01==1
+			|AudioPdmPortsBitMapFlag_Mic01
+#endif
+#if EnableMic23==1
+			|AudioPdmPortsBitMapFlag_Mic23
+#endif
+#if EnableMic45==1
+			|AudioPdmPortsBitMapFlag_Mic45
+#endif
+#if EnableMic67==1
+			|AudioPdmPortsBitMapFlag_Mic67
+#endif
+			))
 		#if CallAudioFrameProcessInIntr==1
 			ProcessAudio_AfterAudioInputBufIsReady();
 		#else
@@ -973,6 +1013,8 @@ void DMicRx_Callback2(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DbgPin7Dn();
 	return;
 }
+#endif
+#if EnableMic45==1
 __attribute__((section("CodeQuickAccess")))
 void DMicRx_Callback4(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
 {
@@ -983,7 +1025,21 @@ void DMicRx_Callback4(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	}
 	DmaTxRxIsDone|=AudioPdmPortsBitMapFlag_Mic45;
 
-	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+	//if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3
+	#if EnableMic01==1
+				|AudioPdmPortsBitMapFlag_Mic01
+	#endif
+	#if EnableMic23==1
+				|AudioPdmPortsBitMapFlag_Mic23
+	#endif
+	#if EnableMic45==1
+				|AudioPdmPortsBitMapFlag_Mic45
+	#endif
+	#if EnableMic67==1
+				|AudioPdmPortsBitMapFlag_Mic67
+	#endif
+				))
 		#if CallAudioFrameProcessInIntr==1
 			ProcessAudio_AfterAudioInputBufIsReady();
 		#else
@@ -993,6 +1049,8 @@ void DMicRx_Callback4(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DbgPin7Dn();
 	return;
 }
+#endif
+#if EnableMic67==1
 __attribute__((section("CodeQuickAccess")))
 void DMicRx_Callback6(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
 {
@@ -1003,7 +1061,21 @@ void DMicRx_Callback6(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	}
 	DmaTxRxIsDone|=AudioPdmPortsBitMapFlag_Mic67;
 
-	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+	//if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67))
+	if(DmaTxRxIsDone==(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3
+	#if EnableMic01==1
+				|AudioPdmPortsBitMapFlag_Mic01
+	#endif
+	#if EnableMic23==1
+				|AudioPdmPortsBitMapFlag_Mic23
+	#endif
+	#if EnableMic45==1
+				|AudioPdmPortsBitMapFlag_Mic45
+	#endif
+	#if EnableMic67==1
+				|AudioPdmPortsBitMapFlag_Mic67
+	#endif
+				))
 		#if CallAudioFrameProcessInIntr==1
 			ProcessAudio_AfterAudioInputBufIsReady();
 		#else
@@ -1013,6 +1085,7 @@ void DMicRx_Callback6(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DbgPin7Dn();
 	return;
 }
+#endif
 #if 0
 #if EnableMic01==1
 U32 ToUpdateActivedI2sPorts=0;
