@@ -27,6 +27,7 @@
 #include "aw93305.h"
 #include "bq256xx_charger.h"
 #include "glf70302.h"
+#include "ktd202x_leds.h"
 
 #include "fsl_spi.h"
 #include <string.h>
