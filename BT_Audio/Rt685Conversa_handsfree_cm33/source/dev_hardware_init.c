@@ -60,7 +60,7 @@
 #include "audio_unified.h"
 
 #include "UsbApp.h"
-
+#include "version.h"
 #endif
 
 #endif
@@ -435,6 +435,7 @@ void dev_BOARD_InitHardware(void)
     // gill for BT USART0
     CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
     CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
+    PRINTF("[System] SW version: %s%s\r\n", MCU_APP_VERSION, MCU_APP_VERSION_TIME);
 
     PRINTF("RT685 MCU: start\r\n");
 
@@ -442,7 +443,7 @@ void dev_BOARD_InitHardware(void)
 
     PRINTF("\r\n");
     PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
-    PRINTF("RT685 MCU: ------------ McuVer 0.1.2 ------------ \r\n");
+    PRINTF("RT685 MCU: ------------ McuVer 0.1.3.1 ------------ \r\n");
     PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
 
     PRINTF("\r\n");
