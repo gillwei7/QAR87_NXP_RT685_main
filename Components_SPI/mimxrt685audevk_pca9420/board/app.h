@@ -18,10 +18,13 @@
 
 //Is the Burning program on the Dev-Board?
 #define USE_DEV_BOARD 1
+#define AMP_ENABLE 0
+#define DMIC_ENABLE 1
 
 #define GPIO0_PORT 0U
 #define GPIO1_PORT 1U
 #define GPIO2_PORT 2U
+
 
 /*PCA9422*/
 #define DVS_CTR0_PORT 	  1U
@@ -58,6 +61,7 @@
 #define PWR_SW1_PORT 0U		//NT98532 POWER ON
 #define PWR_SW1_PIN  6U
 
+#if AMP_ENABLE
 //I2S
 #define DEMO_I2S_MASTER_CLOCK_FREQUENCY CLOCK_GetMclkClkFreq()
 #define DEMO_AUDIO_BIT_WIDTH            (16)
@@ -71,6 +75,47 @@
 #define DEMO_I2S_CLOCK_DIVIDER          16
 #define DEMO_I2S_TX_MODE                kI2S_MasterSlaveNormalMaster
 #define DEMO_CODEC_VOLUME               100U
+#endif
+
+#if DMIC_ENABLE
+
+//#define DMAREQ_DMIC0                    16U
+//#define DEMO_I2S_MASTER_CLOCK_FREQUENCY CLOCK_GetMclkClkFreq()
+//#define DEMO_I2S_TX                     (I2S5)
+//#define DEMO_I2S_CLOCK_DIVIDER          16
+//#define DEMO_I2S_TX_CHANNEL             (11)
+
+#define DMAREQ_DMIC0                    16U
+#define DEMO_I2S_MASTER_CLOCK_FREQUENCY CLOCK_GetMclkClkFreq()
+#define DEMO_I2S_TX                     (I2S1)
+#define DEMO_I2S_CLOCK_DIVIDER          16
+#define DEMO_I2S_TX_CHANNEL             (3)
+
+#define DEMO_DMA                        (DMA0)
+
+//left
+#define DEMO_DMIC_RX_CHANNEL            16U
+#define DEMO_DMIC_CHANNEL               kDMIC_Channel0
+#define DEMO_DMIC_CHANNEL_ENABLE        DMIC_CHANEN_EN_CH0(1)
+
+//right
+#define DEMO_DMIC_RX_CHANNEL_1          18U
+#define DEMO_DMIC_CHANNEL_1             kDMIC_Channel2
+#define DEMO_DMIC_CHANNEL_1_ENABLE      DMIC_CHANEN_EN_CH2(1)
+
+//#define DEMO_DMIC_RX_CHANNEL            18U
+//#define DEMO_DMIC_CHANNEL               kDMIC_Channel2
+//#define DEMO_DMIC_CHANNEL_ENABLE        DMIC_CHANEN_EN_CH2(1)
+//
+//#define DEMO_DMIC_RX_CHANNEL_1          16U
+//#define DEMO_DMIC_CHANNEL_1             kDMIC_Channel0
+//#define DEMO_DMIC_CHANNEL_1_ENABLE      DMIC_CHANEN_EN_CH0(1)
+
+#define DEMO_AUDIO_BIT_WIDTH            (16)
+#define DEMO_AUDIO_SAMPLE_RATE          (48000)
+#define DEMO_AUDIO_PROTOCOL             kCODEC_BusI2S
+#define DEMO_I2S_TX_MODE                kI2S_MasterSlaveNormalMaster
+#endif
 /*${macro:end}*/
 
 /*******************************************************************************

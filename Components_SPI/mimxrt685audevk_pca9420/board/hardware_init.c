@@ -40,6 +40,18 @@ void BOARD_InitHardware(void)
     INPUTMUX_AttachSignal(INPUTMUX, kPINT_PinInt1, FUNKEY_PINT_PIN_INT1_SRC);
     /* Turnoff clock to inputmux to save power. Clock is only needed to make changes */
     INPUTMUX_Deinit(INPUTMUX);
+
+
+    //DMIC
+    CLOCK_EnableClock(kCLOCK_InputMux);
+    CLOCK_AttachClk(kAUDIO_PLL_to_DMIC_CLK);
+    CLOCK_SetClkDiv(kCLOCK_DivDmicClk, 8);
+    /* attach AUDIO PLL clock to MCLK */
+    CLOCK_AttachClk(kAUDIO_PLL_to_MCLK_CLK);
+    CLOCK_SetClkDiv(kCLOCK_DivMclkClk, 1);
+    SYSCTL1->MCLKPINDIR = SYSCTL1_MCLKPINDIR_MCLKPINDIR_MASK;
+
+
 }
 
 void BOARD_ConfigPMICModes(pca9420_modecfg_t *cfg, uint32_t num)

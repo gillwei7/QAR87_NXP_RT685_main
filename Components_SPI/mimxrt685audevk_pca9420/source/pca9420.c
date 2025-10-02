@@ -25,6 +25,9 @@
 #include "fsl_i2s.h"
 #include "fsl_i2s_dma.h"
 #include "music.h"
+
+#include "fsl_dmic.h"
+#include "fsl_dmic_dma.h"
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -39,7 +42,19 @@
 #endif
 #define CHARGER_ENABLE 1
 #define PMIC_GLF70583_ENABLE 1
-#define AMP_ENABLE 1
+#define AMP_ENABLE 0
+#define DMIC_ENABLE 1
+
+
+#if DMIC_ENABLE
+#ifndef DEMO_DMIC_NUMS
+#define DEMO_DMIC_NUMS 2U
+#endif
+#define FIFO_DEPTH           (15U)
+#define RECORD_BUFFER_SIZE   (128)
+#define PLAYBACK_BUFFER_SIZE (128 * 2U)
+#define BUFFER_NUM           (2U)
+#endif
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -60,9 +75,72 @@ static i2s_config_t s_TxConfig;
 static i2s_dma_handle_t s_TxHandle;
 static i2s_transfer_t s_TxTransfer;
 
+#if DMIC_ENABLE
+static i2s_config_t tx_config;
+static uint8_t s_buffer[PLAYBACK_BUFFER_SIZE * BUFFER_NUM];
+static uint32_t volatile s_writeIndex = 0U;
+static uint32_t volatile s_emptyBlock = BUFFER_NUM;
+
+static dmic_dma_handle_t s_leftDmicDmaHandle;
+static dma_handle_t s_leftDmicRxDmaHandle;
+
+#if DEMO_DMIC_NUMS == 2U
+static dmic_dma_handle_t s_rightDmicDmaHandle;
+static dma_handle_t s_rightDmicRxDmaHandle;
+#endif
+
+static dma_handle_t s_i2sTxDmaHandle;
+static i2s_dma_handle_t s_i2sTxHandle;
+
+SDK_ALIGN(dma_descriptor_t s_leftDmaDescriptorPingpong[2], 16);
+
+static dmic_transfer_t s_leftReceiveXfer[2U] = {
+    /* transfer configurations for channel0 */
+    {
+        .data                   = s_buffer,
+        .dataWidth              = sizeof(uint16_t),
+        .dataSize               = RECORD_BUFFER_SIZE,
+        .dataAddrInterleaveSize = kDMA_AddressInterleave2xWidth,
+        .linkTransfer           = &s_leftReceiveXfer[1],
+    },
+
+    {
+        .data                   = &s_buffer[PLAYBACK_BUFFER_SIZE],
+        .dataWidth              = sizeof(uint16_t),
+        .dataSize               = RECORD_BUFFER_SIZE,
+        .dataAddrInterleaveSize = kDMA_AddressInterleave2xWidth,
+        .linkTransfer           = &s_leftReceiveXfer[0],
+    },
+};
+
+#if DEMO_DMIC_NUMS == 2U
+SDK_ALIGN(dma_descriptor_t s_rightDmaDescriptorPingpong[2], 16);
+
+static dmic_transfer_t s_rightReceiveXfer[2U] = {
+    /* transfer configurations for channel0 */
+    {
+        .data                   = &s_buffer[2],
+        .dataWidth              = sizeof(uint16_t),
+        .dataSize               = RECORD_BUFFER_SIZE,
+        .dataAddrInterleaveSize = kDMA_AddressInterleave2xWidth,
+        .linkTransfer           = &s_rightReceiveXfer[1],
+    },
+
+    {
+        .data                   = &s_buffer[PLAYBACK_BUFFER_SIZE + 2U],
+        .dataWidth              = sizeof(uint16_t),
+        .dataSize               = RECORD_BUFFER_SIZE,
+        .dataAddrInterleaveSize = kDMA_AddressInterleave2xWidth,
+        .linkTransfer           = &s_rightReceiveXfer[0],
+    },
+};
+#endif
+#endif
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
+#if AMP_ENABLE
 static void TxCallback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
 {
     /* Enqueue the same original buffer all over again */
@@ -77,8 +155,8 @@ static void StopSoundPlayback(void)
     close_aw88166_pa(AW_DEV_0);
     close_aw88166_pa(AW_DEV_1);
 
-    I2S_TransferAbortDMA(DEMO_I2S_TX_toAmp, &s_TxHandle);
-    //I2S_TransferAbortDMA(DEMO_I2S_TX_toNova, &s_TxHandle);
+    //I2S_TransferAbortDMA(DEMO_I2S_TX_toAmp, &s_TxHandle);
+    I2S_TransferAbortDMA(DEMO_I2S_TX_toNova, &s_TxHandle);
 
 
 }
@@ -90,17 +168,36 @@ static void StartSoundPlayback(void)
     s_TxTransfer.data     = &g_Music[0];
     s_TxTransfer.dataSize = sizeof(g_Music);
 
-    I2S_TxTransferCreateHandleDMA(DEMO_I2S_TX_toAmp, &s_TxHandle, &s_DmaTxHandle, TxCallback, (void *)&s_TxTransfer);
-    //I2S_TxTransferCreateHandleDMA(DEMO_I2S_TX_toNova, &s_TxHandle, &s_DmaTxHandle, TxCallback, (void *)&s_TxTransfer);
+    //I2S_TxTransferCreateHandleDMA(DEMO_I2S_TX_toAmp, &s_TxHandle, &s_DmaTxHandle, TxCallback, (void *)&s_TxTransfer);
+    I2S_TxTransferCreateHandleDMA(DEMO_I2S_TX_toNova, &s_TxHandle, &s_DmaTxHandle, TxCallback, (void *)&s_TxTransfer);
     /* need to queue two transmit buffers so when the first one
      * finishes transfer, the other immediatelly starts */
-    I2S_TxTransferSendDMA(DEMO_I2S_TX_toAmp, &s_TxHandle, s_TxTransfer);
-    //I2S_TxTransferSendDMA(DEMO_I2S_TX_toNova, &s_TxHandle, s_TxTransfer);
+    //I2S_TxTransferSendDMA(DEMO_I2S_TX_toAmp, &s_TxHandle, s_TxTransfer);
+    I2S_TxTransferSendDMA(DEMO_I2S_TX_toNova, &s_TxHandle, s_TxTransfer);
 
     start_aw88166_pa(AW_DEV_0, "Music");
     start_aw88166_pa(AW_DEV_1, "Music");
 
 }
+#endif
+
+#if DMIC_ENABLE
+void dmic_Callback(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
+{
+    if (s_emptyBlock)
+    {
+        s_emptyBlock--;
+    }
+}
+
+void i2s_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
+{
+    if (s_emptyBlock < BUFFER_NUM)
+    {
+        s_emptyBlock++;
+    }
+}
+#endif
 
 void GPIO_INTA_DriverIRQHandler(void)
 {
@@ -177,6 +274,12 @@ void pint_intr_callback(pint_pin_int_t pintr, uint32_t pmatch_status)
 /*! @brief Main function */
 int main(void)
 {
+
+#if DMIC_ENABLE
+    dmic_channel_config_t dmic_channel_cfg;
+    i2s_transfer_t i2sTxTransfer;
+    static uint32_t logCounter = 0;
+#endif
 
     /* Init board hardware. */
     BOARD_InitHardware();
@@ -304,23 +407,171 @@ int main(void)
     s_TxConfig.divider     = 8;//(24576000U / 16000U / 32U / 2);//DEMO_I2S_CLOCK_DIVIDER;
     s_TxConfig.masterSlave = DEMO_I2S_TX_MODE;
 
-    I2S_TxInit(DEMO_I2S_TX_toAmp, &s_TxConfig);
-    //I2S_TxInit(DEMO_I2S_TX_toNova, &s_TxConfig);
+    //I2S_TxInit(DEMO_I2S_TX_toAmp, &s_TxConfig);
+    I2S_TxInit(DEMO_I2S_TX_toNova, &s_TxConfig);
 
     DMA_Init(DEMO_DMA);
 
-    DMA_EnableChannel(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp);
-    DMA_SetChannelPriority(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp, kDMA_ChannelPriority3);
-    DMA_CreateHandle(&s_DmaTxHandle, DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp);
+    //DMA_EnableChannel(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp);
+    //DMA_SetChannelPriority(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp, kDMA_ChannelPriority3);
+    //DMA_CreateHandle(&s_DmaTxHandle, DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp);
 
-    //DMA_EnableChannel(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toNova);
-    //DMA_SetChannelPriority(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toNova, kDMA_ChannelPriority3);
-    //DMA_CreateHandle(&s_DmaTxHandle, DEMO_DMA, DEMO_I2S_TX_CHANNEL_toNova);
+    DMA_EnableChannel(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toNova);
+    DMA_SetChannelPriority(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toNova, kDMA_ChannelPriority3);
+    DMA_CreateHandle(&s_DmaTxHandle, DEMO_DMA, DEMO_I2S_TX_CHANNEL_toNova);
 
     StartSoundPlayback();
 
 #endif
 
+#if DMIC_ENABLE
+
+PRINTF("DMIC-I2S5 Audio Pass-through DMA Example\r\n");
+
+    DMA_Init(DEMO_DMA);
+
+    DMA_EnableChannel(DEMO_DMA, DEMO_I2S_TX_CHANNEL);
+    DMA_EnableChannel(DEMO_DMA, DEMO_DMIC_RX_CHANNEL);
+    DMA_SetChannelPriority(DEMO_DMA, DEMO_I2S_TX_CHANNEL, kDMA_ChannelPriority3);
+    DMA_SetChannelPriority(DEMO_DMA, DEMO_DMIC_RX_CHANNEL, kDMA_ChannelPriority2);
+    DMA_CreateHandle(&s_i2sTxDmaHandle, DEMO_DMA, DEMO_I2S_TX_CHANNEL);
+    DMA_CreateHandle(&s_leftDmicRxDmaHandle, DEMO_DMA, DEMO_DMIC_RX_CHANNEL);
+
+#if DEMO_DMIC_NUMS == 2U
+    DMA_EnableChannel(DEMO_DMA, DEMO_DMIC_RX_CHANNEL_1);
+    DMA_SetChannelPriority(DEMO_DMA, DEMO_DMIC_RX_CHANNEL_1, kDMA_ChannelPriority2);
+    DMA_CreateHandle(&s_rightDmicRxDmaHandle, DEMO_DMA, DEMO_DMIC_RX_CHANNEL_1);
+#endif
+
+    memset(&dmic_channel_cfg, 0U, sizeof(dmic_channel_config_t));
+
+    dmic_channel_cfg.divhfclk            = kDMIC_PdmDiv1;
+    dmic_channel_cfg.osr                 = 32U;
+    dmic_channel_cfg.gainshft            = 4U;
+    dmic_channel_cfg.preac2coef          = kDMIC_CompValueZero;
+    dmic_channel_cfg.preac4coef          = kDMIC_CompValueZero;
+    dmic_channel_cfg.dc_cut_level        = kDMIC_DcCut155;
+    dmic_channel_cfg.post_dc_gain_reduce = 1U;
+    dmic_channel_cfg.saturate16bit       = 1U;
+    dmic_channel_cfg.sample_rate         = kDMIC_PhyFullSpeed;
+    DMIC_Init(DMIC0);
+#if !(defined(FSL_FEATURE_DMIC_HAS_NO_IOCFG) && FSL_FEATURE_DMIC_HAS_NO_IOCFG)
+    DMIC_SetIOCFG(DMIC0, kDMIC_PdmDual);
+#endif
+    DMIC_Use2fs(DMIC0, true);
+    DMIC_EnableChannelDma(DMIC0, DEMO_DMIC_CHANNEL, true);
+#if defined(BOARD_DMIC_CHANNEL_STEREO_SIDE_SWAP) && (BOARD_DMIC_CHANNEL_STEREO_SIDE_SWAP)
+    DMIC_ConfigChannel(DMIC0, DEMO_DMIC_CHANNEL, kDMIC_Right, &dmic_channel_cfg);
+#else
+    DMIC_ConfigChannel(DMIC0, DEMO_DMIC_CHANNEL, kDMIC_Left, &dmic_channel_cfg);
+#endif
+    DMIC_FifoChannel(DMIC0, DEMO_DMIC_CHANNEL, FIFO_DEPTH, true, true);
+
+#if DEMO_DMIC_NUMS == 2U
+    DMIC_EnableChannelDma(DMIC0, DEMO_DMIC_CHANNEL_1, true);
+#if defined(BOARD_DMIC_CHANNEL_STEREO_SIDE_SWAP) && (BOARD_DMIC_CHANNEL_STEREO_SIDE_SWAP)
+    DMIC_ConfigChannel(DMIC0, DEMO_DMIC_CHANNEL_1, kDMIC_Left, &dmic_channel_cfg);
+#else
+    DMIC_ConfigChannel(DMIC0, DEMO_DMIC_CHANNEL_1, kDMIC_Right, &dmic_channel_cfg);
+#endif
+    DMIC_FifoChannel(DMIC0, DEMO_DMIC_CHANNEL_1, FIFO_DEPTH, true, true);
+#endif
+
+    DMIC_EnableChannnel(DMIC0, DEMO_DMIC_CHANNEL_ENABLE
+#if DEMO_DMIC_NUMS == 2U
+                             | DEMO_DMIC_CHANNEL_1_ENABLE
+#endif
+    );
+    PRINTF("Configure I2S\r\n");
+
+    I2S_TxGetDefaultConfig(&tx_config);
+    tx_config.oneChannel = false; // 明確設定為 false，代表是雙聲道（立體聲）
+    tx_config.divider     = DEMO_I2S_CLOCK_DIVIDER;
+    tx_config.masterSlave = DEMO_I2S_TX_MODE;
+    I2S_TxInit(DEMO_I2S_TX, &tx_config); // DEMO_I2S_TX 現在是 I2S1
+    I2S_TxTransferCreateHandleDMA(DEMO_I2S_TX, &s_i2sTxHandle, &s_i2sTxDmaHandle, i2s_Callback, NULL);
+
+#if DEMO_DMIC_NUMS == 2U
+    DMIC_TransferCreateHandleDMA(DMIC0, &s_leftDmicDmaHandle, NULL, NULL, &s_leftDmicRxDmaHandle);
+    DMIC_InstallDMADescriptorMemory(&s_leftDmicDmaHandle, s_leftDmaDescriptorPingpong, 2U);
+
+    DMIC_TransferCreateHandleDMA(DMIC0, &s_rightDmicDmaHandle, dmic_Callback, NULL, &s_rightDmicRxDmaHandle);
+    DMIC_InstallDMADescriptorMemory(&s_rightDmicDmaHandle, s_rightDmaDescriptorPingpong, 2U);
+
+    status_t dmic_dma_status_left;
+    status_t dmic_dma_status_right;
+
+    dmic_dma_status_left = DMIC_TransferReceiveDMA(DMIC0, &s_leftDmicDmaHandle, s_leftReceiveXfer, DEMO_DMIC_CHANNEL);
+	dmic_dma_status_right = DMIC_TransferReceiveDMA(DMIC0, &s_rightDmicDmaHandle, s_rightReceiveXfer, DEMO_DMIC_CHANNEL_1);
+
+	if (dmic_dma_status_left != kStatus_Success || dmic_dma_status_right != kStatus_Success)
+	{
+		PRINTF("FATAL ERROR: Failed to start DMIC DMA transfer!\r\n");
+		while(1); // 停在這裡
+	}
+
+//    DMIC_TransferReceiveDMA(DMIC0, &s_leftDmicDmaHandle, s_leftReceiveXfer, DEMO_DMIC_CHANNEL);
+//    DMIC_TransferReceiveDMA(DMIC0, &s_rightDmicDmaHandle, s_rightReceiveXfer, DEMO_DMIC_CHANNEL_1);
+#else
+    DMIC_TransferCreateHandleDMA(DMIC0, &s_leftDmicDmaHandle, dmic_Callback, NULL, &s_leftDmicRxDmaHandle);
+    DMIC_InstallDMADescriptorMemory(&s_leftDmicDmaHandle, s_leftDmaDescriptorPingpong, 2U);
+    DMIC_TransferReceiveDMA(DMIC0, &s_leftDmicDmaHandle, s_leftReceiveXfer, DEMO_DMIC_CHANNEL);
+#endif
+
+    PRINTF("Starting audio loopback...\r\n");
+    /* ========================[ 新增的除錯程式碼 ]======================== */
+	PRINTF("--- Starting DMIC Register Status Check ---\r\n");
+	// 延遲一段時間，讓 FIFO 有機會填充
+	for (volatile int i = 0; i < 1000000; i++)
+	{
+		__NOP();
+	}
+
+	// 讀取並印出暫存器狀態 10 次
+	for (int i = 0; i < 10; i++)
+	{
+		uint32_t chanen = DMIC0->CHANEN;
+		// 根據您的 app.h，您使用的是 Channel 0 和 Channel 2
+		uint32_t fifo_status_ch0 = DMIC0->CHANNEL[0].FIFO_STATUS;
+		uint32_t fifo_status_ch2 = DMIC0->CHANNEL[2].FIFO_STATUS;
+
+		PRINTF("Loop %d: CHANEN=0x%08X, CH0_FIFO_STATUS=0x%08X, CH2_FIFO_STATUS=0x%08X\r\n",
+			   i, chanen, fifo_status_ch0, fifo_status_ch2);
+
+		// 再次延遲
+		for (volatile int j = 0; j < 500000; j++)
+		{
+			__NOP();
+		}
+	}
+	PRINTF("--- DMIC Register Status Check Finished ---\r\n");
+	/* ========================[ 除錯程式碼結束 ]======================== */
+	while (1)
+	{
+		if (s_emptyBlock < BUFFER_NUM)
+		{
+			i2sTxTransfer.data     = s_buffer + s_writeIndex * PLAYBACK_BUFFER_SIZE;
+			i2sTxTransfer.dataSize = PLAYBACK_BUFFER_SIZE;
+			if (I2S_TxTransferSendDMA(DEMO_I2S_TX, &s_i2sTxHandle, i2sTxTransfer) == kStatus_Success)
+			{
+				/* 2. 增加日誌邏輯 */
+				logCounter++;
+				if (logCounter >= 500)
+				{
+					PRINTF("I2S: Successfully sent 500 audio blocks. Current write index: %d\r\n", s_writeIndex);
+					logCounter = 0; // 計數器歸零
+				}
+
+				if (++s_writeIndex >= BUFFER_NUM)
+				{
+					s_writeIndex = 0U;
+				}
+			}
+		}
+	}
+
+
+#endif
 #if LED_ENABLE
 	/* LED Init */
 	ktd202x_probe();
