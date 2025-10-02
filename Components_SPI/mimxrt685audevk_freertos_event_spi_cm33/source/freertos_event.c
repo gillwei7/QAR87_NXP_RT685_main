@@ -743,6 +743,32 @@ static void I2C_Task(void *pvParameters)
             GPIO_PinEnableInterrupt(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, kGPIO_InterruptA);
         }
 
+
+        /* --- CHARGER event --- */
+        if ((bits & CHARGER_EVENT_BIT) != 0)
+        {
+            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
+            {
+    			bq256xx_status_t status;
+    			if (bq256xx_poll_status(&status) == kStatus_Success) {
+    				PRINTF("[Charger] Power Good: %s\n", status.power_good ? "Yes" : "No");
+    				PRINTF("[Charger] VBUS Status: 0x%02X\n", status.vbus_stat);
+    				PRINTF("[Charger] Charge Status: 0x%02X\n", status.chg_stat);
+    				PRINTF("[Charger] Fault Status: 0x%02X\n", status.fault_stat);
+    				PRINTF("[Charger] VBUS Good: %s\n", status.vbus_good ? "Yes" : "No");
+    				PRINTF("\n");
+    			} else {
+    				PRINTF("[Charger] Failed to read charger status.\n");
+    			}
+                xSemaphoreGive(i2c_mutex);
+            }
+
+            GPIO_PinClearInterruptFlag(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
+            GPIO_PinEnableInterrupt(GPIO, CHARG_INT_PORT, CHARG_INT_PIN, kGPIO_InterruptA);
+
+        }
+
+
     }
 }
 
