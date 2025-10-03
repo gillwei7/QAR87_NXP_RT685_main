@@ -434,11 +434,11 @@ void dev_BOARD_InitBTScoPins(void)
                                          /* Enable pull-down function */
                                          IOPCTL_PIO_PULLDOWN_EN |
                                          /* Disable input buffer function */
-                                         IOPCTL_PIO_INBUF_DI |
+										 IOPCTL_PIO_INBUF_EN |
                                          /* Normal mode */
                                          IOPCTL_PIO_SLEW_RATE_NORMAL |
                                          /* Normal drive */
-                                         IOPCTL_PIO_FULLDRIVE_DI |
+										 IOPCTL_PIO_FULLDRIVE_EN |
                                          /* Analog mux is disabled */
                                          IOPCTL_PIO_ANAMUX_DI |
                                          /* Pseudo Output Drain is disabled */
@@ -455,11 +455,11 @@ void dev_BOARD_InitBTScoPins(void)
                                          /* Enable pull-down function */
                                          IOPCTL_PIO_PULLDOWN_EN |
                                          /* Disable input buffer function */
-                                         IOPCTL_PIO_INBUF_DI |
+										 IOPCTL_PIO_INBUF_EN |
                                          /* Normal mode */
                                          IOPCTL_PIO_SLEW_RATE_NORMAL |
                                          /* Normal drive */
-                                         IOPCTL_PIO_FULLDRIVE_DI |
+										 IOPCTL_PIO_FULLDRIVE_EN |
                                          /* Analog mux is disabled */
                                          IOPCTL_PIO_ANAMUX_DI |
                                          /* Pseudo Output Drain is disabled */
@@ -497,11 +497,11 @@ void dev_BOARD_InitBTScoPins(void)
                                              /* Enable pull-down function */
                                              IOPCTL_PIO_PULLDOWN_EN |
                                              /* Disable input buffer function */
-                                             IOPCTL_PIO_INBUF_DI |
+											 IOPCTL_PIO_INBUF_EN |
                                              /* Normal mode */
                                              IOPCTL_PIO_SLEW_RATE_NORMAL |
                                              /* Normal drive */
-                                             IOPCTL_PIO_FULLDRIVE_DI |
+											 IOPCTL_PIO_FULLDRIVE_EN |
                                              /* Analog mux is disabled */
                                              IOPCTL_PIO_ANAMUX_DI |
                                              /* Pseudo Output Drain is disabled */
