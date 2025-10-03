@@ -957,6 +957,9 @@ int main(void)
     NVIC_SetPriority(GPIO_INTA_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
     EnableIRQ(GPIO_INTA_IRQn);
 
+    /* AMP GPIO */
+    gpio_pin_config_t amp_config = { kGPIO_DigitalOutput, 1, };
+	GPIO_PinInit(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, &amp_config);
     /* Touch INT GPIO*/
     GPIO_PinInit(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &sw_config);
     GPIO_SetPinInterruptConfig(GPIO, TOUCH_INT_PORT, TOUCH_INT_PIN, &config);
