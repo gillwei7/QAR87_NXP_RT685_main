@@ -14,4 +14,10 @@
 #define DMIC_TO_NOVATEK      0
 #define DEV_AUDIO_DEBUG_GPIO 1 // Include debug pin / led / button
 
+#define AMP_ENABLE 1
+
+
+#define AMP_RESET_PORT 0U
+#define AMP_RESET_PIN  0U
+
 #endif /* QAR87_CONFIG_H_ */

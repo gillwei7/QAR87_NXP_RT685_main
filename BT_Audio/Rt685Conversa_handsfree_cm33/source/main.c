@@ -29,6 +29,7 @@
 #include "board.h"
 #include "pin_mux_dev.h"
 #include "pmic_pca9422.h"
+#include "aw88166.h"
 
 #if DMIC_TO_NOVATEK
 #include "fsl_device_registers.h"
@@ -247,6 +248,19 @@ int main(void)
 	GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); //Enable GLF70583
 
 #endif // PMIC_GLF70583_ENABLE
+
+#if AMP_ENABLE
+    gpio_pin_config_t amp_config = {
+            kGPIO_DigitalOutput,
+            1,
+        };
+	GPIO_PinInit(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, &amp_config);
+#endif
+
+#if AMP_ENABLE
+	PRINTF("[AMP][AW88166] \r\n");
+	init_aw88166();
+#endif
 
 #if DMIC_TO_NOVATEK
     dmic_channel_config_t dmic_channel_cfg;
