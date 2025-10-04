@@ -908,38 +908,38 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	{
 		//start Rx0 after edge
 		#if __OPTIMIZE__==0
-			WaitForRx0LRCKFallingEdge_Fc1();
+			WaitForRx0LRCKFallingEdge_Fc3();
 		#else
-			WaitForRx0LRCKRisingEdge_Fc1();
+			WaitForRx0LRCKRisingEdge_Fc3();
 		#endif
 
-				((I2S_Type *)DEMO_I2S1Rx0)->FIFOCFG |= (1<<16);	//empty fifo
+				((I2S_Type *)DEMO_I2S3Rx0)->FIFOCFG |= (1<<16);	//empty fifo
 				#if 1
 					//this is to ensure rx intr comes after dmic intr --- don't close this part
 					for(int i=0;i<8;i++)
 					{
 						volatile U32 t;
-						t=((I2S_Type *)DEMO_I2S1Rx0)->FIFORD;
+						t=((I2S_Type *)DEMO_I2S3Rx0)->FIFORD;
 					}
 				#endif
-				ImmediatelyStartI2S1Dma();	//after calling this, I2S dma intr occurs one frame later!
+				ImmediatelyStartI2S3Dma();	//after calling this, I2S dma intr occurs one frame later!
 
 		//start tx0 after edge
 		#if __OPTIMIZE__==0
-			WaitForRx0LRCKRisingEdge_Fc1();
+			WaitForRx0LRCKRisingEdge_Fc3();
 		#else
-			WaitForRx0LRCKFallingEdge_Fc1();
+			WaitForRx0LRCKFallingEdge_Fc3();
 		#endif
-				((I2S_Type *)DEMO_I2S3Tx0)->FIFOCFG |= (1<<16);	//empty fifo
+				((I2S_Type *)DEMO_I2S1Tx0)->FIFOCFG |= (1<<16);	//empty fifo
 				#if 1
 					//this is to ensure tx intr comes after dmic intr --- don't close this part
 					for(int i=0;i<8;i++)
 					{
-						((I2S_Type *)DEMO_I2S3Tx0)->FIFOWR=0;
+						((I2S_Type *)DEMO_I2S1Tx0)->FIFOWR=0;
 						//((I2S_Type *)DEMO_I2S4_TX1)->FIFOWR=i*0x20000;		//full the fifo tx buffer, so that tx intr can be aligned with rx and dmic
 					}
 				#endif
-				ImmediatelyStartI2S3Dma();	//after calling this, I2S dma intr occurs one frame later!
+				ImmediatelyStartI2S1Dma();	//after calling this, I2S dma intr occurs one frame later!
 
 		//set the flag variables to initial value
 		StartI2SAudioDmaFromDmicDmaIntr_Cnt=0;

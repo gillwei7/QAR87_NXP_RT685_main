@@ -202,19 +202,19 @@ void ProcessAudio_AfterAudioInputBufIsReady(void)
 #endif
 		}
 
-		if(I2S1DmaTransferringIsUsingBufA)
-		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
-			I2SDmaInCh01Ptr=I2S1Rx0BufCh0And1Mixed_B;
-		}else
-		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
-			I2SDmaInCh01Ptr=I2S1Rx0BufCh0And1Mixed_A;
-		}
 		if(I2S3DmaTransferringIsUsingBufA)
 		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
-			I2SDmaOtCh01Ptr=I2S3Tx0BufCh2And3Mixed_B;
+			I2SDmaInCh01Ptr=I2S1Tx0BufCh0And1Mixed_B;
 		}else
 		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
-			I2SDmaOtCh01Ptr=I2S3Tx0BufCh2And3Mixed_A;
+			I2SDmaInCh01Ptr=I2S1Tx0BufCh0And1Mixed_A;
+		}
+		if(I2S1DmaTransferringIsUsingBufA)
+		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
+			I2SDmaOtCh01Ptr=I2S3Rx0BufCh2And3Mixed_B;
+		}else
+		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
+			I2SDmaOtCh01Ptr=I2S3Rx0BufCh2And3Mixed_A;
 		}
 	#endif
 

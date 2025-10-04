@@ -39,6 +39,7 @@
 #include "AudioProcess.h"
 #include "MainAudioFlow.h"
 #endif
+#include "aw88166.h"
 
 
 
@@ -457,17 +458,20 @@ static void Deinit_Board_Audio(void)
 #endif
 
 		//close all I2S and related DMA --- if need to just close the wanted, just call one of the 3 grouped functions
-		CloseI2sDma((I2S_Type *)DEMO_I2S1Rx0);
-		CloseI2sDma((I2S_Type *)DEMO_I2S3Tx0);
-			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2S1Rx0);
-			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2S3Tx0);
-				ClearDmaBuf_I2S1Rx0();
-				ClearDmaBuf_I2S3Tx0();
+		CloseI2sDma((I2S_Type *)DEMO_I2S3Rx0);
+		CloseI2sDma((I2S_Type *)DEMO_I2S1Tx0);
+			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2S3Rx0);
+			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2S1Tx0);
+				ClearDmaBuf_I2S3Rx0();
+				ClearDmaBuf_I2S1Tx0();
 		//close PDM all channels
 		BOARD_DeInit_DMA_PDM(0xff);
 
 		HAL_AudioTxDeinit((hal_audio_handle_t)&tx_mic_handle[0]);
 		HAL_AudioRxDeinit((hal_audio_handle_t)&rx_speaker_handle[0]);
+
+		close_aw88166_pa(AW_DEV_0);
+		close_aw88166_pa(AW_DEV_1);
 
 		(void)BOARD_SwitchAudioFreq(0U);
 #if !DEV_AUDIO_DEBUG_GPIO
@@ -569,13 +573,15 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 				BOARD_Init_DMA_I2S_Fc3();
 					BOARD_Init_I2S_Fc1();
 					BOARD_Init_I2S_Fc3();
-						ClearDmaBuf_I2S1Rx0();
-						ClearDmaBuf_I2S3Tx0();
+						ClearDmaBuf_I2S3Rx0();
+						ClearDmaBuf_I2S1Tx0();
 							ConfigI2S1ChainedDma();
 							ConfigI2S3ChainedDma();
-								EnableI2S1Rx0DmaChannel();
-								EnableI2S3Tx0DmaChannel();
+								EnableI2S3Rx0DmaChannel();
+								EnableI2S1Tx0DmaChannel();
 				PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
+			    start_aw88166_pa(AW_DEV_0, "Receiver");
+			    start_aw88166_pa(AW_DEV_1, "Receiver");
 				DbgPin8Dn();
 
 #if !DEV_AUDIO_DEBUG_GPIO

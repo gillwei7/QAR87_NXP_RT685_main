@@ -398,6 +398,7 @@ void AMP_I2S(void); /* Function assigned for the Cortex-M33 */
 #define PWR_SW1_PORT 0U		//NT98532 POWER ON
 #define PWR_SW1_PIN  6U
 
+
 #endif
 
 /*! @name PDM_CLK01 (coord R1), U40[4]/U41[4]/PDM_CLK01_OnBoard

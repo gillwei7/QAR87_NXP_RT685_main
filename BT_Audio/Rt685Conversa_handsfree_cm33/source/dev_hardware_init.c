@@ -79,15 +79,15 @@
 
 /* I2S */
 #define DEMO_MICBUF_TX_INSTANCE (2U)
-#define DEMO_MICBUF_RX_INSTANCE (1U)
-#define DEMO_SPKBUF_TX_INSTANCE (3U)
+#define DEMO_MICBUF_RX_INSTANCE (3U)//(1U)
+#define DEMO_SPKBUF_TX_INSTANCE (1U)//(3U)
 #define DEMO_SPKBUF_RX_INSTANCE (4U)//(5U) // gill modify BT receive FC5->FC4
 
 /* DMA */
 #define EXAMPLE_DMA_INSTANCE      (0U)
 #define EXAMPLE_MICBUF_TX_CHANNEL (5U)
-#define EXAMPLE_MICBUF_RX_CHANNEL (2U)
-#define EXAMPLE_SPKBUF_TX_CHANNEL (7U)
+#define EXAMPLE_MICBUF_RX_CHANNEL (6U)//(2U)
+#define EXAMPLE_SPKBUF_TX_CHANNEL (3U)//(7U)
 #define EXAMPLE_SPKBUF_RX_CHANNEL (8U)//(10U) // gill modify BT receive DMA10->DMA8
 
 /* demo audio data channel */
@@ -331,7 +331,7 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate)
         //CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
 
         DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, CLOCK_GetFlexCommClkFreq(5U));
-        PRINTF("DbgConsole_Init on FC5");
+        PRINTF("DbgConsole_Init on FC5\r\n");
 
         /* attach AUDIO PLL clock to MCLK (AudioPll * (18 / 26) / 15 / 1 = 24.576MHz / 22.5792MHz) */
         CLOCK_AttachClk(kAUDIO_PLL_to_MCLK_CLK);
@@ -526,6 +526,8 @@ void dev_BOARD_InitHardware(void)
 
         SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
         //BOARD_InitDebugConsole();		//not sure --- conflict with DSP init debug console --- earlier prints can not be displayed
+//        DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, CLOCK_GetFlexCommClkFreq(5U));
+
         PRINTF("RT685 MCU: DSP handshake is received\r\n");
         SEMA42_Unlock(APP_SEMA42, SEMA42_GATE);
     #endif
