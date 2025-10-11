@@ -45,7 +45,7 @@
 #define DEMO_DMA (DMA0)			//DMA0 is for MCU side
 
 
-#define DEMO_I2S3Rx0_MODE 		kI2S_MasterSlaveNormalMaster//kI2S_MasterSlaveNormalSlave
+#define DEMO_I2S3Rx0_MODE 		kI2S_MasterSlaveNormalSlave
 #define DEMO_I2S1Tx0_MODE 		kI2S_MasterSlaveNormalMaster//kI2S_MasterSlaveNormalSlave
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
