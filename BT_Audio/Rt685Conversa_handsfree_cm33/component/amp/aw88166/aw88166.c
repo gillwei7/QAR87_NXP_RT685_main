@@ -11,7 +11,8 @@
 #include "board.h"
 #include "aw88166.h"
 //#include "aw_params_20241105.h"
-#include "aw_params.h"
+//#include "aw_params.h"
+#include "aw_params_20251007receiver_16k32bit.h"
 
 
 static status_t aw_dev0_i2c_write_func(uint16_t dev_addr, uint8_t reg_addr,

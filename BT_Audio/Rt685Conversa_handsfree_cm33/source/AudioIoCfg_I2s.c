@@ -163,7 +163,7 @@ void BOARD_Init_I2S_Fc1(void)
 
 	//I2S_Tx_config.divider     = DEMO_I2S_CLOCK_DIVIDER;
 	//no matter BT side is 16KHz or 8KHz, Fc1 and Fc3 are always 16KHz and 32bit
-	I2S_Tx_config.divider     = 8;//(24576000U / 16000U / 32U / 2);
+	I2S_Tx_config.divider     = (24576000U / 16000U / 32U / 2);
 
 	I2S_Tx_config.position    =  0;
 	I2S_Tx_config.oneChannel  = false;
