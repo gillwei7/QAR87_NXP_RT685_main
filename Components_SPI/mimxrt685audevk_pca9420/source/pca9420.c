@@ -579,6 +579,23 @@ PRINTF("DMIC-I2S5 Audio Pass-through DMA Example\r\n");
 	ktd202x_ch1_led_on(1); //blue
 	ktd202x_ch2_led_on(1); //red
 	ktd202x_ch3_led_on(1);//green
+	/*
+	ktd202x_ch3_led_breathe(PERIOD_CODE_1P5S,
+	                        RISE_CODE_600MS,
+	                        FALL_CODE_600MS,
+	                        ON_PERCENT_60,
+	                        RAMP_SCALE_2X_SLOW,
+	                        false,
+	                        LED_CURRENT_CH3 );
+
+	ktd202x_ch2_led_breathe(PERIOD_CODE_1P5S,
+							RISE_CODE_600MS,
+							FALL_CODE_600MS,
+	                        ON_PERCENT_60,
+							RAMP_SCALE_2X_SLOW,
+	                        true,
+							LED_CURRENT_CH2);
+	*/
 #endif
 
 #if CHARGER_ENABLE
