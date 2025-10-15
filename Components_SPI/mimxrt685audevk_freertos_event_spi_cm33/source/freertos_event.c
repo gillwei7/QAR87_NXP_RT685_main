@@ -315,6 +315,17 @@ static void I2C_Task(void *pvParameters)
                 {
                 	unsigned int btn_event = aw933xx.event.click;
                 	PRINTF("[Touch] click= %d \n",btn_event);
+                	if(btn_event==1)
+                	{
+                		uint8_t v = ONE_TOUCH_HEX_VALUE;
+                		(void)xQueueSend(spi_request_queue, &v, 0);
+                	}
+                	else if(btn_event==2)
+                	{
+                		uint8_t v = DOUBLE_TOUCH_HEX_VALUE;
+                		(void)xQueueSend(spi_request_queue, &v, 0);
+                	}
+
                 }
                 else if(aw933xx.event.press)
                 {

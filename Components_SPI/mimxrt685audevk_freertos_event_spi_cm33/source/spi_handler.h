@@ -28,6 +28,8 @@
 #define TRIGGER_HEX_VALUE 0x92
 #define SHORT_PRESS_HEX_VALUE 0x21
 #define LONG_PRESS_HEX_VALUE 0x23
+#define ONE_TOUCH_HEX_VALUE 0x11
+#define DOUBLE_TOUCH_HEX_VALUE 0x12
 
 void spi_handler_task(void *pvParameters); // <<< MODIFIED: 新的 SPI 消費者任務
 void passive_handler_task(void *pvParameters);
