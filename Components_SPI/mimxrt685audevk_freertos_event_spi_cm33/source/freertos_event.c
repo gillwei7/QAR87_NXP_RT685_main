@@ -174,6 +174,7 @@ static void button_task(void *pvParameters)
 	                PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
 	                uint8_t v = SHORT_PRESS_HEX_VALUE;
 	                (void)xQueueSend(spi_request_queue, &v, 0);
+	                led_post_event(LED_EVT_PHOTO_CAPTURE);
 	            }
 	            // 若此時已經在第二次按壓中（is_pressed==true），不回報短按，
 	            // 等放開時再判斷是雙擊或長按（第二次按壓可能超過 1 秒而成為長按）
@@ -387,6 +388,14 @@ static void I2C_Task(void *pvParameters)
     				PRINTF("[Charger] Fault Status: 0x%02X\n", status.fault_stat);
     				PRINTF("[Charger] VBUS Good: %s\n", status.vbus_good ? "Yes" : "No");
     				PRINTF("\n");
+    				if(status.vbus_good)
+    				{
+    					led_post_event(LED_EVT_CHARGING);
+    				}
+    				else
+    				{
+    					led_post_event(LED_EVT_ALL_OFF);
+    				}
     			} else {
     				PRINTF("[Charger] Failed to read charger status.\n");
     			}
