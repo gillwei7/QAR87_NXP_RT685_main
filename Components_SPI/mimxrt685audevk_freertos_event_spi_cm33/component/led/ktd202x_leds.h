@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #define KTD2027
 #define PLATFORM_MODE 1
@@ -34,6 +35,11 @@
 #define TIM_1     0x00
 #define TIM_2     0x01
 
+#define PERIOD_CODE_1P5S     0x06
+#define RISE_CODE_600MS      0x03
+#define FALL_CODE_600MS      0x03
+#define RAMP_SCALE_2X_SLOW   0x10    // 2×慢（若太慢，改 0x00；若還太快，改 0x10:4×慢）
+#define ON_PERCENT_60        0x9A    // 約 60% 對應的百分比碼（表列含 0.4% 步進）
 
 #if PLATFORM_MODE
 int ktd202x_probe(void);
@@ -55,6 +61,21 @@ int32_t ktd202x_ch3_led_blink(unsigned long delay_on, unsigned long delay_off, u
 int32_t ktd202x_ch4_led_blink(unsigned long delay_on, unsigned long delay_off, uint8_t timer_slot);
 
 void LEDcontrol(uint8_t  newLEDState ); //control status
+
+int32_t ktd202x_ch2_led_breathe(uint8_t period_code,
+                                uint8_t rise_code,
+                                uint8_t fall_code,
+                                uint8_t on_percent_code,
+                                uint8_t ramp_scale_2bits,
+                                bool use_pwm1,
+                                uint8_t current_level );
+int32_t ktd202x_ch3_led_breathe(uint8_t period_code,
+                                uint8_t rise_code,
+                                uint8_t fall_code,
+                                uint8_t on_percent_code,
+                                uint8_t ramp_scale_2bits,
+                                bool use_pwm1,
+                                uint8_t current_level);
 
 #else
 int ktd202x_probe(void);

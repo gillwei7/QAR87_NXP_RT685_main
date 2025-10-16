@@ -296,6 +296,7 @@ static void power_key_task(void *pvParameters)
                         PRINTF("[PWR] Short Press detected.\r\n");
                         reg_led++;
                         led_post_event(reg_led);
+
                     } else {
                         /* 小於最小短按時間：視為抖動/誤觸，忽略 */
                         // no-op
@@ -459,6 +460,27 @@ static void I2C_Task(void *pvParameters)
                     	ktd202x_led_off();
                     	ktd202x_ch4_led_blink(300, 300, TIM_1);
                         break;
+                    case LED_EVT_OTA_SUCCESS:
+                    	ktd202x_led_off();
+                    	ktd202x_ch3_led_breathe(PERIOD_CODE_1P5S,
+                    	                        RISE_CODE_600MS,
+                    	                        FALL_CODE_600MS,
+                    	                        ON_PERCENT_60,
+                    	                        RAMP_SCALE_2X_SLOW,
+												true,
+                    	                        LED_CURRENT_CH3 );
+                        break;
+                    case LED_EVT_OTA_FAIL:
+                    	ktd202x_led_off();
+                    	ktd202x_ch2_led_breathe(PERIOD_CODE_1P5S,
+                    							RISE_CODE_600MS,
+                    							FALL_CODE_600MS,
+                    	                        ON_PERCENT_60,
+                    							RAMP_SCALE_2X_SLOW,
+                    	                        true,
+                    							LED_CURRENT_CH2);
+                        break;
+
                     case LED_EVT_ALL_OFF:
                     	ktd202x_led_off();
                         break;

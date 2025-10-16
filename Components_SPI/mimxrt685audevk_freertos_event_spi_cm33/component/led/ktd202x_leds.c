@@ -25,7 +25,6 @@ uint8_t led_status = 0;
 #define TIME_PERCENT_START_COUNT   0X00
 #define TIME_PERCENT_STEP (4)
 
-
 static int32_t ktd202x_write(uint8_t address, uint8_t value, uint32_t length)
 {
     // PRINTF("address : %02x\n", address);
@@ -455,6 +454,123 @@ int32_t ktd202x_ch4_led_blink(unsigned long delay_on, unsigned long delay_off, u
 
 }
 #endif
+
+// 寫 Ramp 時間：low nibble=Trise code, high nibble=Tfall code
+static inline status_t ktd202x_set_ramp(uint8_t rise_code, uint8_t fall_code) {
+    uint8_t reg5 = ((fall_code & 0x0F) << 4) | (rise_code & 0x0F);
+    return ktd202x_write(0x05, reg5, 1);            // Reg5
+}
+
+// 設定 Ramp 速度倍率：Reg0[6:5] = 00:1x, 01:2x慢, 10:4x慢, 11:8x快
+static inline status_t ktd202x_set_ramp_scale(uint8_t scale2bits) {
+    // 讀改寫 Reg0（若你沒有 read API，先保存本地鏡像或直接覆蓋其他位保持預設）
+    // 這裡假設其他位保持 0：TimerSlot=Slot1、EnCtrl=Always ON、Test=0
+    uint8_t reg0 = (scale2bits & 0x03) << 5;        // Reg0[6:5]
+    return ktd202x_write(0x00, reg0, 1);            // Reg0
+}
+
+// 設定週期與 ON 百分比（Ton%），選 PWM1 或 PWM2
+static inline status_t ktd202x_set_period_and_on(uint8_t period_code, uint8_t on_percent_code, bool use_pwm1) {
+    // Reg1：週期 + Ramp 型態（若要線性，將 bit7 置 1）
+    status_t ret = ktd202x_write(0x01, period_code, 1);     // Reg1
+    if (ret != kStatus_Success) return ret;
+    // Reg2/Reg3：PWM1 / PWM2 的 ON 百分比
+    return ktd202x_write(use_pwm1 ? 0x02 : 0x03, on_percent_code, 1);
+}
+
+// ch3（綠）呼吸：period_ms 對應 period_code；rise/fall 用 nibble code；Ton% 用百分比碼
+int32_t ktd202x_ch3_led_breathe(uint8_t period_code,
+                                uint8_t rise_code,
+                                uint8_t fall_code,
+                                uint8_t on_percent_code,
+                                uint8_t ramp_scale_2bits,
+                                bool use_pwm1,
+                                uint8_t current_level /* e.g., LED_CURRENT_CH3 */) {
+    status_t ret;
+
+    // 1) 電流（亮度）
+    ret = ktd202x_write(0x08, current_level, 1);     // Reg8: Ch3 Iout
+    if (ret != kStatus_Success) return ret;
+
+    // 2) Ramp 設定
+    ret = ktd202x_set_ramp(rise_code, fall_code);    // Reg5
+    if (ret != kStatus_Success) return ret;
+    ret = ktd202x_set_ramp_scale(ramp_scale_2bits);  // Reg0[6:5]
+    if (ret != kStatus_Success) return ret;
+
+    // 3) 週期 + ON 百分比
+    ret = ktd202x_set_period_and_on(period_code, on_percent_code, use_pwm1); // Reg1 + Reg2/3
+    if (ret != kStatus_Success) return ret;
+
+    // 4) 通道模式：先清再設（避免位元殘留）
+    // Ch3 的 2-bit 模式位元是 Reg4 的 [5:4]，你的 led_status 用對應遮罩 0x30
+    led_status &= ~0x30;                              // 清 Ch3 模式
+    led_status |= (use_pwm1 ? 0x20 : 0x30);           // 10:PWM1 或 11:PWM2
+    ret = ktd202x_write(0x04, led_status, 1);         // Reg4
+    if (ret != kStatus_Success) return ret;
+
+    //LOG_DBG("[KTD202x] ch3 breathe: period=0x%02X rise=0x%X fall=0x%X on%%=0x%02X mode=%s\r\n",
+    //        period_code, rise_code, fall_code, on_percent_code, use_pwm1 ? "PWM1" : "PWM2");
+    PRINTF("[KTD2027] ktd202x_ch3_led_breathe \r\n");
+
+    return ret;
+}
+
+
+// === 紅燈（Ch2）呼吸 ===
+// period_code      : Reg1 週期碼（64ms 起，每步 +256ms，最長約 8s）
+// rise_code/fall_code : Reg5 的 Trise/Tfall 檔位（各 4bit；未套倍率前約 128ms 級距）
+// on_percent_code  : Reg2/Reg3 的 ON 時間百分比碼（Ton 含 Trise）
+// ramp_scale_2bits : Reg0[6:5] 的倍率（00=1×、01=2×慢、10=4×慢、11=8×快）
+// use_pwm1         : true=用 PWM1（寫 Reg2），false=用 PWM2（寫 Reg3）
+// current_level    : 紅燈目標電流（例：LED_CURRENT_CH2；建議先用 0x80~0x9F 測亮度）
+
+int32_t ktd202x_ch2_led_breathe(uint8_t period_code,
+                                uint8_t rise_code,
+                                uint8_t fall_code,
+                                uint8_t on_percent_code,
+                                uint8_t ramp_scale_2bits,
+                                bool use_pwm1,
+                                uint8_t current_level /* e.g., LED_CURRENT_CH2 */)
+{
+    status_t ret;
+
+    // 1) 設定紅燈亮度電流（Reg7）
+    ret = ktd202x_write(0x07, current_level, 1);  // Ch2 Iout
+    if (ret != kStatus_Success) return ret;
+
+    // 2) Ramp 設定（Reg5 + Reg0[6:5]）
+    //    注意：Reg5 低 4bit 是 Trise， 高 4bit 是 Tfall
+    uint8_t reg5 = ((fall_code & 0x0F) << 4) | (rise_code & 0x0F);
+    ret = ktd202x_write(0x05, reg5, 1);           // Reg5: Ramp
+    if (ret != kStatus_Success) return ret;
+
+    // Reg0[6:5] 設倍率；此處假設其他位保持預設（TimerSlot=Slot1、EnCtrl=Always ON）
+    uint8_t reg0 = (ramp_scale_2bits & 0x03) << 5;
+    ret = ktd202x_write(0x00, reg0, 1);           // Reg0: Ramp Scaling
+    if (ret != kStatus_Success) return ret;
+
+    // 3) 週期與 ON 百分比（Reg1 + Reg2/Reg3）
+    ret = ktd202x_write(0x01, period_code, 1);    // Reg1: Period（若需線性 ramp，將 Reg1[7] 置 1）
+    if (ret != kStatus_Success) return ret;
+
+    ret = ktd202x_write(use_pwm1 ? 0x02 : 0x03, on_percent_code, 1); // Reg2/Reg3: ON%
+    if (ret != kStatus_Success) return ret;
+
+    // 4) 通道模式（Reg4）：先清再設，避免殘留
+    //    紅燈（Ch2）的模式遮罩是 0x0C（00:OFF, 01:ON, 10:PWM1, 11:PWM2）
+    led_status &= ~0x0C;                          // 清 Ch2 模式位
+    led_status |= (use_pwm1 ? 0x08 : 0x0C);       // 設為 PWM1 或 PWM2
+    ret = ktd202x_write(0x04, led_status, 1);     // Reg4: Channel Control
+    if (ret != kStatus_Success) return ret;
+
+    //LOG_DBG("[KTD202x] ch2 breathe: period=0x%02X rise=0x%X fall=0x%X on%%=0x%02X mode=%s\r\n",
+    //        period_code, rise_code, fall_code, on_percent_code, use_pwm1 ? "PWM1" : "PWM2");
+    PRINTF("[KTD2027] ktd202x_ch2_led_breathe \r\n");
+
+    return ret;
+}
+
 
 #if 0
 void LEDcontrol(uint8_t  newLEDState )

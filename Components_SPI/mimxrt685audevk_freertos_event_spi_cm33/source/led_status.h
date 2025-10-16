@@ -8,7 +8,7 @@
 #ifndef LED_STATUS_H_
 #define LED_STATUS_H_
 
-#define LED_ON 1
+#define LED_ON 10
 
 /* LED events (single, centralized event model) */
 typedef enum {
