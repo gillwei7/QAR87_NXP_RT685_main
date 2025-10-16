@@ -31,6 +31,7 @@
 #include "aw88166.h"
 
 #include "spi_handler.h"
+#include "led_status.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -70,6 +71,7 @@ static TaskHandle_t sPowerKeyTaskHandle = NULL;
 #define TOUCH_EVENT_BIT      (1UL << 0)
 #define CHARGER_EVENT_BIT    (1UL << 1)
 #define GAUGE_EVENT_BIT      (1UL << 2)
+#define LED_EVENT_BIT        (1UL << 3)   /* LED task wake-up flag */
 
 BatteryInfo battery;
 /* ===== I2C synchronization objects ===== */
@@ -92,9 +94,24 @@ extern QueueHandle_t spi_request_queue ;
 extern EventGroupHandle_t spi_event_group ;
 extern SemaphoreHandle_t spi_semaphore ;
 
+/*===== LED handlers =====*/
+TaskHandle_t sLEDTaskHandle;
+volatile led_event_t g_led_event = LED_EVT_NONE;
+
+uint8_t reg_led =0;
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
+static void led_post_event(led_event_t e)
+{
+    g_led_event = e;
+    if (i2c_event_group) {
+        xEventGroupSetBits(i2c_event_group, LED_EVENT_BIT);
+
+    }
+}
+
 /* 讀腳位 */
 static inline uint8_t pwr_raw_read(void)
 {
@@ -277,7 +294,8 @@ static void power_key_task(void *pvParameters)
                     } else if (press_dur >= minShortTicks) {
                         /* 短按 */
                         PRINTF("[PWR] Short Press detected.\r\n");
-
+                        reg_led++;
+                        led_post_event(reg_led);
                     } else {
                         /* 小於最小短按時間：視為抖動/誤觸，忽略 */
                         // no-op
@@ -298,7 +316,7 @@ static void I2C_Task(void *pvParameters)
     {
         EventBits_t bits = xEventGroupWaitBits(
             i2c_event_group,
-            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT,
+            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT | LED_EVENT_BIT,
             pdTRUE,     /* clear on exit */
             pdFALSE,    /* wait for any bit */
             portMAX_DELAY);
@@ -392,6 +410,64 @@ static void I2C_Task(void *pvParameters)
             GPIO_PinEnableInterrupt(GPIO, GAUGE_INT_PORT, GAUGE_INT_PIN, kGPIO_InterruptA);
 
         }
+
+        /*--- LED event --- */
+        if ((bits & LED_EVENT_BIT) != 0) {
+                vTaskDelay(1); /* 確保 g_led_event 已更新 */
+                led_event_t evt = g_led_event;
+
+                if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE) {
+                    /* 根據事件控制 LED */
+                    switch (evt) {
+                    case LED_EVT_POWER_ON_PROGRESS:
+                    	ktd202x_led_off();
+                        ktd202x_ch4_led_on(LED_ON);
+                        break;
+                    case LED_EVT_POWER_OFF_PROGRESS:
+                    	ktd202x_led_off();
+                    	ktd202x_ch2_led_on(LED_ON);
+                    	vTaskDelay(1000);
+                    	ktd202x_ch2_led_off();
+                        break;
+                    case LED_EVT_CHARGING:
+                    	ktd202x_led_off();
+                        ktd202x_ch2_led_blink(500, 500, TIM_1);
+                        break;
+                    case LED_EVT_LOW_BATTERY:
+                    	ktd202x_led_off();
+                        ktd202x_ch2_led_blink(500, 4500, TIM_1);
+                        break;
+                    case LED_EVT_FULL_CHARGERED:
+                    	ktd202x_led_off();
+                    	ktd202x_ch3_led_on(LED_ON);
+                        break;
+                    case LED_EVT_PHOTO_CAPTURE:
+                    	ktd202x_led_off();
+                    	ktd202x_ch4_led_on(LED_ON);
+                    	vTaskDelay(50);
+                    	ktd202x_ch4_led_off();
+                        break;
+                    case LED_EVT_VIDEO_CAPTURE:
+                    	ktd202x_led_off();
+                    	ktd202x_ch4_led_blink(500, 500, TIM_2);
+                        break;
+                    case LED_EVT_PAIRING_MODE:
+                    	ktd202x_led_off();
+                    	ktd202x_ch1_led_blink(100, 100, TIM_2);
+                        break;
+                    case LED_EVT_OTA_PROGRESS:
+                    	ktd202x_led_off();
+                    	ktd202x_ch4_led_blink(300, 300, TIM_1);
+                        break;
+                    case LED_EVT_ALL_OFF:
+                    	ktd202x_led_off();
+                        break;
+                    default:
+                        break;
+                    }
+                    xSemaphoreGive(i2c_mutex);
+                }
+            }
     }
 }
 
