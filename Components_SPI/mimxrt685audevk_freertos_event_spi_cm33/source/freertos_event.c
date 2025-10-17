@@ -49,6 +49,9 @@
 
 #define SCAN_I2C_ADDRESS_ENABLE 1
 
+/* pca9422 ship mode  */
+#define LONG_PRESS_MS    (2000U)  // 必須持續 2 秒
+#define SAMPLE_MS        (10U)    // 輪詢間隔 10ms，兼具簡單防抖
 
 /* event bits */
 #define BTN_NOTIFY_EDGE   (1UL << 0)  // 在sButtonTaskHandle，來自 FunKey PINT ISR 的雙邊緣事件，
@@ -131,6 +134,30 @@ volatile amp_event_t g_amp_event = AMP_EVT_NONE;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+/* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
+static inline void delay_ms(uint32_t ms)
+{
+    SDK_DelayAtLeastUs(ms * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk));
+}
+
+/* 檢查按鍵是否連續維持低電位（active-low）達指定毫秒數 */
+static bool power_key_low_for_ms(uint32_t ms) //for pca9422 ship mode
+{
+    uint32_t elapsed = 0U;
+
+    while (elapsed < ms)
+    {
+        /* 低電位＝按下（active-low 假設） */
+        if (GPIO_PinRead(GPIO, POWER_KEY_PORT, POWER_KEY_PIN) != 0U)
+        {
+            return false;  // 中途釋放，長按失敗
+        }
+        delay_ms(SAMPLE_MS);
+        elapsed += SAMPLE_MS;
+    }
+    return true; // 全程保持低電位達指定時間
+}
+
 static void TxCallback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
 {
     /* Enqueue the same original buffer all over again */
@@ -799,6 +826,42 @@ int main(void)
  	/* Apply PMIC mode and voltage settings */
  	BOARD_Init_PMICConfigure();
  	PRINTF("[PCA9422] BOARD_Init_PMICConfigure OK \r\n");
+ 	/* ====== PCA9422 ship mode start ======*/
+	uint8_t value,ship_mode=0;
+	/* 讀取當下按鍵狀態 */
+	uint8_t pin_state = (uint8_t)GPIO_PinRead(GPIO, POWER_KEY_PORT, POWER_KEY_PIN);
+
+	    if (pin_state == 0U)
+	    {
+	        /* 按鍵為低（按下）→ 需連續 2 秒才允許離開 ship mode */
+	        if (power_key_low_for_ms(LONG_PRESS_MS))
+	        {
+	            PRINTF("[PCA9422] PCA9422 leave ship mode (press >= %u ms)\r\n", LONG_PRESS_MS);
+	            ship_mode=0;
+	        }
+	        else
+	        {
+	            /* 沒達到 2 秒長按 → 進入 ship mode */
+	            PRINTF("[PCA9422] PCA9422 enter ship mode (press < %u ms)\r\n", LONG_PRESS_MS);
+	            ship_mode = 1;
+	        }
+	    }
+	    else
+	    {
+	        /* 沒有按住按鍵（高電位）→ 直接進入 ship mode */
+	        PRINTF("[PCA9422] PCA9422 enter ship mode\r\n");
+	        ship_mode = 1;
+
+	    }
+	    if(ship_mode)
+	    {
+	    	/* pca9422 ship mode process */
+	        value = 0x10;
+	        BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x09, 1, &value, 1);
+	        value = 0x00;
+	        BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x0A, 1, &value, 1);
+	    }
+	/* ====== PCA9422 ship mode end ======*/
 
 	/* init SPI peripheral */
     spi_slave_config_t slave_config = {0};
@@ -809,7 +872,7 @@ int main(void)
     NVIC_SetPriority(EXAMPLE_SPI_SLAVE_IRQ, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
     EnableIRQ(EXAMPLE_SPI_SLAVE_IRQ);
 
-    /* ======================PMIC PCA9422================== */
+    /* ======================PMIC glf70583================== */
 	uint8_t top_stat = 0;
 	glf70583_i2c_read(GLF70583_A_I2C_ADDR,0x00,&top_stat,1);
 	PRINTF("[GLF70583] top_stat:%X \n",top_stat);
