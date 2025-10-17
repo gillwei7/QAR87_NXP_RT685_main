@@ -906,6 +906,8 @@ int main(void)
 	GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1);
 
 	/* Init I2C Component */
+	ktd202x_ch4_led_on(LED_ON); //White light turns on first
+
 	awinic_single_enter(); //Touch Init
 
 	/* ============== Charger Init Start==============*/
