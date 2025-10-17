@@ -397,7 +397,8 @@ void AMP_I2S(void); /* Function assigned for the Cortex-M33 */
 
 #define PWR_SW1_PORT 0U		//NT98532 POWER ON
 #define PWR_SW1_PIN  6U
-
+#define RESET553_N_PORT 0U
+#define RESET553_N_PIN  27U
 
 #endif
 

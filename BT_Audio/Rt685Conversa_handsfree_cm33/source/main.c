@@ -197,6 +197,7 @@ int main(void)
 	gpio_interrupt_config_t config = {kGPIO_PinIntEnableEdge, kGPIO_PinIntEnableLowOrFall};
 	/* Init input switch GPIO. */
 	EnableIRQ(GPIO_INTA_IRQn);
+
 #if PMIC_GLF70583_ENABLE
     /* Init GPIO */
     //GPIO_PortInit(GPIO, PWR_SW1_PORT);
@@ -218,6 +219,7 @@ int main(void)
 #endif
 
 #if PMIC_GLF70583_ENABLE
+
 	uint8_t top_stat = 0;
 	glf70583_i2c_read(GLF70583_A_I2C_ADDR,0x00,&top_stat,1);
 	PRINTF("[GLF70583]top_stat:%X \n",top_stat);
@@ -225,13 +227,8 @@ int main(void)
 	//Solution: The manufacturer did not set it to LOAD SWITCH
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0xF5, 0xC6);
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB8);
-//    DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, CLOCK_GetFlexCommClkFreq(5U));
-
-	PRINTF("[GLF70583]top_stat:%X \n",top_stat);
-
 	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB9);
-	PRINTF("[GLF70583]top_stat:%X \n",top_stat);
 
 	// BUCK1 Delay 4ms
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x66, 0x0C);
@@ -244,16 +241,17 @@ int main(void)
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x6A, 0x12);
 	// 0x25->BUCK4、LDO2 off
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x26, 0xE8);
-	// 0x26->BUCK2 ON、Others off
-	//glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);
+	// 0x26->BUCK1、2、4 ON、Others off
 	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0xD0);
-	PRINTF("[GLF70583]top_stat:%X \n",top_stat);
+	//glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);//BUCK2 ON、Others off
 
 	//uint8_t ch = GETCHAR();
-	SDK_DelayAtLeastUs(1000000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
-
 	PRINTF("GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); \n");
 	GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); //Enable GLF70583
+
+	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
+	PRINTF("GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1); \n");
+	GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1); //NT98532 Reset Pin
 
 #endif // PMIC_GLF70583_ENABLE
 
