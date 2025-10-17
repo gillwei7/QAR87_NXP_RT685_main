@@ -470,8 +470,10 @@ static void Deinit_Board_Audio(void)
 		HAL_AudioTxDeinit((hal_audio_handle_t)&tx_mic_handle[0]);
 		HAL_AudioRxDeinit((hal_audio_handle_t)&rx_speaker_handle[0]);
 
+#if AMP_ENABLE
 		close_aw88166_pa(AW_DEV_0);
 		close_aw88166_pa(AW_DEV_1);
+#endif
 
 		(void)BOARD_SwitchAudioFreq(0U);
 #if !DEV_AUDIO_DEBUG_GPIO
@@ -580,8 +582,10 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 								EnableI2S3Rx0DmaChannel();
 								EnableI2S1Tx0DmaChannel();
 				PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
-			    start_aw88166_pa(AW_DEV_0, "Receiver");
-			    start_aw88166_pa(AW_DEV_1, "Receiver");
+#if AMP_ENABLE
+				start_aw88166_pa(AW_DEV_0, "Receiver");
+				start_aw88166_pa(AW_DEV_1, "Receiver");
+#endif
 				DbgPin8Dn();
 
 #if !DEV_AUDIO_DEBUG_GPIO
