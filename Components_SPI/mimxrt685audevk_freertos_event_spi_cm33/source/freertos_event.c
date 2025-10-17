@@ -649,7 +649,6 @@ int main(void)
         PRINTF("Failed to create spi_request_queue\r\n");
         while (1);
     }
-
 #if SCAN_I2C_ADDRESS_ENABLE
     Scan_I2C_Devices(BOARD_PMIC_I3C_BASEADDR);
 #endif
@@ -699,10 +698,10 @@ int main(void)
 
     /* Init PCA9422 PMIC. */
  	BOARD_InitPmic();
- 	PRINTF("-------------- PCA9422 BOARD_InitPmic OK--------------\r\n");
+ 	PRINTF("[PCA9422] BOARD_InitPmic OK \r\n");
  	/* Apply PMIC mode and voltage settings */
  	BOARD_Init_PMICConfigure();
- 	PRINTF("-------------- PCA9422 BOARD_Init_PMICConfigure OK--------------\r\n");
+ 	PRINTF("[PCA9422] BOARD_Init_PMICConfigure OK \r\n");
 
 	/* init SPI peripheral */
     spi_slave_config_t slave_config = {0};
@@ -716,7 +715,7 @@ int main(void)
     /* ======================PMIC PCA9422================== */
 	uint8_t top_stat = 0;
 	glf70583_i2c_read(GLF70583_A_I2C_ADDR,0x00,&top_stat,1);
-	PRINTF("[GLF70583]top_stat:%X \n",top_stat);
+	PRINTF("[GLF70583] top_stat:%X \n",top_stat);
 
 	//Solution: The manufacturer did not set it to LOAD SWITCH
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0xF5, 0xC6);
@@ -739,11 +738,11 @@ int main(void)
 	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0xD0);
 	//glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);//BUCK2 ON、Others off
 
-	PRINTF("GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); \n");
+	PRINTF("[GLF70583] Enable GLF70583 \n");
 	GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); //Enable GLF70583
 
 	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
-	PRINTF("GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1); \n");
+	PRINTF("[System] Enable Novatek \n");
 	GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1);
 
 	/* Init I2C Component */
