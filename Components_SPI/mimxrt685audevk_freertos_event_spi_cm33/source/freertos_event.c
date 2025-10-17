@@ -241,10 +241,10 @@ static void button_task(void *pvParameters)
 	                dbl_pending = false;
 	                PRINTF("[Button] Short Press detected.\r\n");
 	                PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
-//	                uint8_t v = SHORT_PRESS_HEX_VALUE;
-//	                (void)xQueueSend(spi_request_queue, &v, 0);
-//	                led_post_event(LED_EVT_PHOTO_CAPTURE);
-	                amp_post_event(AMP_EVT_MUSIC_START);
+	                uint8_t v = SHORT_PRESS_HEX_VALUE;
+	                (void)xQueueSend(spi_request_queue, &v, 0);
+	                led_post_event(LED_EVT_PHOTO_CAPTURE);
+	                //amp_post_event(AMP_EVT_MUSIC_START); test amp
 	            }
 	            // 若此時已經在第二次按壓中（is_pressed==true），不回報短按，
 	            // 等放開時再判斷是雙擊或長按（第二次按壓可能超過 1 秒而成為長按）
@@ -295,7 +295,7 @@ static void button_task(void *pvParameters)
 	                            //      DOUBLE_CLICK_HEX_VALUE);
 	                            //uint8_t v = DOUBLE_CLICK_HEX_VALUE;
 	                            //(void)xQueueSend(spi_request_queue, &v, 0);
-	                            amp_post_event(AMP_EVT_RECEIVER_START);
+	                            //amp_post_event(AMP_EVT_RECEIVER_START); //test amp
 	                        } else {
 	                            /* 第一次短按：開窗等第二下 */
 	                            dbl_pending = true;
@@ -367,8 +367,8 @@ static void power_key_task(void *pvParameters)
                         /* 短按 */
                         PRINTF("[PWR] Short Press detected.\r\n");
                         //reg_led++;
-                        //led_post_event(reg_led);
-                        amp_post_event(AMP_EVT_STOP);
+                        //led_post_event(reg_led);      //test led
+                        //amp_post_event(AMP_EVT_STOP); //test amp
 
                     } else {
                         /* 小於最小短按時間：視為抖動/誤觸，忽略 */
