@@ -77,6 +77,7 @@ static TaskHandle_t sPowerKeyTaskHandle = NULL;
 #define CHARGER_EVENT_BIT    (1UL << 1)
 #define GAUGE_EVENT_BIT      (1UL << 2)
 #define LED_EVENT_BIT        (1UL << 3)   /* LED task wake-up flag */
+#define AMP_EVENT_BIT     	 (1UL << 4)
 
 BatteryInfo battery;
 /* ===== I2C synchronization objects ===== */
@@ -111,9 +112,66 @@ volatile led_event_t g_led_event = LED_EVT_NONE;
 
 uint8_t reg_led =0;
 
+/*===== AMP handlers ===== */
+typedef enum {
+    AMP_EVT_NONE = 0,
+    AMP_EVT_MUSIC_START,
+	AMP_EVT_RECEIVER_START,
+    AMP_EVT_STOP,
+} amp_event_t;
+
+typedef enum {
+    AMP_MODE_MUSIC = 0,
+    AMP_MODE_RECEIVER = 1,
+} amp_mode_t;
+
+
+volatile amp_event_t g_amp_event = AMP_EVT_NONE;
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
+static void TxCallback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
+{
+    /* Enqueue the same original buffer all over again */
+    i2s_transfer_t *transfer = (i2s_transfer_t *)userData;
+    I2S_TxTransferSendDMA(base, handle, *transfer);
+}
+static void StopSoundPlayback(void)
+{
+    PRINTF("[I2S1]Stopping sound playback\r\n");
+
+    close_aw88166_pa(AW_DEV_0);
+    close_aw88166_pa(AW_DEV_1);
+
+    I2S_TransferAbortDMA(DEMO_I2S_TX_toAmp, &s_TxHandle);
+}
+
+static void StartSoundPlayback(amp_mode_t mode)
+{
+    const char *profile = (mode == AMP_MODE_RECEIVER) ? "Receiver" : "Music";
+
+    PRINTF("[I2S1]Setup looping playback of sine wave (%s mode)\r\n", profile);
+
+    s_TxTransfer.data     = &g_Music[0];
+    s_TxTransfer.dataSize = sizeof(g_Music);
+
+    I2S_TxTransferCreateHandleDMA(DEMO_I2S_TX_toAmp,  &s_TxHandle, &s_DmaTxHandle, TxCallback, (void *)&s_TxTransfer);
+    I2S_TxTransferSendDMA(DEMO_I2S_TX_toAmp,  &s_TxHandle, s_TxTransfer);
+
+    start_aw88166_pa(AW_DEV_0, profile);
+    start_aw88166_pa(AW_DEV_1, profile);
+}
+
+static void amp_post_event(amp_event_t e)
+{
+    g_amp_event = e;
+    if (i2c_event_group) {
+        xEventGroupSetBits(i2c_event_group, AMP_EVENT_BIT);
+    }
+}
+
+
 static void led_post_event(led_event_t e)
 {
     g_led_event = e;
@@ -183,9 +241,10 @@ static void button_task(void *pvParameters)
 	                dbl_pending = false;
 	                PRINTF("[Button] Short Press detected.\r\n");
 	                PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
-	                uint8_t v = SHORT_PRESS_HEX_VALUE;
-	                (void)xQueueSend(spi_request_queue, &v, 0);
-	                led_post_event(LED_EVT_PHOTO_CAPTURE);
+//	                uint8_t v = SHORT_PRESS_HEX_VALUE;
+//	                (void)xQueueSend(spi_request_queue, &v, 0);
+//	                led_post_event(LED_EVT_PHOTO_CAPTURE);
+	                amp_post_event(AMP_EVT_MUSIC_START);
 	            }
 	            // 若此時已經在第二次按壓中（is_pressed==true），不回報短按，
 	            // 等放開時再判斷是雙擊或長按（第二次按壓可能超過 1 秒而成為長按）
@@ -236,6 +295,7 @@ static void button_task(void *pvParameters)
 	                            //      DOUBLE_CLICK_HEX_VALUE);
 	                            //uint8_t v = DOUBLE_CLICK_HEX_VALUE;
 	                            //(void)xQueueSend(spi_request_queue, &v, 0);
+	                            amp_post_event(AMP_EVT_RECEIVER_START);
 	                        } else {
 	                            /* 第一次短按：開窗等第二下 */
 	                            dbl_pending = true;
@@ -306,8 +366,9 @@ static void power_key_task(void *pvParameters)
                     } else if (press_dur >= minShortTicks) {
                         /* 短按 */
                         PRINTF("[PWR] Short Press detected.\r\n");
-                        reg_led++;
-                        led_post_event(reg_led);
+                        //reg_led++;
+                        //led_post_event(reg_led);
+                        amp_post_event(AMP_EVT_STOP);
 
                     } else {
                         /* 小於最小短按時間：視為抖動/誤觸，忽略 */
@@ -329,10 +390,35 @@ static void I2C_Task(void *pvParameters)
     {
         EventBits_t bits = xEventGroupWaitBits(
             i2c_event_group,
-            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT | LED_EVENT_BIT,
+            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT | LED_EVENT_BIT | AMP_EVENT_BIT,
             pdTRUE,     /* clear on exit */
             pdFALSE,    /* wait for any bit */
             portMAX_DELAY);
+
+
+        /* --- AMP event --- */
+        if ((bits & AMP_EVENT_BIT) != 0) {
+            vTaskDelay(1); /* 確保 g_amp_event 已更新 */
+            amp_event_t evt = g_amp_event;
+
+            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE) {
+                switch (evt) {
+                    case AMP_EVT_MUSIC_START:
+                        StartSoundPlayback(AMP_MODE_MUSIC);
+                        break;
+                    case AMP_EVT_RECEIVER_START:
+                        StartSoundPlayback(AMP_MODE_RECEIVER);
+                        break;
+                    case AMP_EVT_STOP:
+                        StopSoundPlayback();
+                        break;
+                    default:
+                        break;
+                }
+                xSemaphoreGive(i2c_mutex);
+            }
+        }
+
 
         /* --- TOUCH event --- */
         if ((bits & TOUCH_EVENT_BIT) != 0)
