@@ -167,6 +167,27 @@ void BOARD_InitPins(void)
                                         IOPCTL_PIO_INV_DI);
     /* PORT1 PIN8 (coords: B5) is configured as PIO1_8 */
     IOPCTL_PinMuxSet(IOPCTL, 1U, 8U, port1_pin8_config);
+
+    const uint32_t AP533_RST_N = (/* Pin is configured as PIO0_27 */
+                                      IOPCTL_PIO_FUNC0 |
+                                      /* Disable pull-up / pull-down function */
+                                      IOPCTL_PIO_PUPD_DI |
+                                      /* Enable pull-down function */
+                                      IOPCTL_PIO_PULLDOWN_EN |
+                                      /* Disable input buffer function */
+                                      IOPCTL_PIO_INBUF_DI |
+                                      /* Normal mode */
+                                      IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                      /* Normal drive */
+                                      IOPCTL_PIO_FULLDRIVE_DI |
+                                      /* Analog mux is disabled */
+                                      IOPCTL_PIO_ANAMUX_DI |
+                                      /* Pseudo Output Drain is disabled */
+                                      IOPCTL_PIO_PSEDRAIN_DI |
+                                      /* Input function is not inverted */
+                                      IOPCTL_PIO_INV_DI);
+        /* PORT0 PIN27 (coords: J4) is configured as PIO0_27 */
+        IOPCTL_PinMuxSet(IOPCTL, RESET553_N_PORT, RESET553_N_PIN, AP533_RST_N);
 }
 
 /* clang-format off */

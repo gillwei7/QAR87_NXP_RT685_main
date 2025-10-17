@@ -251,6 +251,8 @@ int main(void)
 
 	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
 	PRINTF("GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1); \n");
+	//gpio_pin_config_t output_int_config = {kGPIO_DigitalOutput, 0,};
+	GPIO_PinInit(GPIO, RESET553_N_PORT, RESET553_N_PIN, &output_int_config);
 	GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1); //NT98532 Reset Pin
 
 #endif // PMIC_GLF70583_ENABLE
