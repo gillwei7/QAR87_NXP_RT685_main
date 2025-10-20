@@ -1,0 +1,28 @@
+/*
+ * qar87_config.h
+ *
+ *  Created on: 2025年9月11日
+ *      Author: 11306067
+ */
+
+#ifndef QAR87_CONFIG_H_
+#define QAR87_CONFIG_H_
+
+#define PIN_CONFIG_DEV_BOARD 1
+#define PMIC_GLF70583_ENABLE 1
+#define PMIC_PCA9422_ENABLE  1
+#define DMIC_TO_NOVATEK      0
+#define DEV_AUDIO_DEBUG_GPIO 1 // Include debug pin / led / button
+
+#define AMP_ENABLE 1
+
+
+#define AMP_RESET_PORT 0U
+#define AMP_RESET_PIN  0U
+
+#define     DbgPin5Port                 0
+#define     DbgPin5                     25
+#define     DbgPin5Up()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 1)
+#define     DbgPin5Dn()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 0)
+
+#endif /* QAR87_CONFIG_H_ */

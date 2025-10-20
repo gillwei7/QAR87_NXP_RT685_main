@@ -7,3 +7,8 @@ BT_Audio/Rt685Conversa_handsfree_hifi4/bin/
 BT_Audio/XtensaInfo/
 BT_Audio/libc_RI-2021.8/
 BT_Audio/Rt685Conversa_handsfree_cm33/.settings/org.eclipse.cdt.managedbuilder.core.prefs
+
+
+BT_Audio/evkmimxrt685_a2dp_sink_cm33/Debug/
+BT_Audio/evkmimxrt685_a2dp_sink_cm33/.settings/language.settings.xml
+BT_Audio/evkmimxrt685_a2dp_sink_cm33/.settings/org.eclipse.cdt.managedbuilder.core.prefs
