@@ -27,4 +27,6 @@ typedef enum {
     LED_EVT_ALL_OFF                  /* 全部關閉 */
 } led_event_t;
 
+void led_post_event(led_event_t e);
+
 #endif /* LED_STATUS_H_ */

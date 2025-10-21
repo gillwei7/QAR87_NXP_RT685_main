@@ -199,7 +199,7 @@ static void amp_post_event(amp_event_t e)
 }
 
 
-static void led_post_event(led_event_t e)
+void led_post_event(led_event_t e)
 {
     g_led_event = e;
     if (i2c_event_group) {

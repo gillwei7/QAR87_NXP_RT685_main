@@ -6,6 +6,7 @@
  */
 
 #include "spi_handler.h"
+#include "led_status.h"
 
 /* ============= 被動模式相關定義 ============= */
 typedef enum {
@@ -50,6 +51,7 @@ static inline void SPI_EnableRxTxInterrupt(void);
 static inline void SPI_DisableRxTxInterrupt(void);
 static uint8_t calculateChecksum(uint8_t* data, uint8_t len);
 static void init_passive_mode(void);
+static void handle_passive_frame(const uint8_t *frame);
 
 // <<< MODIFIED: 核心架構變更，使用 Queue 取代 Event Group 進行任務間通訊 >>>
 QueueHandle_t spi_request_queue = NULL;
@@ -59,6 +61,35 @@ SemaphoreHandle_t spi_semaphore = NULL;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+// 放在 Code 區（任意合適位置）
+static void handle_passive_frame(const uint8_t *frame)
+{
+    const uint8_t prefix = frame[0];
+    const uint8_t cmd    = frame[1];
+    const uint8_t val    = frame[2];
+    const uint8_t cs_rx  = frame[3];
+    const uint8_t cs_exp = calculateChecksum((uint8_t*)frame, 3);
+
+    // 基本防呆（其實前面 ISR 已驗過，但保險再檢一次）
+    if (prefix != 0xAA || cs_rx != cs_exp) {
+        PRINTF("[Passive] Handle: prefix/cs error (got %02X, cs %02X!=%02X)\r\n", prefix, cs_rx, cs_exp);
+        return;
+    }
+
+    switch (cmd) {
+        case 0x11:
+            if (val == 0x11) {
+                PRINTF("[Passive] CMD=0x11 LED OFF\r\n");
+                led_post_event(LED_EVT_ALL_OFF);
+            }
+            break;
+        default:
+            PRINTF("[Passive] CMD=0x%02X (VAL=0x%02X) not handled yet\r\n", cmd, val);
+            // TODO: 依你們協議擴充
+            break;
+    }
+}
+
 /**
  * @brief 計算數據的校驗和 (Checksum)。
  * @details 遍歷數據中的每個位元，計算值為 '1' 的位元總數。
@@ -389,6 +420,9 @@ void passive_handler_task(void *pvParameters)
             }
         }
         if (bits & EVT_PASSIVE_RX_DONE) {
+
+            PRINTF("[Passive] Sequence completed. Parsing frame...\r\n");
+            handle_passive_frame(passive_rx_buffer);
             PRINTF("[Passive] Ready for next sequence.\r\n");
         }
     }
