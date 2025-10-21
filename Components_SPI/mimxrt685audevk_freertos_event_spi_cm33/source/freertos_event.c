@@ -134,6 +134,27 @@ volatile amp_event_t g_amp_event = AMP_EVT_NONE;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+static void pca9422_ship_mode(void)
+{
+	PRINTF("[PCA9422] PCA9422 enter ship mode \r\n");
+	/* pca9422 ship mode process */
+	uint8_t value;
+    value = 0x10;
+    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x09, 1, &value, 1);
+    value = 0x00;
+    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x0A, 1, &value, 1);
+}
+static void pca9422_power_down(void)
+{
+    PRINTF("[PCA9422] PCA9422 power down \r\n");
+	/* pca9422 power down  process */
+    uint8_t value;
+    value = 0x08;
+    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x09, 1, &value, 1);
+    value = 0x00;
+    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x0A, 1, &value, 1);
+}
+
 /* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
 static inline void delay_ms(uint32_t ms)
 {
@@ -390,6 +411,8 @@ static void power_key_task(void *pvParameters)
                         /* 長按（放開才觸發） */
                         PRINTF("[PWR] Long Press (>=%ums) detected.\r\n",(unsigned)PWR_LONG_MS);
 
+                        led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+
                     } else if (press_dur >= minShortTicks) {
                         /* 短按 */
                         PRINTF("[PWR] Short Press detected.\r\n");
@@ -560,8 +583,9 @@ static void I2C_Task(void *pvParameters)
                     case LED_EVT_POWER_OFF_PROGRESS:
                     	ktd202x_led_off();
                     	ktd202x_ch2_led_on(LED_ON);
-                    	vTaskDelay(1000);
+                    	vTaskDelay(pdMS_TO_TICKS(1000));
                     	ktd202x_ch2_led_off();
+                    	pca9422_power_down();
                         break;
                     case LED_EVT_CHARGING:
                     	ktd202x_led_off();
@@ -827,7 +851,6 @@ int main(void)
  	BOARD_Init_PMICConfigure();
  	PRINTF("[PCA9422] BOARD_Init_PMICConfigure OK \r\n");
  	/* ====== PCA9422 ship mode start ======*/
-	uint8_t value,ship_mode=0;
 	/* 讀取當下按鍵狀態 */
 	uint8_t pin_state = (uint8_t)GPIO_PinRead(GPIO, POWER_KEY_PORT, POWER_KEY_PIN);
 
@@ -837,29 +860,18 @@ int main(void)
 	        if (power_key_low_for_ms(LONG_PRESS_MS))
 	        {
 	            PRINTF("[PCA9422] PCA9422 leave ship mode (press >= %u ms)\r\n", LONG_PRESS_MS);
-	            ship_mode=0;
 	        }
 	        else
 	        {
 	            /* 沒達到 2 秒長按 → 進入 ship mode */
-	            PRINTF("[PCA9422] PCA9422 enter ship mode (press < %u ms)\r\n", LONG_PRESS_MS);
-	            ship_mode = 1;
+	            PRINTF("[PCA9422] Power key (press < %u ms)\r\n", LONG_PRESS_MS);
+	            pca9422_ship_mode();
 	        }
 	    }
 	    else
 	    {
 	        /* 沒有按住按鍵（高電位）→ 直接進入 ship mode */
-	        PRINTF("[PCA9422] PCA9422 enter ship mode\r\n");
-	        ship_mode = 1;
-
-	    }
-	    if(ship_mode)
-	    {
-	    	/* pca9422 ship mode process */
-	        value = 0x10;
-	        BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x09, 1, &value, 1);
-	        value = 0x00;
-	        BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x0A, 1, &value, 1);
+	    	pca9422_ship_mode();
 	    }
 	/* ====== PCA9422 ship mode end ======*/
 
