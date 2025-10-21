@@ -497,6 +497,8 @@ static void I2C_Task(void *pvParameters)
                 else if(aw933xx.event.press)
                 {
                 	PRINTF("[Touch] press \n");
+                	uint8_t v = PRESS_TOUCH_HEX_VALUE;
+                	(void)xQueueSend(spi_request_queue, &v, 0);
                 }
                 else if(aw933xx.event.long_press)
                 {
@@ -509,10 +511,14 @@ static void I2C_Task(void *pvParameters)
                 else if(aw933xx.event.right_wareds)
                 {
                 	PRINTF("[Touch] slide_right \n");
+                	uint8_t v = FORWARD_SLIDE_HEX_VALUE;
+                	(void)xQueueSend(spi_request_queue, &v, 0);
                 }
                 else if(aw933xx.event.left_wareds)
                 {
                 	PRINTF("[Touch] slide_left \n");
+                	uint8_t v = BACK_SLIDE_HEX_VALUE;
+                	(void)xQueueSend(spi_request_queue, &v, 0);
                 }
 
             }
