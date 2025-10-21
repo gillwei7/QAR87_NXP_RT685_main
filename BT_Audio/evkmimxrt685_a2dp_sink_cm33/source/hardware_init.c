@@ -220,7 +220,7 @@ static void i2c_release_bus_delay(void)
         __NOP();
     }
 }
-
+#if 0
 void BOARD_I3C_ReleaseBus(void)
 {
     uint8_t i = 0;
@@ -269,7 +269,7 @@ void BOARD_I3C_ReleaseBus(void)
                   BOARD_INITI3CPINSASGPIO_I3C0_SDA_PIN, 1U);
     i2c_release_bus_delay();
 }
-
+#endif
 static void Scan_I2C_Devices(I3C_Type *base)
 {
     uint8_t dummyData = 0x00;
