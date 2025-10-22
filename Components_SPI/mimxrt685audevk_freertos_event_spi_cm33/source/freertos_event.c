@@ -24,6 +24,7 @@
 #include "spi_handler.h"
 #include "button_handler.h"
 #include "i2_component_handler.h"
+#include "i2s_handler.h"
 
 #include <string.h>
 #include <stdlib.h>

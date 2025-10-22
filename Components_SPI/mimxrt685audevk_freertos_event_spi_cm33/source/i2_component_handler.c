@@ -49,7 +49,7 @@ static void Init_bq25618_charger(void)
 		status_t bq_ret = bq256xx_init(&charger_cfg);
 		if ( bq_ret!= kStatus_Success) {
 			PRINTF("[Charger] bq256xx init failed!,ret:%d \n",bq_ret);
-			return -1;
+
 		}
 		else{
 			PRINTF("[Charger] bq256xx initialized.OK \n");
