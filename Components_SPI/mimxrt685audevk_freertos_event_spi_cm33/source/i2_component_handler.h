@@ -76,6 +76,8 @@ typedef enum {
 void pca9422_ship_mode(void);
 void pca9422_power_down(void);
 
+void Init_I2C_Component(void);
+
 void led_post_event(led_event_t e);
 void amp_post_event(amp_event_t e);
 

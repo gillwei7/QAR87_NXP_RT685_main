@@ -8,6 +8,7 @@
 #include "i2_component_handler.h"
 #include "spi_handler.h"
 #include "i2s_handler.h"
+#include "button_handler.h"
 
 /* ===== I2C synchronization objects ===== */
 EventGroupHandle_t i2c_event_group = NULL;
@@ -32,6 +33,113 @@ static void Start_AMP(amp_mode_t mode)
 
     start_aw88166_pa(AW_DEV_0, profile);
     start_aw88166_pa(AW_DEV_1, profile);
+}
+static void Init_bq25618_charger(void)
+{
+	/* ============== Charger Init Start==============*/
+		bq256xx_cfg_t charger_cfg = {
+				.vindpm_uv = 4450000,
+				.iindpm_ua = 2000000,
+				.ichg_ua = 530000,
+				.vbatreg_uv = 4005000,
+				.iprechg_ua = 60000,
+				.iterm_ua = 20000,
+				.wdt_ms = 0
+		};
+		status_t bq_ret = bq256xx_init(&charger_cfg);
+		if ( bq_ret!= kStatus_Success) {
+			PRINTF("[Charger] bq256xx init failed!,ret:%d \n",bq_ret);
+			return -1;
+		}
+		else{
+			PRINTF("[Charger] bq256xx initialized.OK \n");
+		}
+		bq256xx_write_reg(0x03, 0x31); // IPRECHG = 60mA, ITERM = 20mA
+	/* ============== Charger Init End==============*/
+}
+
+static void Init_glf70583_pmic(void)
+{
+    /* ======================PMIC glf70583================== */
+	uint8_t top_stat = 0;
+	glf70583_i2c_read(GLF70583_A_I2C_ADDR,0x00,&top_stat,1);
+	PRINTF("[GLF70583] top_stat:%X \n",top_stat);
+
+	//Solution: The manufacturer did not set it to LOAD SWITCH
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0xF5, 0xC6);
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB8);
+	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB9);
+
+	// BUCK1 Delay 4ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x66, 0x0C);
+	// BUCK2 Delay 2ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x67, 0x08);
+	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x67, 0x08);
+	// BUCK3 Delay 0ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x68, 0x00);
+	// LDO1 Delay 5ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x6A, 0x12);
+	// 0x25->BUCK4、LDO2 off
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x26, 0xE8);
+	// 0x26->BUCK1、2、4 ON、Others off
+	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0xD0);
+	//glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);//BUCK2 ON、Others off
+
+	PRINTF("[GLF70583] Enable GLF70583 \n");
+	GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); //Enable GLF70583
+
+	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
+	PRINTF("[System] Enable Novatek \n");
+	GPIO_PinWrite(GPIO, RESET553_N_PORT, RESET553_N_PIN, 1);
+}
+
+static void Init_pca9422_pmic(void)
+{
+    /* Init PCA9422 PMIC. */
+ 	BOARD_InitPmic();
+ 	PRINTF("[PCA9422] BOARD_InitPmic OK \r\n");
+ 	/* Apply PMIC mode and voltage settings */
+ 	BOARD_Init_PMICConfigure();
+ 	PRINTF("[PCA9422] BOARD_Init_PMICConfigure OK \r\n");
+
+}
+static void Determine_pca9422_enter_ship_mode(void)
+{
+	/* 讀取當下按鍵狀態 */
+	uint8_t pin_state = (uint8_t)GPIO_PinRead(GPIO, POWER_KEY_PORT, POWER_KEY_PIN);
+
+		if (pin_state == 0U)
+		{
+			/* 按鍵為低（按下）→ 需連續 2 秒才允許離開 ship mode */
+			if (power_key_low_for_ms(LONG_PRESS_MS))
+			{
+				PRINTF("[PCA9422] PCA9422 leave ship mode (press >= %u ms)\r\n", LONG_PRESS_MS);
+			}
+			else
+			{
+				/* 沒達到 2 秒長按 → 進入 ship mode */
+				PRINTF("[PCA9422] Power key (press < %u ms)\r\n", LONG_PRESS_MS);
+				pca9422_ship_mode();
+			}
+		}
+		else
+		{
+			/* 沒有按住按鍵（高電位）→ 直接進入 ship mode */
+			pca9422_ship_mode();
+		}
+}
+
+void Init_I2C_Component(void)
+{
+	Init_pca9422_pmic();
+	Determine_pca9422_enter_ship_mode();
+	Init_glf70583_pmic();
+	Init_bq25618_charger();
+	ktd202x_ch4_led_on(LED_ON); //White light turns on first
+	awinic_single_enter(); //Touch Init
+	glf70302_read_battery(&battery); //Read the battery level after powering on
+	init_aw88166(); // Init AMP
 }
 
 void pca9422_ship_mode(void)
