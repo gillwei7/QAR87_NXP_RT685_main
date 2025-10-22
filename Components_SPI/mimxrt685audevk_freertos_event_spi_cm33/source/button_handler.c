@@ -7,7 +7,7 @@
 
 
 #include "button_handler.h"
-#include "led_status.h"
+#include "i2_component_handler.h"
 #include "spi_handler.h"
 
 /* ===== external SPI handlers ===== */
