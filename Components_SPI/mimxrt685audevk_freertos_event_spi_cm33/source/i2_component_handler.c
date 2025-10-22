@@ -7,7 +7,7 @@
 
 #include "i2_component_handler.h"
 #include "spi_handler.h"
-#include "music.h"
+#include "i2s_handler.h"
 
 /* ===== I2C synchronization objects ===== */
 EventGroupHandle_t i2c_event_group = NULL;
@@ -21,39 +21,14 @@ volatile led_event_t g_led_event = LED_EVT_NONE;
 volatile amp_event_t g_amp_event = AMP_EVT_NONE;
 extern volatile struct aw933xx_dev aw933xx;
 
-/*====== I2S prototype======*/
-dma_handle_t s_DmaTxHandle;
-i2s_config_t s_TxConfig;
-i2s_dma_handle_t s_TxHandle;
-i2s_transfer_t s_TxTransfer;
-
-static void TxCallback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
+static void Stop_AMP(void)
 {
-    /* Enqueue the same original buffer all over again */
-    i2s_transfer_t *transfer = (i2s_transfer_t *)userData;
-    I2S_TxTransferSendDMA(base, handle, *transfer);
-}
-static void StopSoundPlayback(void)
-{
-    PRINTF("[I2S1]Stopping sound playback\r\n");
-
     close_aw88166_pa(AW_DEV_0);
     close_aw88166_pa(AW_DEV_1);
-
-    I2S_TransferAbortDMA(DEMO_I2S_TX_toAmp, &s_TxHandle);
 }
-
-static void StartSoundPlayback(amp_mode_t mode)
+static void Start_AMP(amp_mode_t mode)
 {
-    const char *profile = (mode == AMP_MODE_RECEIVER) ? "Receiver" : "Music";
-
-    PRINTF("[I2S1]Setup looping playback of sine wave (%s mode)\r\n", profile);
-
-    s_TxTransfer.data     = &g_Music[0];
-    s_TxTransfer.dataSize = sizeof(g_Music);
-
-    I2S_TxTransferCreateHandleDMA(DEMO_I2S_TX_toAmp,  &s_TxHandle, &s_DmaTxHandle, TxCallback, (void *)&s_TxTransfer);
-    I2S_TxTransferSendDMA(DEMO_I2S_TX_toAmp,  &s_TxHandle, s_TxTransfer);
+	const char *profile = (mode == AMP_MODE_RECEIVER) ? "Receiver" : "Music";
 
     start_aw88166_pa(AW_DEV_0, profile);
     start_aw88166_pa(AW_DEV_1, profile);
@@ -142,12 +117,15 @@ void I2C_Task(void *pvParameters)
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE) {
                 switch (evt) {
                     case AMP_EVT_MUSIC_START:
-                        StartSoundPlayback(AMP_MODE_MUSIC);
+                        StartSoundPlayback();
+                        Start_AMP(AMP_MODE_MUSIC);
                         break;
                     case AMP_EVT_RECEIVER_START:
-                        StartSoundPlayback(AMP_MODE_RECEIVER);
+                        StartSoundPlayback();
+                        Start_AMP(AMP_MODE_RECEIVER);
                         break;
                     case AMP_EVT_STOP:
+                    	Stop_AMP();
                         StopSoundPlayback();
                         break;
                     default:

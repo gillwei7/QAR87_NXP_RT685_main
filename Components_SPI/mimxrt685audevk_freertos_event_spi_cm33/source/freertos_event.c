@@ -45,12 +45,6 @@ extern TaskHandle_t       sI2CTaskHandle  ;
 
 extern volatile BatteryInfo battery ;
 
-/*====== I2S prototype======*/
-extern dma_handle_t s_DmaTxHandle;
-extern i2s_config_t s_TxConfig;
-extern i2s_dma_handle_t s_TxHandle;
-extern i2s_transfer_t s_TxTransfer;
-
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -299,23 +293,7 @@ int main(void)
 	init_aw88166(); // Init AMP
 
 	/*===============I2S Init ======================*/
-	PRINTF("[I2S]Configure I2S \r\n");
-
-    I2S_TxGetDefaultConfig(&s_TxConfig);
-
-    // I2S 32bits
-    s_TxConfig.dataLength  = 32;
-    s_TxConfig.frameLength = 64;
-    s_TxConfig.divider     = 8;//(24576000U / 16000U / 32U / 2);//DEMO_I2S_CLOCK_DIVIDER;
-    s_TxConfig.masterSlave = DEMO_I2S_TX_MODE;
-
-    I2S_TxInit(DEMO_I2S_TX_toAmp, &s_TxConfig);
-
-    DMA_Init(DEMO_DMA);
-
-    DMA_EnableChannel(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp);
-    DMA_SetChannelPriority(DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp, kDMA_ChannelPriority3);
-    DMA_CreateHandle(&s_DmaTxHandle, DEMO_DMA, DEMO_I2S_TX_CHANNEL_toAmp);
+	Init_I2S();
 
 	/* ===== A. 建立 I2C EventGroup 與 Mutex ===== */
 	i2c_event_group = xEventGroupCreate();

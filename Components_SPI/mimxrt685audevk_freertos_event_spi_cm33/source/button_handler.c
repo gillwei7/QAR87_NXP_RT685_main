@@ -266,6 +266,7 @@ void power_key_task(void *pvParameters)
                         PRINTF("[PWR] Long Press (>=%ums) detected.\r\n",(unsigned)PWR_LONG_MS);
 
                         led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+                        //amp_post_event(AMP_EVT_MUSIC_START); //test amp
 
                     } else if (press_dur >= minShortTicks) {
                         /* 短按 */

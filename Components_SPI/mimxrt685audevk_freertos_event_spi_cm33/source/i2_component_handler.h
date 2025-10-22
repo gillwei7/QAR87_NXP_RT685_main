@@ -29,10 +29,6 @@
 #include "ktd202x_leds.h"
 #include "aw88166.h"
 
-#include "fsl_dma.h"
-#include "fsl_i2s.h"
-#include "fsl_i2s_dma.h"
-
 
 #define SCAN_I2C_ADDRESS_ENABLE 1
 #define LED_ON 					10
