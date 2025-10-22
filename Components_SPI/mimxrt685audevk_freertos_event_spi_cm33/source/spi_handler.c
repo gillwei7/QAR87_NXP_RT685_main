@@ -401,7 +401,7 @@ void spi_handler_task(void *pvParameters)
  * 當需要重新初始化被動模式時 (例如，一次主動傳輸完成後或被動接收失敗後)，
  * 此任務會確保 SPI 正確地返回到監聽狀態。
  */
-void passive_handler_task(void *pvParameters)
+void passive_spi_handler_task(void *pvParameters)
 {
     EventBits_t bits;
     vTaskDelay(pdMS_TO_TICKS(100));
