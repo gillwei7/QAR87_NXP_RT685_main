@@ -145,7 +145,7 @@ void button_task(void *pvParameters)
 	                PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
 	                uint8_t v = SHORT_PRESS_HEX_VALUE;
 	                (void)xQueueSend(spi_request_queue, &v, 0);
-	                led_post_event(LED_EVT_PHOTO_CAPTURE);
+
 	                //amp_post_event(AMP_EVT_MUSIC_START); test amp
 	            }
 	            // 若此時已經在第二次按壓中（is_pressed==true），不回報短按，
