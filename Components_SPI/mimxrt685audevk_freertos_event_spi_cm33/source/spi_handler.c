@@ -24,6 +24,7 @@ static volatile bool passive_mode_busy = false;
 static uint8_t dataFrame1[FIXED_BUFFER_SIZE] = {0xAA, 0x00, 0x04, 0x00};
 static uint8_t dataFrame2[FIXED_BUFFER_SIZE] = {0xAA, 0x00, 0x21, 0x00};
 static uint8_t dataFrame3[FIXED_BUFFER_SIZE] = {0xFF, 0xFF, 0xFF, 0xFF};
+static uint8_t dataFrame4[STATUS_BUFFER_SIZE] = {0xAA, 0x00, 0x93, 0x00, 0x00, 0x00, 0x00};
 
 static uint8_t dynamicFrameBuffer[MAX_FRAME_SIZE] = {0};
 static uint8_t destBuff[MAX_FRAME_SIZE] = {0};
@@ -305,9 +306,17 @@ static void execute_active_spi_transmission(uint8_t hex_value)
     uint8_t* frame2_ptr = dataFrame2;
     uint32_t frame2_size = FIXED_BUFFER_SIZE;
 
-    if (hex_value == TRIGGER_HEX_VALUE) {
-        PRINTF("Dynamic frame trigger (0x92) is not supported in this mode.\r\n");
-        // 如果未來需要，可以在此處添加其他任務互動以獲取字串
+    if (hex_value == SYSTEM_STATUS_HEX_VALUE) {
+    	dataFrame1[2] = 0x07;
+		dataFrame1[3] = calculateChecksum(dataFrame1, 3);
+		dataFrame4[2] = hex_value;
+		dataFrame4[6] = calculateChecksum(dataFrame4, 6);
+		frame2_ptr = dataFrame4;
+		frame2_size = STATUS_BUFFER_SIZE;
+		PRINTF("Updated Fixed Frame 2: [%02X %02X %02X %02X %02X %02X %02X]\r\n",
+			   dataFrame4[0], dataFrame4[1], dataFrame4[2], dataFrame4[3],
+			   	   dataFrame4[4], dataFrame4[5], dataFrame4[6]);
+
     } else {
         dataFrame1[2] = 0x04;
         dataFrame1[3] = calculateChecksum(dataFrame1, 3);
