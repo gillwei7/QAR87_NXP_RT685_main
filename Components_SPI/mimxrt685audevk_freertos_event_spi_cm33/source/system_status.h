@@ -9,6 +9,7 @@
 #define SYSTEM_STATUS_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 typedef struct __attribute__((packed)) {
     uint8_t flags;   // byte0: [RSVD3:3][RSVD1:1][MIC:1][BT:1][HA:1][BLE:1]
@@ -33,42 +34,32 @@ enum {
 };
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
-inline void ss_ble_on(SystemStatus* s)  { s->flags |=  SS_BLE_BIT; }
-inline void ss_ble_off(SystemStatus* s) { s->flags &= ~SS_BLE_BIT; }
-inline bool ss_ble_is_on(const SystemStatus* s) { return (s->flags & SS_BLE_BIT) != 0; }
+void ss_ble_on(SystemStatus* s);
+void ss_ble_off(SystemStatus* s);
+bool ss_ble_is_on(const SystemStatus* s);
 
-inline void ss_ha_on(SystemStatus* s)   { s->flags |=  SS_HA_BIT; }
-inline void ss_ha_off(SystemStatus* s)  { s->flags &= ~SS_HA_BIT; }
-inline bool ss_ha_is_on(const SystemStatus* s)  { return (s->flags & SS_HA_BIT) != 0; }
+void ss_ha_on(SystemStatus* s);
+void ss_ha_off(SystemStatus* s);
+bool ss_ha_is_on(const SystemStatus* s);
 
-inline void ss_bt_on(SystemStatus* s)   { s->flags |=  SS_BT_BIT; }
-inline void ss_bt_off(SystemStatus* s)  { s->flags &= ~SS_BT_BIT; }
-inline bool ss_bt_is_on(const SystemStatus* s)  { return (s->flags & SS_BT_BIT) != 0; }
+void ss_bt_on(SystemStatus* s);
+void ss_bt_off(SystemStatus* s);
+bool ss_bt_is_on(const SystemStatus* s);
 
-inline void ss_mic_on(SystemStatus* s)  { s->flags |=  SS_MIC_BIT; }
-inline void ss_mic_off(SystemStatus* s) { s->flags &= ~SS_MIC_BIT; }
-inline bool ss_mic_is_on(const SystemStatus* s) { return (s->flags & SS_MIC_BIT) != 0; }
+void ss_mic_on(SystemStatus* s);
+void ss_mic_off(SystemStatus* s);
+bool ss_mic_is_on(const SystemStatus* s);
 
 
 /* ====== Layer：設定與讀取 ====== */
-static inline void     ss_set_layer(SystemStatus* s, uint8_t layer) { s->layer = layer; }
-static inline uint8_t  ss_get_layer(const SystemStatus* s)          { return s->layer; }
+void     ss_set_layer(SystemStatus* s, uint8_t layer);
+uint8_t  ss_get_layer(const SystemStatus* s);
 
 /* ====== 充電與電量：設定與讀取 ====== */
-static inline void ss_set_charging(SystemStatus* s, bool on) {
-    if (on) s->batt |= SS_CHARGER_BIT; else s->batt &= ~SS_CHARGER_BIT;
-}
-static inline bool ss_is_charging(const SystemStatus* s) {
-    return (s->batt & SS_CHARGER_BIT) != 0;
-}
-
-static inline void ss_set_battery(SystemStatus* s, uint8_t percent) {
-    if (percent > 100) percent = 100; // clamp 到 0..100
-    s->batt = (uint8_t)((s->batt & SS_CHARGER_BIT) | (percent << SS_LEVEL_SHIFT));
-}
-static inline uint8_t ss_get_battery(const SystemStatus* s) {
-    return (uint8_t)((s->batt & SS_LEVEL_MASK) >> SS_LEVEL_SHIFT);
-}
+void ss_set_charging(SystemStatus* s, bool on);
+bool ss_is_charging(const SystemStatus* s);
+void ss_set_battery(SystemStatus* s, uint8_t percent);
+uint8_t ss_get_battery(const SystemStatus* s);
 
 /*
 

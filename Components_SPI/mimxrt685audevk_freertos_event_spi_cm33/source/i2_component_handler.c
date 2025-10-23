@@ -26,6 +26,8 @@ extern volatile struct aw933xx_dev aw933xx;
 
 extern uint8_t led_status;
 volatile SystemStatus ss = {0};
+extern volatile uint8_t System_Status ;
+extern uint8_t Novatek_boot_completed;
 
 static void Stop_AMP(void)
 {
@@ -444,7 +446,16 @@ void I2C_Task(void *pvParameters)
                 }
             }
 
+        if(System_Status && Novatek_boot_completed)
+        {
+        	System_Status=0;
+    		uint8_t v = SYSTEM_STATUS_HEX_VALUE;
+    	    (void)xQueueSend(spi_request_queue, &v, 0);
+
+        }
         if(ss_is_charging(&ss) && led_status==0)
         	led_post_event(LED_EVT_CHARGING);
+
+
     }
 }

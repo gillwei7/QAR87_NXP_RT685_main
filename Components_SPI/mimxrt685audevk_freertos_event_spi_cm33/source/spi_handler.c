@@ -7,6 +7,7 @@
 
 #include "spi_handler.h"
 #include "i2_component_handler.h"
+#include "system_status.h"
 
 /* ============= 被動模式相關定義 ============= */
 typedef enum {
@@ -60,6 +61,9 @@ QueueHandle_t spi_request_queue = NULL;
 EventGroupHandle_t spi_event_group = NULL;
 SemaphoreHandle_t spi_semaphore = NULL;
 
+extern volatile SystemStatus ss ;
+uint8_t Novatek_boot_completed = 0;
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -109,6 +113,7 @@ static void handle_passive_ack_frame(const uint8_t *frame)
         case 0x11: //Nova boot completed
             if (val == 0x11) {
                 PRINTF("[Passive] ACK:[11 11] Nova boot completed\r\n");
+                Novatek_boot_completed = 1;
                 led_post_event(LED_EVT_ALL_OFF);
             }
             break;
@@ -310,6 +315,9 @@ static void execute_active_spi_transmission(uint8_t hex_value)
     	dataFrame1[2] = 0x07;
 		dataFrame1[3] = calculateChecksum(dataFrame1, 3);
 		dataFrame4[2] = hex_value;
+		dataFrame4[3] = ss.flags;
+		dataFrame4[4] = ss.layer;
+		dataFrame4[5] = ss.batt;
 		dataFrame4[6] = calculateChecksum(dataFrame4, 6);
 		frame2_ptr = dataFrame4;
 		frame2_size = STATUS_BUFFER_SIZE;
