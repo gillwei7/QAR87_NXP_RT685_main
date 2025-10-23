@@ -9,6 +9,7 @@
 #include "spi_handler.h"
 #include "i2s_handler.h"
 #include "button_handler.h"
+#include "system_status.h"
 
 /* ===== I2C synchronization objects ===== */
 EventGroupHandle_t i2c_event_group = NULL;
@@ -17,10 +18,14 @@ TaskHandle_t       sI2CTaskHandle  = NULL;
 
 extern QueueHandle_t spi_request_queue ;
 
+volatile bq256xx_status_t charger_status;
 volatile BatteryInfo battery ;
 volatile led_event_t g_led_event = LED_EVT_NONE;
 volatile amp_event_t g_amp_event = AMP_EVT_NONE;
 extern volatile struct aw933xx_dev aw933xx;
+
+extern uint8_t led_status;
+volatile SystemStatus ss = {0};
 
 static void Stop_AMP(void)
 {
@@ -139,7 +144,16 @@ void Init_I2C_Component(void)
 	ktd202x_ch4_led_on(LED_ON); //White light turns on first
 	awinic_single_enter(); //Touch Init
 	glf70302_read_battery(&battery); //Read the battery level after powering on
+	ss_set_battery(&ss, battery.soc);
 	init_aw88166(); // Init AMP
+
+
+	bq256xx_poll_status(&charger_status);
+	if(charger_status.vbus_good)
+	{
+		ss_set_charging(&ss, true);
+	}
+
 }
 
 void pca9422_ship_mode(void)
@@ -307,21 +321,22 @@ void I2C_Task(void *pvParameters)
         {
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
-    			bq256xx_status_t status;
-    			if (bq256xx_poll_status(&status) == kStatus_Success) {
-    				PRINTF("[Charger] Power Good: %s\n", status.power_good ? "Yes" : "No");
-    				PRINTF("[Charger] VBUS Status: 0x%02X\n", status.vbus_stat);
-    				PRINTF("[Charger] Charge Status: 0x%02X\n", status.chg_stat);
-    				PRINTF("[Charger] Fault Status: 0x%02X\n", status.fault_stat);
-    				PRINTF("[Charger] VBUS Good: %s\n", status.vbus_good ? "Yes" : "No");
+    			if (bq256xx_poll_status(&charger_status) == kStatus_Success) {
+    				PRINTF("[Charger] Power Good: %s\n", charger_status.power_good ? "Yes" : "No");
+    				PRINTF("[Charger] VBUS Status: 0x%02X\n", charger_status.vbus_stat);
+    				PRINTF("[Charger] Charge Status: 0x%02X\n", charger_status.chg_stat);
+    				PRINTF("[Charger] Fault Status: 0x%02X\n", charger_status.fault_stat);
+    				PRINTF("[Charger] VBUS Good: %s\n", charger_status.vbus_good ? "Yes" : "No");
     				PRINTF("\n");
-    				if(status.vbus_good)
+    				if(charger_status.vbus_good)
     				{
     					led_post_event(LED_EVT_CHARGING);
+    					ss_set_charging(&ss, true);
     				}
     				else
     				{
     					led_post_event(LED_EVT_ALL_OFF);
+    					ss_set_charging(&ss, false);
     				}
     			} else {
     				PRINTF("[Charger] Failed to read charger status.\n");
@@ -340,6 +355,7 @@ void I2C_Task(void *pvParameters)
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
             	glf70302_read_battery(&battery);
+            	ss_set_battery(&ss, battery.soc);
                 xSemaphoreGive(i2c_mutex);
             }
 
@@ -427,5 +443,8 @@ void I2C_Task(void *pvParameters)
                     xSemaphoreGive(i2c_mutex);
                 }
             }
+
+        if(ss_is_charging(&ss) && led_status==0)
+        	led_post_event(LED_EVT_CHARGING);
     }
 }
