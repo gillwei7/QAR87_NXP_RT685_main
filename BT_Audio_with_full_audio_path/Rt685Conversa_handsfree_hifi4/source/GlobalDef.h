@@ -1,0 +1,112 @@
+/*
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+
+#ifndef __GlobalDef_h__
+#define __GlobalDef_h__
+
+
+typedef unsigned char U8;
+typedef unsigned short U16;
+typedef unsigned int U32;
+typedef unsigned long long U64;
+
+typedef signed char S8;
+typedef signed short S16;
+typedef signed int S32;
+typedef signed long long S64;
+
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef unsigned long long u64;
+
+typedef signed char s8;
+typedef signed short s16;
+typedef signed int s32;
+typedef signed long long s64;
+
+
+#define _Value_Pow_2_31_	2147483648
+//#define _Value_Pow_2_30_	1073741824
+
+#define _Value_Pow_2_15_	32768
+
+#define _Value_Pow_2_Neg31_	0.0000000004656612873077392578125
+#define _Value_Pow_2_Neg15_	0.000030517578125
+
+#define Pi_Value            3.14159265353846
+
+
+#define     LedGrnPinPort               0
+#define     LedBluPinPort               0
+#define     LedRedPinPort               0
+
+#define     LedGrnPin                   14
+#define     LedBluPin                   26
+#define     LedRedPin                   31
+
+#define     DbgPin5Port                 0
+#define     DbgPin6Port                 0
+#define     DbgPin7Port                 0
+#define     DbgPin8Port                 0
+
+#define     DbgPin5                     3
+#define     DbgPin6                     4
+#define     DbgPin7                     19
+#define     DbgPin8                     20
+
+
+#define     DbgPin5Up()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 1)
+#define     DbgPin5Dn()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 0)
+#define     DbgPin6Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 1)
+#define     DbgPin6Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 0)
+#define     DbgPin7Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin7, 1)
+#define     DbgPin7Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin7, 0)
+#define     DbgPin8Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin8, 1)
+#define     DbgPin8Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin8, 0)
+
+
+#define     LedOn_G()                   GPIO_PinWrite(GPIO, LedGrnPinPort, LedGrnPin, 1)
+#define     LedOff_G()                  GPIO_PinWrite(GPIO, LedGrnPinPort, LedGrnPin, 0)
+#define     LedOn_R()                   GPIO_PinWrite(GPIO, LedRedPinPort, LedRedPin, 1)
+#define     LedOff_R()                  GPIO_PinWrite(GPIO, LedRedPinPort, LedRedPin, 0)
+#define     LedOn_B()                   GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 1)
+#define     LedOff_B()                  GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 0)
+
+
+#define APP_MU MUB
+#define CHN_MU_REG_NUM 0U
+#define BOOT_FLAG 0x01U
+#define APP_MU_IRQn 6
+
+//#include "..\..\Rt685_UsbAudio_McuPrg\source\UsbAudioCfg.h"
+#include "..\..\Rt685Conversa_handsfree_cm33\source\DefForBothMcuAndDsp.h"
+
+extern volatile T_CommonVarSharedByDspAndMcu *PtrVarBlockSharedByDspAndMcu;
+
+extern U32 read_ccount(void);
+
+
+
+
+typedef enum _ReturnResultType
+{
+	RtnValue_Success=0,
+	RtnValue_Fail,
+} ReturnResultType;
+
+
+#define PRINTF_M(x, ...)		do {			\
+SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);	\
+	PRINTF(x, ##__VA_ARGS__);					\
+SEMA42_Unlock(APP_SEMA42, SEMA42_GATE);			\
+} while(0)
+
+
+
+#endif

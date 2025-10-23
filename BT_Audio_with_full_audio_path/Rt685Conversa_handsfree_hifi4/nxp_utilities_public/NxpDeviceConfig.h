@@ -1,0 +1,39 @@
+/*
+ * Copyright 2018-2025 NXP
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+
+#ifndef NXP_CONVERSA_DEVICE_CONFIG_H_
+#define NXP_CONVERSA_DEVICE_CONFIG_H_
+
+/** @enum NXP_DEVICE_ID
+ *   list of NXP device ID for hardware identification.
+ *   should be used in nxp_conversa_plugin_config_t::device_id
+ */
+typedef enum
+{
+    Device_IMXRT1040_CM7 = 1,                       ///< I.MXRT1040 	: Running on Cortex-M7
+    Device_IMXRT1050_CM7,                           ///< I.MXRT1050 	: Running on Cortex-M7
+    Device_IMXRT1060_CM7,                           ///< I.MXRT1060 	: Running on Cortex-M7
+    Device_IMXRT1160_CM7,                           ///< I.MXRT1160 	: Running on Cortex-M7
+    Device_IMXRT1170_CM7,                           ///< I.MXRT1170 	: Running on Cortex-M7
+    Device_IMXRT500_CM33,                           ///< I.MXRT500  	: Running on Cortex-M33
+    Device_IMXRT500_FusionF1,                       ///< I.MXRT500  	: Running on FusionF1
+    Device_IMXRT600_HIFI4,                          ///< I.MXRT600  	: Running on HIFI4
+	Device_IMXRT700_HIFI4,                          ///< I.MXRT700  	: Running on HIFI4
+	Device_IMXRT700_HIFI1,                          ///< I.MXRT700  	: Running on HIFI4
+	Device_LPC55S69,                                ///< LPC55S69  		: Running on Cortex-M33
+    Device_IMX93_CM33,                           	///< I.MX93	  		: Running on Cortex-M33
+	Device_IMX_CAxx,                           		///< I.MXxx	  		: Running on Cortex-A
+	Device_IMX7ULP_CA7,                             ///< I.MX7ULP 		: Running on Cortex-A ,i.MX7ULP)
+    Device_IMX8M_CM4,                               ///< I.MX8M 		: Running on Cortex-M4 (i.MX8MPlus and i.MX8MMini)
+    Device_IMX8M_CM7,                               ///< I.MX8M  		: Running on Cortex-M7 (i.MX8MPlus and i.MX8MMini)
+    Device_IMX8ULP_CM33,                            ///< I.MX8ULP	  	: Running on Cortex-M33
+	Device_RW610_CM33_NO_DSP,						///< RW610			: Running on Cortex-M33 (no DSP extensions)
+    Device_DUMMY_DEVICE  = 99
+} NXP_DEVICE_ID;
+
+#endif // NXP_CONVERSA_DEVICE_CONFIG_H_
