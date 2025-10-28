@@ -83,9 +83,10 @@ static void handle_active_ack_frame(const uint8_t *frame)
 
     switch (cmd) {
         case 0x00:
-            if (val == 0x01) { //Nova completes the photo shoot
-                PRINTF("[Passive] ACK:[00 01] Nova completes the photo shoot \r\n");
-                led_post_event(LED_EVT_PHOTO_CAPTURE);
+            if (val == 0x00) {
+                PRINTF("[Active] ACK:[00 00] Nova close all component(led,Dmic,AMP) \r\n");
+                led_post_event(LED_EVT_ALL_OFF);
+                // TODO: Dmic,AMP
             }
             break;
         default:
@@ -110,13 +111,26 @@ static void handle_passive_ack_frame(const uint8_t *frame)
     }
 
     switch (cmd) {
-        case 0x11: //Nova boot completed
-            if (val == 0x11) {
-                PRINTF("[Passive] ACK:[11 11] Nova boot completed\r\n");
-                Novatek_boot_completed = 1;
-                led_post_event(LED_EVT_ALL_OFF);
+        case 0x00:
+            if (val == 0x01) {
+                PRINTF("[Passive] ACK:[00 01] Nova take photo success \r\n");
+                led_post_event(LED_EVT_PHOTO_CAPTURE);
             }
-            break;
+
+            else if (val == 0x03) {
+				PRINTF("[Passive] ACK:[00 03] Nova record video success \r\n");
+				led_post_event(LED_EVT_VIDEO_CAPTURE);
+			}
+			break;
+
+        case 0x11: //Nova boot completed
+			if (val == 0x11) {
+				PRINTF("[Passive] ACK:[11 11] Nova boot completed\r\n");
+				Novatek_boot_completed = 1;
+				led_post_event(LED_EVT_ALL_OFF);
+			}
+			break;
+
         default:
             PRINTF("[Passive] CMD=0x%02X (VAL=0x%02X) not handled yet\r\n", cmd, val);
             // TODO: 依你們協議擴充
