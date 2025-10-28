@@ -44,7 +44,10 @@
 
 #endif
 
+#if UsingQAR87Board == 1
+#include "hal_amp.h"
 
+#endif
 
 /* Sco loop back, data from sco input to sco output */
 #define SCO_SAI_LOOPBACK (0)
@@ -495,6 +498,8 @@ void Deinit_Board_Audio(void)
 		{
 			return ;
 		}
+		hal_amp_aw88166_left_stop();
+		hal_amp_aw88166_right_stop();
 		//to do .... codec mute
 	#else
 		if (codec_inited == 0)
@@ -654,6 +659,8 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 						|AudioPdmPortsBitMapFlag_Mic67
 					#endif
 			);
+			hal_amp_aw88166_left_start("Receiver");
+			hal_amp_aw88166_right_start("Receiver");
 			PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
 
 	
@@ -818,6 +825,9 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)	//n
 							EnableI2S1Rx0DmaChannel();
 							EnableI2S3Tx0DmaChannel();
 			DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3);
+			hal_amp_aw88166_left_start("Music");
+			hal_amp_aw88166_right_start("Music");
+
 			PRINTF("Init_Board_RingTone_Audio is successful and finished \r\n");
 			
 	#else	
@@ -882,6 +892,9 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)	//n
 	#if UsingQAR87Board == 1
 			//initial codec/amplifier
 			//B36932, to do....
+			hal_amp_aw88166_left_start("Music");
+			hal_amp_aw88166_right_start("Music");
+
 			codec_inited = 1;
 	#else		
 			if (CODEC_Init(&codec_handle, &boardCodecScoConfig1) != kStatus_Success)

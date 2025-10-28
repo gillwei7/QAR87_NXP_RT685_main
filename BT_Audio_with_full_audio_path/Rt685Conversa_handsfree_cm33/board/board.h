@@ -303,6 +303,49 @@
 #define ERPC_BOARD_I2C_INT_PIN_IRQ         PIN_INT1_IRQn
 #define ERPC_BOARD_I2C_INT_PIN_IRQ_HANDLER PIN_INT1_IRQHandler
 
+
+/* QAR87 Board */
+#if UsingQAR87Board == 1
+
+/* GPIO Port */
+#define GPIO0_PORT 0U
+#define GPIO1_PORT 1U
+#define GPIO2_PORT 2U
+
+/* AMP */
+#define AMP_RESET_PORT 0U
+#define AMP_RESET_PIN  0U
+
+/* Touch */
+#define TOUCH_INT_PORT 1U
+#define TOUCH_INT_PIN  8U
+
+/* Charger */
+#define CHARG_INT_PORT 1U
+#define CHARG_INT_PIN  15U
+
+/* Gauge */
+#define GAUGE_INT_PORT 2U
+#define GAUGE_INT_PIN  18U
+
+/* SoC */
+#define PWR_SW1_PORT 0U		//NT98532 POWER ON
+#define PWR_SW1_PIN  6U
+#define RESET553_N_PORT 0U
+#define RESET553_N_PIN  27U
+
+/* Buttons */
+#define EXAMPLE_PINT_BASE PINT
+#define POWERKEY_PINT_PIN_INT0_SRC kINPUTMUX_GpioPort0Pin5ToPintsel  /* Power Key */
+#define FUNKEY_PINT_PIN_INT1_SRC kINPUTMUX_GpioPort0Pin26ToPintsel   /* Fun Key */
+#define POWER_KEY_PORT 0U
+#define POWER_KEY_PIN  5U
+#define FUN_KEY1_N_PORT 0U
+#define FUN_KEY1_N_PIN  26U
+
+
+#endif
+
 #if defined(__cplusplus)
 extern "C" {
 #endif /* __cplusplus */
