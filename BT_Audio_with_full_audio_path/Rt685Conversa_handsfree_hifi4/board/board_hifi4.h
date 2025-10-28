@@ -12,6 +12,7 @@
 #include "fsl_common.h"
 #include "fsl_reset.h"
 #include "fsl_gpio.h"
+#include "GlobalDef.h"
 
 /*******************************************************************************
  * Definitions
@@ -20,6 +21,20 @@
 #define BOARD_NAME "MIMXRT685-EVK"
 
 /*! @brief The UART to use for debug messages. */
+#if UsingQAR87Board == 1	//running on QAR87 board
+
+#define BOARD_DEBUG_UART_TYPE kSerialPort_Uart
+#define BOARD_DEBUG_UART_BASEADDR (uint32_t) USART5
+#define BOARD_DEBUG_UART_INSTANCE 5U
+#define BOARD_DEBUG_UART_CLK_FREQ CLOCK_GetFlexCommClkFreq(5U)
+#define BOARD_DEBUG_UART_CLK_ATTACH kFFRO_to_FLEXCOMM5
+#define BOARD_DEBUG_UART_RST kFC5_RST_SHIFT_RSTn
+#define BOARD_DEBUG_UART_CLKSRC kCLOCK_Flexcomm5
+#define BOARD_UART_IRQ_HANDLER FLEXCOMM5_IRQHandler
+#define BOARD_UART_IRQ FLEXCOMM5_IRQn
+
+#else
+
 #define BOARD_DEBUG_UART_TYPE kSerialPort_Uart
 #define BOARD_DEBUG_UART_BASEADDR (uint32_t) USART0
 #define BOARD_DEBUG_UART_INSTANCE 0U
@@ -29,6 +44,8 @@
 #define BOARD_DEBUG_UART_CLKSRC kCLOCK_Flexcomm0
 #define BOARD_UART_IRQ_HANDLER FLEXCOMM0_IRQHandler
 #define BOARD_UART_IRQ FLEXCOMM0_IRQn
+
+#endif
 
 #ifndef BOARD_DEBUG_UART_BAUDRATE
 #define BOARD_DEBUG_UART_BAUDRATE 115200

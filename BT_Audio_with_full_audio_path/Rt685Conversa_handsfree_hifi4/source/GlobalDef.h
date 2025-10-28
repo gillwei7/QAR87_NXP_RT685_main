@@ -30,6 +30,8 @@ typedef signed short s16;
 typedef signed int s32;
 typedef signed long long s64;
 
+//If UsingQAR87Board == 1, the program can run on the QAR87 development board.
+#define UsingQAR87Board		1
 
 #define _Value_Pow_2_31_	2147483648
 //#define _Value_Pow_2_30_	1073741824
@@ -60,6 +62,24 @@ typedef signed long long s64;
 #define     DbgPin7                     19
 #define     DbgPin8                     20
 
+#if UsingQAR87Board == 1	//running on QAR87 board
+#define     DbgPin5Up()
+#define     DbgPin5Dn()
+#define     DbgPin6Up()
+#define     DbgPin6Dn()
+#define     DbgPin7Up()
+#define     DbgPin7Dn()
+#define     DbgPin8Up()
+#define     DbgPin8Dn()
+
+#define     LedOn_G()
+#define     LedOff_G()
+#define     LedOn_R()
+#define     LedOff_R()
+#define     LedOn_B()
+#define     LedOff_B()
+
+#else	//running on RT685-EVK
 
 #define     DbgPin5Up()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 1)
 #define     DbgPin5Dn()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 0)
@@ -78,6 +98,7 @@ typedef signed long long s64;
 #define     LedOn_B()                   GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 1)
 #define     LedOff_B()                  GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 0)
 
+#endif
 
 #define APP_MU MUB
 #define CHN_MU_REG_NUM 0U

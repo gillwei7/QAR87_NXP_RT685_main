@@ -36,10 +36,17 @@ const flexspi_nor_config_t flexspi_config = {
             .deviceType           = 0x1,
             .sflashPadType        = kSerialFlash_4Pads,
             .serialClkFreq        = kFlexSpiSerialClk_SDR_24MHz,
+#if UsingQAR87Board == 1			
+            .sflashA1Size         = 0x1000000U,//16MB,
+            .sflashA2Size         = 0,
+            .sflashB1Size         = 0,
+            .sflashB2Size         = 0,				
+#else			
             .sflashA1Size         = 0,
             .sflashA2Size         = 0,
             .sflashB1Size         = 0x1000000U,//16MB
             .sflashB2Size         = 0,
+#endif			
             .lookupTable =
                 {
                     /* Read */

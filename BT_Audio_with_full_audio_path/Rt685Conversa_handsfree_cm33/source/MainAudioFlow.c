@@ -222,15 +222,22 @@ __attribute__((section("CodeQuickAccess")))
 
 	#if 1	//folding --- prepare mic input pointers, and get int type of mic signal data
 		//take real mic audio input as incoming data
-
+#if EnableMic01 == 1
 		PdmCh0DmaTransferringIsUsingBufA=GetPdmCh0DmaTransferringIsUsingBufAOrB();
+#endif
+#if EnableMic23 == 1
 		PdmCh2DmaTransferringIsUsingBufA=GetPdmCh2DmaTransferringIsUsingBufAOrB();
+#endif
+#if EnableMic45 == 1
 		PdmCh4DmaTransferringIsUsingBufA=GetPdmCh4DmaTransferringIsUsingBufAOrB();
+#endif
+#if EnableMic67 == 1
 		PdmCh6DmaTransferringIsUsingBufA=GetPdmCh6DmaTransferringIsUsingBufAOrB();
+#endif
 
 		I2S1DmaTransferringIsUsingBufA=GetI2S1DmaTransferringIsUsingBufAOrB();
 		I2S3DmaTransferringIsUsingBufA=GetI2S3DmaTransferringIsUsingBufAOrB();
-
+#if EnableMic01 == 1
 		if(PdmCh0DmaTransferringIsUsingBufA)
 		{
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
@@ -242,6 +249,8 @@ __attribute__((section("CodeQuickAccess")))
 			MicInputCh0Ptr=MicInputDmaDualBuf_0 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh1Ptr=MicInputDmaDualBuf_1 + 0 * AudioFrameSizeInSamplePerCh;
 		}
+#endif
+#if EnableMic23 == 1
 		if(PdmCh2DmaTransferringIsUsingBufA)
 		{
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
@@ -253,6 +262,8 @@ __attribute__((section("CodeQuickAccess")))
 			MicInputCh2Ptr=MicInputDmaDualBuf_2 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh3Ptr=MicInputDmaDualBuf_3 + 0 * AudioFrameSizeInSamplePerCh;
 		}
+#endif
+#if EnableMic45 == 1
 		if(PdmCh4DmaTransferringIsUsingBufA)
 		{
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
@@ -264,6 +275,8 @@ __attribute__((section("CodeQuickAccess")))
 			MicInputCh4Ptr=MicInputDmaDualBuf_4 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh5Ptr=MicInputDmaDualBuf_5 + 0 * AudioFrameSizeInSamplePerCh;
 		}
+#endif
+#if EnableMic67 == 1
 		if(PdmCh6DmaTransferringIsUsingBufA)
 		{
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
@@ -275,19 +288,27 @@ __attribute__((section("CodeQuickAccess")))
 			MicInputCh6Ptr=MicInputDmaDualBuf_6 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh7Ptr=MicInputDmaDualBuf_7 + 0 * AudioFrameSizeInSamplePerCh;
 		}
-
+#endif
 		//left shift 8 bits to have mic signal reach the full scale --- raw data is 24 bit effective located in the lower 24bits
 		for(int i=0;i<AudioFrameSizeInSamplePerCh;i++)
 		{
+#if EnableMic01 == 1
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[0][i]=(MicInputCh0Ptr[i]<<8);
 			//VarBlockSharedByDspAndMcu.PdmInAudioBuf[0][i]=i*0x100000;
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[1][i]=(MicInputCh1Ptr[i]<<8);
+#endif
+#if EnableMic23 == 1
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[2][i]=(MicInputCh2Ptr[i]<<8);
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[3][i]=(MicInputCh3Ptr[i]<<8);
+#endif
+#if EnableMic45 == 1
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[4][i]=(MicInputCh4Ptr[i]<<8);
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[5][i]=(MicInputCh5Ptr[i]<<8);
+#endif
+#if EnableMic67 == 1
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[6][i]=(MicInputCh6Ptr[i]<<8);
 			VarBlockSharedByDspAndMcu.PdmInAudioBuf[7][i]=(MicInputCh7Ptr[i]<<8);
+#endif
 		}
 
 		if(I2S1DmaTransferringIsUsingBufA)
@@ -553,47 +574,63 @@ void ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy(void)
 
 		if(PdmCh0DmaTransferringIsUsingBufA)
 		{
+		#if EnableMic01==1
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
 			MicInputCh0Ptr=MicInputDmaDualBuf_0 + 1 * AudioFrameSizeInSamplePerCh;
 			MicInputCh1Ptr=MicInputDmaDualBuf_1 + 1 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}else
 		{
+		#if EnableMic01==1
 			//now DMA is using PDM BufB, the MCU code should use PDM DMA buffer A (the first half), which is just ready
 			MicInputCh0Ptr=MicInputDmaDualBuf_0 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh1Ptr=MicInputDmaDualBuf_1 + 0 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}
 		if(PdmCh2DmaTransferringIsUsingBufA)
 		{
+		#if EnableMic23==1
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
 			MicInputCh2Ptr=MicInputDmaDualBuf_2 + 1 * AudioFrameSizeInSamplePerCh;
 			MicInputCh3Ptr=MicInputDmaDualBuf_3 + 1 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}else
 		{
+		#if EnableMic23==1
 			//now DMA is using PDM BufB, the MCU code should use PDM DMA buffer A (the first half), which is just ready
 			MicInputCh2Ptr=MicInputDmaDualBuf_2 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh3Ptr=MicInputDmaDualBuf_3 + 0 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}
 		if(PdmCh4DmaTransferringIsUsingBufA)
 		{
+		#if EnableMic45==1
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
 			MicInputCh4Ptr=MicInputDmaDualBuf_4 + 1 * AudioFrameSizeInSamplePerCh;
 			MicInputCh5Ptr=MicInputDmaDualBuf_5 + 1 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}else
 		{
+		#if EnableMic45==1
 			//now DMA is using PDM BufB, the MCU code should use PDM DMA buffer A (the first half), which is just ready
 			MicInputCh4Ptr=MicInputDmaDualBuf_4 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh5Ptr=MicInputDmaDualBuf_5 + 0 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}
 		if(PdmCh6DmaTransferringIsUsingBufA)
 		{
+		#if EnableMic67==1
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
 			MicInputCh6Ptr=MicInputDmaDualBuf_6 + 1 * AudioFrameSizeInSamplePerCh;
 			MicInputCh7Ptr=MicInputDmaDualBuf_7 + 1 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}else
 		{
+		#if EnableMic67==1
 			//now DMA is using PDM BufB, the MCU code should use PDM DMA buffer A (the first half), which is just ready
 			MicInputCh6Ptr=MicInputDmaDualBuf_6 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh7Ptr=MicInputDmaDualBuf_7 + 0 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}
 
 		if(PdmInputMuteCnt)
@@ -896,47 +933,63 @@ void ProcessAudio_AfterAudioInputBufIsReady_AudioIoDbg(void)
 
 		if(PdmCh0DmaTransferringIsUsingBufA)
 		{
+		#if EnableMic01==1
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
 			MicInputCh0Ptr=MicInputDmaDualBuf_0 + 1 * AudioFrameSizeInSamplePerCh;
 			MicInputCh1Ptr=MicInputDmaDualBuf_1 + 1 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}else
 		{
+		#if EnableMic01==1
 			//now DMA is using PDM BufB, the MCU code should use PDM DMA buffer A (the first half), which is just ready
 			MicInputCh0Ptr=MicInputDmaDualBuf_0 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh1Ptr=MicInputDmaDualBuf_1 + 0 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}
 		if(PdmCh2DmaTransferringIsUsingBufA)
 		{
+		#if EnableMic23==1
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
 			MicInputCh2Ptr=MicInputDmaDualBuf_2 + 1 * AudioFrameSizeInSamplePerCh;
 			MicInputCh3Ptr=MicInputDmaDualBuf_3 + 1 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}else
 		{
+		#if EnableMic23==1
 			//now DMA is using PDM BufB, the MCU code should use PDM DMA buffer A (the first half), which is just ready
 			MicInputCh2Ptr=MicInputDmaDualBuf_2 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh3Ptr=MicInputDmaDualBuf_3 + 0 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}
 		if(PdmCh4DmaTransferringIsUsingBufA)
 		{
+		#if EnableMic45==1
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
 			MicInputCh4Ptr=MicInputDmaDualBuf_4 + 1 * AudioFrameSizeInSamplePerCh;
 			MicInputCh5Ptr=MicInputDmaDualBuf_5 + 1 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}else
 		{
+		#if EnableMic45==1
 			//now DMA is using PDM BufB, the MCU code should use PDM DMA buffer A (the first half), which is just ready
 			MicInputCh4Ptr=MicInputDmaDualBuf_4 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh5Ptr=MicInputDmaDualBuf_5 + 0 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}
 		if(PdmCh6DmaTransferringIsUsingBufA)
 		{
+		#if EnableMic67==1
 			//now DMA is using PDM BufA, the MCU code should use PDM DMA buffer B (the later half), which is just ready
 			MicInputCh6Ptr=MicInputDmaDualBuf_6 + 1 * AudioFrameSizeInSamplePerCh;
 			MicInputCh7Ptr=MicInputDmaDualBuf_7 + 1 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}else
 		{
+		#if EnableMic67==1
 			//now DMA is using PDM BufB, the MCU code should use PDM DMA buffer A (the first half), which is just ready
 			MicInputCh6Ptr=MicInputDmaDualBuf_6 + 0 * AudioFrameSizeInSamplePerCh;
 			MicInputCh7Ptr=MicInputDmaDualBuf_7 + 0 * AudioFrameSizeInSamplePerCh;
+		#endif
 		}
 
 		if(PdmInputMuteCnt)
@@ -1691,8 +1744,23 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 	DmaTxRxIsExpected=(
 						AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
 						AudioI2sPortsBitMapFlag_FcTxToNt|AudioI2sPortsBitMapFlag_FcRxFrNt|
-						AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
+						//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
+						#if EnableMic01==1
+							AudioPdmPortsBitMapFlag_Mic01
+						#endif
+						#if EnableMic23==1
+							|AudioPdmPortsBitMapFlag_Mic23
+						#endif
+						#if EnableMic45==1
+							|AudioPdmPortsBitMapFlag_Mic45
+						#endif
+						#if EnableMic67==1
+							|AudioPdmPortsBitMapFlag_Mic67
+						#endif
+
 					  );
+
+
 }
 
 void DeInitAudioInterface_AudioIoDebug(int Opt)
@@ -1707,10 +1775,10 @@ void DeInitAudioInterface_AudioIoDebug(int Opt)
 
 	if(AudioPortIsActive_I2SToAmp)
 	{
-		CloseI2sDma((I2S_Type *)DEMO_I2S1Rx0);
-		CloseI2sDma((I2S_Type *)DEMO_I2S3Tx0);
-			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2S1Rx0);
-			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2S3Tx0);
+		CloseI2sDma((I2S_Type *)DEMO_I2SRxFrAmp);
+		CloseI2sDma((I2S_Type *)DEMO_I2STxToAmp);
+			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2SRxFrAmp);
+			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2STxToAmp);
 				ClearDmaBuf_I2S1Rx0();
 				ClearDmaBuf_I2S3Tx0();
 		AudioPortIsActive_I2SToAmp=0;
@@ -1822,16 +1890,16 @@ void CloseAllActivedI2SPorts(void)
 	//close active audio ports --- I2S in ports
 	//if(ActivedI2sPorts&AudioI2sPortsBitMapFlag_Fc3)
 	{
-    	CloseI2sDma((I2S_Type *)DEMO_I2S3Tx0);
-    	CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2S3Tx0);
+    	CloseI2sDma((I2S_Type *)DEMO_I2STxToAmp);
+    	CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2STxToAmp);
     	ClearDmaBuf_I2S3Tx0();
 	}
 
 	//close active audio ports --- I2S out ports
 	//if(ActivedI2sPorts&AudioI2sPortsBitMapFlag_Fc1)
 	{
-    	CloseI2sDma((I2S_Type *)DEMO_I2S1Rx0);
-    	CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2S1Rx0);
+    	CloseI2sDma((I2S_Type *)DEMO_I2SRxFrAmp);
+    	CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2SRxFrAmp);
     	ClearDmaBuf_I2S1Rx0();
 	}
 	/*

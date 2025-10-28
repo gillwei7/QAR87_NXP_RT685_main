@@ -624,6 +624,34 @@ status_t BOARD_Codec_I2C_Receive(
 }
 #endif
 
+#if UsingQAR87Board == 1
+
+//#if defined(SDK_I3C_BASED_COMPONENT_USED) && SDK_I3C_BASED_COMPONENT_USED
+void BOARD_PMIC_I2C_Init(void)
+{
+
+    BOARD_I3C_Init(BOARD_PMIC_I3C_BASEADDR, BOARD_PMIC_I3C_CLOCK_FREQ);
+
+}
+
+status_t BOARD_PMIC_I2C_Send(
+    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, const uint8_t *txBuff, uint8_t txBuffSize)
+{
+
+    return BOARD_I3C_Send(BOARD_PMIC_I3C_BASEADDR, deviceAddress, subAddress, subAddressSize, (uint8_t *)txBuff,
+    	                          txBuffSize);
+
+}
+
+status_t BOARD_PMIC_I2C_Receive(
+    uint8_t deviceAddress, uint32_t subAddress, uint8_t subAddressSize, uint8_t *rxBuff, uint8_t rxBuffSize)
+{
+
+    return BOARD_I3C_Receive(BOARD_PMIC_I3C_BASEADDR, deviceAddress, subAddress, subAddressSize, rxBuff, rxBuffSize);
+
+}
+
+#else
 #if defined(SDK_I2C_BASED_COMPONENT_USED) && SDK_I2C_BASED_COMPONENT_USED
 void BOARD_PMIC_I2C_Init(void)
 {
@@ -660,5 +688,6 @@ status_t BOARD_Accel_I2C_Receive(
 {
     return BOARD_I2C_Receive(BOARD_ACCEL_I2C_BASEADDR, deviceAddress, subAddress, subaddressSize, rxBuff, rxBuffSize);
 }
+#endif/* SDK_I2C_BASED_COMPONENT_USED */
 
-#endif /* SDK_I2C_BASED_COMPONENT_USED */
+#endif 

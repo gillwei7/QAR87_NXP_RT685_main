@@ -27,14 +27,35 @@
 
 #define DEMO_I2S_MASTER_CLOCK_FREQUENCY CLOCK_GetMclkClkFreq()
 
+#if UsingQAR87Board == 1
 
+#define FcIdx_RxFrAmp			3
+#define FcIdx_TxToAmp			1
+#define DEMO_I2STxToAmp 			(I2S1)
+#define DEMO_I2SRxFrAmp 			(I2S3)
+#define I2S_FCTxToAmp_DMA_CHANNEL 	(3)				//flexcomm1 tx
+#define I2S_FCRxFrAmp_DMA_CHANNEL 	(6)				//flexcomm3 rx
+
+//#define DEMO_I2S3Tx0 			(I2S3)
+//#define DEMO_I2S1Rx0 			(I2S1)
+//#define I2S_FC1Rx_DMA_CHANNEL 	(2)				//flexcomm1 rx
+//#define I2S_FC3Tx_DMA_CHANNEL 	(7)				//flexcomm3 tx
+
+#define FcIdx_RxFrNvt			6
+#define FcIdx_TxToNvt			5
+#define I2STxToNtInstance		(I2S5)
+#define I2SRxFrNtInstance		(I2S6)
+#define I2S_TxToNt_DMA_CHANNEL 	(11)			//flexcomm5 tx
+#define I2S_RxFrNt_DMA_CHANNEL 	(12)			//flexcomm6 rx
+
+#else
 //having I2S1 and I2S2 swapped, is to aviod using a wire connecting I2STx0 to AMP Data Input --- only use a jump connecting JP8.2 and JP8.3
 #define FcIdx_RxFrAmp			1
 #define FcIdx_TxToAmp			3
-#define DEMO_I2S3Tx0 			(I2S3)
-#define DEMO_I2S1Rx0 			(I2S1)
-#define I2S_FC1Rx_DMA_CHANNEL 	(2)				//flexcomm1 rx
-#define I2S_FC3Tx_DMA_CHANNEL 	(7)				//flexcomm3 tx
+#define DEMO_I2STxToAmp 			(I2S3)
+#define DEMO_I2SRxFrAmp 			(I2S1)
+#define I2S_FCRxFrAmp_DMA_CHANNEL 	(2)				//flexcomm1 rx
+#define I2S_FCTxToAmp_DMA_CHANNEL 	(7)				//flexcomm3 tx
 
 //Note --- on RT685 EVK, we use fc2 and 5 for the I2S to NVT --- while using I2S to NVT, BT SCO interface is OFF.
 #define FcIdx_RxFrNvt			5
@@ -43,7 +64,7 @@
 #define I2SRxFrNtInstance		(I2S5)
 #define I2S_TxToNt_DMA_CHANNEL 	(5)				//flexcomm2 rx
 #define I2S_RxFrNt_DMA_CHANNEL 	(10)			//flexcomm5 tx
-
+#endif
 /*
  	 	 	 	 	 DMA ch
 	fc0		rx,			0
@@ -69,12 +90,12 @@
 #define DEMO_DMA (DMA0)			//DMA0 is for MCU side
 
 
-#define DEMO_I2S3Tx0_MODE 		kI2S_MasterSlaveNormalSlave
+#define DEMO_I2SToAmpTx_MODE 		kI2S_MasterSlaveNormalMaster //kI2S_MasterSlaveNormalSlave //B36932, need to check whether is "kI2S_MasterSlaveNormalMaster"
 
 #if Rt685I2SToAmpIsI2SMaster==1
-	#define DEMO_I2S1Rx0_MODE 		kI2S_MasterSlaveNormalMaster
+	#define DEMO_I2SFrAmpRx_MODE 	kI2S_MasterSlaveNormalMaster
 #else
-	#define DEMO_I2S1Rx0_MODE 		kI2S_MasterSlaveNormalSlave
+	#define DEMO_I2SFrAmpRx_MODE	kI2S_MasterSlaveNormalSlave
 #endif
 
 #if Rt685I2SToNvtIsI2SMaster==1
@@ -117,8 +138,8 @@ extern volatile U8 I2SRxFrNtDmaTransferringIsUsingBufA;
 extern volatile short StartI2SToAmpAudioDmaFromDmicDmaIntr_Cnt;
 extern volatile short StartI2SToNvtAudioDmaFromDmicDmaIntr_Cnt;
 
-extern i2s_dma_handle_t I2S1Rx0Handle;
-extern i2s_dma_handle_t I2S3Tx0Handle;
+extern i2s_dma_handle_t I2SRxFrAmpHandle;
+extern i2s_dma_handle_t I2STxToAmpHandle;
 extern i2s_dma_handle_t I2SRxFrNtHandle;
 extern i2s_dma_handle_t I2STxToNtHandle;
 

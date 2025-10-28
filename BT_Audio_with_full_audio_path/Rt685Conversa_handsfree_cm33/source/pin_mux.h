@@ -50,7 +50,9 @@ void BOARD_InitBootPins(void);
  *
  */
 void BOARD_InitPins(void); /* Function assigned for the Cortex-M33 */
-
+#if UsingQAR87Board == 1
+void BOARD_Init_PMIC_CTL_Pins(void);
+#endif
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
 #define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
@@ -919,7 +921,33 @@ void BOARD_InitI3CPinsAsGPIO(void); /* Function assigned for the Cortex-M33 */
  *
  */
 void BOARD_InitI3CPins(void); /* Function assigned for the Cortex-M33 */
+#if UsingQAR87Board == 1
+/*! @name I3C0_SCL (coord N17), PCA9422_I2C_SCL
+  @{ */
+/* Routed pin properties */
+#define PCA9422_I3C_I3C_ICM_SCL_PERIPHERAL I3C            /*!<@brief Peripheral name */
+#define PCA9422_I3C_I3C_ICM_SCL_SIGNAL SCL                /*!<@brief Signal name */
+#define PCA9422_I3C_I3C_ICM_SCL_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define PCA9422_I3C_I3C_ICM_SCL_PIN 29U                   /*!<@brief PORT pin number */
+#define PCA9422_I3C_I3C_ICM_SCL_PIN_MASK (1U << 29U)      /*!<@brief PORT pin mask */
+                                                          /* @} */
 
+/*! @name I3C0_SDA (coord P16), PCA9422_I2C_SDA
+  @{ */
+/* Routed pin properties */
+#define PCA9422_I3C_I3C_ICM_SDA_PERIPHERAL I3C            /*!<@brief Peripheral name */
+#define PCA9422_I3C_I3C_ICM_SDA_SIGNAL SDA                /*!<@brief Signal name */
+#define PCA9422_I3C_I3C_ICM_SDA_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define PCA9422_I3C_I3C_ICM_SDA_PIN 30U                   /*!<@brief PORT pin number */
+#define PCA9422_I3C_I3C_ICM_SDA_PIN_MASK (1U << 30U)      /*!<@brief PORT pin mask */
+                                                          /* @} */
+
+/*!
+ * @brief Configures pin routing and optionally pin electrical features.
+ *
+ */
+void PCA9422_I3C(void); /* Function assigned for the Cortex-M33 */
+#endif
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
 #define IOPCTL_PIO_FUNC0 0x00u            /*!<@brief Selects pin function 0 */
@@ -1119,6 +1147,78 @@ void BOARD_Init_Audio_Pins(void); /* Function assigned for the Cortex-M33 */
 #define IOPCTL_PIO_PUPD_DI 0x00u          /*!<@brief Disable pull-up / pull-down function */
 #define IOPCTL_PIO_SLEW_RATE_NORMAL 0x00u /*!<@brief Normal mode */
 
+#if UsingQAR87Board == 1
+/*! @name FLEXSPI0A_DATA0 (coord L2), U19[D3]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA0_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA0_SIGNAL FLEXSPI_A_DATA0    /*!<@brief Signal name */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA0_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA0_PIN 20U                   /*!<@brief PORT pin number */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA0_PIN_MASK (1U << 20U)      /*!<@brief PORT pin mask */
+                                                                       /* @} */
+
+/*! @name FLEXSPI0A_DATA1 (coord M2), U19[D2]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA1_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA1_SIGNAL FLEXSPI_A_DATA1    /*!<@brief Signal name */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA1_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA1_PIN 21U                   /*!<@brief PORT pin number */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA1_PIN_MASK (1U << 21U)      /*!<@brief PORT pin mask */
+                                                                       /* @} */
+
+/*! @name FLEXSPI0A_DATA2 (coord N1), U19[C4]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA2_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA2_SIGNAL FLEXSPI_A_DATA2    /*!<@brief Signal name */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA2_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA2_PIN 22U                   /*!<@brief PORT pin number */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA2_PIN_MASK (1U << 22U)      /*!<@brief PORT pin mask */
+                                                                       /* @} */
+
+/*! @name FLEXSPI0A_DATA3 (coord N2), U19[D4]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA3_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA3_SIGNAL FLEXSPI_A_DATA3    /*!<@brief Signal name */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA3_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA3_PIN 23U                   /*!<@brief PORT pin number */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_DATA3_PIN_MASK (1U << 23U)      /*!<@brief PORT pin mask */
+/* @} */
+/*! @name FLEXSPI0A_SCLK (coord U3), U19[B2]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_SCK_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_SCK_SIGNAL FLEXSPI_A_SCLK     /*!<@brief Signal name */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_SCK_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_SCK_PIN 18U                   /*!<@brief PORT pin number */
+#define BOARD_INITFLEXSPI0APINS_QSPI_A_SCK_PIN_MASK (1U << 18U)      /*!<@brief PORT pin mask */
+                                                                     /* @} */
+
+/*! @name FLEXSPI0A_SS0_N (coord T2), U19[C2]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_CS0_PERIPHERAL FLEXSPI	/*!* @brief Peripheral name */
+#define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_CS0_SIGNAL FLEXSPI_A_SS0_B	/*!* @brief Signal name */
+#define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_CS0_PORT 1U	/*!* @brief PORT peripheral base pointer */
+#define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_CS0_PIN 19U	/*!* @brief PORT pin number */
+#define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_CS0_PIN_MASK (1U << 19U)	/*!* @brief PORT pin mask */
+/* @} */
+
+/*! @name FLEXSPI0A_RESET_N (coord T2), U19[C2]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_RESET_PERIPHERAL FLEXSPI	/*!* @brief Peripheral name */
+#define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_RESET_SIGNAL FLEXSPI_A_RESET_B	/*!* @brief Signal name */
+#define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_RESET_PORT 0U	/*!* @brief PORT peripheral base pointer */
+#define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_RESET_PIN 26U	/*!* @brief PORT pin number */
+#define BOARD_INITFLEXSPIFLASHPINS_QSPI_A_RESET_PIN_MASK (0U << 26U)	/*!* @brief PORT pin mask */
+/* @} */
+void BOARD_InitFlexSPI0APins(void); /* Function assigned for the Cortex-M33 */
+
+#else
 /*! @name FLEXSPI0B_DATA0 (coord L2), U19[D3]
   @{ */
 /* Routed pin properties */
@@ -1224,7 +1324,7 @@ void BOARD_Init_Audio_Pins(void); /* Function assigned for the Cortex-M33 */
  *
  */
 void BOARD_InitFlexSPI0BPins(void); /* Function assigned for the Cortex-M33 */
-
+#endif
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_EN 0x0100u   /*!<@brief Full drive enable */
 #define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
@@ -1471,6 +1571,28 @@ void BOARD_InitFourDbgPins(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITDMICPINS_PDM_DATA23_PIN_MASK (1U << 21U)      /*!<@brief PORT pin mask */
                                                                 /* @} */
 
+/*! @name PDM_DATA45 (coord P3), U19[E2]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITDMICPINS_PDM_DATA45_PERIPHERAL DMIC0          /*!<@brief Peripheral name */
+#define BOARD_INITDMICPINS_PDM_DATA45_SIGNAL DATA               /*!<@brief Signal name */
+#define BOARD_INITDMICPINS_PDM_DATA45_CHANNEL 4_5               /*!<@brief Signal channel */
+#define BOARD_INITDMICPINS_PDM_DATA45_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITDMICPINS_PDM_DATA45_PIN 22U                   /*!<@brief PORT pin number */
+#define BOARD_INITDMICPINS_PDM_DATA45_PIN_MASK (1U << 22U)      /*!<@brief PORT pin mask */
+                                                                    /* @} */
+
+/*! @name PDM_DATA67 (coord P5), U19[E1]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITDMICPINS_PDM_DATA67_PERIPHERAL DMIC0          /*!<@brief Peripheral name */
+#define BOARD_INITDMICPINS_PDM_DATA67_SIGNAL DATA               /*!<@brief Signal name */
+#define BOARD_INITDMICPINS_PDM_DATA67_CHANNEL 6_7               /*!<@brief Signal channel */
+#define BOARD_INITDMICPINS_PDM_DATA67_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITDMICPINS_PDM_DATA67_PIN 23U                   /*!<@brief PORT pin number */
+#define BOARD_INITDMICPINS_PDM_DATA67_PIN_MASK (1U << 23U)      /*!<@brief PORT pin mask */
+                                                                    /* @} */
+
 /*! @name PDM_CLK23 (coord U1), U19[D5]
   @{ */
 /* Routed pin properties */
@@ -1481,6 +1603,18 @@ void BOARD_InitFourDbgPins(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITDMICPINS_PDM_CLK23_PIN 17U                   /*!<@brief PORT pin number */
 #define BOARD_INITDMICPINS_PDM_CLK23_PIN_MASK (1U << 17U)      /*!<@brief PORT pin mask */
                                                                    /* @} */
+
+/*! @name PDM_CLK45 (coord R2), U19[E3]
+  @{ */
+/* Routed pin properties */
+#define BOARD_INITDMICPINS_PDM_CLK45_PERIPHERAL DMIC0          /*!<@brief Peripheral name */
+#define BOARD_INITDMICPINS_PDM_CLK45_SIGNAL CLK                /*!<@brief Signal name */
+#define BOARD_INITDMICPINS_PDM_CLK45_CHANNEL 4_5               /*!<@brief Signal channel */
+#define BOARD_INITDMICPINS_PDM_CLK45_PORT 2U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITDMICPINS_PDM_CLK45_PIN 18U                   /*!<@brief PORT pin number */
+#define BOARD_INITDMICPINS_PDM_CLK45_PIN_MASK (1U << 18U)      /*!<@brief PORT pin mask */
+                                                                   /* @} */
+
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *

@@ -65,10 +65,16 @@ void BOARD_DSP_Init(void)
 #endif
 #endif
 #endif
+
+#if UsingQAR87Board == 1
+	//initial PMIC for DSP
+	// to do ....
+#else
     /* Initialize PMIC PCA9420 */
     BOARD_InitPmic();
     /* Configure PMIC Vddcore value according to main/dsp clock. */
     BOARD_SetPmicVoltageForFreq(kPartTemp_N20C_P85C, CLOCK_GetMainClkFreq(), 600000000U);
+#endif
 
     /* Enable DSP PLL clock 594MHz. */
     CLOCK_InitSysPfd(kCLOCK_Pfd1, 16);

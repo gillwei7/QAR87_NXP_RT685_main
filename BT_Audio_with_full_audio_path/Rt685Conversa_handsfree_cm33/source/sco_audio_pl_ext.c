@@ -489,17 +489,25 @@ extern void ClearBTUpDnAudioBufDataArea(void);
 void Deinit_Board_Audio(void)
 {
 	#if EnableConversa==1
+	#if UsingQAR87Board == 1
+		//deinit code (amplifier)
+		if (codec_inited == 0)
+		{
+			return ;
+		}
+		//to do .... codec mute
+	#else
 		if (codec_inited == 0)
 		{
 			return ;
 		}
 		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
-
+	#endif
 		//close all I2S and related DMA --- if need to just close the wanted, just call one of the 3 grouped functions
-		CloseI2sDma((I2S_Type *)DEMO_I2S1Rx0);
-		CloseI2sDma((I2S_Type *)DEMO_I2S3Tx0);
-			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2S1Rx0);
-			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2S3Tx0);
+		CloseI2sDma((I2S_Type *)DEMO_I2SRxFrAmp);
+		CloseI2sDma((I2S_Type *)DEMO_I2STxToAmp);
+			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2SRxFrAmp);
+			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2STxToAmp);
 				ClearDmaBuf_I2S1Rx0();
 				ClearDmaBuf_I2S3Tx0();
 		//close PDM all channels
@@ -538,11 +546,19 @@ void Deinit_Board_Audio(void)
 		PRINTF("Deinit_Board_Audio is done \r\n");
 
 	#else
+	#if UsingQAR87Board == 1
+		if (codec_inited == 0)
+		{
+			return ;
+		}
+		//to do .... codec mute
+	#else
 		if (codec_inited == 0)
 		{
 			return ;
 		}
 		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
+	#endif
 		HAL_AudioTxDeinit((hal_audio_handle_t)&tx_speaker_handle[0]);
 		HAL_AudioRxDeinit((hal_audio_handle_t)&rx_mic_handle[0]);
 		HAL_AudioTxDeinit((hal_audio_handle_t)&tx_mic_handle[0]);
@@ -597,6 +613,51 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			HAL_AudioRxInstallCallback((hal_audio_handle_t)&rx_speaker_handle[0], rxSpeakerCallback, NULL);
 
 	    	DbgPin8Up();
+	#if UsingQAR87Board == 1
+			//initial codec/amplifier
+			//B36932, to do....
+
+	    	codec_inited = 1;
+			//initial audio buffer and dmic and I2S
+
+			InitAudioCircularBuf();
+
+			//PDM, fc3, fc1 and chained DMA configuring
+			//we open pdm ports here
+			Init_MicDmaCfgCh(0xff);	//mic0,1,2,3,4,5
+			BOARD_Init_DMA_PDM(0xff);
+			BOARD_Init_DMIC(0xff,0); //0: no skip general Dmic init. If not the first mic init, then should skip.
+			ConfigDmicChainedDma(0xff);
+
+			BOARD_Init_DMA_I2S_Fc1();
+			BOARD_Init_DMA_I2S_Fc3();
+			BOARD_Init_I2S_Fc1();
+			BOARD_Init_I2S_Fc3();
+			ClearDmaBuf_I2S1Rx0();
+			ClearDmaBuf_I2S3Tx0();
+			ConfigI2S1ChainedDma();
+			ConfigI2S3ChainedDma();
+			EnableI2S1Rx0DmaChannel();
+			EnableI2S3Tx0DmaChannel();
+			DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
+					//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
+					#if EnableMic01==1
+						AudioPdmPortsBitMapFlag_Mic01
+					#endif
+					#if EnableMic23==1
+						|AudioPdmPortsBitMapFlag_Mic23
+					#endif
+					#if EnableMic45==1
+						|AudioPdmPortsBitMapFlag_Mic45
+					#endif
+					#if EnableMic67==1
+						|AudioPdmPortsBitMapFlag_Mic67
+					#endif
+			);
+			PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
+
+	
+	#else
 			/* Codec */
 			if (CODEC_Init(&codec_handle, &boardCodecScoConfig) != kStatus_Success)
 			{
@@ -633,9 +694,25 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 							ConfigI2S3ChainedDma();
 								EnableI2S1Rx0DmaChannel();
 								EnableI2S3Tx0DmaChannel();
-				DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67);
+				DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
+						//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
+						#if EnableMic01==1
+							AudioPdmPortsBitMapFlag_Mic01
+						#endif
+						#if EnableMic23==1
+							|AudioPdmPortsBitMapFlag_Mic23
+						#endif
+						#if EnableMic45==1
+							|AudioPdmPortsBitMapFlag_Mic45
+						#endif
+						#if EnableMic67==1
+							|AudioPdmPortsBitMapFlag_Mic67
+						#endif
+				);
+
 				PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
 			}
+	#endif
 		}
 	#else
 		if (samplingRate > 0U)
@@ -720,7 +797,31 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)	//n
 			VarBlockSharedByDspAndMcu.BtFs=BTAudioFs;
 
 			DbgPin8Up();
-			/* Codec */
+
+	#if UsingQAR87Board == 1
+			//initial codec/amplifier
+			//B36932, to do....
+			
+			codec_inited = 1;
+			//initial audio buffer and dmic and I2S	
+			InitAudioCircularBuf();
+
+			//fc3, fc1 and chained DMA configuring
+			BOARD_Init_DMA_I2S_Fc1();
+			BOARD_Init_DMA_I2S_Fc3();
+				BOARD_Init_I2S_Fc1();
+				BOARD_Init_I2S_Fc3();
+					ClearDmaBuf_I2S1Rx0();
+					ClearDmaBuf_I2S3Tx0();
+						ConfigI2S1ChainedDma();
+						ConfigI2S3ChainedDma();
+							EnableI2S1Rx0DmaChannel();
+							EnableI2S3Tx0DmaChannel();
+			DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3);
+			PRINTF("Init_Board_RingTone_Audio is successful and finished \r\n");
+			
+	#else	
+			/* Codec */		
 			if (CODEC_Init(&codec_handle, &boardCodecScoConfig) != kStatus_Success)
 			{
 				DbgPin8Dn();
@@ -752,6 +853,7 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)	//n
 				DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3);
 				PRINTF("Init_Board_RingTone_Audio is successful and finished \r\n");
 			}
+	#endif			
 		}
 	#else
 		if (samplingRate > 0U)
@@ -777,6 +879,11 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)	//n
 			HAL_AudioTxInit((hal_audio_handle_t)&tx_speaker_handle[0], &txSpeakerConfig);
 			HAL_AudioTxInstallCallback((hal_audio_handle_t)&tx_speaker_handle[0], txSpeakerCallback, NULL);
 
+	#if UsingQAR87Board == 1
+			//initial codec/amplifier
+			//B36932, to do....
+			codec_inited = 1;
+	#else		
 			if (CODEC_Init(&codec_handle, &boardCodecScoConfig1) != kStatus_Success)
 			{
 				PRINTF("Init_Board_RingTone_Audio is failed --- CODEC init failure \r\n");
@@ -790,6 +897,7 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)	//n
 				codec_inited = 1;
 				PRINTF("Init_Board_RingTone_Audio is successful and finished \r\n");
 			}
+	#endif		
 		}
 	#endif
 }
@@ -1161,7 +1269,21 @@ void InitAndStartPdm(void)
 	PdmInputMuteCnt=12;			//96ms
 
 	//note: DmaTxRxIsExpected is not or ed with AudioI2sPortsBitMapFlag_Fc1 AudioI2sPortsBitMapFlag_Fc3, so after start PDM, fc1 fc3 will not be started
-	DmaTxRxIsExpected=(AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67);
+	DmaTxRxIsExpected=(
+			//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
+					#if EnableMic01==1
+						AudioPdmPortsBitMapFlag_Mic01
+					#endif
+					#if EnableMic23==1
+						|AudioPdmPortsBitMapFlag_Mic23
+					#endif
+					#if EnableMic45==1
+						|AudioPdmPortsBitMapFlag_Mic45
+					#endif
+					#if EnableMic67==1
+						|AudioPdmPortsBitMapFlag_Mic67
+					#endif
+			);
 
 	//start dmic immediately --- but no need to start fc1 fc3 in the PDM callback
 	ImmediatelyStartDmicDmaChannels(0xff);	//mic0,1,2,3, after calling this, dmic dma intr occurs one frame later!
@@ -1365,8 +1487,12 @@ void SCO_Edma_Task(void *handle)
 		#if EnableUsbComAndAudio==1
 			USB_DeviceCdcVcomTask();	//can be placed to other place if here is not good (when other new task is needed and created)
 		#endif
-		ButtonEventProcess();		//this button process can be placed to other place if here is not good (when other new task is needed and created)
-		//DbgPin7Dn();
+		#if UsingQAR87Board == 1
+			//ButtonEventProcess..... //B36932
+		#else
+			ButtonEventProcess();		//this button process can be placed to other place if here is not good (when other new task is needed and created)
+			//DbgPin7Dn();
+		#endif
     }
 }
 void sco_audio_init_pl_ext(void)
@@ -1443,7 +1569,49 @@ void StartMicSpkTest(void)
 	CLOCK_SetClkDiv(kCLOCK_DivDmicClk, 8);		//PDM clk is: 24.576/8 =3.072MHz --- OSR to be 48, PDM stream after CIC is: 3072k/48=64K --> then half down to 32KHz --> then half down to 16KHz (don't use 2Fs)
 
 	DbgPin8Up();
+#if UsingQAR87Board == 1
 	//Quanta changes CODEC_Init to AMP_Init
+	//to do .... //B36932
+
+	codec_inited = 1;
+	InitAudioCircularBuf();
+
+	//PDM, fc3, fc1 and chained DMA configuring
+	//we open pdm ports here
+	Init_MicDmaCfgCh(0xff);	//mic0,1,2,3,4,5
+	BOARD_Init_DMA_PDM(0xff);
+	BOARD_Init_DMIC(0xff,0); //0: no skip general Dmic init. If not the first mic init, then should skip.
+	ConfigDmicChainedDma(0xff);
+
+
+	BOARD_Init_DMA_I2S_Fc1();
+	BOARD_Init_DMA_I2S_Fc3();
+		BOARD_Init_I2S_Fc1();
+		BOARD_Init_I2S_Fc3();
+			ClearDmaBuf_I2S1Rx0();
+			ClearDmaBuf_I2S3Tx0();
+				ConfigI2S1ChainedDma();
+				ConfigI2S3ChainedDma();
+					EnableI2S1Rx0DmaChannel();
+					EnableI2S3Tx0DmaChannel();
+	DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
+			//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
+					#if EnableMic01==1
+						AudioPdmPortsBitMapFlag_Mic01
+					#endif
+					#if EnableMic23==1
+						|AudioPdmPortsBitMapFlag_Mic23
+					#endif
+					#if EnableMic45==1
+						|AudioPdmPortsBitMapFlag_Mic45
+					#endif
+					#if EnableMic67==1
+						|AudioPdmPortsBitMapFlag_Mic67
+					#endif
+					);
+	
+#else
+	
 	if (CODEC_Init(&codec_handle, &boardCodecScoConfig) != kStatus_Success)
 	{
     	DbgPin8Dn();
@@ -1488,9 +1656,23 @@ void StartMicSpkTest(void)
 					ConfigI2S3ChainedDma();
 						EnableI2S1Rx0DmaChannel();
 						EnableI2S3Tx0DmaChannel();
-		DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67);
+		DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
+				//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
+							#if EnableMic01==1
+								AudioPdmPortsBitMapFlag_Mic01
+							#endif
+							#if EnableMic23==1
+								|AudioPdmPortsBitMapFlag_Mic23
+							#endif
+							#if EnableMic45==1
+								|AudioPdmPortsBitMapFlag_Mic45
+							#endif
+							#if EnableMic67==1
+								|AudioPdmPortsBitMapFlag_Mic67
+							#endif
+							);
 	}
-
+#endif
 	//start dmic immediately, then in dmic intr, fc1,fc3 will be started
 	ImmediatelyStartDmicDmaChannels(0xff);	//mic0,1,2,3, after calling this, dmic dma intr occurs one frame later!
 	while(1)
@@ -1754,11 +1936,15 @@ API_RESULT sco_audio_set_speaker_volume(UCHAR volume)
         return API_FAILURE;
     }
     /* HFP support 0- 15, codec support 0-100*/
+	#if UsingQAR87Board == 1
+	//Codec or Amplifier configuration
+	//to do ....
+	#else
     if (kStatus_Success == CODEC_SetVolume(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, ((volume * 6U) + 9U)))
     {
         return API_SUCCESS;
     }
-
+	#endif
     return API_FAILURE;
 }
 void sco_audio_play_ringtone_pl_ext(void)

@@ -11,7 +11,11 @@
 #include "fsl_cache.h"
 #include "board.h"
 
+#if UsingQAR87Board == 1
+#define FLASH_PORT kFLEXSPI_PortA1
+#else
 #define FLASH_PORT kFLEXSPI_PortB1
+#endif
 
 #if MX25U12843G
 

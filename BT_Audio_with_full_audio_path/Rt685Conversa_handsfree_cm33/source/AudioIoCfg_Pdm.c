@@ -900,6 +900,7 @@ int GetPdmCh6DmaTransferringIsUsingBufAOrB(void)
 	return ((*(DmaDscrPtr_Dmic6+3)==(unsigned int)&MicInputDmaPingpongDscr[6][0]));
 }
 
+#if EnableMic01==1
 __attribute__((section("CodeQuickAccess")))
 void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
 {
@@ -918,13 +919,13 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 				WaitForRx0LRCKRisingEdge_Fc1();
 			#endif
 
-					((I2S_Type *)DEMO_I2S1Rx0)->FIFOCFG |= (1<<16);	//empty fifo
+					((I2S_Type *)DEMO_I2SRxFrAmp)->FIFOCFG |= (1<<16);	//empty fifo
 					#if 1
 						//this is to ensure rx intr comes after dmic intr --- don't close this part
 						for(int i=0;i<8;i++)
 						{
 							volatile U32 t;
-							t=((I2S_Type *)DEMO_I2S1Rx0)->FIFORD;
+							t=((I2S_Type *)DEMO_I2SRxFrAmp)->FIFORD;
 						}
 					#endif
 					ImmediatelyStartI2S1Dma();	//after calling this, I2S dma intr occurs one frame later!
@@ -935,12 +936,12 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 			#else
 				WaitForRx0LRCKFallingEdge_Fc1();
 			#endif
-					((I2S_Type *)DEMO_I2S3Tx0)->FIFOCFG |= (1<<16);	//empty fifo
+					((I2S_Type *)DEMO_I2STxToAmp)->FIFOCFG |= (1<<16);	//empty fifo
 					#if 1
 						//this is to ensure tx intr comes after dmic intr --- don't close this part
 						for(int i=0;i<8;i++)
 						{
-							((I2S_Type *)DEMO_I2S3Tx0)->FIFOWR=0;
+							((I2S_Type *)DEMO_I2STxToAmp)->FIFOWR=0;
 							//((I2S_Type *)DEMO_I2S4_TX1)->FIFOWR=i*0x20000;		//full the fifo tx buffer, so that tx intr can be aligned with rx and dmic
 						}
 					#endif
@@ -1012,6 +1013,8 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DbgPin7Dn();
 	return;
 }
+#endif
+#if EnableMic23==1
 __attribute__((section("CodeQuickAccess")))
 void DMicRx_Callback2(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
 {
@@ -1033,6 +1036,8 @@ void DMicRx_Callback2(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DbgPin7Dn();
 	return;
 }
+#endif
+#if EnableMic45==1
 __attribute__((section("CodeQuickAccess")))
 void DMicRx_Callback4(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
 {
@@ -1054,6 +1059,8 @@ void DMicRx_Callback4(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DbgPin7Dn();
 	return;
 }
+#endif
+#if EnableMic67==1
 __attribute__((section("CodeQuickAccess")))
 void DMicRx_Callback6(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
 {
@@ -1075,6 +1082,7 @@ void DMicRx_Callback6(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DbgPin7Dn();
 	return;
 }
+#endif
 #if 0
 #if EnableMic01==1
 U32 ToUpdateActivedI2sPorts=0;
@@ -1096,13 +1104,13 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		//start I2S1,4 Tx
 		WaitForRx0LRCKRisingEdge_Fc1();		//this is to make sure I2S intr comes after DMIC			//start tx0 after rising edge
 		//start Tx after rising edge
-			((I2S_Type *)DEMO_I2S1Rx0)->FIFOCFG |= (1<<16);	//empty fifo
+			((I2S_Type *)DEMO_I2SRxFrAmp)->FIFOCFG |= (1<<16);	//empty fifo
 			//((I2S_Type *)DEMO_I2S4_TX1)->FIFOCFG |= (1<<16);	//empty fifo
 			#if 1
 			//this is to ensure tx intr comes after dmic intr --- don't close this part
 				for(int i=0;i<8;i++)
 				{
-					((I2S_Type *)DEMO_I2S1Rx0)->FIFOWR=0;
+					((I2S_Type *)DEMO_I2SRxFrAmp)->FIFOWR=0;
 					//((I2S_Type *)DEMO_I2S4_TX1)->FIFOWR=0;
 					//((I2S_Type *)DEMO_I2S_TX1)->FIFOWR=i*0x20000;		//fpll the fifo tx buffer, so that tx intr can be aligned with rx and dmic --- using special values for debug checking
 				}
@@ -1115,14 +1123,14 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		WaitForRx0LRCKFallingEdge_Fc1();
 		//start Rx0 after falling edge
 			//((I2S_Type *)DEMO_I2S2_RX0)->FIFOCFG |= (1<<16);	//empty fifo
-			((I2S_Type *)DEMO_I2S3Tx0)->FIFOCFG |= (1<<16);	//empty fifo
+			((I2S_Type *)DEMO_I2STxToAmp)->FIFOCFG |= (1<<16);	//empty fifo
 			#if 1
 				//this is to ensure rx intr comes after dmic intr --- don't close this part
 				for(int i=0;i<8;i++)
 				{
 					volatile U32 t;
 					//t=((I2S_Type *)DEMO_I2S2_RX0)->FIFORD;
-					t=((I2S_Type *)DEMO_I2S3Tx0)->FIFORD;
+					t=((I2S_Type *)DEMO_I2STxToAmp)->FIFORD;
 					t++;	//just to remove a warning
 				}
 			#endif

@@ -39,13 +39,13 @@
 i2s_config_t I2S_Tx_config;
 i2s_config_t I2S_Rx_config;
 
-dma_handle_t I2S3Tx0DmaHandle;
-dma_handle_t I2S1Rx0DmaHandle;
+dma_handle_t I2STxToAmpDmaHandle;
+dma_handle_t I2SRxFrAmpDmaHandle;
 dma_handle_t I2STxToNtDmaHandle;
 dma_handle_t I2SRxFrNtDmaHandle;
 
-i2s_dma_handle_t I2S3Tx0Handle;
-i2s_dma_handle_t I2S1Rx0Handle;
+i2s_dma_handle_t I2STxToAmpHandle;
+i2s_dma_handle_t I2SRxFrAmpHandle;
 i2s_dma_handle_t I2SRxFrNtHandle;
 i2s_dma_handle_t I2STxToNtHandle;
 
@@ -195,11 +195,11 @@ void ClearDmaBuf_I2SRxFrNt(void)
 //in fsl_dma.c handle->base->CHANNEL[channel].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK; is removed --- this is to start all the DMA channel at the same time
 void EnableI2S3Tx0DmaChannel(void)
 {
-	((DMA_Type *)(DEMO_DMA))->CHANNEL[I2S_FC3Tx_DMA_CHANNEL].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK;
+	((DMA_Type *)(DEMO_DMA))->CHANNEL[I2S_FCTxToAmp_DMA_CHANNEL].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK;
 }
 void EnableI2S1Rx0DmaChannel(void)
 {
-	((DMA_Type *)(DEMO_DMA))->CHANNEL[I2S_FC1Rx_DMA_CHANNEL].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK;
+	((DMA_Type *)(DEMO_DMA))->CHANNEL[I2S_FCRxFrAmp_DMA_CHANNEL].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK;
 }
 void EnableI2STxToNtDmaChannel(void)
 {
@@ -212,14 +212,14 @@ void EnableI2SRxFrNtDmaChannel(void)
 __attribute__((section("CodeQuickAccess")))
 void ImmediatelyStartI2S1Dma(void)
 {
-	((I2S_Type *)DEMO_I2S1Rx0)->FIFOCFG |= I2S_FIFOCFG_DMARX_MASK;
+	((I2S_Type *)DEMO_I2SRxFrAmp)->FIFOCFG |= I2S_FIFOCFG_DMARX_MASK;
 	NVIC_SetPriority(DMA0_IRQn, (USB_DEVICE_INTERRUPT_PRIORITY + 1U));
 	EnableIRQ(DMA0_IRQn);
 }
 __attribute__((section("CodeQuickAccess")))
 void ImmediatelyStartI2S3Dma(void)
 {
-	((I2S_Type *)DEMO_I2S3Tx0)->FIFOCFG |= I2S_FIFOCFG_DMATX_MASK;
+	((I2S_Type *)DEMO_I2STxToAmp)->FIFOCFG |= I2S_FIFOCFG_DMATX_MASK;
 	NVIC_SetPriority(DMA0_IRQn, (USB_DEVICE_INTERRUPT_PRIORITY + 1U));
 	EnableIRQ(DMA0_IRQn);
 }
@@ -242,15 +242,15 @@ void ImmediatelyStartI2SRxToNtDma(void)
 #if 1	//folding --- init
 void BOARD_Init_DMA_I2S_Fc1(void)
 {
-	DMA_EnableChannel(DEMO_DMA, I2S_FC1Rx_DMA_CHANNEL);
-	DMA_SetChannelPriority(DEMO_DMA, I2S_FC1Rx_DMA_CHANNEL, kDMA_ChannelPriority4);
-	DmaDscrPtr_I2S1 =Ptr_dma_descriptor_table0+4*I2S_FC1Rx_DMA_CHANNEL;
+	DMA_EnableChannel(DEMO_DMA, I2S_FCRxFrAmp_DMA_CHANNEL);
+	DMA_SetChannelPriority(DEMO_DMA, I2S_FCRxFrAmp_DMA_CHANNEL, kDMA_ChannelPriority4);
+	DmaDscrPtr_I2S1 =Ptr_dma_descriptor_table0+4*I2S_FCRxFrAmp_DMA_CHANNEL;
 }
 void BOARD_Init_DMA_I2S_Fc3(void)
 {
-	DMA_EnableChannel(DEMO_DMA, I2S_FC3Tx_DMA_CHANNEL);
-	DMA_SetChannelPriority(DEMO_DMA, I2S_FC3Tx_DMA_CHANNEL, kDMA_ChannelPriority5);
-	DmaDscrPtr_I2S3 =Ptr_dma_descriptor_table0+4*I2S_FC3Tx_DMA_CHANNEL;
+	DMA_EnableChannel(DEMO_DMA, I2S_FCTxToAmp_DMA_CHANNEL);
+	DMA_SetChannelPriority(DEMO_DMA, I2S_FCTxToAmp_DMA_CHANNEL, kDMA_ChannelPriority5);
+	DmaDscrPtr_I2S3 =Ptr_dma_descriptor_table0+4*I2S_FCTxToAmp_DMA_CHANNEL;
 }
 void BOARD_Init_DMA_I2S_FcRxFrNt(void)
 {
@@ -290,8 +290,8 @@ void BOARD_Init_I2S_Fc3(void)
 	I2S_Tx_config.position    =  0;
 	I2S_Tx_config.oneChannel  = false;
 
-	I2S_Tx_config.masterSlave = DEMO_I2S3Tx0_MODE;
-	I2S_TxInit(DEMO_I2S3Tx0, &I2S_Tx_config);
+	I2S_Tx_config.masterSlave = DEMO_I2SToAmpTx_MODE;
+	I2S_TxInit(DEMO_I2STxToAmp, &I2S_Tx_config);
 }
 void BOARD_Init_I2S_Fc1(void)
 {
@@ -319,8 +319,8 @@ void BOARD_Init_I2S_Fc1(void)
 	I2S_Rx_config.position    =  0;
 	I2S_Rx_config.oneChannel  = false;
 
-	I2S_Rx_config.masterSlave = DEMO_I2S1Rx0_MODE;
-	I2S_RxInit(DEMO_I2S1Rx0, &I2S_Rx_config);
+	I2S_Rx_config.masterSlave = DEMO_I2SFrAmpRx_MODE;
+	I2S_RxInit(DEMO_I2SRxFrAmp, &I2S_Rx_config);
 }
 void BOARD_Init_I2S_FcTxToNt(void)
 {
@@ -385,7 +385,7 @@ void WaitForRx0LRCKRisingEdge_Fc1(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2S1Rx0)->STAT) & 0x4) ==0x0	//now it is left channel
+				((((I2S_Type *)DEMO_I2SRxFrAmp)->STAT) & 0x4) ==0x0	//now it is left channel
 		  )
 			break;
 	}
@@ -393,7 +393,7 @@ void WaitForRx0LRCKRisingEdge_Fc1(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2S1Rx0)->STAT) & 0x4) ==0x4	//now it is right channel
+				((((I2S_Type *)DEMO_I2SRxFrAmp)->STAT) & 0x4) ==0x4	//now it is right channel
 		  )
 			break;
 	}
@@ -407,7 +407,7 @@ void WaitForRx0LRCKFallingEdge_Fc1(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2S1Rx0)->STAT) & 0x4) ==0x4	//now it is right channel
+				((((I2S_Type *)DEMO_I2SRxFrAmp)->STAT) & 0x4) ==0x4	//now it is right channel
 		  )
 			break;
 	}
@@ -415,7 +415,7 @@ void WaitForRx0LRCKFallingEdge_Fc1(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2S1Rx0)->STAT) & 0x4) ==0x0	//now it is left channel
+				((((I2S_Type *)DEMO_I2SRxFrAmp)->STAT) & 0x4) ==0x0	//now it is left channel
 		  )
 			break;
 	}
@@ -429,7 +429,7 @@ void WaitForTx0LRCKRisingEdge_Fc3(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2S3Tx0)->STAT) & 0x4) ==0x0	//now it is left channel
+				((((I2S_Type *)DEMO_I2STxToAmp)->STAT) & 0x4) ==0x0	//now it is left channel
 		  )
 			break;
 	}
@@ -437,7 +437,7 @@ void WaitForTx0LRCKRisingEdge_Fc3(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2S3Tx0)->STAT) & 0x4) ==0x4	//now it is right channel
+				((((I2S_Type *)DEMO_I2STxToAmp)->STAT) & 0x4) ==0x4	//now it is right channel
 		  )
 			break;
 	}
@@ -451,7 +451,7 @@ void WaitForTx0LRCKFallingEdge_Fc3(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2S3Tx0)->STAT) & 0x4) ==0x4	//now it is right channel
+				((((I2S_Type *)DEMO_I2STxToAmp)->STAT) & 0x4) ==0x4	//now it is right channel
 		  )
 			break;
 	}
@@ -459,7 +459,7 @@ void WaitForTx0LRCKFallingEdge_Fc3(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2S3Tx0)->STAT) & 0x4) ==0x0	//now it is left channel
+				((((I2S_Type *)DEMO_I2STxToAmp)->STAT) & 0x4) ==0x0	//now it is left channel
 		  )
 			break;
 	}
@@ -560,13 +560,13 @@ void CloseI2sDma(I2S_Type *I2SBase)
 {
 	switch((U32)I2SBase)
 	{
-		case (U32)DEMO_I2S1Rx0:
-				I2S_TransferAbortDMA(DEMO_I2S1Rx0, &I2S1Rx0Handle);
-				DMA_DisableChannel(DEMO_DMA, I2S_FC1Rx_DMA_CHANNEL);
+		case (U32)DEMO_I2SRxFrAmp:
+				I2S_TransferAbortDMA(DEMO_I2SRxFrAmp, &I2SRxFrAmpHandle);
+				DMA_DisableChannel(DEMO_DMA, I2S_FCRxFrAmp_DMA_CHANNEL);
 			break;
-		case (U32)DEMO_I2S3Tx0:
-				I2S_TransferAbortDMA(DEMO_I2S3Tx0, &I2S3Tx0Handle);
-				DMA_DisableChannel(DEMO_DMA, I2S_FC3Tx_DMA_CHANNEL);
+		case (U32)DEMO_I2STxToAmp:
+				I2S_TransferAbortDMA(DEMO_I2STxToAmp, &I2STxToAmpHandle);
+				DMA_DisableChannel(DEMO_DMA, I2S_FCTxToAmp_DMA_CHANNEL);
 			break;
 		case (U32)I2STxToNtInstance:
 			I2S_TransferAbortDMA(I2STxToNtInstance, &I2STxToNtHandle);
@@ -594,10 +594,10 @@ void CloseI2sAndI2sIntr(I2S_Type *I2SBase)
 	I2S_DisableInterrupts(I2SBase, (uint32_t)kI2S_RxErrorFlag | (uint32_t)kI2S_RxLevelFlag);
 	switch((U32)I2SBase)
 	{
-		case (U32)DEMO_I2S1Rx0:
+		case (U32)DEMO_I2SRxFrAmp:
 			DisableIRQ((IRQn_Type)(FLEXCOMM0_IRQn+FcIdx_RxFrAmp));
 			break;
-		case (U32)DEMO_I2S3Tx0:
+		case (U32)DEMO_I2STxToAmp:
 			DisableIRQ((IRQn_Type)(FLEXCOMM0_IRQn+FcIdx_TxToAmp));
 			break;
 		case (U32)I2STxToNtInstance:
@@ -846,10 +846,10 @@ void I2STxToNt_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t compl
 #if 1	//folding --- configure/create and start
 void ConfigI2S3ChainedDma(void)
 {
-	DMA_CreateHandle(&I2S3Tx0DmaHandle, DEMO_DMA, I2S_FC3Tx_DMA_CHANNEL);
-	I2S_TxTransferCreateHandleDMA(DEMO_I2S3Tx0,  &I2S3Tx0Handle, &I2S3Tx0DmaHandle, I2S3Tx0_Callback,I2S3Tx0Transfer);
-	I2S_TransferInstallLoopDMADescriptorMemory   (&I2S3Tx0Handle,  I2S3Tx0DmaDescriptors, 2U);
-    if (I2S_TransferSendLoopDMA   (DEMO_I2S3Tx0, &I2S3Tx0Handle, &I2S3Tx0Transfer[0], 2U) != kStatus_Success)
+	DMA_CreateHandle(&I2STxToAmpDmaHandle, DEMO_DMA, I2S_FCTxToAmp_DMA_CHANNEL);
+	I2S_TxTransferCreateHandleDMA(DEMO_I2STxToAmp,  &I2STxToAmpHandle, &I2STxToAmpDmaHandle, I2S3Tx0_Callback,I2S3Tx0Transfer);
+	I2S_TransferInstallLoopDMADescriptorMemory   (&I2STxToAmpHandle,  I2S3Tx0DmaDescriptors, 2U);
+    if (I2S_TransferSendLoopDMA   (DEMO_I2STxToAmp, &I2STxToAmpHandle, &I2S3Tx0Transfer[0], 2U) != kStatus_Success)
     {
         assert(false);
     }
@@ -857,10 +857,10 @@ void ConfigI2S3ChainedDma(void)
 }
 void ConfigI2S1ChainedDma(void)
 {
-	DMA_CreateHandle(&I2S1Rx0DmaHandle, DEMO_DMA, I2S_FC1Rx_DMA_CHANNEL);
-	I2S_RxTransferCreateHandleDMA(DEMO_I2S1Rx0,  &I2S1Rx0Handle, &I2S1Rx0DmaHandle, I2S1Rx0_Callback,I2S1Rx0Transfer);
-    I2S_TransferInstallLoopDMADescriptorMemory   (&I2S1Rx0Handle,  I2S1Rx0DmaDescriptors, 2U);
-    if (I2S_TransferReceiveLoopDMA(DEMO_I2S1Rx0, &I2S1Rx0Handle, &I2S1Rx0Transfer[0], 2U) != kStatus_Success)
+	DMA_CreateHandle(&I2SRxFrAmpDmaHandle, DEMO_DMA, I2S_FCRxFrAmp_DMA_CHANNEL);
+	I2S_RxTransferCreateHandleDMA(DEMO_I2SRxFrAmp,  &I2SRxFrAmpHandle, &I2SRxFrAmpDmaHandle, I2S1Rx0_Callback,I2S1Rx0Transfer);
+    I2S_TransferInstallLoopDMADescriptorMemory   (&I2SRxFrAmpHandle,  I2S1Rx0DmaDescriptors, 2U);
+    if (I2S_TransferReceiveLoopDMA(DEMO_I2SRxFrAmp, &I2SRxFrAmpHandle, &I2S1Rx0Transfer[0], 2U) != kStatus_Success)
     {
         assert(false);
     }

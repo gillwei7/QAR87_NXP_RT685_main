@@ -18,6 +18,12 @@
 #include "controller_hci_uart.h"
 #include "fsl_power.h"
 
+#if UsingQAR87Board == 1
+#include "glf70583.h"
+#include "pmic_support.h"
+#include "pmic_pca9422.h"
+#endif
+
 #if CONFIG_BT_HOST_USB_ENABLE==1
 #include "usb_host_config.h"
 #include "usb_phy.h"
@@ -79,14 +85,22 @@
 #define DEMO_MICBUF_TX_INSTANCE (2U)
 #define DEMO_MICBUF_RX_INSTANCE (1U)
 #define DEMO_SPKBUF_TX_INSTANCE (3U)
+#if UsingQAR87Board == 1
+#define DEMO_SPKBUF_RX_INSTANCE (4U)
+#else
 #define DEMO_SPKBUF_RX_INSTANCE (5U)
+#endif
 
 /* DMA */
 #define EXAMPLE_DMA_INSTANCE      (0U)
 #define EXAMPLE_MICBUF_TX_CHANNEL (5U)
 #define EXAMPLE_MICBUF_RX_CHANNEL (2U)
 #define EXAMPLE_SPKBUF_TX_CHANNEL (7U)
+#if UsingQAR87Board == 1
+#define EXAMPLE_SPKBUF_RX_CHANNEL (8U)
+#else
 #define EXAMPLE_SPKBUF_RX_CHANNEL (10U)
+#endif
 
 /* demo audio data channel */
 #define DEMO_MICBUF_TX_CHANNEL (kHAL_AudioMono)
@@ -405,30 +419,46 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
 		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3);
-		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S2) */
+		        /* attach AUDIO PLL clock to FLEXCOMM2 (I2S2) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);
-		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S5) */
+			#if UsingQAR87Board == 1
+				/* attach AUDIO PLL clock to FLEXCOMM4 (I2S4) */
+        		CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
+			#else
+		        /* attach AUDIO PLL clock to FLEXCOMM5 (I2S5) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
+			#endif
+				
 			break;
 			case 1:
 		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
 		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3);
-		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S2) */
+		        /* attach AUDIO PLL clock to FLEXCOMM2 (I2S2) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);
-		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S5) */
+		    #if UsingQAR87Board == 1
+				/* attach AUDIO PLL clock to FLEXCOMM4 (I2S4) */
+        		CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
+			#else
+		        /* attach AUDIO PLL clock to FLEXCOMM5 (I2S5) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
+			#endif
 			break;
 			case 2:
 		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
 		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3);
-		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S2) */
+		        /* attach AUDIO PLL clock to FLEXCOMM2 (I2S2) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);
-		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S5) */
+			#if UsingQAR87Board == 1
+				/* attach AUDIO PLL clock to FLEXCOMM4 (I2S4) */
+        		CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
+			#else
+		        /* attach AUDIO PLL clock to FLEXCOMM5 (I2S5) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
+			#endif
 			break;
 		}
 
@@ -452,16 +482,29 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 			switch(I2SClkShareCfgIdx)
 			{
 				case 0:
-					SetFcClkSharing(FcIdx_RxFrNvt, FcIdx_TxToNvt, 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
-					SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 1
+					#if UsingQAR87Board == 1
+						SetFcClkSharing(DEMO_MICBUF_TX_INSTANCE, DEMO_SPKBUF_RX_INSTANCE, 0); //BT PCM interface, share clk of DEMO_MICBUF_TX_INSTANCE to DEMO_SPKBUF_RX_INSTANCE, using internal share group 0
+						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
+					#else
+						SetFcClkSharing(FcIdx_RxFrNvt, FcIdx_TxToNvt, 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
+						SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrAmp to FcIdx_TxToAmp, using internal share group 1
+					#endif
 				break;
 				case 1:
 					SetFcClkSharing(FcIdx_RxFrNvt, FcIdx_TxToNvt, 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
-					SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 1
+					#if UsingQAR87Board == 1
+						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
+					#else
+						SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrAmp to FcIdx_TxToAmp, using internal share group 1
+					#endif
 				break;
 				case 2:
 					SetFcClkSharing(FcIdx_RxFrNvt, FcIdx_TxToNvt, 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
-					SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 1
+					#if UsingQAR87Board == 1
+						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
+					#else
+						SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrAmp to FcIdx_TxToAmp, using internal share group 1
+					#endif
 				break;
 			}
 		#endif
@@ -570,6 +613,88 @@ void BOARD_I3C_ReleaseBus(void)
                   BOARD_INITI3CPINSASGPIO_I3C0_SDA_PIN, 1U);
     i2c_release_bus_delay();
 }
+
+#if UsingQAR87Board == 1
+static void Scan_I2C_Devices(I3C_Type *base)
+{
+    uint8_t dummyData = 0x00;
+    status_t result;
+
+    PRINTF("[I2C]Scanning I2C addresses...\n");
+
+    for (uint8_t addr = 0x08; addr <= 0x77; addr++) // I2C valid 7-bit address range
+    {
+        result = BOARD_I3C_Send(base, addr, 0x00, 0, &dummyData, 0);
+
+        if (result == kStatus_Success)
+        {
+        	PRINTF("[I2C]Device found at 0x%02X\n", addr);
+        }
+    }
+
+    PRINTF("[I2C]Scan complete.\n");
+}
+
+void BOARD_InitPMICs(void)
+{
+	/* Define the init structure for the input switch pin */
+	gpio_pin_config_t sw_config    = {kGPIO_DigitalInput, 0};
+	gpio_interrupt_config_t config = {kGPIO_PinIntEnableEdge, kGPIO_PinIntEnableLowOrFall};
+	/* Init input switch GPIO. */
+	EnableIRQ(GPIO_INTA_IRQn);
+
+	//PMIC_GLF70583_ENABLE
+    /* Init GPIO */
+    GPIO_PortInit(GPIO, PWR_SW1_PORT);
+    gpio_pin_config_t output_int_config = {kGPIO_DigitalOutput, 0,};
+    GPIO_PinInit(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, &output_int_config);
+    GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 0);
+
+
+    BOARD_I3C_Init(BOARD_PMIC_I3C_BASEADDR, BOARD_PMIC_I3C_CLOCK_FREQ);
+    Scan_I2C_Devices(BOARD_PMIC_I3C_BASEADDR);
+
+    //PMIC_PCA9422_ENABLE
+   /* Init PCA9422 PMIC. */
+	BOARD_InitPmic();
+	//PRINTF("-------------- PCA9422 BOARD_InitPmic OK--------------\r\n");
+	/* Apply PMIC mode and voltage settings */
+	BOARD_Init_PMICConfigure();
+	//PRINTF("-------------- PCA9422 BOARD_Init_PMICConfigure OK--------------\r\n");
+
+	//PMIC_GLF70583_ENABLE
+	uint8_t top_stat = 0;
+	glf70583_i2c_read(GLF70583_A_I2C_ADDR,0x00,&top_stat,1);
+	//PRINTF("[GLF70583]top_stat:%X \n",top_stat);
+
+	//Solution: The manufacturer did not set it to LOAD SWITCH
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0xF5, 0xC6);
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB8);
+	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB9);
+
+	// BUCK1 Delay 4ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x66, 0x0C);
+	// BUCK2 Delay 2ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x67, 0x08);
+	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x67, 0x08);
+	// BUCK3 Delay 0ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x68, 0x00);
+	// LDO1 Delay 5ms
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x6A, 0x12);
+	// 0x25->BUCK4?BLDO2 off
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x26, 0xE8);
+	// 0x26->BUCK2 ON?BOthers off
+	//glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);
+	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0xD0);
+
+	//uint8_t ch = GETCHAR();
+	//PRINTF("GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); \n");
+	GPIO_PinWrite(GPIO, PWR_SW1_PORT, PWR_SW1_PIN, 1); //Enable GLF70583
+	// PMIC_GLF70583_ENABLE
+}
+#endif
+
 extern void UsbAppInit(void);
 void BOARD_InitHardware(void)
 {
@@ -580,6 +705,27 @@ void BOARD_InitHardware(void)
         1,
     };
 
+#if UsingQAR87Board == 1
+    gpio_pin_config_t IW611_PMIC_config = {
+        kGPIO_DigitalOutput,
+        1,
+    };
+    /* Attach main clock to I3C, 500MHz / 20 = 25Hz. */
+    CLOCK_AttachClk(kMAIN_CLK_to_I3C_CLK);
+    CLOCK_SetClkDiv(kCLOCK_DivI3cClk, 20);
+
+    BOARD_InitBootPins();
+    BOARD_InitBootClocks();
+	
+    /* Attach AUX0_PLL clock to flexspi with divider 4*/
+    //BOARD_SetFlexspiClock(2, 8);
+    /* attach FRG0 clock to FLEXCOMM4 */
+    CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
+    CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
+
+    BOARD_InitPMICs();
+    BOARD_InitDebugConsole();	
+#else
     BOARD_InitBootPins();
     BOARD_InitBootClocks();
     BOARD_InitDebugConsole();
@@ -597,13 +743,14 @@ void BOARD_InitHardware(void)
     CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
 
 	PRINTF("RT685 MCU: start\r\n");
+#endif
 
 #if EnableConversa==1
 
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
-	PRINTF("RT685 MCU: ------------ McuVer 0.1.4 ------------ \r\n");
-	PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
+	PRINTF("RT685 MCU: ------------ McuVer 0.1.4.1 ------------ \r\n");
+	//PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
 
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: size of shared memory structure is %d \r\n", sizeof(VarBlockSharedByDspAndMcu));
@@ -615,11 +762,17 @@ void BOARD_InitHardware(void)
 	PRINTF("RT685 MCU: Test get cycle counter without Jlink\r\n");
 	TestGetCycCnt();		//can be closed after debug
 
+#if UsingQAR87Board == 1
+	InitSineToneGen1();
+	InitSineToneGen2();
+	InitBtnEvt(); //need more editing for Quanta board
+#else
 	InitDbgPin();
 	OpeningBlink(3);
 	InitSineToneGen1();
 	InitSineToneGen2();
 	InitBtnEvt();
+#endif
 
 	#if EnableUsbComAndAudio==1
 		#if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)

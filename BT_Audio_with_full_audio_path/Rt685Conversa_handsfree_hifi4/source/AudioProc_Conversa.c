@@ -374,6 +374,11 @@ void InitConversa(void)
 		return;
 	}
 
+	PRINTF("\DMIC Interface:\r\n");
+	PRINTF("DMIC0 - PDM_DATA01(PIO2_20)- DMIC SEL = low\r\n");
+	PRINTF("DMIC1 - PDM_DATA01(PIO2_20)- DMIC SEL = high\r\n");
+	PRINTF("DMIC2 - PDM_DATA23(PIO2_21)- DMIC SEL = low\r\n");
+	PRINTF("DMIC3 - PDM_DATA23(PIO2_21)- DMIC SEL = high\r\n");
 	/* At this step Conversa instance is created */
 	InitConversaBufPtr();
 }
@@ -497,9 +502,9 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 		PL_FLOAT** pp_outputAudioData_Rx_FLT= NULL;
 
 		#if 1
-			pp_inputAudioData_Tx_FLT[0]=(float *)Ptr_Mic4;
-			pp_inputAudioData_Tx_FLT[1]=(float *)Ptr_Mic5;
-			pp_inputAudioData_Tx_FLT[2]=(float *)Ptr_Mic6;
+			pp_inputAudioData_Tx_FLT[0]=(float *)Ptr_Mic4; //A3, glasses mic location
+			pp_inputAudioData_Tx_FLT[1]=(float *)Ptr_Mic5; //C7, glasses mic location
+			pp_inputAudioData_Tx_FLT[2]=(float *)Ptr_Mic6; //C8, glasses mic location
 		#else
 			pp_inputAudioData_Tx_FLT[0]=(float *)RawMic32BitBuf0;
 			pp_inputAudioData_Tx_FLT[1]=(float *)RawMic32BitBuf1;

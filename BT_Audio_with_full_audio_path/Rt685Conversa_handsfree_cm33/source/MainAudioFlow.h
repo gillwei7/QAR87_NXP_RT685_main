@@ -9,16 +9,18 @@
 #ifndef __MainAudioFlow_h__
 #define __MainAudioFlow_h__
 
-
+#if EnableMic01==1
 #define AudioPdmPortsBitMapFlag_Mic01			0x01
+#endif
+#if EnableMic23==1
 #define AudioPdmPortsBitMapFlag_Mic23			0x02
-
+#endif
 #if EnableMic45==1
-	#define AudioPdmPortsBitMapFlag_Mic45			0x04
+#define AudioPdmPortsBitMapFlag_Mic45			0x04
 #endif
 
 #if EnableMic67==1
-	#define AudioPdmPortsBitMapFlag_Mic67			0x08
+#define AudioPdmPortsBitMapFlag_Mic67			0x08
 #endif
 
 #define AudioI2sPortsBitMapFlag_Fc1				0x10

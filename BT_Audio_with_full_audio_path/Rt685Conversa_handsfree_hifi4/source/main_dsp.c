@@ -340,7 +340,7 @@ int main(void)
 
     SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
     	PRINTF("RT685 DSP: Started -----IW611 BT HFP with Conversa------- \r\n");
-		PRINTF("RT685 DSP: started ----------- DspVer 0.1.4 ------------- \r\n");
+		PRINTF("RT685 DSP: started ----------- DspVer 0.1.4.1 ------------- \r\n");
     	PRINTF("RT685 DSP: Started -----IW611 BT HFP with Conversa------- \r\n");
 		InitMeterAndCompressor();
 		InitVit();

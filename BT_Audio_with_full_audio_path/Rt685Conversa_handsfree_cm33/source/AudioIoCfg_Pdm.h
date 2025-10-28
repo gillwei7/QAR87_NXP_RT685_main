@@ -19,11 +19,17 @@
 #include "fsl_i2s_dma.h"
 
 
-
+#if UsingQAR87Board == 1
+#define EnableMic01		1
+#define EnableMic23		1
+#define EnableMic45		0
+#define EnableMic67		0
+#else
 #define EnableMic01		1
 #define EnableMic23		1
 #define EnableMic45		1
 #define EnableMic67		1
+#endif
 
 #define DMAREQ_DMIC0 16U
 #define DMAREQ_DMIC1 17U

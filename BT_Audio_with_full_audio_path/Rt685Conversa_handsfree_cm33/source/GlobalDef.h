@@ -11,6 +11,9 @@
 
 
 //------------------------settings can be changed ----------------------
+//If UsingQAR87Board == 1, the program can be run on the QAR87 development board.
+//Defined in properties preprocessor #define UsingQAR87Board										1
+
 #define EnableConversa										1		//when this is set to 0, this demo is the same as the original SDK HFP example
 
 //sub working modes (workstate) enable or disable --- go to WorkStateManager.h to setup
@@ -49,6 +52,8 @@
 #define Fs_I2SToNvt_MicSpkTest							48000
 
 #define EnableVitBeforeTheCall								1
+
+
 //------------------------settings can be changed ----------------------
 
 
