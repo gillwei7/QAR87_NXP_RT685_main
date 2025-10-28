@@ -5,8 +5,8 @@
  *      Author: 11301026
  */
 
-#ifndef I2_COMPONENT_HANDLER_H_
-#define I2_COMPONENT_HANDLER_H_
+#ifndef I2C_COMPONENT_HANDLER_H_
+#define I2C_COMPONENT_HANDLER_H_
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -85,4 +85,4 @@ void Scan_I2C_Devices(I3C_Type *base);
 void I2C_Task(void *pvParameters);
 
 
-#endif /* I2_COMPONENT_HANDLER_H_ */
+#endif /* I2C_COMPONENT_HANDLER_H_ */

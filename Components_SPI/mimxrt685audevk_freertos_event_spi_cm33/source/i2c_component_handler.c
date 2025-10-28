@@ -5,7 +5,7 @@
  *      Author: 11301026
  */
 
-#include "i2_component_handler.h"
+#include "i2c_component_handler.h"
 #include "spi_handler.h"
 #include "i2s_handler.h"
 #include "button_handler.h"
