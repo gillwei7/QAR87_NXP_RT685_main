@@ -4,7 +4,7 @@
  *  Created on: Oct 21, 2025
  *      Author: Lydia
  */
-
+#if UsingQAR87Board == 1
 #ifndef HAL_PMIC_H_
 #define HAL_PMIC_H_
 
@@ -24,3 +24,4 @@ void BOARD_InitPMICs(void);
 
 
 #endif /* HAL_PMIC_H_ */
+#endif

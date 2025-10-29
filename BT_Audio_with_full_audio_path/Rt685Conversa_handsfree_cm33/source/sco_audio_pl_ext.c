@@ -622,7 +622,7 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			//initial codec/amplifier
 			//B36932, to do....
 
-	    	codec_inited = 1;
+	    	//move to after smart amp is enabled //codec_inited = 1;
 			//initial audio buffer and dmic and I2S
 
 			InitAudioCircularBuf();
@@ -661,6 +661,7 @@ static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
 			);
 			hal_amp_aw88166_left_start("Receiver");
 			hal_amp_aw88166_right_start("Receiver");
+			codec_inited = 1;
 			PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
 
 	
@@ -809,7 +810,7 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)	//n
 			//initial codec/amplifier
 			//B36932, to do....
 			
-			codec_inited = 1;
+			//move to after smart amp is enabled // codec_inited = 1;
 			//initial audio buffer and dmic and I2S	
 			InitAudioCircularBuf();
 
@@ -827,7 +828,7 @@ static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)	//n
 			DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3);
 			hal_amp_aw88166_left_start("Music");
 			hal_amp_aw88166_right_start("Music");
-
+			codec_inited = 1;
 			PRINTF("Init_Board_RingTone_Audio is successful and finished \r\n");
 			
 	#else	

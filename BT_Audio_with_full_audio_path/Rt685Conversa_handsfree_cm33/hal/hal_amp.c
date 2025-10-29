@@ -4,6 +4,7 @@
  *  Created on: Oct 21, 2025
  *      Author: Lydia
  */
+#if UsingQAR87Board == 1
 #include "hal_amp.h"
 
 void hal_amp_aw88166_power_on(void) {
@@ -36,3 +37,5 @@ void hal_amp_aw88166_right_stop(void) {
     close_aw88166_pa(AW_DEV_1);
 
 }
+
+#endif

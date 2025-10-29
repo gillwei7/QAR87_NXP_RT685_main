@@ -250,6 +250,7 @@ void BOARD_InitPins(void)
 #endif
 }
 
+#if UsingQAR87Board == 1
 /* FUNCTION ************************************************************************************************************
  *
  * Function Name : PCA9422_I3C
@@ -323,7 +324,7 @@ void PCA9422_I3C(void)
     /* PORT2 PIN30 (coords: P16) is configured as I3C0_SDA */
     IOPCTL_PinMuxSet(IOPCTL, PCA9422_I3C_I3C_ICM_SDA_PORT, PCA9422_I3C_I3C_ICM_SDA_PIN, I3C_ICM_SDA);
 }
-
+#endif
 /* clang-format off */
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************

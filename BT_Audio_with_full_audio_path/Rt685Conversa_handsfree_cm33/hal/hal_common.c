@@ -4,6 +4,7 @@
  *  Created on: Oct 21, 2025
  *      Author: Lydia
  */
+#if UsingQAR87Board == 1
 #include "hal_common.h"
 
 /**
@@ -56,4 +57,4 @@ void Scan_I2C_Devices(I3C_Type *base)
     PRINTF("[I2C]Scan complete.\n");
 }
 
-
+#endif

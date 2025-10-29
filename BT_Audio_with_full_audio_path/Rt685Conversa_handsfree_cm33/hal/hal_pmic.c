@@ -4,6 +4,7 @@
  *  Created on: Oct 21, 2025
  *      Author: Lydia
  */
+#if UsingQAR87Board == 1
 #include "hal_pmic.h"
 
 
@@ -77,3 +78,4 @@ void BOARD_InitPMICs(void)
 
 #endif // PMIC_GLF70583_ENABLE
 }
+#endif

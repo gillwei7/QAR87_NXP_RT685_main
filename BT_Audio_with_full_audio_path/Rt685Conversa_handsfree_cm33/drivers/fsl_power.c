@@ -29,15 +29,21 @@ static const uint32_t powerLowDspFreqLevel[2][3] = {
     /* For part -20C - 85C */
     {355U * MEGA, 235U * MEGA, 95U * MEGA}};
 
-//const uint32_t powerFullCm33FreqLevel[2][5] = {
+#if UsingQAR87Board == 1
 static const uint32_t powerFullCm33FreqLevel[2][5] = {
+#else
+const uint32_t powerFullCm33FreqLevel[2][5] = {
+#endif
     /* For part 0C - 85C */
     {300U * MEGA, 275U * MEGA, 210U * MEGA, 140U * MEGA, 65U * MEGA},
     /* For part -20C - 85C */
     {300U * MEGA, 270U * MEGA, 200U * MEGA, 135U * MEGA, 50U * MEGA}};
 
-//const uint32_t powerFullDspFreqLevel[2][5] = {
+#if UsingQAR87Board == 1
 static const uint32_t powerFullDspFreqLevel[2][5] = {
+#else
+const uint32_t powerFullDspFreqLevel[2][5] = {
+#endif
     /* For part 0C - 85C */
     {600U * MEGA, 480U * MEGA, 300U * MEGA, 195U * MEGA, 70U * MEGA},
     /* For part -20C - 85C */

@@ -308,9 +308,9 @@
 #if UsingQAR87Board == 1
 
 /* GPIO Port */
-#define GPIO0_PORT 0U
-#define GPIO1_PORT 1U
-#define GPIO2_PORT 2U
+#define GPIO0_PORT                    0U
+#define GPIO1_PORT                    1U
+#define GPIO2_PORT                    2U
 
 /* AMP */
 #define AMP_RESET_PORT 0U
@@ -335,9 +335,9 @@
 #define RESET553_N_PIN  27U
 
 /* Buttons */
-#define EXAMPLE_PINT_BASE PINT
-#define POWERKEY_PINT_PIN_INT0_SRC kINPUTMUX_GpioPort0Pin5ToPintsel  /* Power Key */
-#define FUNKEY_PINT_PIN_INT1_SRC kINPUTMUX_GpioPort0Pin26ToPintsel   /* Fun Key */
+#define EXAMPLE_PINT_BASE             PINT
+#define POWERKEY_PINT_PIN_INT0_SRC    kINPUTMUX_GpioPort0Pin5ToPintsel  /* Power Key */
+#define FUNKEY_PINT_PIN_INT1_SRC      kINPUTMUX_GpioPort0Pin26ToPintsel   /* Fun Key */
 #define POWER_KEY_PORT 0U
 #define POWER_KEY_PIN  5U
 #define FUN_KEY1_N_PORT 0U

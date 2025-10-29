@@ -4,7 +4,7 @@
  *  Created on: Oct 21, 2025
  *      Author: Lydia
  */
-
+#if UsingQAR87Board == 1
 #ifndef HAL_POWER_H_
 #define HAL_POWER_H_
 
@@ -19,3 +19,4 @@ void hal_power_gauge_glf70302_get_battery_level(void);
 
 
 #endif /* HAL_POWER_H_ */
+#endif

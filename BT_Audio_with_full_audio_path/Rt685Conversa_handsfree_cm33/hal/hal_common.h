@@ -4,7 +4,7 @@
  *  Created on: Oct 21, 2025
  *      Author: Lydia
  */
-
+#if UsingQAR87Board == 1
 /*******************************************************************************
  * Quanta hal functions
  ******************************************************************************/
@@ -86,3 +86,4 @@ void hal_log_message(const int level,const char *file, const char *func, uint8_t
 
 
 #endif /* HAL_DRIVER_H_ */
+#endif

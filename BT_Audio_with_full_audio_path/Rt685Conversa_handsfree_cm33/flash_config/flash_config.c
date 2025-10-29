@@ -23,7 +23,7 @@ __attribute__((section(".flash_conf"), used))
 
 //move to defined in Preprocess project setting #define MX25U12843G 1
 
-#if MX25U12843G
+#if MX25U12843G || UsingQAR87Board
 const flexspi_nor_config_t flexspi_config = {
     .memConfig =
         {

@@ -4,6 +4,7 @@
  *  Created on: 2025年7月30日
  *      Author: 11301026
  */
+#if UsingQAR87Board == 1
 #include "pmic_pca9422.h"
 #include "fsl_power.h"
 #include <assert.h>
@@ -108,3 +109,4 @@ void BOARD_Init_PMICConfigure(void)
     PCA9422_SetBuckDVSControl(&pca9422Handle, kPCA9422_RegulatorSwitch3, (uint8_t)kPCA9422_PinInActiveAndBxOUTSLEEPInSleep);
 }
 
+#endif

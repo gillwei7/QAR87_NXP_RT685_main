@@ -4,7 +4,7 @@
  *  Created on: 2025年7月30日
  *      Author: 11301026
  */
-
+#if UsingQAR87Board == 1
 #ifndef PMIC_PCA9422_H_
 #define PMIC_PCA9422_H_
 
@@ -18,3 +18,4 @@ void BOARD_Config_PMICRegEnable(pca9422_regulatoren_t *cfg);
 
 
 #endif /* PMIC_PCA9422_H_ */
+#endif

@@ -27,8 +27,8 @@
 #else
 #define EnableMic01		1
 #define EnableMic23		1
-#define EnableMic45		1
-#define EnableMic67		1
+#define EnableMic45		0
+#define EnableMic67		0
 #endif
 
 #define DMAREQ_DMIC0 16U

@@ -4,7 +4,7 @@
  *  Created on: Oct 21, 2025
  *      Author: Lydia
  */
-
+#if UsingQAR87Board == 1
 #ifndef HAL_AMP_DRIVER_H_
 #define HAL_AMP_DRIVER_H_
 
@@ -21,6 +21,7 @@ void hal_amp_aw88166_right_start(char *prof_name);
 void hal_amp_aw88166_left_stop(void);
 void hal_amp_aw88166_right_stop(void);
 
+#endif
 
 
 #endif /* HAL_AMP_DRIVER_H_ */
