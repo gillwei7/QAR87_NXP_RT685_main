@@ -112,7 +112,12 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 
     switch (cmd) {
         case 0x00:
-            if (val == 0x01) {
+        	if (val == 0x00) {
+				PRINTF("[Passive] ACK:[00 00] Nova do nothing \r\n");
+				led_post_event(LED_EVT_ALL_OFF);
+			}
+
+        	else if (val == 0x01) {
                 PRINTF("[Passive] ACK:[00 01] Nova take photo success \r\n");
                 led_post_event(LED_EVT_PHOTO_CAPTURE);
             }
