@@ -219,20 +219,6 @@ int main(void)
         while (1);
     }
 
-//    if (xTaskCreate(spi_task, "SPI_TASK", configMINIMAL_STACK_SIZE + 100, NULL,
-//                    tskIDLE_PRIORITY + 1, NULL) != pdPASS)
-//    {
-//        PRINTF("Task creation failed!.\r\n");
-//        while (1);
-//    }
-
-    if (xTaskCreate(passive_spi_handler_task, "PASSIVE", configMINIMAL_STACK_SIZE + 200, NULL,
-                    tskIDLE_PRIORITY + 3, NULL) != pdPASS)
-    {
-        PRINTF("Task creation failed!.\r\n");
-        while (1);
-    }
-
 	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 100, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
     {
         PRINTF(" BUTTON Task creation failed!.\r\n");

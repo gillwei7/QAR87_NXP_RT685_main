@@ -430,84 +430,63 @@ static void execute_active_spi_transmission(uint8_t hex_value)
     vTaskDelay(pdMS_TO_TICKS(100));
 }
 
-/**
- * @brief SPI 處理任務 (消費者)。
- * @details 這是一個 FreeRTOS 任務，它無限循環地等待來自 `spi_request_queue` 的請求。
- * 一旦從佇列中接收到一個值 (例如，由 `button_task` 發送的按鍵事件)，
- * 它就會調用 `execute_active_spi_transmission` 來執行主動 SPI 傳輸。
- * 這種生產者-消費者模式可以將事件的產生 (按鈕) 與事件的處理 (SPI傳輸) 解耦。
- */
 void spi_handler_task(void *pvParameters)
 {
-    uint8_t received_value;
+    uint8_t     received_value;
+    EventBits_t bits;
 
-    // 初始化 SPI frame 的 checksum
+    /* 初始化固定幀的 checksum，維持原有邏輯 */
     dataFrame1[3] = calculateChecksum(dataFrame1, 3);
     dataFrame2[3] = calculateChecksum(dataFrame2, 3);
 
     PRINTF("=== SPI Slave Ready ===\r\n");
     PRINTF("GPIO is LOW: Passive mode active, waiting for Master...\r\n");
-    PRINTF("SPI Handler Task is ready, waiting for requests from the queue.\r\n");
+    PRINTF("SPI Handler Task (unified) is ready: handles ACTIVE requests and PASSIVE maintenance.\r\n");
 
-    while (1)
-    {
-        // 從佇列中等待並接收訊息，如果沒有訊息，任務會在此處被 block 住
-        if (xQueueReceive(spi_request_queue, &received_value, portMAX_DELAY) == pdPASS)
-        {
-            // 成功收到請求，呼叫執行函式
-            execute_active_spi_transmission(received_value);
-        }
-    }
-}
-
-/**
- * @brief 被動模式處理任務。
- * @details 這個任務負責管理 SPI 的被動模式。它在啟動時初始化 SPI 進入被動模式，
- * 並等待事件信號 (EVT_PASSIVE_RX_DONE 或 EVT_PASSIVE_NEED_INIT)。
- * 當需要重新初始化被動模式時 (例如，一次主動傳輸完成後或被動接收失敗後)，
- * 此任務會確保 SPI 正確地返回到監聽狀態。
- */
-void passive_spi_handler_task(void *pvParameters)
-{
-    EventBits_t bits;
+    /* 先進入被動監聽 */
     vTaskDelay(pdMS_TO_TICKS(100));
     init_passive_mode();
 
-    while (1) {
-        bits = xEventGroupWaitBits(spi_event_group,
-                                   EVT_PASSIVE_RX_DONE | EVT_PASSIVE_NEED_INIT,
-                                   pdTRUE,
-                                   pdFALSE,
-                                   portMAX_DELAY);
-        if (bits & EVT_PASSIVE_NEED_INIT) {
+    for (;;)
+    {
+        /* 1) 先處理主動事件（來自 queue 的請求），以短暫 timeout 等待 */
+        if (xQueueReceive(spi_request_queue, &received_value, pdMS_TO_TICKS(10)) == pdPASS)
+        {
+            /* 接到事件就執行主動傳輸（會自管 ACTIVE->PASSIVE 的狀態流） */
+            execute_active_spi_transmission(received_value);
+        }
+
+        /* 2) 處理 PASSIVE 事件旗標：非阻塞、取到就清除 */
+        bits = xEventGroupWaitBits(
+            spi_event_group,
+            EVT_PASSIVE_RX_DONE | EVT_PASSIVE_NEED_INIT,
+            pdTRUE,   /* 清掉已讀取的 bits */
+            pdFALSE,  /* 任一個 bit 觸發即可 */
+            0         /* non-blocking */
+        );
+
+        /* 需要重新初始化被動模式（主動傳輸結束或被動驗證失敗） */
+        if (bits & EVT_PASSIVE_NEED_INIT)
+        {
             vTaskDelay(pdMS_TO_TICKS(10));
-            if (GPIO_PinRead(GPIO, 2, 15) == 0 && operation_mode != MODE_ACTIVE) {
+
+            /* 僅在 GPIO 為低且非 ACTIVE 狀態下才重新初始化，以免打架 */
+            if (GPIO_PinRead(GPIO, 2, 15) == 0 && operation_mode != MODE_ACTIVE)
+            {
                 init_passive_mode();
             }
         }
-        if (bits & EVT_PASSIVE_RX_DONE) {
 
+        /* 完成 PASSIVE 的一組收/回流程，解析 ACK */
+        if (bits & EVT_PASSIVE_RX_DONE)
+        {
             PRINTF("[Passive] Sequence completed. Parsing frame...\r\n");
             handle_passive_ack_frame(passive_rx_buffer);
             PRINTF("[Passive] Ready for next sequence.\r\n");
         }
-    }
-}
 
-/**
- * @brief SPI 監控任務 (可能用於調試)。
- * @details 這是一個簡單的任務，等待 `EVT_TRANSFER_DONE` 事件，並在事件發生時打印一條訊息。
- * 在目前的架構中，主要的主動傳輸邏輯由 `execute_active_spi_transmission` 處理，
- * 這個任務可能是一個輔助或遺留的監控功能。
- */
-void spi_task(void *pvParameters)
-{
-    EventBits_t bits;
-    while (1) {
-        bits = xEventGroupWaitBits(spi_event_group, EVT_TRANSFER_DONE, pdTRUE, pdFALSE, portMAX_DELAY);
-        if ((bits & EVT_TRANSFER_DONE) != 0) {
-            PRINTF("spi_task: Frame transfer done.\r\n");
-        }
+        /* 視系統耗能需求，你也可以在這裡加入適度的 vTaskDelay(1~2ms) 作為保護 */
+        /* vTaskDelay(pdMS_TO_TICKS(1)); */
     }
 }
 
