@@ -11,8 +11,8 @@
 #include "hal_common.h"
 
 
-void hal_power_charger_aw93305_init(void);
-void hal_power_charger_aw93305_get_gesture(void);
+void hal_touch_aw93305_init(void);
+void hal_touch_aw93305_gesture_callback(void);
 
 
 #endif /* HAL_TOUCH_H_ */
