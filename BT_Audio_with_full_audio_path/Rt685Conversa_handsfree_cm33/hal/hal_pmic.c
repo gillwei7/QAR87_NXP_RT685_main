@@ -16,6 +16,17 @@ void hal_pmic_pca9422_init(void)
 
 }
 
+void hal_pmic_pca9422_enter_ship_mode(void)
+{
+	PRINTF("[PCA9422] PCA9422 enter ship mode \r\n");
+	/* pca9422 ship mode process */
+	uint8_t value;
+    value = 0x10;
+    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x09, 1, &value, 1);
+    value = 0x00;
+    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x0A, 1, &value, 1);
+}
+
 void hal_pmic_glf70583_init(void)
 {
     uint8_t top_stat = 0;
@@ -56,8 +67,6 @@ void BOARD_InitPMICs(void)
 
 #if PMIC_GLF70583_ENABLE
     hal_pmic_glf70583_init();
-    hal_loop_delay_ms(10);
-    hal_soc_enable();
 #endif
     PRINTF("BOARD_InitPMICs OK \n");
 }

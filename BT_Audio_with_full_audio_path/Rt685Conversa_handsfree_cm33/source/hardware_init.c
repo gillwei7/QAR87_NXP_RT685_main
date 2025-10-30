@@ -644,6 +644,8 @@ void BOARD_InitHardware(void)
 
     hal_gpio_init();
     BOARD_InitPMICs();
+    hal_loop_delay_ms(10);
+    hal_soc_enable();
     BOARD_InitDebugConsole();
     hal_amp_aw88166_power_on();
     hal_amp_aw88166_init();
