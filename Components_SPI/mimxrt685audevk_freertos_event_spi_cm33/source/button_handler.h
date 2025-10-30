@@ -36,8 +36,7 @@
 #define POWER_KEY_PINT_CH  		  0   // PINT channel
 #define FUN_KEY1_PINT_CH  		  1   // PINT channel
 
-void button_task(void *pvParameters); //Fun_key
-void power_key_task(void *pvParameters);//Power_key
+void button_task(void *pvParameters);
 
 void pint_intr_callback(pint_pin_int_t pintr, uint32_t pmatch_status);
 

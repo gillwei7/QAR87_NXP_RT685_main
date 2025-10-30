@@ -238,11 +238,7 @@ int main(void)
         PRINTF(" BUTTON Task creation failed!.\r\n");
         while (1);
     }
-	if (xTaskCreate(power_key_task, "POWER_KEY", configMINIMAL_STACK_SIZE + 100, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
-    {
-        PRINTF(" POWER_KEY Task creation failed!.\r\n");
-        while (1);
-    }
+
 	/* ===== C. 建立 I2C_Task（建議比 passive_handler_task 略高，避免事件延遲） ===== */
 	if (xTaskCreate(I2C_Task, "I2C_TASK",
 	                configMINIMAL_STACK_SIZE + 256,
