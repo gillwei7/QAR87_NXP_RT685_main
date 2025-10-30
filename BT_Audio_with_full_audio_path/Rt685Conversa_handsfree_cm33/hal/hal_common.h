@@ -38,13 +38,6 @@
 #define HAL_MCU_APP_VERSION_SUB    version_sub
 
 
-#define PMIC_GLF70583_ENABLE       1
-#define PMIC_PCA9422_ENABLE        1
-#define PMIC_GLF70583_ENABLE       1
-#define PMIC_GLF70583_ENABLE       1
-#define PMIC_GLF70583_ENABLE       1
-#define PMIC_GLF70583_ENABLE       1
-#define PMIC_GLF70583_ENABLE       1
 
 
 /*******************************************************************************
@@ -67,16 +60,23 @@ static uint8_t version_sub[15] = "";
  * Functions
  ******************************************************************************/
 // Delay
-void hal_delay_us(uint32_t val);
-void hal_delay_ms(uint32_t val);
+void hal_loop_delay_us(uint32_t val);
+void hal_loop_delay_ms(uint32_t val);
 
 // GPIO
-void hal_gpio_port_init(void);
+void hal_gpio_init(void);
 void hal_gpio_write_pin(uint8_t port, uint8_t pin, uint8_t state);
 uint8_t hal_gpio_read_pin(uint8_t port, uint8_t pin);
 
 // I2C
-void Scan_I2C_Devices(I3C_Type *base);
+void hal_i3c_init(void);
+void hal_scan_i2c_devices(I3C_Type *base);
+
+// SPI
+void hal_spi_init(void);
+
+// SoC
+void hal_soc_enable(void);
 
 // HW Version
 uint8_t hal_get_hw_version (void);

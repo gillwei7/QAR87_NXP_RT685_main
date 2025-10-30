@@ -52,7 +52,7 @@ static void aw_dev0_reset_gpio_ctl(bool State)
 {
 #if UsingQAR87Board == 1
     //GPIO_PinWrite(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, State ? 1U : 0U);
-	GPIO_PinWrite(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, 1U);
+    GPIO_PinWrite(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, 1U);
 #endif
 }
 

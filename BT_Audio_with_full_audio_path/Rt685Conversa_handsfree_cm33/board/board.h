@@ -21,11 +21,6 @@
 #define BOARD_NAME      "MIMXRT685-EVK"
 #define BOARD_I3C_CODEC (1)
 
-#if UsingQAR87Board == 1
-#define PWR_SW1_PORT 0U		//NT98532 POWER ON
-#define PWR_SW1_PIN  6U
-#endif
-
 /*! @brief The UART to use for debug messages. */
 #if UsingQAR87Board == 1
 
@@ -313,36 +308,126 @@
 #define GPIO2_PORT                    2U
 
 /* AMP */
-#define AMP_RESET_PORT 0U
-#define AMP_RESET_PIN  0U
+#define GPIO_AMP_RESET_R_PORT         0U      //AMP_RESET_PORT
+#define GPIO_AMP_RESET_R_PIN          0U      //AMP_RESET_PIN
 
 /* Touch */
-#define TOUCH_INT_PORT 1U
-#define TOUCH_INT_PIN  8U
+#define NXP_TOUCH_INT_PORT            1U      //TOUCH_INT_PORT
+#define NXP_TOUCH_INT_PIN             8U      //TOUCH_INT_PIN
 
 /* Charger */
-#define CHARG_INT_PORT 1U
-#define CHARG_INT_PIN  15U
+#if UsingQAR87BoardHwVersion1 == 1 // Actual Board
+#define CHG_INT_N_R_PORT              0U      //CHARG_INT_PORT
+#define CHG_INT_N_R_PIN               21U     //CHARG_INT_PIN
+#endif
+#if UsingQAR87BoardHwVersion1 == 0 // Dev Board
+#define CHG_INT_N_R_PORT              1U      //CHARG_INT_PORT
+#define CHG_INT_N_R_PIN               15U     //CHARG_INT_PIN
+#endif
 
 /* Gauge */
-#define GAUGE_INT_PORT 2U
-#define GAUGE_INT_PIN  18U
+#define FG_INT_GLF70302_PORT          2U      //GAUGE_INT_PORT
+#define FG_INT_GLF70302_PIN           18U     //GAUGE_INT_PIN
 
 /* SoC */
-#define PWR_SW1_PORT 0U		//NT98532 POWER ON
-#define PWR_SW1_PIN  6U
-#define RESET553_N_PORT 0U
-#define RESET553_N_PIN  27U
+#define NXP_532_PWR_PMIC1_PORT        0U      //PWR_SW1_PORT / NT98532 POWER ON
+#define NXP_532_PWR_PMIC1_PIN         6U      //PWR_SW1_PIN
+#define AP533_RST_N_PORT              0U      //RESET553_N_PORT
+#define AP533_RST_N_PIN               27U     //RESET553_N_PIN
+#define HS_SPI_2_RDY_PORT             1U
+#define HS_SPI_2_RDY_PIN              10U
+#define AP533_WAKEUP_N_PORT           2U
+#define AP533_WAKEUP_N_PIN            15U
 
 /* Buttons */
-#define EXAMPLE_PINT_BASE             PINT
+#define BUTTON_PINT_BASE              PINT
 #define POWERKEY_PINT_PIN_INT0_SRC    kINPUTMUX_GpioPort0Pin5ToPintsel  /* Power Key */
 #define FUNKEY_PINT_PIN_INT1_SRC      kINPUTMUX_GpioPort0Pin26ToPintsel   /* Fun Key */
-#define POWER_KEY_PORT 0U
-#define POWER_KEY_PIN  5U
-#define FUN_KEY1_N_PORT 0U
-#define FUN_KEY1_N_PIN  26U
+#define NXP_BQ_MR_N_PORT              0U      //POWER_KEY_PORT
+#define NXP_BQ_MR_N_PIN               5U      //POWER_KEY_PIN
+#define FUN_KEY_PORT                  0U      //FUN_KEY1_N_PORT
+#define FUN_KEY_PIN                   26U     //FUN_KEY1_N_PIN
 
+/* Proximity */
+#if UsingQAR87BoardHwVersion1 == 1 // Actual Board
+#define PROX1_INT_N_PORT              2U
+#define PROX1_INT_N_PIN               14U
+#endif
+
+/* USB Switch */
+#if UsingQAR87BoardHwVersion1 == 1 // Actual Board
+#define NXP_532_USB_SWITCH_PORT       0U
+#define NXP_532_USB_SWITCH_PIN        10U
+#define USB_SWDIO_SWITCH_PORT         2U
+#define USB_SWDIO_SWITCH_PIN          19U
+
+#endif
+#define VBUS20_PORT                   0U
+#define VBUS20_PIN                    19U
+#define OVP_FAULT_N_PORT              0U
+#define OVP_FAULT_N_PIN               20U
+
+/* BT / Wi-Fi */
+#if UsingQAR87BoardHwVersion1 == 1 // Actual Board
+#define BT_RST_PORT                   0U
+#define BT_RST_PIN                    11U
+#define NXP_PDN_RF_PORT               3U
+#define NXP_PDN_RF_PIN                26U
+#endif
+#if UsingQAR87BoardHwVersion1 == 0 // Dev Board
+#define PWR_EN_IW611_PORT             3U
+#define PWR_EN_IW611_PIN              26U
+#endif
+#define BT_WAKE_OUT_PORT              0U
+#define BT_WAKE_OUT_PIN               25U
+#define BT_WAKE_IN_PORT               1U
+#define BT_WAKE_IN_PIN                2U
+
+/* PIMC */
+#define PCA9422_AMUX_PORT             0U
+#define PCA9422_AMUX_PIN              13U
+#define PCA9422_685_STBY_MODE1_PORT   0U
+#define PCA9422_685_STBY_MODE1_PIN    24U
+#define PCA9422_685_DVS_CTR1_PORT     0U
+#define PCA9422_685_DVS_CTR1_PIN      29U
+#define PCA9422_685_DVS_CTR0_PORT     1U
+#define PCA9422_685_DVS_CTR0_PIN      9U
+#define PCA9422_685_SLEEP_MODE0_PORT  2U
+#define PCA9422_685_SLEEP_MODE0_PIN   27U
+#define PCA9422_INTB_PORT             2U
+#define PCA9422_INTB_PIN              28U
+#define PCA9422_685_DVS_CTR2_PORT     2U
+#define PCA9422_685_DVS_CTR2_PIN      31U
+
+/* HW config */
+#if UsingQAR87BoardHwVersion1 == 0 // Dev Board
+#define HW_CONFIG_01_PORT             0U
+#define HW_CONFIG_01_PIN              10U
+#define HW_CONFIG_02_PORT             0U
+#define HW_CONFIG_02_PIN              11U
+#define HW_CONFIG_03_PORT             0U
+#define HW_CONFIG_03_PIN              12U
+#endif
+
+#define POWER_KEY_PINT_CH  		      0      // PINT channel
+#define FUN_KEY_PINT_CH  		      1      // PINT channel
+
+#define SOC_SPI_SLAVE                 SPI14
+#define SOC_SPI_SLAVE_IRQ             FLEXCOMM14_IRQn
+#define SPI_SLAVE_IRQHandler          FLEXCOMM14_IRQHandler
+
+#define SOC_SPI_SSEL                  0
+#define SOC_SPI_SPOL                  kSPI_SpolActiveAllLow
+
+
+#define PMIC_GLF70583_ENABLE          1
+#define PMIC_PCA9422_ENABLE           1
+#define TOUCH_AW93305_ENABLE          0
+#define CHG_BQ25618_ENABLE            0
+#define FG_GLF70302_ENABLE            0
+#define LED_KTD2027_ENABLE            0
+#define AMP_AW88166_ENABLE            1
+#define SOC_SPI_ENABLE                0
 
 #endif
 

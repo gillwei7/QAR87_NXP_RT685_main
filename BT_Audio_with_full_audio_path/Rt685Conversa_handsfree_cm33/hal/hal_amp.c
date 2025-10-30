@@ -8,16 +8,12 @@
 #include "hal_amp.h"
 
 void hal_amp_aw88166_power_on(void) {
-    gpio_pin_config_t amp_config = {
-		kGPIO_DigitalOutput,
-		1,
-	};
-	GPIO_PinInit(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, &amp_config);
+    GPIO_PinWrite(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, 1);
 }
 
 void hal_amp_aw88166_init(void) {
-	init_aw88166();
-	PRINTF("[AMP][AW88166] init OK\r\n");
+    init_aw88166();
+    PRINTF("[AMP][AW88166] init OK\r\n");
 }
 
 /* prof_name: 1. "Music", 2. "Receiver" */
