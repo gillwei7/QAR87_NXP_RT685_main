@@ -36,8 +36,9 @@
 #define FORWARD_SLIDE_HEX_VALUE 0x14
 #define BACK_SLIDE_HEX_VALUE 0x15
 
-void spi_handler_task(void *pvParameters);
-
+void spi_handler_task(void *pvParameters); // <<< MODIFIED: 新的 SPI 消費者任務
+void passive_spi_handler_task(void *pvParameters);
+void spi_task(void *pvParameters);
 
 
 #endif /* SPI_HANDLER_H_ */
