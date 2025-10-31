@@ -16,6 +16,17 @@ void hal_pmic_pca9422_init(void)
 
 }
 
+void hal_pmic_pca9422_power_down(void)
+{
+    PRINTF("[PCA9422] PCA9422 power down \r\n");
+	/* pca9422 power down  process */
+    uint8_t value;
+    value = 0x08;
+    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x09, 1, &value, 1);
+    value = 0x00;
+    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x0A, 1, &value, 1);
+}
+
 void hal_pmic_pca9422_enter_ship_mode(void)
 {
 	PRINTF("[PCA9422] PCA9422 enter ship mode \r\n");

@@ -9,6 +9,11 @@
 #include "spi_handler.h"
 #include "button_handler.h"
 #include "system_status.h"
+#include "hal_pmic.h"
+#include "hal_power.h"
+#include "hal_touch.h"
+#include "hal_led.h"
+#include "hal_amp.h"
 
 /* ===== I2C synchronization objects ===== */
 EventGroupHandle_t i2c_event_group = NULL;
@@ -33,6 +38,7 @@ static void Stop_AMP(void)
     close_aw88166_pa(AW_DEV_0);
     close_aw88166_pa(AW_DEV_1);
 }
+
 static void Start_AMP(amp_mode_t mode)
 {
 	const char *profile = (mode == AMP_MODE_RECEIVER) ? "Receiver" : "Music";
@@ -40,76 +46,7 @@ static void Start_AMP(amp_mode_t mode)
     start_aw88166_pa(AW_DEV_0, profile);
     start_aw88166_pa(AW_DEV_1, profile);
 }
-static void Init_bq25618_charger(void)
-{
-	/* ============== Charger Init Start==============*/
-		bq256xx_cfg_t charger_cfg = {
-				.vindpm_uv = 4450000,
-				.iindpm_ua = 2000000,
-				.ichg_ua = 530000,
-				.vbatreg_uv = 4005000,
-				.iprechg_ua = 60000,
-				.iterm_ua = 20000,
-				.wdt_ms = 0
-		};
-		status_t bq_ret = bq256xx_init(&charger_cfg);
-		if ( bq_ret!= kStatus_Success) {
-			PRINTF("[Charger] bq256xx init failed!,ret:%d \n",bq_ret);
 
-		}
-		else{
-			PRINTF("[Charger] bq256xx initialized.OK \n");
-		}
-		bq256xx_write_reg(0x03, 0x31); // IPRECHG = 60mA, ITERM = 20mA
-	/* ============== Charger Init End==============*/
-}
-
-static void Init_glf70583_pmic(void)
-{
-    /* ======================PMIC glf70583================== */
-	uint8_t top_stat = 0;
-	glf70583_i2c_read(GLF70583_A_I2C_ADDR,0x00,&top_stat,1);
-	PRINTF("[GLF70583] top_stat:%X \n",top_stat);
-
-	//Solution: The manufacturer did not set it to LOAD SWITCH
-	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0xF5, 0xC6);
-	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB8);
-	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
-	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB9);
-
-	// BUCK1 Delay 4ms
-	glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x66, 0x0C);
-	// BUCK2 Delay 2ms
-	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x67, 0x08);
-	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x67, 0x08);
-	// BUCK3 Delay 0ms
-	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x68, 0x00);
-	// LDO1 Delay 5ms
-	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x6A, 0x12);
-	// 0x25->BUCK4、LDO2 off
-	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x26, 0xE8);
-	// 0x26->BUCK1、2、4 ON、Others off
-	glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0xD0);
-	//glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);//BUCK2 ON、Others off
-
-	PRINTF("[GLF70583] Enable GLF70583 \n");
-	GPIO_PinWrite(GPIO, NXP_532_PWR_PMIC1_PORT, NXP_532_PWR_PMIC1_PIN, 1); //Enable GLF70583
-
-	SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
-	PRINTF("[System] Enable Novatek \n");
-	GPIO_PinWrite(GPIO, AP533_RST_N_PORT, AP533_RST_N_PIN, 1);
-}
-
-static void Init_pca9422_pmic(void)
-{
-    /* Init PCA9422 PMIC. */
- 	BOARD_InitPmic();
- 	PRINTF("[PCA9422] BOARD_InitPmic OK \r\n");
- 	/* Apply PMIC mode and voltage settings */
- 	BOARD_Init_PMICConfigure();
- 	PRINTF("[PCA9422] BOARD_Init_PMICConfigure OK \r\n");
-
-}
 static void Determine_pca9422_enter_ship_mode(void)
 {
 	/* 讀取當下按鍵狀態 */
@@ -126,58 +63,37 @@ static void Determine_pca9422_enter_ship_mode(void)
 			{
 				/* 沒達到 2 秒長按 → 進入 ship mode */
 				PRINTF("[PCA9422] Power key (press < %u ms)\r\n", LONG_PRESS_MS);
-				pca9422_ship_mode();
+				hal_pmic_pca9422_enter_ship_mode();
 			}
 		}
 		else
 		{
 			/* 沒有按住按鍵（高電位）→ 直接進入 ship mode */
-			pca9422_ship_mode();
+			hal_pmic_pca9422_enter_ship_mode();
 		}
 }
 
 void Init_I2C_Component(void)
 {
-	Init_pca9422_pmic();
+	hal_pmic_pca9422_init();
 	Determine_pca9422_enter_ship_mode();
-	Init_glf70583_pmic();
-	Init_bq25618_charger();
-	ktd202x_ch4_led_on(LED_ON); //White light turns on first
-	awinic_single_enter(); //Touch Init
-	glf70302_read_battery(&battery_info); //Read the battery level after powering on
+	hal_pmic_glf70583_init();
+	hal_power_charger_bq25618_init();
+	hal_led_ktd2027_init();
+	hal_led_ktd2027_power_on_indicator(); //White light turns on first
+	hal_touch_aw93305_init(); //Touch Init
+	hal_power_gauge_glf70302_get_battery_level(); //Read the battery level after powering on
 	ss_set_battery(&ss, battery_info.soc);
-	init_aw88166(); // Init AMP
+	hal_amp_aw88166_init(); // Init AMP
 
 
-	bq256xx_poll_status(&charger_status);
+	hal_power_charger_bq25618_get_charging_status();
 	if(charger_status.vbus_good)
 	{
 		ss_set_charging(&ss, true);
 	}
 
 }
-
-void pca9422_ship_mode(void)
-{
-	PRINTF("[PCA9422] PCA9422 enter ship mode \r\n");
-	/* pca9422 ship mode process */
-	uint8_t value;
-    value = 0x10;
-    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x09, 1, &value, 1);
-    value = 0x00;
-    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x0A, 1, &value, 1);
-}
-void pca9422_power_down(void)
-{
-    PRINTF("[PCA9422] PCA9422 power down \r\n");
-	/* pca9422 power down  process */
-    uint8_t value;
-    value = 0x08;
-    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x09, 1, &value, 1);
-    value = 0x00;
-    BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x0A, 1, &value, 1);
-}
-
 
 void amp_post_event(amp_event_t e)
 {
@@ -196,27 +112,6 @@ void led_post_event(led_event_t e)
 
     }
 }
-
-void Scan_I2C_Devices(I3C_Type *base)
-{
-    uint8_t dummyData = 0x00;
-    status_t result;
-
-    PRINTF("[I2C]Scanning I2C addresses...\n");
-
-    for (uint8_t addr = 0x08; addr <= 0x77; addr++) // I2C valid 7-bit address range
-    {
-        result = BOARD_I3C_Send(base, addr, 0x00, 0, &dummyData, 0);
-
-        if (result == kStatus_Success)
-        {
-        	PRINTF("[I2C]Device found at 0x%02X\n", addr);
-        }
-    }
-
-    PRINTF("[I2C]Scan complete.\n");
-}
-
 
 void I2C_Task(void *pvParameters)
 {
