@@ -11,6 +11,10 @@ void hal_amp_aw88166_power_on(void) {
     GPIO_PinWrite(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, 1);
 }
 
+void hal_amp_aw88166_power_off(void) {
+    GPIO_PinWrite(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, 0);
+}
+
 void hal_amp_aw88166_init(void) {
     init_aw88166();
     PRINTF("[AMP][AW88166] init OK\r\n");
