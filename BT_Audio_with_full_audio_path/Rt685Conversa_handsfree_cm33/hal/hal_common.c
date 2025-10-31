@@ -8,7 +8,32 @@
 #include "hal_common.h"
 #include "fsl_pint.h"
 #include "fsl_spi.h"
+#include "board.h"
 #include "button_handler.h"
+#include "i2c_component_handler.h"
+
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+
+#if SOC_SPI_ENABLE
+#define USE_EVENT 1
+#define USE_SEMAPHORE 0
+#endif
+
+/*******************************************************************************
+ * Prototypes
+ ******************************************************************************/
+/* ===== external I2C handlers ===== */
+extern EventGroupHandle_t i2c_event_group ;
+extern SemaphoreHandle_t  i2c_mutex       ;
+extern TaskHandle_t       sI2CTaskHandle  ;
+
+/* ===== external SPI handlers ===== */
+extern QueueHandle_t spi_request_queue ;
+extern EventGroupHandle_t spi_event_group ;
+extern SemaphoreHandle_t spi_semaphore ;
+
 
 /**
  * @description: Delay N us
@@ -101,6 +126,12 @@ void hal_i3c_init(void)
 {
     BOARD_I3C_Init(BOARD_PMIC_I3C_BASEADDR, BOARD_PMIC_I3C_CLOCK_FREQ);
     hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
+    i2c_event_group = xEventGroupCreate();
+    configASSERT(i2c_event_group);
+
+    i2c_mutex = xSemaphoreCreateMutex();
+    configASSERT(i2c_mutex);
+
 }
 
 void hal_scan_i2c_devices(I3C_Type *base)
@@ -126,6 +157,33 @@ void hal_scan_i2c_devices(I3C_Type *base)
 void hal_spi_init(void)
 {
 #if SOC_SPI_ENABLE
+#if USE_EVENT
+    spi_event_group = xEventGroupCreate();
+    if (spi_event_group == NULL)
+    {
+        PRINTF("Failed to create event group\r\n");
+        while (1);
+    }
+#endif
+
+#if USE_SEMAPHORE
+    spi_semaphore = xSemaphoreCreateBinary();
+    if (spi_semaphore == NULL)
+    {
+        PRINTF("Failed to create semaphore\r\n");
+        while (1);
+    }
+#endif
+
+    /* <<< NEW: 建立訊息佇列 >>> */
+    // 佇列長度為 10，每個訊息的大小是一個 uint8_t
+    spi_request_queue = xQueueCreate(10, sizeof(uint8_t));
+    if (spi_request_queue == NULL)
+    {
+        PRINTF("Failed to create spi_request_queue\r\n");
+        while (1);
+    }
+
     /* init SPI peripheral */
     spi_slave_config_t spi_slave_config = {0};
     SPI_SlaveGetDefaultConfig(&spi_slave_config);
@@ -141,4 +199,5 @@ void hal_soc_enable(void)
 {
     GPIO_PinWrite(GPIO, AP533_RST_N_PORT, AP533_RST_N_PIN, 1); //NT98532 Reset Pin
 }
+
 #endif
