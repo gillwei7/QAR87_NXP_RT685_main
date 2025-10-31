@@ -8,6 +8,7 @@
 #include "hal_common.h"
 #include "fsl_pint.h"
 #include "fsl_spi.h"
+#include "button_handler.h"
 
 /**
  * @description: Delay N us
@@ -83,10 +84,10 @@ static void hal_gpio_pin_init(void)
     PINT_Init(BUTTON_PINT_BASE);
     NVIC_SetPriority(PIN_INT0_IRQn + FUN_KEY_PINT_CH, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
     NVIC_SetPriority(PIN_INT0_IRQn + POWER_KEY_PINT_CH, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
-//    PINT_PinInterruptConfig(BUTTON_PINT_BASE, kPINT_PinInt0, kPINT_PinIntEnableBothEdges, pint_intr_callback);
-//    PINT_EnableCallbackByIndex(BUTTON_PINT_BASE, kPINT_PinInt0);
-//    PINT_PinInterruptConfig(BUTTON_PINT_BASE, kPINT_PinInt1, kPINT_PinIntEnableBothEdges, pint_intr_callback);
-//    PINT_EnableCallbackByIndex(BUTTON_PINT_BASE, kPINT_PinInt1);
+    PINT_PinInterruptConfig(BUTTON_PINT_BASE, kPINT_PinInt0, kPINT_PinIntEnableBothEdges, pint_intr_callback);
+    PINT_EnableCallbackByIndex(BUTTON_PINT_BASE, kPINT_PinInt0);
+    PINT_PinInterruptConfig(BUTTON_PINT_BASE, kPINT_PinInt1, kPINT_PinIntEnableBothEdges, pint_intr_callback);
+    PINT_EnableCallbackByIndex(BUTTON_PINT_BASE, kPINT_PinInt1);
 
 }
 
@@ -126,13 +127,13 @@ void hal_spi_init(void)
 {
 #if SOC_SPI_ENABLE
     /* init SPI peripheral */
-//    spi_slave_config_t spi_slave_config = {0};
-//    SPI_SlaveGetDefaultConfig(&spi_slave_config);
-//    spi_slave_config.sselPol = (spi_spol_t)SOC_SPI_SPOL;
-//    SPI_SlaveInit(SOC_SPI_SLAVE, &spi_slave_config);
-//
-//    NVIC_SetPriority(SOC_SPI_SLAVE_IRQ, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
-//    EnableIRQ(SOC_SPI_SLAVE_IRQ);
+    spi_slave_config_t spi_slave_config = {0};
+    SPI_SlaveGetDefaultConfig(&spi_slave_config);
+    spi_slave_config.sselPol = (spi_spol_t)SOC_SPI_SPOL;
+    SPI_SlaveInit(SOC_SPI_SLAVE, &spi_slave_config);
+
+    NVIC_SetPriority(SOC_SPI_SLAVE_IRQ, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
+    EnableIRQ(SOC_SPI_SLAVE_IRQ);
 #endif
 }
 
