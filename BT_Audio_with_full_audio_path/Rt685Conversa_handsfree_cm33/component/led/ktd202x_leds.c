@@ -441,7 +441,7 @@ int32_t ktd202x_ch4_led_blink(unsigned long delay_on, unsigned long delay_off, u
 	if (ret != kStatus_Success) {
 		return ret;
 	}
-	ret = ktd202x_write(0x09, LED_CURRENT, 1);
+	ret = ktd202x_write(0x09, LED_CURRENT_CH4, 1);
 	if (ret != kStatus_Success) {
 		return ret;
 	}

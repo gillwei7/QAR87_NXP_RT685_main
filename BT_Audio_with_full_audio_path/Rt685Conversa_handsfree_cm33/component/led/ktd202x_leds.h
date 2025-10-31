@@ -27,10 +27,17 @@
 #define WHITE_BLINK     0x08
 #endif
 
-#define  LED_CURRENT  0x0A
-#define  LED_CURRENT_CH1  LED_CURRENT * 10 / 10
-#define  LED_CURRENT_CH2  LED_CURRENT * 15 / 10
-#define  LED_CURRENT_CH3  LED_CURRENT * 5 / 10
+
+#define LED_CURRENT_CH1       0x09	// BLUE  0x1F: 4mA, 0x1B: 3.5mA, 0x17: 3mA, 0x14: 2.625mA, 0x13: 2.5mA, 0x12: 2.375mA, 0x0F: 2mA, 0x0E: 1.875mA, 0x0D: 1.75mA 0x0C: 1.625mA, 0x0B: 1.5mA 0x0A: 1.375mA, 0x07: 1mA     (20mA * 10mcd / 50mcd  = 4mA)
+#define LED_CURRENT_CH1_WHITE 0x01	// BLUE  0x1F: 4mA, 0x1B: 3.5mA, 0x17: 3mA, 0x14: 2.625mA, 0x13: 2.5mA, 0x12: 2.375mA, 0x0F: 2mA, 0x0E: 1.875mA, 0x0D: 1.75mA 0x0C: 1.625mA, 0x0B: 1.5mA 0x0A: 1.375mA, 0x07: 1mA     (20mA * 10mcd / 50mcd  = 4mA)
+#define LED_CURRENT_CH2       0x07	// RED   0x0F: 2mA      (20mA * 10mcd / 100mcd = 2mA)
+#define LED_CURRENT_CH2_WHITE 0x03	// RED   0x0F: 2mA      (20mA * 10mcd / 100mcd = 2mA)
+#define LED_CURRENT_CH2_ORG   0x0E	// RED   0x0F: 2mA      (20mA * 10mcd / 100mcd = 2mA)
+#define LED_CURRENT_CH3       0x03	// GREEN 0x08: 1.125mA, 0x07: 1mA, 0x05: 0.75mA, 0x04: 0.625mA  (20mA * 10mcd / 180mcd = 1.11mA)
+#define LED_CURRENT_CH3_WHITE 0x01	// GREEN 0x08: 1.125mA, 0x07: 1mA, 0x05: 0.75mA, 0x04: 0.625mA  (20mA * 10mcd / 180mcd = 1.11mA)
+#define LED_CURRENT_CH3_ORG   0x00	// GREEN 0x08: 1.125mA, 0x04: 0.625mA, 0x01: 0.25mA, 0x00: 0.125mA  (20mA * 10mcd / 180mcd = 1.11mA)
+#define LED_CURRENT_CH4       0x05	// WHITE 0x4F: 10mA, 0x37 7mA, 0x17: 3mA, 0x13: 2.5mA, 0x09: 1.25mA
+
 
 #define TIM_1     0x00
 #define TIM_2     0x01
