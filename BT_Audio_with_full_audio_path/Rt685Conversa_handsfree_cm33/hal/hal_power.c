@@ -10,7 +10,7 @@
 #include "glf70302.h"
 
 volatile bq256xx_status_t charger_status;
-volatile BatteryInfo battery;
+volatile BatteryInfo battery_info;
 
 void hal_power_charger_bq25618_init(void)
 {
@@ -45,7 +45,7 @@ void hal_power_charger_bq25618_get_charging_status(void)
 
 void hal_power_gauge_glf70302_get_battery_level(void)
 {
-	glf70302_read_battery(&battery); //Read the battery level after powering on
+	glf70302_read_battery(&battery_info); //Read the battery level after powering on
 }
 
 #endif
