@@ -642,13 +642,9 @@ void BOARD_InitHardware(void)
     CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
     CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
 
-    hal_gpio_init();
-    BOARD_InitPMICs();
-    hal_loop_delay_ms(10);
-    hal_soc_enable();
+    hal_board_init();
     BOARD_InitDebugConsole();
-    hal_amp_aw88166_power_on();
-    hal_amp_aw88166_init();
+
 #else
     BOARD_InitBootPins();
     BOARD_InitBootClocks();

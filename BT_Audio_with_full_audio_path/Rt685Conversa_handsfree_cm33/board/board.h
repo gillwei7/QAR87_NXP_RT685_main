@@ -422,12 +422,12 @@
 
 #define PMIC_GLF70583_ENABLE          1
 #define PMIC_PCA9422_ENABLE           1
-#define TOUCH_AW93305_ENABLE          0
-#define CHG_BQ25618_ENABLE            0
-#define FG_GLF70302_ENABLE            0
-#define LED_KTD2027_ENABLE            0
+#define TOUCH_AW93305_ENABLE          1
+#define CHG_BQ25618_ENABLE            1
+#define FG_GLF70302_ENABLE            1
+#define LED_KTD2027_ENABLE            1
 #define AMP_AW88166_ENABLE            1
-#define SOC_SPI_ENABLE                0
+#define SOC_SPI_ENABLE                1
 
 #endif
 

@@ -184,6 +184,7 @@ void hal_gpio_interrupt_init(void)
 void hal_gpio_init(void)
 {
     hal_gpio_port_init();
+    hal_gpio_interrupt_init();
     hal_gpio_pin_init();
 }
 
@@ -263,6 +264,16 @@ void hal_spi_init(void)
 void hal_soc_enable(void)
 {
     GPIO_PinWrite(GPIO, AP533_RST_N_PORT, AP533_RST_N_PIN, 1); //NT98532 Reset Pin
+}
+
+void hal_board_init(void)
+{
+	hal_gpio_init();
+	hal_i3c_init();
+	hal_spi_init();
+	Init_I2C_Component();
+	hal_soc_enable();
+
 }
 
 #endif

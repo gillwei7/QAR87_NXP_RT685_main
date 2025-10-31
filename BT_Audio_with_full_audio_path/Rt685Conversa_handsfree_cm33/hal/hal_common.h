@@ -84,6 +84,8 @@ uint8_t hal_get_hw_version (void);
 // Log levels
 void hal_log_message(const int level,const char *file, const char *func, uint8_t has_file, uint8_t has_func, const char *message,...);
 
+// Board Init
+void hal_board_init(void);
 
 #endif /* HAL_DRIVER_H_ */
 #endif
