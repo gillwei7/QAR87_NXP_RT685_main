@@ -22,6 +22,7 @@
 #include "task.h"
 
 #include "app_handsfree.h"
+#include "hal_common.h"
 
 /*******************************************************************************
  * Definitions
@@ -43,6 +44,7 @@ extern void BOARD_InitHardware(void);
 int main(void)
 {
     BOARD_InitHardware();
+    hal_board_init();
 
     if (xTaskCreate(peripheral_hfp_hf_task, "peripheral_hfp_hf_task", configMINIMAL_STACK_SIZE * 8, NULL,		//was configMINIMAL_STACK_SIZE * 8
                     tskIDLE_PRIORITY + 1, NULL) != pdPASS)

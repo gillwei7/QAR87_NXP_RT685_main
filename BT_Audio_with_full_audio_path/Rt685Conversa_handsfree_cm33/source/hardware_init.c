@@ -17,6 +17,8 @@
 #include "fsl_adapter_uart.h"
 #include "controller_hci_uart.h"
 #include "fsl_power.h"
+#include "fsl_inputmux.h"
+#include "fsl_pint.h"
 
 #if UsingQAR87Board == 1
 #include "hal_amp.h"
@@ -642,8 +644,15 @@ void BOARD_InitHardware(void)
     CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
     CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
 
-    hal_board_init();
     BOARD_InitDebugConsole();
+
+    /* Connect trigger sources to PINT */
+    INPUTMUX_Init(INPUTMUX);
+    INPUTMUX_AttachSignal(INPUTMUX, kPINT_PinInt0, POWERKEY_PINT_PIN_INT0_SRC);
+    INPUTMUX_AttachSignal(INPUTMUX, kPINT_PinInt1, FUNKEY_PINT_PIN_INT1_SRC);
+    /* Turnoff clock to inputmux to save power. Clock is only needed to make changes */
+    INPUTMUX_Deinit(INPUTMUX);
+
 
 #else
     BOARD_InitBootPins();
