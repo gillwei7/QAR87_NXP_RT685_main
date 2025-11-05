@@ -35,12 +35,22 @@
 
 #include "GlobalDef.h"
 
+#if UsingQAR87Board == 1
+#include "spi_handler.h"
+#include "button_handler.h"
+#include "i2c_component_handler.h"
+#include "hal_common.h"
+#endif
 
 #define Manager_TASK_PRIORITY				2			//this is low
 
 #define APP_HFP_HF_INITIAL_VGS_GAIN 12
 #define APP_HFP_HF_INITIAL_VGM_GAIN 12
 #define HFP_CLASS_OF_DEVICE (0x200404U)
+
+#if UsingQAR87Board == 1
+extern TaskHandle_t       sI2CTaskHandle  ;
+#endif
 
 static volatile uint8_t s_call_status = 0;
 hfp_hf_get_config hfp_hf_config = {
@@ -470,6 +480,7 @@ void peripheral_hfp_hf_task(void *pvParameters)
 {
     int err = 0;
 
+
 	#if EnableOnlyMicSpk_NoBT==1
 		StartMicSpkTest();		//USB audio up streaming also works well in this testing, USB audio down streaming is not used, because USB audio sync is not running
 	#endif
@@ -489,6 +500,38 @@ void peripheral_hfp_hf_task(void *pvParameters)
 	BaseType_t result = 0;
 	result = xTaskCreate(Manager_Task, "Manager_40ms", 1024, NULL, Manager_TASK_PRIORITY, NULL);
 	assert(pdPASS == result);
+#if UsingQAR87Board == 1
+
+//    if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 500, NULL,
+//                    tskIDLE_PRIORITY + 2, NULL) != pdPASS)
+//    {
+//        PRINTF("Task creation failed!.\r\n");
+//        while (1);
+//    }
+//
+//    if (xTaskCreate(passive_spi_handler_task, "PASSIVE", configMINIMAL_STACK_SIZE + 200, NULL,
+//                    tskIDLE_PRIORITY + 3, NULL) != pdPASS)
+//    {
+//        PRINTF("Task creation failed!.\r\n");
+//        while (1);
+//    }
+
+//	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 100, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
+//    {
+//        PRINTF(" BUTTON Task creation failed!.\r\n");
+//        while (1);
+//    }
+
+//	if (xTaskCreate(I2C_Task, "I2C_TASK",
+//	                configMINIMAL_STACK_SIZE + 256,
+//	                NULL,
+//	                tskIDLE_PRIORITY + 3,
+//	                &sI2CTaskHandle) != pdPASS)
+//	{
+//	    PRINTF("I2C_TASK creation failed!\r\n");
+//	    while (1) { ; }
+//	}
+#endif
 
     vTaskDelete(NULL);
 }
