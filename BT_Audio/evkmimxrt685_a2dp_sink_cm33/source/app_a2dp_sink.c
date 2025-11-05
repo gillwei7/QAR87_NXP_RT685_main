@@ -383,10 +383,37 @@ static void bt_ready(int err)
     app_a2dp_snk_auto_connect();
 }
 
+extern void BOARD_InitTask(void);
+static uint8_t board_inited = 0;
+void app_board_init_task(void *pvParameters)
+{
+    int err = 0;
+    (void)err;
+    PRINTF("app_board_init_task start...\n");
+    PRINTF("app_board_init_task start...\n");
+    PRINTF("app_board_init_task start...\n");
+    PRINTF("app_board_init_task start...\n");
+    PRINTF("app_board_init_task start...\n");
+    PRINTF("app_board_init_task start...\n");
+    PRINTF("app_board_init_task start...\n");
+    PRINTF("app_board_init_task start...\n");
+    PRINTF("app_board_init_task start...\n");
+
+    BOARD_InitTask();
+    PRINTF("app_board_init_task OK...\n");
+    board_inited = 1;
+
+    vTaskDelete(NULL);
+}
+
 void app_a2dp_sink_task(void *pvParameters)
 {
     int err = 0;
     (void)err;
+
+    while (!board_inited) {
+        vTaskDelay(1000);
+    }
 
     PRINTF("Bluetooth A2dp Sink demo start...\n");
 

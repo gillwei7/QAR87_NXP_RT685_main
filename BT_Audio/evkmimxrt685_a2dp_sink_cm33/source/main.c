@@ -37,6 +37,12 @@ int main(void)
 {
     BOARD_InitHardware();
 
+    if (xTaskCreate(app_board_init_task, "app_board_init_task", configMINIMAL_STACK_SIZE + 100, NULL, tskIDLE_PRIORITY + 2, NULL) != pdPASS)
+    {
+        PRINTF("init task creation failed!\r\n");
+        while (1)
+            ;
+    }
 
     if (xTaskCreate(app_a2dp_sink_task, "app_a2dp_sink_task", configMINIMAL_STACK_SIZE * 8, NULL, tskIDLE_PRIORITY + 1, NULL) != pdPASS)
     {
@@ -45,7 +51,9 @@ int main(void)
             ;
     }
 
+
     vTaskStartScheduler();
+
     for (;;)
         ;
 }
