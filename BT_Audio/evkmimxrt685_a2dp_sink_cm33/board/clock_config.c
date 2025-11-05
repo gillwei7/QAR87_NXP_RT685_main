@@ -140,9 +140,14 @@ const clock_sys_pll_config_t g_sysPllConfig_BOARD_BootClockRUN =
 const clock_audio_pll_config_t g_audioPllConfig_BOARD_BootClockRUN =
     {
         .audio_pll_src = kCLOCK_AudioPllXtalIn,   /* OSC clock */
-        .numerator = 5040,                        /* Numerator of the Audio PLL fractional loop divider is null */
+#if 0
+		.numerator = 5040,                        /* Numerator of the Audio PLL fractional loop divider is null */
         .denominator = 27000,                     /* Denominator of the Audio PLL fractional loop divider is null */
-        .audio_pll_mult = kCLOCK_AudioPllMult22   /* Divide by 22 */
+#else
+		.numerator = 528,                        /* Numerator of the Audio PLL fractional loop divider is null */
+        .denominator = 1000,                     /* Denominator of the Audio PLL fractional loop divider is null */
+#endif
+		.audio_pll_mult = kCLOCK_AudioPllMult22   /* Divide by 22 */
     };
 /*******************************************************************************
  * Code for BOARD_BootClockRUN configuration
@@ -178,15 +183,22 @@ void BOARD_BootClockRUN(void)
 
     /* Configure Audio PLL clock source */
     CLOCK_InitAudioPll(&g_audioPllConfig_BOARD_BootClockRUN);
+#if 0
     CLOCK_InitAudioPfd(kCLOCK_Pfd0, 26);              /* Enable Audio PLL clock */
-
+#else
+    CLOCK_InitAudioPfd(kCLOCK_Pfd0, 22);              /* Enable Audio PLL clock */
+#endif
     CLOCK_SetClkDiv(kCLOCK_DivSysCpuAhbClk, 2U);         /* Set SYSCPUAHBCLKDIV divider to value 2 */
 
     /* Set up clock selectors - Attach clocks to the peripheries */
     CLOCK_AttachClk(kMAIN_PLL_to_MAIN_CLK);                 /* Switch MAIN_CLK to MAIN_PLL */
 
     /* Set up dividers */
+#if 0
     CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 15U);         /* Set AUDIOPLLCLKDIV divider to value 15 */
+#else
+    CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 18U);         /* Set AUDIOPLLCLKDIV divider to value 15 */
+#endif
     CLOCK_SetClkDiv(kCLOCK_DivPfc0Clk, 2U);         /* Set PFC0DIV divider to value 2 */
     CLOCK_SetClkDiv(kCLOCK_DivPllFrgClk, 12U);         /* Set FRGPLLCLKDIV divider to value 12 */
 

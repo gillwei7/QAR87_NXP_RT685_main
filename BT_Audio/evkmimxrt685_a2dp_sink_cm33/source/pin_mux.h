@@ -40,11 +40,12 @@ void BOARD_InitBootPins(void);
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitPins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevGpioPins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
 #define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
+#define IOPCTL_PIO_INBUF_DI 0x00u         /*!<@brief Disable input buffer function */
 #define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
 #define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
 #define IOPCTL_PIO_PSEDRAIN_DI 0x00u      /*!<@brief Pseudo Output Drain is disabled */
@@ -56,23 +57,7 @@ void BOARD_InitPins(void); /* Function assigned for the Cortex-M33 */
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitIBtUartPins(void); /* Function assigned for the Cortex-M33 */
-
-#define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
-#define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
-#define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
-#define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
-#define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
-#define IOPCTL_PIO_PSEDRAIN_DI 0x00u      /*!<@brief Pseudo Output Drain is disabled */
-#define IOPCTL_PIO_PULLDOWN_EN 0x00u      /*!<@brief Enable pull-down function */
-#define IOPCTL_PIO_PUPD_DI 0x00u          /*!<@brief Disable pull-up / pull-down function */
-#define IOPCTL_PIO_SLEW_RATE_NORMAL 0x00u /*!<@brief Normal mode */
-
-/*!
- * @brief Configures pin routing and optionally pin electrical features.
- *
- */
-void BOARD_InitDebugUartFC2Pins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevIBtUartPins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
@@ -88,12 +73,12 @@ void BOARD_InitDebugUartFC2Pins(void); /* Function assigned for the Cortex-M33 *
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitDebugUartFC3Pins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevDebugUartFC2Pins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
 #define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
-#define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
+#define IOPCTL_PIO_INBUF_DI 0x00u         /*!<@brief Disable input buffer function */
 #define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
 #define IOPCTL_PIO_PSEDRAIN_DI 0x00u      /*!<@brief Pseudo Output Drain is disabled */
 #define IOPCTL_PIO_PULLDOWN_EN 0x00u      /*!<@brief Enable pull-down function */
@@ -104,10 +89,27 @@ void BOARD_InitDebugUartFC3Pins(void); /* Function assigned for the Cortex-M33 *
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitDebugUartFC5Pins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevDebugUartFC3Pins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
+#define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
+#define IOPCTL_PIO_INBUF_DI 0x00u         /*!<@brief Disable input buffer function */
+#define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
+#define IOPCTL_PIO_PSEDRAIN_DI 0x00u      /*!<@brief Pseudo Output Drain is disabled */
+#define IOPCTL_PIO_PULLDOWN_EN 0x00u      /*!<@brief Enable pull-down function */
+#define IOPCTL_PIO_PUPD_DI 0x00u          /*!<@brief Disable pull-up / pull-down function */
+#define IOPCTL_PIO_SLEW_RATE_NORMAL 0x00u /*!<@brief Normal mode */
+
+/*!
+ * @brief Configures pin routing and optionally pin electrical features.
+ *
+ */
+void BOARD_InitDevDebugUartFC5Pins(void); /* Function assigned for the Cortex-M33 */
+
+#define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
+#define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
+#define IOPCTL_PIO_FULLDRIVE_EN 0x0100u   /*!<@brief Full drive enable */
 #define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
 #define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
 #define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
@@ -119,78 +121,108 @@ void BOARD_InitDebugUartFC5Pins(void); /* Function assigned for the Cortex-M33 *
 /*! @name FLEXSPI0A_DATA0 (coord C6), J32[2]/SD_CMD
   @{ */
 /* Routed pin properties */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_CMD_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_CMD_SIGNAL FLEXSPI_A_DATA0    /*!<@brief Signal name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_CMD_PORT 1U                   /*!<@brief PORT peripheral base pointer */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_CMD_PIN 20U                   /*!<@brief PORT pin number */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_CMD_PIN_MASK (1U << 20U)      /*!<@brief PORT pin mask */
-                                                                    /* @} */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_CMD_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_CMD_SIGNAL FLEXSPI_A_DATA0    /*!<@brief Signal name */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_CMD_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_CMD_PIN 20U                   /*!<@brief PORT pin number */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_CMD_PIN_MASK (1U << 20U)      /*!<@brief PORT pin mask */
+                                                                       /* @} */
 
 /*! @name FLEXSPI0A_DATA1 (coord C7), J32[1]/SD_DAT3
   @{ */
 /* Routed pin properties */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT3_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT3_SIGNAL FLEXSPI_A_DATA1    /*!<@brief Signal name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT3_PORT 1U                   /*!<@brief PORT peripheral base pointer */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT3_PIN 21U                   /*!<@brief PORT pin number */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT3_PIN_MASK (1U << 21U)      /*!<@brief PORT pin mask */
-                                                                     /* @} */
+/*!
+ * @brief Peripheral name */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT3_PERIPHERAL FLEXSPI
+/*!
+ * @brief Signal name */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT3_SIGNAL FLEXSPI_A_DATA1
+/*!
+ * @brief PORT peripheral base pointer */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT3_PORT 1U
+/*!
+ * @brief PORT pin number */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT3_PIN 21U
+/*!
+ * @brief PORT pin mask */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT3_PIN_MASK (1U << 21U)
+/* @} */
 
 /*! @name FLEXSPI0A_DATA2 (coord B5), J32[7]/SD_DAT0
   @{ */
 /* Routed pin properties */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT0_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT0_SIGNAL FLEXSPI_A_DATA2    /*!<@brief Signal name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT0_PORT 1U                   /*!<@brief PORT peripheral base pointer */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT0_PIN 22U                   /*!<@brief PORT pin number */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT0_PIN_MASK (1U << 22U)      /*!<@brief PORT pin mask */
-                                                                     /* @} */
+/*!
+ * @brief Peripheral name */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT0_PERIPHERAL FLEXSPI
+/*!
+ * @brief Signal name */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT0_SIGNAL FLEXSPI_A_DATA2
+/*!
+ * @brief PORT peripheral base pointer */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT0_PORT 1U
+/*!
+ * @brief PORT pin number */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT0_PIN 22U
+/*!
+ * @brief PORT pin mask */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT0_PIN_MASK (1U << 22U)
+/* @} */
 
 /*! @name FLEXSPI0A_DATA3 (coord A5), J32[11]/CARD_WR_PRT/SD_WR_PRT
   @{ */
 /* Routed pin properties */
 /*!
  * @brief Peripheral name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_WR_PRT_PERIPHERAL FLEXSPI
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_WR_PRT_PERIPHERAL FLEXSPI
 /*!
  * @brief Signal name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_WR_PRT_SIGNAL FLEXSPI_A_DATA3
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_WR_PRT_SIGNAL FLEXSPI_A_DATA3
 /*!
  * @brief PORT peripheral base pointer */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_WR_PRT_PORT 1U
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_WR_PRT_PORT 1U
 /*!
  * @brief PORT pin number */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_WR_PRT_PIN 23U
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_WR_PRT_PIN 23U
 /*!
  * @brief PORT pin mask */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_WR_PRT_PIN_MASK (1U << 23U)
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_WR_PRT_PIN_MASK (1U << 23U)
 /* @} */
 
 /*! @name FLEXSPI0A_SCLK (coord B7), J32[5]/SD_CLK
   @{ */
 /* Routed pin properties */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_CLK_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_CLK_SIGNAL FLEXSPI_A_SCLK     /*!<@brief Signal name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_CLK_PORT 1U                   /*!<@brief PORT peripheral base pointer */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_CLK_PIN 18U                   /*!<@brief PORT pin number */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_CLK_PIN_MASK (1U << 18U)      /*!<@brief PORT pin mask */
-                                                                    /* @} */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_CLK_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_CLK_SIGNAL FLEXSPI_A_SCLK     /*!<@brief Signal name */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_CLK_PORT 1U                   /*!<@brief PORT peripheral base pointer */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_CLK_PIN 18U                   /*!<@brief PORT pin number */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_CLK_PIN_MASK (1U << 18U)      /*!<@brief PORT pin mask */
+                                                                       /* @} */
 
 /*! @name FLEXSPI0A_SS0_N (coord B4), J32[9]/SD_DAT2
   @{ */
 /* Routed pin properties */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT2_PERIPHERAL FLEXSPI        /*!<@brief Peripheral name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT2_SIGNAL FLEXSPI_A_SS0_B    /*!<@brief Signal name */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT2_PORT 1U                   /*!<@brief PORT peripheral base pointer */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT2_PIN 19U                   /*!<@brief PORT pin number */
-#define BOARD_INITFLEXSPIFLASHPINS_SD_DAT2_PIN_MASK (1U << 19U)      /*!<@brief PORT pin mask */
-                                                                     /* @} */
+/*!
+ * @brief Peripheral name */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT2_PERIPHERAL FLEXSPI
+/*!
+ * @brief Signal name */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT2_SIGNAL FLEXSPI_A_SS0_B
+/*!
+ * @brief PORT peripheral base pointer */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT2_PORT 1U
+/*!
+ * @brief PORT pin number */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT2_PIN 19U
+/*!
+ * @brief PORT pin mask */
+#define BOARD_INITDEVFLEXSPIFLASHPINS_SD_DAT2_PIN_MASK (1U << 19U)
+/* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitFlexSPIFlashPins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevFlexSPIFlashPins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
@@ -206,7 +238,7 @@ void BOARD_InitFlexSPIFlashPins(void); /* Function assigned for the Cortex-M33 *
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitButtonsPins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevButtonsPins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
@@ -223,19 +255,19 @@ void BOARD_InitButtonsPins(void); /* Function assigned for the Cortex-M33 */
 /* Routed pin properties */
 /*!
  * @brief Peripheral name */
-#define BOARD_INITI3CPINS_I3C0_SCL_PERIPHERAL I3C
+#define BOARD_INITDEVI3CPINS_I3C0_SCL_PERIPHERAL I3C
 /*!
  * @brief Signal name */
-#define BOARD_INITI3CPINS_I3C0_SCL_SIGNAL SCL
+#define BOARD_INITDEVI3CPINS_I3C0_SCL_SIGNAL SCL
 /*!
  * @brief PORT peripheral base pointer */
-#define BOARD_INITI3CPINS_I3C0_SCL_PORT 2U
+#define BOARD_INITDEVI3CPINS_I3C0_SCL_PORT 2U
 /*!
  * @brief PORT pin number */
-#define BOARD_INITI3CPINS_I3C0_SCL_PIN 29U
+#define BOARD_INITDEVI3CPINS_I3C0_SCL_PIN 29U
 /*!
  * @brief PORT pin mask */
-#define BOARD_INITI3CPINS_I3C0_SCL_PIN_MASK (1U << 29U)
+#define BOARD_INITDEVI3CPINS_I3C0_SCL_PIN_MASK (1U << 29U)
 /* @} */
 
 /*! @name I3C0_SDA (coord C9), J18[2]/U8[3]/U17[B6]/SDA_CODEC
@@ -243,26 +275,26 @@ void BOARD_InitButtonsPins(void); /* Function assigned for the Cortex-M33 */
 /* Routed pin properties */
 /*!
  * @brief Peripheral name */
-#define BOARD_INITI3CPINS_I3C0_SDA_PERIPHERAL I3C
+#define BOARD_INITDEVI3CPINS_I3C0_SDA_PERIPHERAL I3C
 /*!
  * @brief Signal name */
-#define BOARD_INITI3CPINS_I3C0_SDA_SIGNAL SDA
+#define BOARD_INITDEVI3CPINS_I3C0_SDA_SIGNAL SDA
 /*!
  * @brief PORT peripheral base pointer */
-#define BOARD_INITI3CPINS_I3C0_SDA_PORT 2U
+#define BOARD_INITDEVI3CPINS_I3C0_SDA_PORT 2U
 /*!
  * @brief PORT pin number */
-#define BOARD_INITI3CPINS_I3C0_SDA_PIN 30U
+#define BOARD_INITDEVI3CPINS_I3C0_SDA_PIN 30U
 /*!
  * @brief PORT pin mask */
-#define BOARD_INITI3CPINS_I3C0_SDA_PIN_MASK (1U << 30U)
+#define BOARD_INITDEVI3CPINS_I3C0_SDA_PIN_MASK (1U << 30U)
 /* @} */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitI3CPins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevI3CPins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_EN 0x0100u   /*!<@brief Full drive enable */
@@ -278,10 +310,10 @@ void BOARD_InitI3CPins(void); /* Function assigned for the Cortex-M33 */
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitI2SAmpFC1FC3Pins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevI2SAmpFC1FC3Pins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
-#define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
+#define IOPCTL_PIO_FULLDRIVE_EN 0x0100u   /*!<@brief Full drive enable */
 #define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
 #define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
 #define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
@@ -294,10 +326,10 @@ void BOARD_InitI2SAmpFC1FC3Pins(void); /* Function assigned for the Cortex-M33 *
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitI2S2IW612FC2FC4Pins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevI2S2IW612FC2FC4Pins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
-#define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
+#define IOPCTL_PIO_FULLDRIVE_EN 0x0100u   /*!<@brief Full drive enable */
 #define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
 #define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
 #define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
@@ -310,18 +342,19 @@ void BOARD_InitI2S2IW612FC2FC4Pins(void); /* Function assigned for the Cortex-M3
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitI2S3NT98532FC5FC6Pins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevI2S3NT98532FC5FC6Pins(void); /* Function assigned for the Cortex-M33 */
 
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitUSBPins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevUsbPins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
 #define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
 #define IOPCTL_PIO_INBUF_DI 0x00u         /*!<@brief Disable input buffer function */
+#define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
 #define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
 #define IOPCTL_PIO_PSEDRAIN_DI 0x00u      /*!<@brief Pseudo Output Drain is disabled */
 #define IOPCTL_PIO_PULLDOWN_EN 0x00u      /*!<@brief Enable pull-down function */
@@ -332,10 +365,10 @@ void BOARD_InitUSBPins(void); /* Function assigned for the Cortex-M33 */
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitDmicPins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevDmicPins(void); /* Function assigned for the Cortex-M33 */
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
-#define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
+#define IOPCTL_PIO_FULLDRIVE_EN 0x0100u   /*!<@brief Full drive enable */
 #define IOPCTL_PIO_FUNC1 0x01u            /*!<@brief Selects pin function 1 */
 #define IOPCTL_PIO_INBUF_EN 0x40u         /*!<@brief Enables input buffer function */
 #define IOPCTL_PIO_INV_DI 0x00u           /*!<@brief Input function is not inverted */
@@ -344,31 +377,11 @@ void BOARD_InitDmicPins(void); /* Function assigned for the Cortex-M33 */
 #define IOPCTL_PIO_PUPD_DI 0x00u          /*!<@brief Disable pull-up / pull-down function */
 #define IOPCTL_PIO_SLEW_RATE_NORMAL 0x00u /*!<@brief Normal mode */
 
-/*! @name HS_SPI_SCK (coord E5), U19[D3]
-  @{ */
-/* Routed pin properties */
-#define BOARD_INITSPI532PINS_QSPI_B_DATA0_PERIPHERAL FLEXCOMM14     /*!<@brief Peripheral name */
-#define BOARD_INITSPI532PINS_QSPI_B_DATA0_SIGNAL SCK                /*!<@brief Signal name */
-#define BOARD_INITSPI532PINS_QSPI_B_DATA0_PORT 1U                   /*!<@brief PORT peripheral base pointer */
-#define BOARD_INITSPI532PINS_QSPI_B_DATA0_PIN 11U                   /*!<@brief PORT pin number */
-#define BOARD_INITSPI532PINS_QSPI_B_DATA0_PIN_MASK (1U << 11U)      /*!<@brief PORT pin mask */
-                                                                    /* @} */
-
-/*! @name HS_SPI_SSEL0 (coord D4), U19[D4]
-  @{ */
-/* Routed pin properties */
-#define BOARD_INITSPI532PINS_QSPI_B_DATA3_PERIPHERAL FLEXCOMM14     /*!<@brief Peripheral name */
-#define BOARD_INITSPI532PINS_QSPI_B_DATA3_SIGNAL SSEL0              /*!<@brief Signal name */
-#define BOARD_INITSPI532PINS_QSPI_B_DATA3_PORT 1U                   /*!<@brief PORT peripheral base pointer */
-#define BOARD_INITSPI532PINS_QSPI_B_DATA3_PIN 14U                   /*!<@brief PORT pin number */
-#define BOARD_INITSPI532PINS_QSPI_B_DATA3_PIN_MASK (1U << 14U)      /*!<@brief PORT pin mask */
-                                                                    /* @} */
-
 /*!
  * @brief Configures pin routing and optionally pin electrical features.
  *
  */
-void BOARD_InitSPI532Pins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_InitDevSPI532Pins(void); /* Function assigned for the Cortex-M33 */
 
 #if defined(__cplusplus)
 }
