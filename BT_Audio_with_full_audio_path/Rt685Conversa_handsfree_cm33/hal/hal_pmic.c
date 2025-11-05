@@ -47,7 +47,7 @@ void hal_pmic_glf70583_init(void)
     //Solution: The manufacturer did not set it to LOAD SWITCH
     glf70583_i2c_write(GLF70583_A_I2C_ADDR,0xF5, 0xC6);
     glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB8);
-    SDK_DelayAtLeastUs(10000, CLOCK_GetFreq(kCLOCK_CoreSysClk));//delay 10ms
+    hal_loop_delay_ms(10);
     glf70583_i2c_write(GLF70583_A_I2C_ADDR,0x24, 0xB9);
 
     // BUCK1 Delay 4ms

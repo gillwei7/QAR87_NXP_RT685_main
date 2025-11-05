@@ -69,6 +69,13 @@ void hal_loop_delay_ms(uint32_t val)
     if (val < 4294 && val > 0) {
         SDK_DelayAtLeastUs(val * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk));
     }
+//    volatile uint32_t i = 0;
+//    volatile uint32_t j = 0;
+//    for (j = 0; j < val; j++)
+//	for (i = 0; i < 30000; i++)
+//	{
+//		__NOP();
+//	}
 }
 
 static void hal_gpio_port_init(void)
