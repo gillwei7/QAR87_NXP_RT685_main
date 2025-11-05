@@ -75,24 +75,38 @@ static void Determine_pca9422_enter_ship_mode(void)
 
 void Init_I2C_Component(void)
 {
+#if PMIC_PCA9422_ENABLE
 	hal_pmic_pca9422_init();
-	Determine_pca9422_enter_ship_mode();
+#endif
+//	Determine_pca9422_enter_ship_mode();
+#if PMIC_GLF70583_ENABLE
 	hal_pmic_glf70583_init();
+#endif
+#if CHG_BQ25618_ENABLE
 	hal_power_charger_bq25618_init();
+#endif
+#if LED_KTD2027_ENABLE
 	hal_led_ktd2027_init();
 	hal_led_ktd2027_power_on_indicator(); //White light turns on first
+#endif
+#if TOUCH_AW93305_ENABLE
 	hal_touch_aw93305_init(); //Touch Init
+#endif
+#if FG_GLF70302_ENABLE
 	hal_power_gauge_glf70302_get_battery_level(); //Read the battery level after powering on
 	ss_set_battery(&ss, battery_info.soc);
+#endif
+#if AMP_AW88166_ENABLE
 	hal_amp_aw88166_init(); // Init AMP
-
+#endif
+#if CHG_BQ25618_ENABLE
 
 	hal_power_charger_bq25618_get_charging_status();
 	if(charger_status.vbus_good)
 	{
 		ss_set_charging(&ss, true);
 	}
-
+#endif
 }
 
 void amp_post_event(amp_event_t e)
@@ -133,6 +147,7 @@ void I2C_Task(void *pvParameters)
             amp_event_t evt = g_amp_event;
 
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE) {
+#if AMP_AW88166_ENABLE
                 switch (evt) {
                     case AMP_EVT_MUSIC_START:
 //                        StartSoundPlayback();
@@ -149,6 +164,7 @@ void I2C_Task(void *pvParameters)
                     default:
                         break;
                 }
+#endif
                 xSemaphoreGive(i2c_mutex);
             }
         }
@@ -159,30 +175,39 @@ void I2C_Task(void *pvParameters)
         {
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
+#if TOUCH_AW93305_ENABLE
             	AW93305_EXTI_Callback();
+#endif
                 xSemaphoreGive(i2c_mutex);
 
+#if TOUCH_AW93305_ENABLE
                 if(aw933xx.event.click >0)
                 {
                 	unsigned int btn_event = aw933xx.event.click;
                 	PRINTF("[Touch] click= %d \n",btn_event);
                 	if(btn_event==1)
                 	{
+#if SOC_SPI_ENABLE
                 		uint8_t v = ONE_TOUCH_HEX_VALUE;
                 		(void)xQueueSend(spi_request_queue, &v, 0);
+#endif
                 	}
                 	else if(btn_event==2)
                 	{
+#if SOC_SPI_ENABLE
                 		uint8_t v = DOUBLE_TOUCH_HEX_VALUE;
                 		(void)xQueueSend(spi_request_queue, &v, 0);
+#endif
                 	}
 
                 }
                 else if(aw933xx.event.press)
                 {
                 	PRINTF("[Touch] press \n");
+#if SOC_SPI_ENABLE
                 	uint8_t v = PRESS_TOUCH_HEX_VALUE;
                 	(void)xQueueSend(spi_request_queue, &v, 0);
+#endif
                 }
                 else if(aw933xx.event.long_press)
                 {
@@ -195,15 +220,20 @@ void I2C_Task(void *pvParameters)
                 else if(aw933xx.event.right_wareds)
                 {
                 	PRINTF("[Touch] slide_right \n");
+#if SOC_SPI_ENABLE
                 	uint8_t v = FORWARD_SLIDE_HEX_VALUE;
                 	(void)xQueueSend(spi_request_queue, &v, 0);
+#endif
                 }
                 else if(aw933xx.event.left_wareds)
                 {
                 	PRINTF("[Touch] slide_left \n");
+#if SOC_SPI_ENABLE
                 	uint8_t v = BACK_SLIDE_HEX_VALUE;
                 	(void)xQueueSend(spi_request_queue, &v, 0);
+#endif
                 }
+#endif
 
             }
 
@@ -217,6 +247,7 @@ void I2C_Task(void *pvParameters)
         {
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
+#if CHG_BQ25618_ENABLE
     			if (bq256xx_poll_status(&charger_status) == kStatus_Success) {
     				PRINTF("[Charger] Power Good: %s\n", charger_status.power_good ? "Yes" : "No");
     				PRINTF("[Charger] VBUS Status: 0x%02X\n", charger_status.vbus_stat);
@@ -237,6 +268,7 @@ void I2C_Task(void *pvParameters)
     			} else {
     				PRINTF("[Charger] Failed to read charger status.\n");
     			}
+#endif
                 xSemaphoreGive(i2c_mutex);
             }
 
@@ -250,8 +282,10 @@ void I2C_Task(void *pvParameters)
         {
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
+#if FG_GLF70302_ENABLE
             	glf70302_read_battery(&battery_info);
             	ss_set_battery(&ss, battery_info.soc);
+#endif
                 xSemaphoreGive(i2c_mutex);
             }
 
@@ -267,6 +301,7 @@ void I2C_Task(void *pvParameters)
 
                 if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE) {
                     /* 根據事件控制 LED */
+#if LED_KTD2027_ENABLE
                     switch (evt) {
                     case LED_EVT_POWER_ON_PROGRESS:
                     	ktd202x_led_off();
@@ -277,7 +312,7 @@ void I2C_Task(void *pvParameters)
                     	ktd202x_ch2_led_on(LED_ON);
                     	vTaskDelay(pdMS_TO_TICKS(1000));
                     	ktd202x_ch2_led_off();
-                    	pca9422_power_down();
+                    	hal_pmic_pca9422_power_down();
                         break;
                     case LED_EVT_CHARGING:
                     	ktd202x_led_off();
@@ -336,6 +371,7 @@ void I2C_Task(void *pvParameters)
                     default:
                         break;
                     }
+#endif
                     xSemaphoreGive(i2c_mutex);
                 }
             }
@@ -347,9 +383,10 @@ void I2C_Task(void *pvParameters)
     	    (void)xQueueSend(spi_request_queue, &v, 0);
 
         }
+#if LED_KTD2027_ENABLE && CHG_BQ25618_ENABLE
         if(ss_is_charging(&ss) && led_status==0)
         	led_post_event(LED_EVT_CHARGING);
-
+#endif
 
     }
 }

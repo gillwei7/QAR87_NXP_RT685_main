@@ -12,12 +12,16 @@ extern volatile struct aw933xx_dev aw933xx;
 
 void hal_touch_aw93305_init(void)
 {
+#if TOUCH_AW93305_ENABLE
 	awinic_single_enter();
+#endif
 }
 
 void hal_touch_aw93305_gesture_callback(void)
 {
+#if TOUCH_AW93305_ENABLE
 	AW93305_EXTI_Callback();
+#endif
 }
 
 #endif

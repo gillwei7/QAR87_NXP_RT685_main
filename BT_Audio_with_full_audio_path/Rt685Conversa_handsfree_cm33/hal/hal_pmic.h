@@ -15,6 +15,7 @@
 
 
 void hal_pmic_pca9422_init(void);
+void hal_pmic_pca9422_power_down(void);
 void hal_pmic_pca9422_enter_ship_mode(void);
 
 
