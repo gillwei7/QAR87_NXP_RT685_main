@@ -379,9 +379,10 @@ void I2C_Task(void *pvParameters)
         if(System_Status && Novatek_boot_completed)
         {
         	System_Status=0;
+#if SOC_SPI_ENABLE
     		uint8_t v = SYSTEM_STATUS_HEX_VALUE;
     	    (void)xQueueSend(spi_request_queue, &v, 0);
-
+#endif
         }
 #if LED_KTD2027_ENABLE && CHG_BQ25618_ENABLE
         if(ss_is_charging(&ss) && led_status==0)
