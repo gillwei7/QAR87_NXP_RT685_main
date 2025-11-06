@@ -61,6 +61,26 @@ QueueHandle_t spi_request_queue = NULL;
 EventGroupHandle_t spi_event_group = NULL;
 SemaphoreHandle_t spi_semaphore = NULL;
 
+
+// NEW: 被動模式事件佇列與事件型別
+typedef enum {
+    PASSIVE_EVT_NEED_INIT = 1,
+    PASSIVE_EVT_RX_DONE   = 2,
+} passive_evt_t;
+QueueHandle_t passive_evt_queue = NULL;
+
+
+// NEW: 主動傳輸完成事件佇列與事件型別（供 execute_active_spi_transmission 等待）
+typedef enum {
+    TRANSFER_EVT_DONE = 1,
+} transfer_evt_t;
+QueueHandle_t transfer_evt_queue = NULL;
+
+
+// NEW: 同步等待多個 Queue 的 QueueSet（整合 passive + active）
+QueueSetHandle_t spi_evt_set = NULL;
+
+
 extern volatile SystemStatus ss ;
 uint8_t Novatek_boot_completed = 0;
 
@@ -269,12 +289,22 @@ void SPI_SLAVE_IRQHandler(void)
                 } else {
                     PRINTF("\n[Passive] Invalid checksum! Prefix OK, but expected %02X, got %02X\r\n", expected_cs, destBuff[3]);
                     passive_mode_busy = false;
-                    xEventGroupSetBitsFromISR(spi_event_group, EVT_PASSIVE_NEED_INIT, &xHigherPriorityTaskWoken);
+                    //xEventGroupSetBitsFromISR(spi_event_group, EVT_PASSIVE_NEED_INIT, &xHigherPriorityTaskWoken);
+                    passive_evt_t evt = PASSIVE_EVT_NEED_INIT;
+		            if (passive_evt_queue) {
+		                xQueueSendFromISR(passive_evt_queue, &evt, &xHigherPriorityTaskWoken);
+		            }
+
                 }
             } else {
                 PRINTF("\n[Passive] Invalid frame prefix! Expected 0xAA, got 0x%02X\r\n", destBuff[0]);
                 passive_mode_busy = false;
-                xEventGroupSetBitsFromISR(spi_event_group, EVT_PASSIVE_NEED_INIT, &xHigherPriorityTaskWoken);
+                //xEventGroupSetBitsFromISR(spi_event_group, EVT_PASSIVE_NEED_INIT, &xHigherPriorityTaskWoken);
+		        passive_evt_t evt = PASSIVE_EVT_NEED_INIT;
+		        if (passive_evt_queue) {
+		            xQueueSendFromISR(passive_evt_queue, &evt, &xHigherPriorityTaskWoken);
+		        }
+
             }
         } else if (operation_mode == MODE_PASSIVE_ACK) {
             if (destBuff[0] == 0x11 && destBuff[1] == 0x11 && destBuff[2] == 0x11 && destBuff[3] == 0x11) {
@@ -287,9 +317,25 @@ void SPI_SLAVE_IRQHandler(void)
             }
             passive_mode_busy = false;
             operation_mode = MODE_PASSIVE_IDLE;
-            xEventGroupSetBitsFromISR(spi_event_group, EVT_PASSIVE_RX_DONE | EVT_PASSIVE_NEED_INIT, &xHigherPriorityTaskWoken);
+            //xEventGroupSetBitsFromISR(spi_event_group, EVT_PASSIVE_RX_DONE | EVT_PASSIVE_NEED_INIT, &xHigherPriorityTaskWoken);
+
+            // 先送 NEED_INIT，再送 RX_DONE，以維持原本 WaitBits 同時被滿足時「先 init 再 parse」的行為
+			passive_evt_t evt = PASSIVE_EVT_NEED_INIT;
+			if (passive_evt_queue) {
+				xQueueSendFromISR(passive_evt_queue, &evt, &xHigherPriorityTaskWoken);
+				evt = PASSIVE_EVT_RX_DONE;
+				xQueueSendFromISR(passive_evt_queue, &evt, &xHigherPriorityTaskWoken);
+			}
+
         } else if (operation_mode == MODE_ACTIVE) {
-            xEventGroupSetBitsFromISR(spi_event_group, EVT_TRANSFER_DONE, &xHigherPriorityTaskWoken);
+            //xEventGroupSetBitsFromISR(spi_event_group, EVT_TRANSFER_DONE, &xHigherPriorityTaskWoken);
+	        // NEW: 同步送 Queue，供 execute_active_spi_transmission() 的 Queue 版等待
+	        transfer_evt_t tevt = TRANSFER_EVT_DONE;
+	        if (transfer_evt_queue) {
+	            xQueueSendFromISR(transfer_evt_queue, &tevt, &xHigherPriorityTaskWoken);
+	        }
+
+
         }
 #if USE_SEMAPHORE
         xSemaphoreGiveFromISR(spi_semaphore, &xHigherPriorityTaskWoken);
@@ -316,6 +362,12 @@ static void execute_active_spi_transmission(uint8_t hex_value)
     while (passive_mode_busy) {
         vTaskDelay(pdMS_TO_TICKS(10));
     }
+
+    // NEW: 確保主動傳輸完成事件佇列存在
+    if (transfer_evt_queue == NULL) {
+        transfer_evt_queue = xQueueCreate(10, sizeof(transfer_evt_t));
+    }
+
 
     spi_slave_config_t slave_config = {0};
     SPI_SlaveGetDefaultConfig(&slave_config);
@@ -366,7 +418,18 @@ static void execute_active_spi_transmission(uint8_t hex_value)
     }
 
     for (int i = 0; i < frames_to_send; i++) {
-        xEventGroupWaitBits(spi_event_group, EVT_TRANSFER_DONE, pdTRUE, pdFALSE, portMAX_DELAY);
+        //xEventGroupWaitBits(spi_event_group, EVT_TRANSFER_DONE, pdTRUE, pdFALSE, portMAX_DELAY);
+
+        // NEW: 用 Queue 等待 ISR 通知「一個 frame 傳完」
+        transfer_evt_t tevt;
+        if (xQueueReceive(transfer_evt_queue, &tevt, portMAX_DELAY) != pdPASS) {
+            // 若 queue 接收失敗，直接跳出（防守性處理）
+            break;
+        }
+        //（可選）檢查事件型別
+        if (tevt != TRANSFER_EVT_DONE) {
+            continue;
+        }
 
         uint8_t* sent_frame_ptr;
         uint32_t sent_frame_size;
@@ -426,20 +489,32 @@ static void execute_active_spi_transmission(uint8_t hex_value)
     PRINTF(">>> Returning to PASSIVE mode...\r\n\n");
 
     operation_mode = MODE_PASSIVE_IDLE;
-    xEventGroupSetBits(spi_event_group, EVT_PASSIVE_NEED_INIT);
-    vTaskDelay(pdMS_TO_TICKS(100));
+    //xEventGroupSetBits(spi_event_group, EVT_PASSIVE_NEED_INIT);
+	if (passive_evt_queue) {
+		passive_evt_t evt = PASSIVE_EVT_NEED_INIT;
+		(void)xQueueSend(passive_evt_queue, &evt, 0);
+	}
+
 }
 
 /**
- * @brief SPI 處理任務 (消費者)。
- * @details 這是一個 FreeRTOS 任務，它無限循環地等待來自 `spi_request_queue` 的請求。
- * 一旦從佇列中接收到一個值 (例如，由 `button_task` 發送的按鍵事件)，
- * 它就會調用 `execute_active_spi_transmission` 來執行主動 SPI 傳輸。
- * 這種生產者-消費者模式可以將事件的產生 (按鈕) 與事件的處理 (SPI傳輸) 解耦。
+ * @brief Unified SPI handler task.
+ * @details This FreeRTOS task integrates both active and passive SPI flows:
+ * - Waits on a QueueSet that combines `spi_request_queue` (active requests) and `passive_evt_queue` (passive events).
+ * - When an active request (e.g., from button_task) arrives, it calls `execute_active_spi_transmission()` to perform the active SPI sequence.
+ * - When a passive event arrives, it handles ACK parsing or re-initialization for passive mode.
+ *
+ * This design ensures event-driven handling for both directions, decouples ISR from task logic via queues,
+ * and maintains SPI state consistency without busy polling.
  */
 void spi_handler_task(void *pvParameters)
 {
     uint8_t received_value;
+
+
+    passive_evt_t  passive_evt;
+    QueueSetMemberHandle_t activated;
+
 
     // 初始化 SPI frame 的 checksum
     dataFrame1[3] = calculateChecksum(dataFrame1, 3);
@@ -447,68 +522,62 @@ void spi_handler_task(void *pvParameters)
 
     PRINTF("=== SPI Slave Ready ===\r\n");
     PRINTF("GPIO is LOW: Passive mode active, waiting for Master...\r\n");
-    PRINTF("SPI Handler Task is ready, waiting for requests from the queue.\r\n");
+    //PRINTF("SPI Handler Task is ready, waiting for requests from the queue.\r\n");
+    PRINTF("SPI Handler Task unified: waiting for passive/active events via QueueSet.\r\n");
 
-    while (1)
-    {
-        // 從佇列中等待並接收訊息，如果沒有訊息，任務會在此處被 block 住
-        if (xQueueReceive(spi_request_queue, &received_value, portMAX_DELAY) == pdPASS)
-        {
-            // 成功收到請求，呼叫執行函式
-            execute_active_spi_transmission(received_value);
-        }
+
+    // NEW: 確保被動事件佇列存在
+    if (passive_evt_queue == NULL) {
+        passive_evt_queue = xQueueCreate(10, sizeof(passive_evt_t));
     }
-}
-
-/**
- * @brief 被動模式處理任務。
- * @details 這個任務負責管理 SPI 的被動模式。它在啟動時初始化 SPI 進入被動模式，
- * 並等待事件信號 (EVT_PASSIVE_RX_DONE 或 EVT_PASSIVE_NEED_INIT)。
- * 當需要重新初始化被動模式時 (例如，一次主動傳輸完成後或被動接收失敗後)，
- * 此任務會確保 SPI 正確地返回到監聽狀態。
- */
-void passive_spi_handler_task(void *pvParameters)
-{
-    EventBits_t bits;
+    // NEW: 進入被動監聽狀態（原 passive 任務起始行為）
     vTaskDelay(pdMS_TO_TICKS(100));
     init_passive_mode();
 
-    while (1) {
-        bits = xEventGroupWaitBits(spi_event_group,
-                                   EVT_PASSIVE_RX_DONE | EVT_PASSIVE_NEED_INIT,
-                                   pdTRUE,
-                                   pdFALSE,
-                                   portMAX_DELAY);
-        if (bits & EVT_PASSIVE_NEED_INIT) {
-            vTaskDelay(pdMS_TO_TICKS(10));
-            if (GPIO_PinRead(GPIO, 2, 15) == 0 && operation_mode != MODE_ACTIVE) {
-                init_passive_mode();
+    // NEW: 建立並加入 QueueSet（同時監聽 passive_evt_queue 與 spi_request_queue）
+    if (spi_evt_set == NULL) {
+        // 估計總同時待處理項目數（可視實際 queue 長度調整）
+        spi_evt_set = xQueueCreateSet(20);
+        configASSERT(spi_evt_set != NULL);
+    }
+    if (passive_evt_queue) {
+        xQueueAddToSet(passive_evt_queue, spi_evt_set);
+    }
+    if (spi_request_queue) {
+        xQueueAddToSet(spi_request_queue, spi_evt_set);
+    }
+
+    while (1)
+    {
+        // NEW: 以 QueueSet 同步等待兩個來源的事件
+        activated = xQueueSelectFromSet(spi_evt_set, portMAX_DELAY);
+        if (activated == passive_evt_queue) {
+            if (xQueueReceive(passive_evt_queue, &passive_evt, 0) == pdPASS) {
+                switch (passive_evt) {
+                case PASSIVE_EVT_NEED_INIT:
+                    vTaskDelay(pdMS_TO_TICKS(10));
+                    if (GPIO_PinRead(GPIO, 2, 15) == 0 && operation_mode != MODE_ACTIVE) {
+                        init_passive_mode();
+                    }
+                    break;
+                case PASSIVE_EVT_RX_DONE:
+                    PRINTF("[Passive] Sequence completed. Parsing frame...\r\n");
+                    handle_passive_ack_frame(passive_rx_buffer);
+                    PRINTF("[Passive] Ready for next sequence.\r\n");
+                    break;
+                default:
+                    break;
+                }
+            }
+        } else if (activated == spi_request_queue) {
+            if (xQueueReceive(spi_request_queue, &received_value, 0) == pdPASS) {
+                // 主動請求：執行主動 SPI 傳輸（內部以 transfer_evt_queue 等待每個 frame 完成）
+                execute_active_spi_transmission(received_value);
             }
         }
-        if (bits & EVT_PASSIVE_RX_DONE) {
 
-            PRINTF("[Passive] Sequence completed. Parsing frame...\r\n");
-            handle_passive_ack_frame(passive_rx_buffer);
-            PRINTF("[Passive] Ready for next sequence.\r\n");
-        }
     }
 }
 
-/**
- * @brief SPI 監控任務 (可能用於調試)。
- * @details 這是一個簡單的任務，等待 `EVT_TRANSFER_DONE` 事件，並在事件發生時打印一條訊息。
- * 在目前的架構中，主要的主動傳輸邏輯由 `execute_active_spi_transmission` 處理，
- * 這個任務可能是一個輔助或遺留的監控功能。
- */
-void spi_task(void *pvParameters)
-{
-    EventBits_t bits;
-    while (1) {
-        bits = xEventGroupWaitBits(spi_event_group, EVT_TRANSFER_DONE, pdTRUE, pdFALSE, portMAX_DELAY);
-        if ((bits & EVT_TRANSFER_DONE) != 0) {
-            PRINTF("spi_task: Frame transfer done.\r\n");
-        }
-    }
-}
 
 
