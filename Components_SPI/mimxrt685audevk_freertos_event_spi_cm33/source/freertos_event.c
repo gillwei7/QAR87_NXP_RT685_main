@@ -112,6 +112,8 @@ int main(void)
 {
 	BOARD_InitHardware();
 
+    PRINTF("FW Version: 1.0.0 \r\n");
+
 	BOARD_I3C_Init(BOARD_PMIC_I3C_BASEADDR, BOARD_PMIC_I3C_CLOCK_FREQ);
 
 #if USE_EVENT
