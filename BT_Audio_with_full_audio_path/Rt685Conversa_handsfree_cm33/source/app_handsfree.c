@@ -522,15 +522,15 @@ void peripheral_hfp_hf_task(void *pvParameters)
 //        while (1);
 //    }
 
-//	if (xTaskCreate(I2C_Task, "I2C_TASK",
-//	                configMINIMAL_STACK_SIZE + 256,
-//	                NULL,
-//	                tskIDLE_PRIORITY + 3,
-//	                &sI2CTaskHandle) != pdPASS)
-//	{
-//	    PRINTF("I2C_TASK creation failed!\r\n");
-//	    while (1) { ; }
-//	}
+	if (xTaskCreate(I2C_Task, "I2C_TASK",
+	                configMINIMAL_STACK_SIZE + 256,
+	                NULL,
+	                tskIDLE_PRIORITY + 3,
+	                &sI2CTaskHandle) != pdPASS)
+	{
+	    PRINTF("I2C_TASK creation failed!\r\n");
+	    while (1) { ; }
+	}
 #endif
 
     vTaskDelete(NULL);
