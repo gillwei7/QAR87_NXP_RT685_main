@@ -246,6 +246,8 @@ void button_task(void *pvParameters)
                     {
                         /* 長按（放開才觸發） */
                         PRINTF("[PWR] Long Press (>=%ums) detected.\r\n", (unsigned)PWR_LONG_MS);
+                        uint8_t v = POWER_LONG_PRESS_HEX_VALUE;
+                        (void)xQueueSend(spi_request_queue, &v, 0);
                         led_post_event(LED_EVT_POWER_OFF_PROGRESS);
                         /* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
                     }
