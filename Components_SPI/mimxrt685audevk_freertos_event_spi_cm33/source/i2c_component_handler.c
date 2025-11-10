@@ -11,6 +11,9 @@
 #include "button_handler.h"
 #include "system_status.h"
 
+#define BATTERY_READ_PERIOD_MS  (30000U)
+static TimerHandle_t s_battery_timer = NULL;
+
 /* ===== I2C synchronization objects ===== */
 EventGroupHandle_t i2c_event_group = NULL;
 SemaphoreHandle_t  i2c_mutex       = NULL;
@@ -28,6 +31,16 @@ extern uint8_t led_status;
 volatile SystemStatus ss = {0};
 extern volatile uint8_t System_Status ;
 extern uint8_t Novatek_boot_completed;
+
+
+static void BatteryReadTimerCb(TimerHandle_t xTimer)
+{
+
+    if (i2c_event_group) {
+        xEventGroupSetBits(i2c_event_group, GAUGE_EVENT_BIT);
+    }
+
+}
 
 static void Stop_AMP(void)
 {
@@ -155,6 +168,18 @@ void Init_I2C_Component(void)
 	{
 		ss_set_charging(&ss, true);
 	}
+
+
+	s_battery_timer = xTimerCreate("BattTimer",
+	                               pdMS_TO_TICKS(BATTERY_READ_PERIOD_MS),
+	                               pdTRUE,     // auto-reload
+	                               NULL,
+	                               BatteryReadTimerCb);
+	if (s_battery_timer != NULL) {
+	    xTimerStart(s_battery_timer, 0);
+	}
+
+
 
 }
 
