@@ -55,6 +55,10 @@
 #define PLAYBACK_BUFFER_SIZE (128 * 2U)
 #define BUFFER_NUM           (2U)
 #endif
+
+
+#define NOVATEK_UBOOT_PORT  GPIO2_PORT // GPIO2_PORT 通常在 board.h 中定義為 2U
+#define NOVATEK_UBOOT_PIN   15U        // Pin 15
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -294,6 +298,13 @@ int main(void)
     GPIO_PortInit(GPIO, GPIO0_PORT);
     GPIO_PortInit(GPIO, GPIO1_PORT);
     GPIO_PortInit(GPIO, GPIO2_PORT);
+
+    gpio_pin_config_t novatek_config = {
+        kGPIO_DigitalOutput, // 設定為數位輸出
+        1                    // 初始狀態設為 LOW (拉低)
+    };
+    GPIO_PinInit(GPIO, NOVATEK_UBOOT_PORT, NOVATEK_UBOOT_PIN, &novatek_config);
+    PRINTF("Set Novatek Pin (PIO2_15) to OUTPUT LOW.\r\n");
 
     /* Initialize PINT */
     PINT_Init(EXAMPLE_PINT_BASE);

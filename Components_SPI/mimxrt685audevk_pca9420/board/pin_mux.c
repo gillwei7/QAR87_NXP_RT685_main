@@ -11,7 +11,7 @@ product: Pins v17.0
 processor: MIMXRT685S
 package_id: MIMXRT685SFVKB
 mcu_data: ksdk2_0
-processor_version: 24.12.10
+processor_version: 25.06.10
 board: MIMXRT685-AUD-EVK
 pin_labels:
 - {pin_num: G1, pin_signal: PIO0_0/FC0_SCK/CTIMER0_MAT0/I2S_BRIDGE_CLK_IN/GPIO_INT_BMAT/SEC_PIO0_0, label: GPIO_AMP_RESET_R}
@@ -24,6 +24,7 @@ pin_labels:
 - {pin_num: B5, pin_signal: PIO1_8/FC5_SSEL2/SCT0_GPI6/CTIMER_INP12/CTIMER1_MAT2/ADC0_4, label: NXP_TOUCH_INT}
 - {pin_num: B1, pin_signal: PIO1_9/FC5_SSEL3/SCT0_GPI7/UTICK_CAP1/CTIMER1_MAT3/ADC0_12, label: 'J28[1]', identifier: DVS_CTR0}
 - {pin_num: N3, pin_signal: PIO1_15/HS_SPI_SSEL1/CTIMER3_MAT0, label: CHG_INT_N_R}
+- {pin_num: E2, pin_signal: PIO2_15/SCT0_OUT9/CLKIN/CMP0_D, label: Novatek_uboot_select_pin}
 - {pin_num: R2, pin_signal: PIO2_18/PDM_CLK45/FLEXSPI0B_DATA5, label: FG_INT_GLF70302}
 - {pin_num: T2, pin_signal: PIO2_19/PDM_CLK67/FLEXSPI0B_SS0_N, label: FUN_KEY1_N, identifier: QSPI_B_CS0}
 - {pin_num: M14, pin_signal: PIO2_27/USB1_OVERCURRENTN, label: 'U13[A2]', identifier: SLEEP_MODE0}
@@ -71,6 +72,7 @@ BOARD_InitPins:
   - {pin_num: F4, peripheral: GPIO, signal: 'PIO0, 5', pin_signal: PIO0_5/FC0_SSEL2/SCT0_GPI0/SCT0_OUT0/CTIMER_INP1/SEC_PIO0_5/ADC0_0, ibena: enabled}
   - {pin_num: A2, peripheral: GPIO, signal: 'PIO0, 26', pin_signal: PIO0_26/FC3_SSEL2/SCT0_GPI6/SCT0_OUT6/CTIMER_INP7/SEC_PIO0_26/ADC0_3, ibena: enabled}
   - {pin_num: R2, peripheral: GPIO, signal: 'PIO2, 18', pin_signal: PIO2_18/PDM_CLK45/FLEXSPI0B_DATA5, ibena: enabled}
+  - {pin_num: E2, peripheral: GPIO, signal: 'PIO2, 15', pin_signal: PIO2_15/SCT0_OUT9/CLKIN/CMP0_D}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -294,6 +296,27 @@ void BOARD_InitPins(void)
                                         IOPCTL_PIO_INV_DI);
     /* PORT1 PIN8 (coords: B5) is configured as PIO1_8 */
     IOPCTL_PinMuxSet(IOPCTL, 1U, 8U, port1_pin8_config);
+
+    const uint32_t port2_pin15_config = (/* Pin is configured as PIO2_15 */
+                                         IOPCTL_PIO_FUNC0 |
+                                         /* Disable pull-up / pull-down function */
+                                         IOPCTL_PIO_PUPD_DI |
+                                         /* Enable pull-down function */
+                                         IOPCTL_PIO_PULLDOWN_EN |
+                                         /* Disable input buffer function */
+                                         IOPCTL_PIO_INBUF_DI |
+                                         /* Normal mode */
+                                         IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                         /* Normal drive */
+                                         IOPCTL_PIO_FULLDRIVE_DI |
+                                         /* Analog mux is disabled */
+                                         IOPCTL_PIO_ANAMUX_DI |
+                                         /* Pseudo Output Drain is disabled */
+                                         IOPCTL_PIO_PSEDRAIN_DI |
+                                         /* Input function is not inverted */
+                                         IOPCTL_PIO_INV_DI);
+    /* PORT2 PIN15 (coords: E2) is configured as PIO2_15 */
+    IOPCTL_PinMuxSet(IOPCTL, 2U, 15U, port2_pin15_config);
 
     const uint32_t port2_pin18_config = (/* Pin is configured as PIO2_18 */
                                          IOPCTL_PIO_FUNC0 |
@@ -520,11 +543,18 @@ void PCA9422_I3C(void)
 AMP_I2S:
 - options: {callFromInitBoot: 'true', coreID: cm33, enableClock: 'true'}
 - pin_list:
-  - {pin_num: L3, peripheral: FLEXCOMM1, signal: RXD_SDA_MOSI_DATA, pin_signal: PIO0_9/FC1_RXD_SDA_MOSI_DATA/SCT0_GPI6/SCT0_OUT6/CTIMER1_MAT2/I2S_BRIDGE_DATA_OUT/SEC_PIO0_9,
-    ibena: enabled, drive: full}
+  - {pin_num: G16, peripheral: FLEXCOMM5, signal: SCK, pin_signal: PIO1_3/FC5_SCK, ibena: enabled, drive: full}
+  - {pin_num: J16, peripheral: FLEXCOMM5, signal: RXD_SDA_MOSI_DATA, pin_signal: PIO1_5/FC5_RXD_SDA_MOSI_DATA, ibena: enabled, drive: full}
+  - {pin_num: G17, peripheral: FLEXCOMM5, signal: TXD_SCL_MISO_WS, pin_signal: PIO1_4/FC5_TXD_SCL_MISO_WS, ibena: enabled, drive: full}
   - {pin_num: J2, peripheral: FLEXCOMM1, signal: SCK, pin_signal: PIO0_7/FC1_SCK/SCT0_GPI4/SCT0_OUT4/CTIMER1_MAT0/I2S_BRIDGE_CLK_OUT/SEC_PIO0_7, ibena: enabled, drive: full}
   - {pin_num: K4, peripheral: FLEXCOMM1, signal: TXD_SCL_MISO_WS, pin_signal: PIO0_8/FC1_TXD_SCL_MISO_WS/SCT0_GPI5/SCT0_OUT5/CTIMER1_MAT1/I2S_BRIDGE_WS_OUT/SEC_PIO0_8,
     ibena: enabled, drive: full}
+  - {pin_num: L3, peripheral: FLEXCOMM1, signal: RXD_SDA_MOSI_DATA, pin_signal: PIO0_9/FC1_RXD_SDA_MOSI_DATA/SCT0_GPI6/SCT0_OUT6/CTIMER1_MAT2/I2S_BRIDGE_DATA_OUT/SEC_PIO0_9,
+    ibena: enabled, drive: full}
+  - {pin_num: R1, peripheral: DMIC0, signal: 'CLK, 0_1', pin_signal: PIO2_16/PDM_CLK01, ibena: enabled}
+  - {pin_num: U1, peripheral: DMIC0, signal: 'CLK, 2_3', pin_signal: PIO2_17/PDM_CLK23/FLEXSPI0B_DATA4, ibena: enabled}
+  - {pin_num: U2, peripheral: DMIC0, signal: 'DATA, 0_1', pin_signal: PIO2_20/PDM_DATA01, ibena: enabled}
+  - {pin_num: R3, peripheral: DMIC0, signal: 'DATA, 2_3', pin_signal: PIO2_21/PDM_DATA23/CTIMER_INP14/FLEXSPI0B_SS1_N, ibena: enabled}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
