@@ -32,6 +32,24 @@ volatile SystemStatus ss = {0};
 extern volatile uint8_t System_Status ;
 extern uint8_t Novatek_boot_completed;
 
+battery_state_t battery_state = BATTERY_STATE_NORMAL;
+
+
+static inline uint8_t battery_soc_percent_mv(uint32_t mv)
+{
+    // 邊界保護
+    if (mv <= BATTERY_EMPTY_VOLTAGE) return 0;
+    if (mv >= BATTERY_FULL_VOLTAGE)  return 100;
+
+    // 線性比例： (mv - empty) * 100 / (full - empty)
+    uint32_t range = (uint32_t)(BATTERY_FULL_VOLTAGE - BATTERY_EMPTY_VOLTAGE);
+    uint32_t num   = (uint32_t)(mv - BATTERY_EMPTY_VOLTAGE) * 100u;
+
+    // 四捨五入：+range/2
+    uint8_t soc = (uint8_t)((num + (range / 2u)) / range);
+
+    return soc;   // 0~100
+}
 
 static void BatteryReadTimerCb(TimerHandle_t xTimer)
 {
@@ -159,6 +177,7 @@ void Init_I2C_Component(void)
 	ktd202x_ch4_led_on(LED_ON); //White light turns on first
 	awinic_single_enter(); //Touch Init
 	glf70302_read_battery(&battery); //Read the battery level after powering on
+	battery.soc = battery_soc_percent_mv(battery.voltage);
 	ss_set_battery(&ss, battery.soc);
 	init_aw88166(); // Init AMP
 
@@ -365,6 +384,12 @@ void I2C_Task(void *pvParameters)
     					led_post_event(LED_EVT_ALL_OFF);
     					ss_set_charging(&ss, false);
     				}
+    				/*
+    				if(charger_status.chg_stat==0x11)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
+    				{
+    					battery_state = BATTERY_STATE_FULL;
+    				}
+    				*/
     			} else {
     				PRINTF("[Charger] Failed to read charger status.\n");
     			}
@@ -382,6 +407,22 @@ void I2C_Task(void *pvParameters)
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
             	glf70302_read_battery(&battery);
+            	battery.soc = battery_soc_percent_mv(battery.voltage);
+                PRINTF("[Battery] SOC: %d%%\r\n",battery.soc);
+                if(battery.soc>=99 && ss_is_charging(&ss))
+                {
+                	battery_state = BATTERY_STATE_FULL;
+                	led_post_event(LED_EVT_FULL_CHARGERED);
+                }
+                else if (battery.soc<=20)
+                {
+                	battery_state = BATTERY_STATE_LOW;
+                	led_post_event(LED_EVT_LOW_BATTERY);
+                }
+                else
+                {
+                	battery_state = BATTERY_STATE_NORMAL;
+                }
             	ss_set_battery(&ss, battery.soc);
                 xSemaphoreGive(i2c_mutex);
             }
@@ -478,9 +519,24 @@ void I2C_Task(void *pvParameters)
     	    (void)xQueueSend(spi_request_queue, &v, 0);
 
         }
-        if(ss_is_charging(&ss) && led_status==0)
-        	led_post_event(LED_EVT_CHARGING);
 
+        //Confirm the final status
+        if(led_status==0) // When other events are executed, causing the LED to turn off
+        {
+        	if(ss_is_charging(&ss))
+        	{
+            	if(battery_state==BATTERY_STATE_FULL)
+            		led_post_event(LED_EVT_FULL_CHARGERED);
+            	else
+                	led_post_event(LED_EVT_CHARGING);
+        	}
+        	else
+        	{
+        		if(battery_state==BATTERY_STATE_LOW)
+        			led_post_event(LED_EVT_LOW_BATTERY);
+        	}
+
+        }
 
     }
 }
