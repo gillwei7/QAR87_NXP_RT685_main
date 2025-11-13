@@ -157,7 +157,7 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 			break;
         case 0x50: //Update Layer
 				PRINTF("[Passive] ACK:[50 %02X] Update Layer \r\n",val);
-				ss.flags = val;
+				ss.layer = val;
 			break;
 
         default:
