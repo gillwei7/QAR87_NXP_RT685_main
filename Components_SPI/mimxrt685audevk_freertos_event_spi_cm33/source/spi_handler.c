@@ -155,6 +155,10 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 				led_post_event(LED_EVT_ALL_OFF);
 			}
 			break;
+        case 0x50: //Update Layer
+				PRINTF("[Passive] ACK:[50 %02X] Update Layer \r\n",val);
+				ss.flags = val;
+			break;
 
         default:
             PRINTF("[Passive] CMD=0x%02X (VAL=0x%02X) not handled yet\r\n", cmd, val);
