@@ -433,18 +433,19 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 				
 			break;
 			case 1:
+			#if UsingQAR87Board == 1
+				//smart amplifier
 		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
 		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3);
-		        /* attach AUDIO PLL clock to FLEXCOMM2 (I2S2) */
-		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);
-		    #if UsingQAR87Board == 1
-				/* attach AUDIO PLL clock to FLEXCOMM4 (I2S4) */
-        		CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
-			#else
+
+		        // I2S for NT98532 connection
 		        /* attach AUDIO PLL clock to FLEXCOMM5 (I2S5) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
+		        /* attach AUDIO PLL clock to FLEXCOMM6 (I2S6) */
+        		CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM6);
+
 			#endif
 			break;
 			case 2:
@@ -493,8 +494,9 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 					#endif
 				break;
 				case 1:
-					SetFcClkSharing(FcIdx_RxFrNvt, FcIdx_TxToNvt, 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
+
 					#if UsingQAR87Board == 1
+						SetFcClkSharing(FcIdx_TxToNvt, FcIdx_RxFrNvt, 0);	//share clk of FcIdx_TxToNvt to FcIdx_RxFrNvt, using internal share group 0
 						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
 					#else
 						SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrAmp to FcIdx_TxToAmp, using internal share group 1

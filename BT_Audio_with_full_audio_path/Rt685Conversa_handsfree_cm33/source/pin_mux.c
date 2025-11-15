@@ -48,16 +48,20 @@ pin_labels:
 void BOARD_InitBootPins(void)
 {
 #if UsingQAR87Board == 1
-//    BOARD_InitPins();
-//	PCA9422_I3C();
-//    BOARD_InitDEBUG_UARTPins();
-//    //BOARD_InitBUTTONsPins();
-//    BOARD_InitArduinoUARTPins(); //for BT HCI
-//    BOARD_Init_Audio_Pins();//connect to codec
-//    BOARD_InitFlexSPI0APins();
-//    BOARD_InitScoPins(); //connect to BT PCM
-//    //BOARD_InitFourDbgPins();
-//    BOARD_InitDmicPins();
+#if 0
+    BOARD_InitPins();
+	PCA9422_I3C();
+    BOARD_InitDEBUG_UARTPins();
+    //BOARD_InitBUTTONsPins();
+    BOARD_InitArduinoUARTPins(); //for BT HCI
+    BOARD_Init_Audio_Pins();//connect to codec
+    BOARD_InitFlexSPI0APins();
+    BOARD_InitScoPins(); //connect to BT PCM
+    //BOARD_InitFourDbgPins();
+    BOARD_InitDmicPins();
+    BOARD_Init_RTvsNT_Audio_Pins();
+
+#else
     BOARD_InitDevGpioPins();
     BOARD_InitDevIBtUartPins();
     BOARD_InitDevDebugUartFC5Pins();
@@ -68,6 +72,7 @@ void BOARD_InitBootPins(void)
     BOARD_InitDevUsbPins();
     BOARD_InitDevDmicPins();
     BOARD_InitDevSPI532Pins();
+#endif
 #else
     BOARD_InitPins();
     BOARD_InitDEBUG_UARTPins();
@@ -361,6 +366,7 @@ BOARD_InitDEBUG_UARTPins:
 void BOARD_InitDEBUG_UARTPins(void)
 {
 #if UsingQAR87Board == 1
+#if Using_UART5
 //FC5
     const uint32_t port1_pin4_config = (/* Pin is configured as FC5_TXD_SCL_MISO_WS */
                                         IOPCTL_PIO_FUNC1 |
@@ -382,7 +388,29 @@ void BOARD_InitDEBUG_UARTPins(void)
                                         IOPCTL_PIO_INV_DI);
     /* PORT0 PIN1 (coords: G2) is configured as FC0_TXD_SCL_MISO_WS */
     IOPCTL_PinMuxSet(IOPCTL, 1U, 4U, port1_pin4_config);
-
+#else
+//FC2
+    const uint32_t port0_pin15_config = (/* Pin is configured as FC2_TXD_SCL_MISO_WS */
+                                        IOPCTL_PIO_FUNC1 |
+                                        /* Disable pull-up / pull-down function */
+                                        IOPCTL_PIO_PUPD_DI |
+                                        /* Enable pull-down function */
+                                        IOPCTL_PIO_PULLDOWN_EN |
+                                        /* Disable input buffer function */
+                                        IOPCTL_PIO_INBUF_DI |
+                                        /* Normal mode */
+                                        IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                        /* Normal drive */
+                                        IOPCTL_PIO_FULLDRIVE_DI |
+                                        /* Analog mux is disabled */
+                                        IOPCTL_PIO_ANAMUX_DI |
+                                        /* Pseudo Output Drain is disabled */
+                                        IOPCTL_PIO_PSEDRAIN_DI |
+                                        /* Input function is not inverted */
+                                        IOPCTL_PIO_INV_DI);
+    /* PORT0 PIN1 (coords: G2) is configured as FC0_TXD_SCL_MISO_WS */
+    IOPCTL_PinMuxSet(IOPCTL, 0U, 15U, port0_pin15_config);
+#endif
 #else
     const uint32_t port0_pin1_config = (/* Pin is configured as FC0_TXD_SCL_MISO_WS */
                                         IOPCTL_PIO_FUNC1 |

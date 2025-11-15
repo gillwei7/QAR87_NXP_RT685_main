@@ -1157,7 +1157,9 @@ void APP_MU_IRQHandler(void)
     	if(MU_U32InfoFromDsp==MuEvtDspToMcu_AudioProcIsFinished_HomeVitStandBy)
     	{
     		OSA_SR_ALLOC();
-
+#if 1//B36932
+    		McuMainAudioFlowFinalize_AudioIoDbg();
+#else
 			#if EnableUsbComAndAudio==1	//folding --- write conversa Tx output audio to UAC up streaming buffer
 				OSA_ENTER_CRITICAL();
 					//put audio data from DSP side to UacUp cir buffer
@@ -1191,6 +1193,7 @@ void APP_MU_IRQHandler(void)
 						VarBlockSharedByDspAndMcu.MonitorInfoArray1[8]=AODOfUacUpBuf+AudioFrameSizeInSamplePerCh;
 				#endif
 			#endif
+#endif //B36932
     	}else
     	{
 			switch(MU_U32InfoFromDsp)
@@ -1351,6 +1354,7 @@ void VitStandBy_Task(void *handle)
 			{
 			case WorkState_AudioIoDbg:
 				ProcessAudio_AfterAudioInputBufIsReady_AudioIoDbg();
+				//ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy();//B36932
 				break;
 			default:
 				ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy();
@@ -1545,7 +1549,80 @@ void StartAudioTask(void)
 	BaseType_t result = 0;
 
 	#if EnableVitBeforeTheCall==1
-		InitAndStartPdm();		//if use this , it init dma again, cause BT firmware downloading fail
+	//B36932 enable FC1, FC3, FC5,FC6
+
+	//Configure PDM
+	    //init basic clk and PDM
+		InitAudioPLLForAllAudioPeripherals();
+		InitBaseAudioClkForPdm();
+
+		DMA_Init(DMA0);
+		//we open pdm ports here
+		Init_MicDmaCfgCh(0xff);	//mic0,1,2,3,4,5
+		BOARD_Init_DMA_PDM(0xff);
+		BOARD_Init_DMIC(0xff,0); //0: no skip general Dmic init. If not the first mic init, then should skip.
+		ConfigDmicChainedDma(0xff);
+		VarBlockSharedByDspAndMcu.BtFs=16000;	//dsp may check this value, need to set it to either 8000 or 16000
+
+		InitAudioCircularBuf();
+		PdmInputMuteCnt=12;			//96ms
+
+	//Configure FC1, FC3 for AMP, FC5 , Fc6 for NT
+		//BOARD_SwitchAudioFreq(16000,1);
+		BOARD_SwitchAudioFreq(48000,1);
+
+		BOARD_Init_DMA_I2S_Fc1();
+		BOARD_Init_DMA_I2S_Fc3();
+			BOARD_Init_I2S_Fc1();
+			BOARD_Init_I2S_Fc3();
+				ClearDmaBuf_I2S1Rx0();
+				ClearDmaBuf_I2S3Tx0();
+					ConfigI2S1ChainedDma();
+					ConfigI2S3ChainedDma();
+						EnableI2S1Rx0DmaChannel();
+						EnableI2S3Tx0DmaChannel();
+		BOARD_Init_DMA_I2S_FcTxToNt();
+		BOARD_Init_DMA_I2S_FcRxFrNt();
+			BOARD_Init_I2S_FcTxToNt();
+			BOARD_Init_I2S_FcRxFrNt();
+				ClearDmaBuf_I2STxToNt();
+				ClearDmaBuf_I2SRxFrNt();
+					ConfigI2STxToNtChainedDma();
+					ConfigI2SRxFrNtChainedDma();
+						EnableI2STxToNtDmaChannel();
+						EnableI2SRxFrNtDmaChannel();
+
+		//start smart amp
+		hal_amp_aw88166_left_start("Receiver");
+		hal_amp_aw88166_right_start("Receiver");
+		codec_inited = 1;
+
+		//Set expected DMA flag
+		DmaTxRxIsExpected=
+				( AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
+				AudioI2sPortsBitMapFlag_FcTxToNt |AudioI2sPortsBitMapFlag_FcRxFrNt|
+			#if EnableMic01==1
+				AudioPdmPortsBitMapFlag_Mic01
+			#endif
+			#if EnableMic23==1
+				|AudioPdmPortsBitMapFlag_Mic23
+			#endif
+			#if EnableMic45==1
+				|AudioPdmPortsBitMapFlag_Mic45
+			#endif
+			#if EnableMic67==1
+				|AudioPdmPortsBitMapFlag_Mic67
+			#endif
+				);
+
+		//start dmic immediately
+		ImmediatelyStartDmicDmaChannels(0xff);	//after calling this, dmic dma intr occurs one frame later!
+
+		PRINTF("PDM, FC1, FC3, FC5, FC6 are all started for StandbyMode. \r\n");
+
+	//B36932 end
+		//B36932 InitAndStartPdm();		//if use this , it init dma again, cause BT firmware downloading fail
+
 	#endif
 
 	if (taskCreated == 0)

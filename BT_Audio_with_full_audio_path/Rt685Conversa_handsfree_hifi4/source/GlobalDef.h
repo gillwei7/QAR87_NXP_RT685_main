@@ -32,6 +32,7 @@ typedef signed long long s64;
 
 //If UsingQAR87Board == 1, the program can run on the QAR87 development board.
 #define UsingQAR87Board		1
+#define Using_UART5			0 // =0 will use FC2 (PIO0_15)
 
 #define _Value_Pow_2_31_	2147483648
 //#define _Value_Pow_2_30_	1073741824

@@ -53,6 +53,10 @@
 #include "Sweep.h"
 #include "WorkStateManager.h"
 
+#if UsingQAR87Board == 1
+#include "hal_amp.h"
+
+#endif
 
 int UartComReportValue_S32_1;
 int UartComReportValue_S32_2;
@@ -569,8 +573,14 @@ void ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy(void)
 		PdmCh4DmaTransferringIsUsingBufA=GetPdmCh4DmaTransferringIsUsingBufAOrB();
 		PdmCh6DmaTransferringIsUsingBufA=GetPdmCh6DmaTransferringIsUsingBufAOrB();
 
-		//I2S1DmaTransferringIsUsingBufA=GetI2S1DmaTransferringIsUsingBufAOrB();
-		//I2S3DmaTransferringIsUsingBufA=GetI2S3DmaTransferringIsUsingBufAOrB();
+		//B36932 to enable FC1, FC3 for smart amp
+		I2S1DmaTransferringIsUsingBufA=GetI2S1DmaTransferringIsUsingBufAOrB();
+		I2S3DmaTransferringIsUsingBufA=GetI2S3DmaTransferringIsUsingBufAOrB();
+
+		//B36932 to enable FC5, FC6 for RT685 with NT98532 audio
+		I2STxToNtDmaTransferringIsUsingBufA=GetI2STxToNtDmaTransferringIsUsingBufAOrB();
+		I2SRxFrNtDmaTransferringIsUsingBufA=GetI2SRxFrNtDmaTransferringIsUsingBufAOrB();
+
 
 		if(PdmCh0DmaTransferringIsUsingBufA)
 		{
@@ -678,7 +688,76 @@ void ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy(void)
 			I2SDmaOtCh01Ptr=I2S3Tx0BufCh0And1Mixed_A;
 		}
 		*/
+
+		//B36932 point DMA ptr to I2S1 buffer, I2S1 is tx audio to smart amp
+		if(I2S1DmaTransferringIsUsingBufA)
+		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
+			I2SDmaInCh01Ptr=I2S1Rx0BufCh0And1Mixed_B;
+		}else
+		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
+			I2SDmaInCh01Ptr=I2S1Rx0BufCh0And1Mixed_A;
+		}
+
+		//B36932 point DMA ptr to I2S3 buffer, I2S3 is rx audio from smart amp
+		//not used in this application
+		if(I2S3DmaTransferringIsUsingBufA)
+		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
+			I2SDmaOtCh01Ptr=I2S3Tx0BufCh0And1Mixed_B;
+		}else
+		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
+			I2SDmaOtCh01Ptr=I2S3Tx0BufCh0And1Mixed_A;
+		}
+
+		//B36932 point DMA ptr to I2S5 buffer, I2S5 is tx audio to NT98532
+		if(I2STxToNtDmaTransferringIsUsingBufA)
+		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
+			I2SDmaOtCh23Ptr=(void *)I2STxToNtCh0And1Mixed_A;
+		}else
+		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
+			I2SDmaOtCh23Ptr=(void *)I2STxToNtCh0And1Mixed_B;
+		}
+
+		//B36932 point DMA ptr to I2S6 buffer, I2S6 is rx audio from NT98532
+		if(I2SRxFrNtDmaTransferringIsUsingBufA)
+		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
+			I2SDmaInCh23Ptr=(void *)I2SRxFrNtCh0And1Mixed_A;
+		}else
+		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
+			I2SDmaInCh23Ptr=(void *)I2SRxFrNtCh0And1Mixed_B;
+		}
+
 	#endif
+#if 1	//folding --- get I2S input from AMP and from Nvt, and put to shared var buffer
+	//copy I2S input (line in ADC) to shared memory from DMA buffer, for DSP later use
+	for(int i=0;i<AudioFrameSizeInSamplePerCh;i++)
+	{
+		VarBlockSharedByDspAndMcu.I2SLineInBufL[i]=*I2SDmaInCh01Ptr++;
+		VarBlockSharedByDspAndMcu.I2SLineInBufR[i]=*I2SDmaInCh01Ptr++;
+	}
+
+	for(int i=0;i<AudioFrameSizeInSamplePerCh;i++)
+	{
+		#if Rt685I2SToNvtBitWidth==16
+			#if 1
+				VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=((*(S16 *)I2SDmaInCh23Ptr++)<<16);
+				VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=((*(S16 *)I2SDmaInCh23Ptr++)<<16);
+				#if Fs_I2SToNvt_MicSpkTest==48000
+					I2SDmaInCh23Ptr+=2;
+				#endif
+			#else
+					VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=0x20000*i;
+					VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=-0x20000*i;
+			#endif
+		#endif
+		#if Rt685I2SToNvtBitWidth==32
+			VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=*(S32 *)I2SDmaInCh23Ptr++;
+			VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=*(S32 *)I2SDmaInCh23Ptr++;
+			#if Fs_I2SToNvt_MicSpkTest==48000
+				I2SDmaInCh23Ptr+=4;
+			#endif
+	#endif
+	}
+#else
 
 	#if 0	//folding --- get I2S1,2 input and put I2S1,2 output
 		//copy I2S input (line in ADC) to shared memory from DMA buffer, for DSP later use
@@ -787,7 +866,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy(void)
 	#else
 		memset((void *)VarBlockSharedByDspAndMcu.BTRxInAudio,0,sizeof(VarBlockSharedByDspAndMcu.BTRxInAudio));
 	#endif
-
+#endif //B36932
 
 #if EnableUsbComAndAudio==1
 	#if 1	//folding --- get audio data from UAC Dn cir buffer
@@ -1617,8 +1696,10 @@ void McuMainAudioFlowFinalize_AudioIoDbg(void)
 		for(int i=0;i<AudioFrameSizeInSamplePerCh;i++)
 		{
 			//I2S tx to AMP
-			*I2SDmaOtCh01Ptr++=VarBlockSharedByDspAndMcu.I2SLineOtBufL[i];
-			*I2SDmaOtCh01Ptr++=VarBlockSharedByDspAndMcu.I2SLineOtBufR[i];
+			//*I2SDmaOtCh01Ptr++=VarBlockSharedByDspAndMcu.I2SLineOtBufL[i];
+			//*I2SDmaOtCh01Ptr++=VarBlockSharedByDspAndMcu.I2SLineOtBufR[i];
+			*I2SDmaOtCh01Ptr++=VarBlockSharedByDspAndMcu.I2SInNvtBufL[i];
+			*I2SDmaOtCh01Ptr++=VarBlockSharedByDspAndMcu.I2SInNvtBufR[i];
 		}
 		#if Rt685I2SToNvtBitWidth==16
 			S16 *SrcPtr=(S16 *)I2SDmaOtCh23Ptr;
@@ -1674,6 +1755,7 @@ void McuMainAudioFlowFinalize_VideoAi(void)
 
 #if 1	//folding --- audio interface init
 extern uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx);
+extern void StartAudioTask(void);//B36932
 void InitAudioInterface_AudioIoDebug(int Opt)
 {
 	//return;
@@ -1686,8 +1768,10 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 	//if any audio port is NOT configured, set the clk.
 	//no matter BT side is 16KHz or 8KHz, CODEC is always 16KHz
 	if((!AudioPortIsActive_I2SToAmp)||(!AudioPortIsActive_I2SToNvt)||!(AudioPortIsActive_Pdm))
-		BOARD_SwitchAudioFreq(16000,0);
+		BOARD_SwitchAudioFreq(16000,Opt);//B36932 BOARD_SwitchAudioFreq(16000,0);
 
+
+#if 0//B36932 debug
 	if(!AudioPortIsActive_Pdm)
 	{
 		/* DMIC source from audio pll, divider 8, 24.576M/8=3.072MHZ */
@@ -1715,6 +1799,7 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 						EnableI2S3Tx0DmaChannel();
 		AudioPortIsActive_I2SToAmp=1;
 	}
+#endif //B36932 debug
 	if(!AudioPortIsActive_I2SToNvt)
 	{
 		BOARD_Init_DMA_I2S_FcTxToNt();
@@ -1731,16 +1816,20 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 	}
 
 	InitAudioCircularBuf();
-
+#if 0//B36932 debug
 	if(AmpState==AmpState_UnConfigured)
 	{
 		//configure AMP
+		hal_amp_aw88166_left_start("Receiver");
+		hal_amp_aw88166_right_start("Receiver");
+		//codec_inited = 1;
 		//...
 		//...
 		//...
-		AmpState==AmpState_ConfiguredAndSleep;
+		//AmpState==AmpState_ConfiguredAndSleep;
+		AmpState=AmpState_ConfiguredAndActive;
 	}
-
+#endif //B36932 debug
 	DmaTxRxIsExpected=(
 						AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
 						AudioI2sPortsBitMapFlag_FcTxToNt|AudioI2sPortsBitMapFlag_FcRxFrNt|
@@ -1759,8 +1848,10 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 						#endif
 
 					  );
-
-
+	//B36932
+	//start dmic immediately, then in dmic intr, fc1,fc3 will be started
+	//ImmediatelyStartDmicDmaChannels(0xff);	//mic0,1,2,3, after calling this, dmic dma intr occurs one frame later!
+	//InitAndStartPdm();
 }
 
 void DeInitAudioInterface_AudioIoDebug(int Opt)
@@ -1770,6 +1861,9 @@ void DeInitAudioInterface_AudioIoDebug(int Opt)
 	if(Opt&0b0001)
 	{
 		//sleep AMP ...
+		hal_amp_aw88166_left_stop();
+		hal_amp_aw88166_right_stop();
+		//codec_inited = 0;
 		AmpState=AmpState_ConfiguredAndSleep;
 	}
 
@@ -1822,10 +1916,10 @@ void DeInitAudioInterface_HomeVitStandby(int Opt)
 void InitAudioInterface_VideoRecording(int Opt)
 {
 }
-void DeInitAudioInterface_VideoRecording(int Opt)
+void InitAudioInterface_MediaPlayer(int Opt)
 {
 }
-void InitAudioInterface_MediaPlayer(int Opt)
+void DeInitAudioInterface_VideoRecording(int Opt)
 {
 }
 void DeInitAudioInterface_MediaPlayer(int Opt)

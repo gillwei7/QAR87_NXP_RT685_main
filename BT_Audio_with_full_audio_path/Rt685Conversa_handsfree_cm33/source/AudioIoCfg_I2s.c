@@ -278,6 +278,8 @@ void BOARD_Init_I2S_Fc3(void)
 	#if EnableOnlyMicSpk_NoBT==0
 		//no matter BT side is 16KHz or 8KHz, Fc1 and Fc3 are always 16KHz and 32bit
 		I2S_Tx_config.divider     = (24576000U / 16000U / 32U / 2);
+		//B36932 change to 48KHZ for NT audio
+		//I2S_Rx_config.divider     = (24576000U / 48000U / 16U / 2);
 	#else
 		#if Fs_I2SToAmp_MicSpkTest==16000
 			I2S_Tx_config.divider     = (24576000U / 16000U / 32U / 2);
@@ -307,6 +309,8 @@ void BOARD_Init_I2S_Fc1(void)
 	#if EnableOnlyMicSpk_NoBT==0
 		//no matter BT side is 16KHz or 8KHz, Fc1 and Fc3 are always 16KHz and 32bit
 		I2S_Rx_config.divider     = (24576000U / 16000U / 32U / 2);
+		//B36932 change to 48KHZ for NT audio
+		//I2S_Rx_config.divider     = (24576000U / 48000U / 16U / 2);
 	#else
 		#if Fs_I2SToAmp_MicSpkTest==16000
 			I2S_Rx_config.divider     = (24576000U / 16000U / 32U / 2);

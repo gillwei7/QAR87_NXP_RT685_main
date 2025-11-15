@@ -72,6 +72,9 @@ S32 *BtTxOtBuf;
 S32 *SpkOtBufL;
 S32 *SpkOtBufR;
 
+//S32 *NtOtBufL; //B36932
+//S32 *NtOtBufR; //B36932
+
 S32 *RawMic32BitBuf0;
 S32 *RawMic32BitBuf1;
 S32 *RawMic32BitBuf2;
@@ -183,8 +186,8 @@ void initSetConversaInstParam(nxp_conversa_plugin_t *p_conversaPluginParams)
 
 	//for glasses:
 	p_conversaPluginConfig->create_doa 			= CONVERSA_DISABLE;							// Conversa DOA disable (direction of arrival) process
-	p_conversaPluginConfig->create_bf 			= CONVERSA_BF_MODE_ADAPTIVE_OR_FIX;		// Conversa beam former mode (select adaptive + fix steering available)
-	//p_conversaPluginConfig->create_bf           = CONVERSA_BF_MODE_ADAPTIVE;
+	//p_conversaPluginConfig->create_bf 			= CONVERSA_BF_MODE_ADAPTIVE_OR_FIX;		// Conversa beam former mode (select adaptive + fix steering available)
+	p_conversaPluginConfig->create_bf           = CONVERSA_BF_MODE_ADAPTIVE;
 
 	/*
 	 * Audio Echo Canceler (AEC)
@@ -407,6 +410,9 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 
 	S16 i;
 
+	S32 *NtOtBufL; //B36932
+	S32 *NtOtBufR; //B36932
+
 	//generate sine tone for debugging purpose
 	#if 0
 		//sweeping signal overwrites USB down streaming L and R
@@ -450,8 +456,13 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 			}
 		}else if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy)
 		{
+			//process audio input from NT
+			//B36932 translate NT input from INT to Float,16KHz only
+			vec_int2float((float *)SpkOtBufL, (const int *)PtrVarBlockSharedByDspAndMcu->I2SInNvtBufL,	-31,  AudioFrameSizeInSamplePerCh);
+			vec_int2float((float *)SpkOtBufR, (const int *)PtrVarBlockSharedByDspAndMcu->I2SInNvtBufR,	-31,  AudioFrameSizeInSamplePerCh);
+
 			//in this case, only conversa Tx for VIT is really working, no need for audio from BT, set Rx audio to 0
-			memset((S32 *)BtRxInBuf,0,sizeof(BtRxInBuf));
+			//B36932 memset((S32 *)BtRxInBuf,0,sizeof(BtRxInBuf));
 		}else
 		{
 			//should never come here
@@ -642,10 +653,13 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 			#endif
 		#endif
 
-
+		float *FltDstPtr;
+		float *FltSrcPtr;
+		if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HfpCall)
+		{
 		//real conversa rx out --> to spk out L
-		float *FltDstPtr=(float *)SpkOtBufL;
-		float *FltSrcPtr=(float *)pp_outputAudioData_Rx_FLT[0];
+			FltDstPtr=(float *)SpkOtBufL;
+			FltSrcPtr=(float *)pp_outputAudioData_Rx_FLT[0];
 		for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
 		{
 			*FltDstPtr++=*FltSrcPtr++;
@@ -666,7 +680,26 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 		{
 			*FltDstPtr++=*FltSrcPtr++;
 		}
+		}else if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy)
+		{
+			//not sure why "NtOtBufL" data is not correct
+			//real conversa tx out --> to NT out L
+			FltDstPtr=(float *)NtOtBufL;
+			FltSrcPtr=(float *)p_outputAudioData_Tx_FLT;
+			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+			{
+				*FltDstPtr++=*FltSrcPtr++;
+			}
 
+			//raw mic1 signal --> to NT out R --- can be changed to other interested audio source
+			FltDstPtr=(float *)NtOtBufR;
+			FltSrcPtr=(float *)RawMic32BitBuf0;
+			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+			{
+				*FltDstPtr++=*FltSrcPtr++;
+			}
+
+		}
 	#else
 		//fake conversa down link --- ref in --> spk out
 		float *FltDstPtr=(float *)SpkOtBufL;
@@ -747,8 +780,17 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 	#if 1	//folding --- step3: put samples to BT Up cir buffer, and convert tx samples from float to int, and SpkOtBufL to PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL
 		//convert SpkOtBufL to int and put to  PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL
 		#if 1
+			if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HfpCall)
+			{
 			vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL, (const float *)SpkOtBufL,	-31,  AudioFrameSizeInSamplePerCh);
 			vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SLineOtBufR, (const float *)SpkOtBufR,	-31,  AudioFrameSizeInSamplePerCh);	//mic1 to spk R --- this is for test
+			}else if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy)
+			{
+				//now none process the audio input from NT, just copy it to I2SLineOtBuf
+				//maybe there have process in the future
+				vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL, (const float *)SpkOtBufL,	-31,  AudioFrameSizeInSamplePerCh);
+				vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SLineOtBufR, (const float *)SpkOtBufR,	-31,  AudioFrameSizeInSamplePerCh);
+			}
 		#else
 			//conversa BF output
 			vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL, (const float *)BtTxOtBuf,	-31,  AudioFrameSizeInSamplePerCh);
@@ -792,8 +834,16 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 			}
 		}else if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy)
 		{
+			//16KHz only
+			vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufL, (const float *)ConversaTxOut32BitBuf,	-31,  AudioFrameSizeInSamplePerCh);
+			vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufR, (const float *)NtOtBufL,	-31,  AudioFrameSizeInSamplePerCh);
+			//vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufL, (const float *)NtOtBufL,	-31,  AudioFrameSizeInSamplePerCh);
+			//vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufR, (const float *)NtOtBufR,	-31,  AudioFrameSizeInSamplePerCh);
+			//vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufL, (const float *)SpkOtBufL,	-31,  AudioFrameSizeInSamplePerCh);
+			//vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufR, (const float *)SpkOtBufR,	-31,  AudioFrameSizeInSamplePerCh);
+
 			//in this case, only conversa Tx for VIT is really working, no need to put audio to BT, set Tx audio to 0
-			memset((S32 *)BtTxOtBuf,0,sizeof(BtTxOtBuf));
+			//memset((S32 *)BtTxOtBuf,0,sizeof(BtTxOtBuf));
 		}else
 		{
 			//should never come here
@@ -829,21 +879,29 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 
 		for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
 		{
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=RawMic32BitBuf0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=RawMic32BitBuf1[i];
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=RawMic32BitBuf0[i];
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=RawMic32BitBuf1[i];
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=RawMic32BitBuf2[i];
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=RawMic32BitBuf3[i];
-				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=MicInMeterLvl1_InDb/100.0f*(float)0x7fffffff;
-				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=MicInMeterLvl2_InDb/100.0f*(float)0x7fffffff;
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=PtrVarBlockSharedByDspAndMcu->I2SInNvtBufL[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=PtrVarBlockSharedByDspAndMcu->I2SInNvtBufR[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=PtrVarBlockSharedByDspAndMcu->I2SLineOtBufR[i];
+
+				//B36932 PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=MicInMeterLvl1_InDb/100.0f*(float)0x7fffffff;
+				//B36932 PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=MicInMeterLvl2_InDb/100.0f*(float)0x7fffffff;
 
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=ConversaTxOut32BitBuf[i];
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=AecOut32BitBuf[i];
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=BfOut32BitBuf[i];
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=NlpOut32BitBuf[i];
-				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=ConversaOutLvl1_InDb/100.0f*(float)0x7fffffff;
-				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=ConversaOutLvl2_InDb/100.0f*(float)0x7fffffff;
+				//B36932 PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=ConversaOutLvl1_InDb/100.0f*(float)0x7fffffff;
+				//B36932 PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=ConversaOutLvl2_InDb/100.0f*(float)0x7fffffff;
 					//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=PtrVarBlockSharedByDspAndMcu->UacDnAudioBufL[i*3];	// *3, because Uac Dn is 48KHz
 					//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=PtrVarBlockSharedByDspAndMcu->UacDnAudioBufR[i*3];	// *3, because Uac Dn is 48KHz
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufL[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufR[i];
+
 		}
 	#endif
 

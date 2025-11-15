@@ -1132,6 +1132,7 @@ void BOARD_InitArduinoUARTPins(void); /* Function assigned for the Cortex-M33 */
  *
  */
 void BOARD_Init_Audio_Pins(void); /* Function assigned for the Cortex-M33 */
+void BOARD_Init_RTvsNT_Audio_Pins(void);
 
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */

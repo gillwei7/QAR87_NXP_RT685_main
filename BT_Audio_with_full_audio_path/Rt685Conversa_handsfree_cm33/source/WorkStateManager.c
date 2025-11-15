@@ -129,7 +129,7 @@ void WorkStateInit(int WhichState, U32 Opt)
 			break;
 		#if EnableWorkState_AudioIoDbg==1
 			case WorkState_AudioIoDbg:
-				InitAudioInterface_AudioIoDebug(0);
+				InitAudioInterface_AudioIoDebug(1); //to enable FC5,6 to connect with NT98532
 				PRINTF_M("    Mcu: WorkState_AudioIoDbg Init is done\r\n");
 				break;
 		#endif

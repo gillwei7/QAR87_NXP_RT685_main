@@ -213,19 +213,19 @@ typedef enum _VoiceCommandItem
 typedef struct
 {
 	//part 1 --- one frame of audio buf for each source and sink port
-	__attribute__((aligned(32))) S32 PdmInAudioBuf[8][AudioFrameSizeInSamplePerCh_PDM];
+	__attribute__((aligned(32))) S32 PdmInAudioBuf[8][AudioFrameSizeInSamplePerCh_PDM]; //
 
-	__attribute__((aligned(32))) S32 UacUpAudioBuf[AudioFrameSizeInSamplePerCh*8];		//this buffer is channel mixed, and to be used as cir buffer data source
+	__attribute__((aligned(32))) S32 UacUpAudioBuf[AudioFrameSizeInSamplePerCh*8];		//16KHz //this buffer is channel mixed, and to be used as cir buffer data source
 	__attribute__((aligned(32))) S32 UacDnAudioBufL[AudioFrameSizeInSamplePerCh*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh space
 	__attribute__((aligned(32))) S32 UacDnAudioBufR[AudioFrameSizeInSamplePerCh*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh space
-	__attribute__((aligned(32))) S32 I2SLineInBufL[AudioFrameSizeInSamplePerCh];
+	__attribute__((aligned(32))) S32 I2SLineInBufL[AudioFrameSizeInSamplePerCh]; // from amp, for AEC, not use now
 	__attribute__((aligned(32))) S32 I2SLineInBufR[AudioFrameSizeInSamplePerCh];
-	__attribute__((aligned(32))) S32 I2SInNvtBufL[AudioFrameSizeInSamplePerCh];
+	__attribute__((aligned(32))) S32 I2SInNvtBufL[AudioFrameSizeInSamplePerCh]; //from nvt, cm33 write in, DSP conversa process
 	__attribute__((aligned(32))) S32 I2SInNvtBufR[AudioFrameSizeInSamplePerCh];
 
-	__attribute__((aligned(32))) S32 I2SLineOtBufL[AudioFrameSizeInSamplePerCh];
+	__attribute__((aligned(32))) S32 I2SLineOtBufL[AudioFrameSizeInSamplePerCh]; //Conversa RX output , tx to amp
 	__attribute__((aligned(32))) S32 I2SLineOtBufR[AudioFrameSizeInSamplePerCh];
-	__attribute__((aligned(32))) S32 I2SOtNvtBufL[AudioFrameSizeInSamplePerCh];
+	__attribute__((aligned(32))) S32 I2SOtNvtBufL[AudioFrameSizeInSamplePerCh]; //out to nvt, DSP write, cm33 deliver to nvt
 	__attribute__((aligned(32))) S32 I2SOtNvtBufR[AudioFrameSizeInSamplePerCh];
 
 	__attribute__((aligned(32))) S32 BTRxInAudio[AudioFrameSizeInSamplePerCh];	//MCU side writes in the full frame if BT is at 16KHz, writes in half if BT is at 8KHz

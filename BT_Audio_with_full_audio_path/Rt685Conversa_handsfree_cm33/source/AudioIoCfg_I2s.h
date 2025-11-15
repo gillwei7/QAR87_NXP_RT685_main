@@ -99,8 +99,8 @@
 #endif
 
 #if Rt685I2SToNvtIsI2SMaster==1
-	#define I2STxToNt_ClkMode		kI2S_MasterSlaveNormalSlave
-	#define I2SRxFrNt_ClkMode		kI2S_MasterSlaveNormalMaster
+	#define I2STxToNt_ClkMode		kI2S_MasterSlaveNormalMaster //B36932 kI2S_MasterSlaveNormalSlave
+	#define I2SRxFrNt_ClkMode		kI2S_MasterSlaveNormalSlave  //B36932 kI2S_MasterSlaveNormalMaster
 #else
 	#define I2STxToNt_ClkMode		kI2S_MasterSlaveNormalSlave
 	#define I2SRxFrNt_ClkMode		kI2S_MasterSlaveNormalSlave
