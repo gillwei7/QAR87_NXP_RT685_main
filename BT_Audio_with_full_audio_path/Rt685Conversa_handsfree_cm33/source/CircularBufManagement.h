@@ -10,12 +10,11 @@
 #ifndef __CirbufManagement___
 #define __CirbufManagement___
 
-#if EnableConversa==1
-
 #include "DefForBothMcuAndDsp.h"
 
 
 
+#define EnableCirBufFunctionsForS8         				1
 #define EnableCirBufFunctionsForS16         			1
 #define EnableCirBufFunctionsForS32         			1
 #define EnableCirBufFunctionsForS64         			1
@@ -23,6 +22,24 @@
 #define EnableCirBufFunctionsForUacUpStreamMultiCh		EnableUsbComAndAudio
 #define EnableCirBufFunctionsForUacDnStreamMultiCh		EnableUsbComAndAudio
 
+
+#if defined(EnableCirBufFunctionsForS8)&&(EnableCirBufFunctionsForS8==1)
+typedef struct
+{
+	U32 LengthInSamples;
+	S8 *PtrBufHead;
+	S8 *PtrRd;
+	S8 *PtrWr;
+} T_CircularAudioBuf_S8;
+
+    void InitCirAudioBuf_S8(volatile T_CircularAudioBuf_S8 *CirBufPtr,S8 *DataAreaHead,U32 BufLen);
+    void CirAudioBuf_WriteSamples_S8(volatile T_CircularAudioBuf_S8 *CirBufPtr, U32 SampleNumbersToBePut, S8 *PtrAudioDataSrc);
+    S8* CirAudioBuf_ReadSamples_GetRdPtr_S8(volatile T_CircularAudioBuf_S8 *CirBufPtr, U32 SampleNumbersToBeGot);
+    U32 CirAudioBuf_SpaceOccupiedInSamples_S8(volatile T_CircularAudioBuf_S8 *CirBufPtr);
+    U32 CirAudioBuf_SpaceAvailableInSamples_S8(volatile T_CircularAudioBuf_S8 *CirBufPtr);
+    void CirAudioBuf_ClearAllSamples_S8(volatile T_CircularAudioBuf_S8 *CirBufPtr);
+    U8 CirAudioBuf_GetUsagePercentage_S8(volatile T_CircularAudioBuf_S8 *CirBufPtr);
+#endif      //EnableCirBufFunctionsForS8
 
 
 #if defined(EnableCirBufFunctionsForS16)&&(EnableCirBufFunctionsForS16==1)
@@ -165,4 +182,3 @@ typedef struct
 #endif
 
 
-#endif

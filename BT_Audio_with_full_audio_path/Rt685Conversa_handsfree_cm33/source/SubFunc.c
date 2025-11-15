@@ -234,7 +234,7 @@ void GenBtnEvt(void)
 {
     uint8_t i;
     TBtnEvtVarGroup *TmpPtr1;
-    RawBtnState = ((RdBtn1Input()<<0)|(RdBtn2Input()<<1));
+    RawBtnState = ((RdBtn1Input()<<0)|(RdBtn2Input()<<1));//read real io input data
     //RawBtnState = ~RawBtnState;
 
     // Y = ((~A)&(B&C))|(A&(B|C))

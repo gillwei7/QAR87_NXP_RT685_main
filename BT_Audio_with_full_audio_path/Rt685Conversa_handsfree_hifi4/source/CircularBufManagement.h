@@ -15,9 +15,29 @@
 #include "GlobalDef.h"
 
 #define EnableLessUsedCirBufFunctions       0
+#define EnableCirBufFunctionsForS8          1
 #define EnableCirBufFunctionsForS16         1
-#define EnableCirBufFunctionsForS32         0
+#define EnableCirBufFunctionsForS32         1
 #define EnableCirBufFunctionsForS64         0
+
+
+#if defined(EnableCirBufFunctionsForS8)&&(EnableCirBufFunctionsForS8==1)
+typedef struct
+{
+	U32 LengthInSamples;
+	S8 *PtrBufHead;
+	S8 *PtrRd;
+	S8 *PtrWr;
+} T_CircularAudioBuf_S8;
+
+    void InitCirAudioBuf_S8(T_CircularAudioBuf_S8 *CirBufPtr,S8 *DataAreaHead,U32 BufLen);
+    void CirAudioBuf_WriteSamples_S8(volatile T_CircularAudioBuf_S8 *CirBufPtr, U32 SampleNumbersToBePut, S8 *PtrAudioDataSrc);
+    extern void CirAudioBuf_ReadSamples_S8(T_CircularAudioBuf_S8 *CirBufPtr, U32 SampleNumbersToBeGot, S8 *PtrAudioDataDst);
+    S8* CirAudioBuf_ReadSamples_GetRdPtr_S8(T_CircularAudioBuf_S8 *CirBufPtr, U32 SampleNumbersToBeGot);
+    U32 CirAudioBuf_SpaceOccupiedInSamples_S8(T_CircularAudioBuf_S8 *CirBufPtr);
+    U32 CirAudioBuf_SpaceAvailableInSamples_S8(volatile T_CircularAudioBuf_S8 *CirBufPtr);
+    void CirAudioBuf_ClearAllSamples_S8(T_CircularAudioBuf_S8 *CirBufPtr);
+#endif      //EnableCirBufFunctionsForS8
 
 
 #if defined(EnableCirBufFunctionsForS16)&&(EnableCirBufFunctionsForS16==1)
@@ -69,6 +89,7 @@ typedef struct
     U32 CirAudioBuf_SpaceOccupiedInSamples_S32(T_CircularAudioBuf_S32 *CirBufPtr);
     U32 CirAudioBuf_SpaceAvailableInSamples_S32(T_CircularAudioBuf_S32 *CirBufPtr);
     void CirAudioBuf_ClearAllSamples_S32(T_CircularAudioBuf_S32 *CirBufPtr);
+    extern U8 CirAudioBuf_GetUsagePercentage_S32(T_CircularAudioBuf_S32 *CirBufPtr);
     #if defined(EnableLessUsedCirBufFunctions)&&(EnableLessUsedCirBufFunctions==1)
         void CirAudioBuf_ReadSamples_S32(T_CircularAudioBuf_S32 *CirBufPtr, U32 SampleNumbersToBeGot, S32 *PtrAudioDataDst);
         U8 CirAudioBuf_GetUsagePercentage_S32(T_CircularAudioBuf_S32 *CirBufPtr);

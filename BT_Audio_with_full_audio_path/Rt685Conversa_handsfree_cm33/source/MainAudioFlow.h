@@ -53,6 +53,8 @@ extern volatile S32 *MicInputCh5Ptr;
 extern volatile S32 *MicInputCh6Ptr;
 extern volatile S32 *MicInputCh7Ptr;
 
+extern void DeInitCodec(void);
+extern void InitAndStartCodec(int fs, int bits, int Mfreq);
 extern int CheckTimePoint_CurrentIntrIsAStartingOne(void);
 
 extern void CloseAllActivedPDMPorts(void);

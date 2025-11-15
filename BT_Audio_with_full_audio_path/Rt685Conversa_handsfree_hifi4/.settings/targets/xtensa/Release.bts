@@ -16,12 +16,15 @@
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/source}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/utilities}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/NatureDspLibary/include}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceSRC}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/nxp_utilities_public}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/hifi4_nn}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit/tuning_files}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit/models}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceSRC}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceCommon}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceOpusDec}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceSbcDec}</ListEntry>
                         </value>
                     </StringListMapEntry>
                 </StringListMapOptions>
@@ -36,7 +39,6 @@
                             <ListEntry key="CPU_MIMXRT685SFVKB_dsp" value=""/>
                             <ListEntry key="HIFI4" value=""/>
                             <ListEntry key="WORKSPACE_DIRECTORY" value="&quot;${unixpath:${workspace_loc}}&quot;"/>
-                            <ListEntry key="RDSP_USES_IEEE754_CODE" value="1"/>
                             <ListEntry key="RT600" value="1"/>
                             <ListEntry key="CORE_DSP" value=""/>
                             <ListEntry key="PRINTF_ADVANCED_ENABLE" value="0"/>
@@ -54,10 +56,6 @@
                     <SingleFlagMapEntry>
                         <key>EnableSIMD</key>
                         <value flag="-LNO:simd" use="true"/>
-                    </SingleFlagMapEntry>
-                    <SingleFlagMapEntry>
-                        <key>UseDspCoprocessor</key>
-                        <value flag="-mcoproc" use="true"/>
                     </SingleFlagMapEntry>
                     <SingleFlagMapEntry>
                         <key>CompilerEnableLongCall</key>
@@ -94,9 +92,22 @@
                 </BooleanMapOptions>
                 <StringListMapOptions>
                     <StringListMapEntry>
+                        <key>LibrarySearchPath</key>
+                        <value flag="-L" inheritance="prepend">
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/NatureDspLibary}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/hifi4_nn}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceCommon}</ListEntry>
+                        </value>
+                    </StringListMapEntry>
+                    <StringListMapEntry>
                         <key>LinkerAdditionalOptions</key>
                         <value flag="" inheritance="append">
-                            <ListEntry>--orphan-handling=place</ListEntry>
+                            <ListEntry>--orphan-handling=place&#13;
+--gc-sections&#13;
+--cref&#13;
+--sort-section=alignment&#13;
+</ListEntry>
                         </value>
                     </StringListMapEntry>
                     <StringListMapEntry>
@@ -106,25 +117,10 @@
                             <ListEntry>VIT_v6.6.0_EngineeringRelease</ListEntry>
                             <ListEntry>naturedsp</ListEntry>
                             <ListEntry>xa_asrc_src_pp</ListEntry>
+                            <ListEntry>xa_opus_dec</ListEntry>
+                            <ListEntry>xa_sbc_dec</ListEntry>
                             <ListEntry>xa_nn</ListEntry>
                             <ListEntry>xos</ListEntry>
-                        </value>
-                    </StringListMapEntry>
-                    <StringListMapEntry>
-                        <key>LibrarySearchPath</key>
-                        <value flag="-L" inheritance="prepend">
-                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/NatureDspLibary}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceSRC}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/hifi4_nn}</ListEntry>
-                        </value>
-                    </StringListMapEntry>
-                    <StringListMapEntry>
-                        <key>CompilerOptionsForLinker</key>
-                        <value flag="" inheritance="append">
-                            <ListEntry>-Wl,--gc-sections&#13;
--Wl,--sort-section=alignment&#13;
--Wl,--cref</ListEntry>
                         </value>
                     </StringListMapEntry>
                 </StringListMapOptions>

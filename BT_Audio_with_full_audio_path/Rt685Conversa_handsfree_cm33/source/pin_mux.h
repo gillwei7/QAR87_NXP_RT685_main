@@ -1132,8 +1132,9 @@ void BOARD_InitArduinoUARTPins(void); /* Function assigned for the Cortex-M33 */
  *
  */
 void BOARD_Init_Audio_Pins(void); /* Function assigned for the Cortex-M33 */
+#if UsingQAR87Board == 1
 void BOARD_Init_RTvsNT_Audio_Pins(void);
-
+#endif
 #define IOPCTL_PIO_ANAMUX_DI 0x00u        /*!<@brief Analog mux is disabled */
 #define IOPCTL_PIO_FULLDRIVE_DI 0x00u     /*!<@brief Normal drive */
 #define IOPCTL_PIO_FULLDRIVE_EN 0x0100u   /*!<@brief Full drive enable */
@@ -1628,6 +1629,7 @@ void BOARD_InitDmicPins(void); /* Function assigned for the Cortex-M33 */
 
 
 
+#if UsingQAR87Board == 1
 
 /*!
  * @brief Calls initialization functions.
@@ -1992,6 +1994,7 @@ void BOARD_InitDevDmicPins(void); /* Function assigned for the Cortex-M33 */
  *
  */
 void BOARD_InitDevSPI532Pins(void); /* Function assigned for the Cortex-M33 */
+#endif
 
 /*!
  * @}

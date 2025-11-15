@@ -11,18 +11,49 @@
  * Definitions
  ******************************************************************************/
 
-#define AUTO_CONNECT_USE_BOND_INFO (1U)
-extern struct bt_conn *default_conn;
+//#define AUTO_CONNECT_USE_BOND_INFO (1U)			//hpf only
+#define AUTO_CONNECT_USE_BOND_INFO (0U)			//hfp and a2dp
+#define RIDER_PHONE   0x00
+#define RIDER_HEADSET  0x01
+#define PASSENGER_HEADSET  0x02
 
+
+
+#define PHONE   0x00
+#define HEADSET  0x01
+#define INVALID_DEVICE 0x04
+
+extern struct bt_conn *conn_rider_phone;
+extern struct bt_conn *conn_rider_hs;
+extern struct bt_conn *conn_passenger_hs;
+extern struct bt_conn *default_conn;
+extern uint8_t g_profileConnectedRiderHs;
+extern uint8_t g_profileConnectedPassengerHs;
+
+extern int g_pairedDeviceCount;
+
+typedef struct {
+    uint8_t addr[6];     // MAC Address
+    char name[64];       // Device Name
+    uint8_t device_type; // Device Type (Mobile, rider Headset, passenger Headset)
+} paired_device_t;
+
+extern paired_device_t paired_devices[MAX_PAIRED_DEVICES];
 /*******************************************************************************
  * API
  ******************************************************************************/
 
 void app_connect_init(void);
-
+void app_connect(uint8_t profile,uint8_t *addr);
+void app_disconnect(uint8_t profile);
 void app_a2dp_hf_auto_connect(void);
 
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
+void app_lfs_init(void);
+int app_read_paired_devices();
+int app_save_paired_device(const uint8_t addr[6], const char *name, uint8_t device_type);
+int app_save_paired_devices();
+int app_clear_paired_devices();
 int app_auto_connect_save_addr(bt_addr_t const *addr);
 #endif
 

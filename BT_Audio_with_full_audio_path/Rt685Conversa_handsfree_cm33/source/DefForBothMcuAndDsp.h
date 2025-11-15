@@ -10,6 +10,9 @@
 #define __DefForBothMcuAndDsp_h__
 
 
+#define SEMA42_ID_SbcRawCirBufferProtect	0x04
+#define SEMA42_ID_PrintProtect				0x03
+
 #if EnableUsbComAndAudio==1
 
 //-----------------------------USB audio config that user can change---------------------------------
@@ -118,32 +121,27 @@
 
 
 #define APP_SEMA42								SEMA42
-#define SEMA42_GATE								0U
+#define SEMA42_GATE0							0U
+#define SEMA42_GATE1							1U
+#define SEMA42_GATE2							2U
 
+#define AudioFrameSizeInSamplePerChMaxForDMABuf		(128*2)
 
-#if EnableOnlyMicSpk_NoBT==0
-	//both PDM and I2S are 16KHz
-	#define AudioFrameSizeInSamplePerCh 			(128)			//conversa must work with framesize=128, should never change this value, unless Conversa lib's frame size is changed
-	#define AudioFrameSizeInSamplePerCh_PDM 		(128)
-	#if Fs_I2SToNvt_MicSpkTest==16000
-		#define AudioFrameSizeInSamplePerCh_NVT 		(128*1)
-	#endif
-	#if Fs_I2SToNvt_MicSpkTest==48000
-		#define AudioFrameSizeInSamplePerCh_NVT 		(128*3)
-	#endif
-#else
-	#if Fs_I2SToAmp_MicSpkTest==16000
-		#define AudioFrameSizeInSamplePerCh 			(16)		//conversa is not called in this case
-		#define AudioFrameSizeInSamplePerCh_PDM 		(16)
-	#endif
-	#if Fs_I2SToAmp_MicSpkTest==48000
-		#define AudioFrameSizeInSamplePerCh 			(48)		//conversa is not called in this case
-		#define AudioFrameSizeInSamplePerCh_PDM 		(16)
-	#endif
+//both PDM and I2S are 16KHz
+#define AudioFrameSizeInSamplePerCh 			(128)			//conversa must work with framesize=128, should never change this value, unless Conversa lib's frame size is changed
+#define AudioFrameSizeInSamplePerCh_PDM 		(128)
+#if Fs_I2SToNvt_MicSpkTest==16000
+	#define AudioFrameSizeInSamplePerCh_NVT 		(128*1)
+#endif
+#if Fs_I2SToNvt_MicSpkTest==48000
+	#define AudioFrameSizeInSamplePerCh_NVT 		(128*3)
 #endif
 
+#if Rt685I2SToNvtIsI2SMaster==0
 #define AudioFrameSizeInSamplePerCh_I2SToNvt		48
 #define I2SNt_CirBuf_LenInSamples					(48*6+AudioFrameSizeInSamplePerCh)			//this is 8.66ms
+#endif
+
 
 #define AUDIO_OUT_TRANSFER_LENGTH_ONE_FRAME (AUDIO_OUT_SAMPLING_RATE_KHZ * AUDIO_OUT_FORMAT_CHANNELS * AUDIO_OUT_FORMAT_SIZE)
 
@@ -209,13 +207,17 @@ typedef enum _VoiceCommandItem
 	ASR_VoiceCommand_GoHomeVideoRecording,
 } VoiceCommandItem_t;
 
+
+#define CirBuf_SbcRaw_LengthInBytes 20000				//this value was checked by printing MCU writing and DSP reading rd/wr pointers --- at the beginning, MCU will write 8000 bytes in, so 20K byte size is a proper size
+#define CirBuf_SbcRaw_MaxReadSizeLengthInBytes 512		//using 512 because Cadence Sbc decoder uses 512 bytes as input buffer size, this is the maximum size reading from this cir buffer
+
 //MCU program must has the exact same struct def as the following --- this h file should be included by both MCU and DSP prj
 typedef struct
 {
 	//part 1 --- one frame of audio buf for each source and sink port
-	__attribute__((aligned(32))) S32 PdmInAudioBuf[8][AudioFrameSizeInSamplePerCh_PDM]; //
+	__attribute__((aligned(32))) S32 PdmInAudioBuf[8][AudioFrameSizeInSamplePerCh_PDM];
 
-	__attribute__((aligned(32))) S32 UacUpAudioBuf[AudioFrameSizeInSamplePerCh*8];		//16KHz //this buffer is channel mixed, and to be used as cir buffer data source
+	__attribute__((aligned(32))) S32 UacUpAudioBuf[AudioFrameSizeInSamplePerCh*8];		//this buffer is channel mixed, and to be used as cir buffer data source
 	__attribute__((aligned(32))) S32 UacDnAudioBufL[AudioFrameSizeInSamplePerCh*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh space
 	__attribute__((aligned(32))) S32 UacDnAudioBufR[AudioFrameSizeInSamplePerCh*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh space
 	__attribute__((aligned(32))) S32 I2SLineInBufL[AudioFrameSizeInSamplePerCh]; // from amp, for AEC, not use now
@@ -223,7 +225,7 @@ typedef struct
 	__attribute__((aligned(32))) S32 I2SInNvtBufL[AudioFrameSizeInSamplePerCh]; //from nvt, cm33 write in, DSP conversa process
 	__attribute__((aligned(32))) S32 I2SInNvtBufR[AudioFrameSizeInSamplePerCh];
 
-	__attribute__((aligned(32))) S32 I2SLineOtBufL[AudioFrameSizeInSamplePerCh]; //Conversa RX output , tx to amp
+	__attribute__((aligned(32))) S32 I2SLineOtBufL[AudioFrameSizeInSamplePerCh]; //tx to amp, ex. Conversa RX output 
 	__attribute__((aligned(32))) S32 I2SLineOtBufR[AudioFrameSizeInSamplePerCh];
 	__attribute__((aligned(32))) S32 I2SOtNvtBufL[AudioFrameSizeInSamplePerCh]; //out to nvt, DSP write, cm33 deliver to nvt
 	__attribute__((aligned(32))) S32 I2SOtNvtBufR[AudioFrameSizeInSamplePerCh];
@@ -234,11 +236,26 @@ typedef struct
 
 	//part 2 --- others
 	U32 BtFs;
-	U32 CycCnt				[100];
+	U32 I2SFs_Nvt;
+	U32 I2SFs_Loc;
+	U32 PdmFs_Loc;
+	U32 UacUpFs;
+	U32 UacDnFs;
+	U32 I2SFrmSizeInSamples_Loc;
+	U32 PdmFrmSizeInSamples_Loc;
+
 	U32 U32CycCntHistory	[100];
 	U32 MonitorInfoArray1	[20];
 	U32 MonitorInfoArray2	[20];
 	U32 U32ControlPara		[40];
+	U32 FileAddrTable_Opus	[20];
+	U32 FileAddrTable_Sbc	[10];
+
+	U32 NeedToStartPlayOpus;
+	U32 PlayOpusFileIdx;
+	U32 NeedToStartPlaySbc;
+	U32 PlaySbcFileIdx;
+	U32 NeedToStopA2dpSbc;
 
 	#if 0
 		//if using this type, command info can not be passed to MCU ???
@@ -253,6 +270,17 @@ typedef struct
 		U32 CurrentVoiceCommandIntent;
 		U32 CurrentVoiceCommandTagName;
 	#endif
+
+	U32 U32Tmp2;
+	U32 Cm33Hifi1HandShakeCheck;
+
+	//SBC decoding RAW data from MCU to DSP
+	int  CirBuf_SbcRaw;	//use dummy variable here is to avoid the T_CircularAudioBuf_S8 type missing error
+	int  CirBuf_SbcRaw_Dummy1;		//dummy is to reserve the space for (T_CircularAudioBuf_S8 *)&CirBuf_SbcRaw
+	int  CirBuf_SbcRaw_Dummy2;		//dummy is to reserve the space for (T_CircularAudioBuf_S8 *)&CirBuf_SbcRaw
+	int  CirBuf_SbcRaw_Dummy3;		//dummy is to reserve the space for (T_CircularAudioBuf_S8 *)&CirBuf_SbcRaw
+
+	U32 CirBuf_SbcRaw_DataArea[(CirBuf_SbcRaw_LengthInBytes+CirBuf_SbcRaw_MaxReadSizeLengthInBytes)/4];
 } T_CommonVarSharedByDspAndMcu;
 
 

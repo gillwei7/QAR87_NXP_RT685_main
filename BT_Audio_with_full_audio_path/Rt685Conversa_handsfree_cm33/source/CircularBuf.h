@@ -9,7 +9,7 @@
 #ifndef __Cirbuf___
 #define __Cirbuf___
 
-#if EnableConversa==1
+
 //Note both the BTUp and BTDn cir buffers are at 8KHz
 #define BTUpAudioBuf_Len_InSamples	1024		//this is 128ms at 16KHz
 #define BTDnAudioBuf_Len_InSamples	1024		//this is 128ms at 16KHz
@@ -56,9 +56,8 @@ extern T_CircularAudioBuf_S16 BTUpAudioBuf_S16;
 	extern T_CirUacUpAudioBuf_MCh UacUpAudioBuf_MCh;
 #endif
 
-extern void InitAudioCircularBuf(void);
+extern void ClearAudioCirBuf(int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir);
+extern void InitAudioCircularBuf(int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir);
 
 
 #endif
-#endif
-

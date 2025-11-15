@@ -1,21 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?><cproject>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
     	
     <storageModule moduleId="org.eclipse.cdt.core.settings">
         		
-        <cconfiguration id="Xtensa.28585473">
+        <buildSystem id="Xtensa.860710276">
+            			
+            <storageModule id="Xtensa.860710276" moduleId="org.eclipse.cdt.core.settings"/>
+            		
+        </buildSystem>
+        		
+        <cconfiguration id="Xtensa.860710276">
             			
             <storageModule moduleId="cdtBuildSystem" version="4.0.0">
                 				
-                <configuration buildProperties="" description="" errorParsers="com.tensilica.xide.cdt.XtLDErrorParser;com.tensilica.xide.cdt.MakeErrorParser;com.tensilica.xide.cdt.XCCErrorParser" id="Xtensa.28585473" name="Xtensa" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+                <configuration buildProperties="" description="" errorParsers="org.eclipse.cdt.core.GASErrorParser;org.eclipse.cdt.core.GmakeErrorParser;com.tensilica.xide.cdt.XtLDErrorParser;org.eclipse.cdt.core.VCErrorParser;org.eclipse.cdt.core.CWDLocator;com.tensilica.xide.cdt.XCCErrorParser;com.tensilica.xide.cdt.TCErrorParser;com.tensilica.xide.cdt.FlexLmErrorParser" id="Xtensa.860710276" name="Xtensa" parent="org.eclipse.cdt.build.core.prefbase.cfg">
                     					
-                    <folderInfo id="Xtensa.28585473." name="/" resourcePath="">
+                    <folderInfo id="Xtensa.860710276." name="/" resourcePath="">
                         						
-                        <toolChain errorParsers="" id="org.eclipse.cdt.build.core.prefbase.toolchain.28585474" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+                        <toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.1371080601" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
                             							
-                            <targetPlatform binaryParser="com.tensilica.xide.cdt.XtensaELF" id="org.eclipse.cdt.build.core.prefbase.toolchain.28585474.28585475" name=""/>
+                            <targetPlatform binaryParser="com.tensilica.xide.cdt.XtensaELF" id="org.eclipse.cdt.build.core.prefbase.toolchain.1371080601.418824743" name=""/>
                             							
-                            <builder buildPath="" command="${default_xttools_make_path}" enableAutoBuild="false" errorParsers="" id="org.eclipse.cdt.build.core.settings.default.builder.28585476" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder">
+                            <builder command="${default_xttools_make_path}" enableAutoBuild="false" id="org.eclipse.cdt.build.core.settings.default.builder.1910029668" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder">
                                 								
                                 <outputEntries>
                                     									
@@ -25,41 +31,47 @@
                                 							
                             </builder>
                             							
-                            <tool errorParsers="org.eclipse.cdt.core.VCErrorParser;org.eclipse.cdt.core.GASErrorParser" id="org.eclipse.cdt.build.core.settings.holder.libs.28585477" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+                            <tool id="org.eclipse.cdt.build.core.settings.holder.libs.895043583" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
                             							
-                            <tool errorParsers="org.eclipse.cdt.core.VCErrorParser;org.eclipse.cdt.core.GASErrorParser" id="org.eclipse.cdt.build.core.settings.holder.28585478" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+                            <tool id="org.eclipse.cdt.build.core.settings.holder.1688187864" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1465245512" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1107318952" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\board&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\board&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\component\lists&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\component\lists&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\component\serial_manager&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\component\serial_manager&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\component\uart&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\component\uart&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\drivers&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\drivers&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\MIMXRT685S&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\MIMXRT685S&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\source&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\source&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\utilities&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\utilities&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\NatureDspLibary\include&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\NatureDspLibary\include&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\CadenceSRC&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\ConversaVit&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\ConversaVit&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\nxp_utilities_public&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\nxp_utilities_public&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\hifi4_nn&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\hifi4_nn&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\ConversaVit\tuning_files&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\ConversaVit\tuning_files&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\ConversaVit\models&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\ConversaVit\models&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceSRC&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceCommon&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceOpusDec&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceSbcDec&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="C:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/nxp_rt600_RI23_11_newlib/xtensa-elf/include/xcc/c++"/>
                                     									
@@ -79,7 +91,7 @@
                                     								
                                 </option>
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1564330455" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1477494831" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
                                     									
                                     <listOptionValue builtIn="false" value="NDEBUG=1"/>
                                     									
@@ -93,9 +105,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="HIFI4=1"/>
                                     									
-                                    <listOptionValue builtIn="false" value="WORKSPACE_DIRECTORY=&quot;C:/Users/nxa14582/Documents/IMXRT600_Workspace/RT600_IW611_BT_Stan_Zhang/V_0_1_4_1&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="RDSP_USES_IEEE754_CODE=1"/>
+                                    <listOptionValue builtIn="false" value="WORKSPACE_DIRECTORY=&quot;C:/Users/nxa14582/Documents/IMXRT600_Workspace/RT600_IW611_BT_Stan_Zhang/V_0_1_5_0&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="RT600=1"/>
                                     									
@@ -675,43 +685,49 @@
                                     								
                                 </option>
                                 								
-                                <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.28585483" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+                                <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1565013745" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
                                 							
                             </tool>
                             							
-                            <tool errorParsers="org.eclipse.cdt.core.VCErrorParser;org.eclipse.cdt.core.GASErrorParser" id="org.eclipse.cdt.build.core.settings.holder.28585484" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+                            <tool id="org.eclipse.cdt.build.core.settings.holder.1316623671" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.152900154" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.1075248897" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\board&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\board&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\component\lists&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\component\lists&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\component\serial_manager&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\component\serial_manager&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\component\uart&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\component\uart&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\drivers&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\drivers&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\MIMXRT685S&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\MIMXRT685S&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\source&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\source&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\utilities&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\utilities&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\NatureDspLibary\include&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\NatureDspLibary\include&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\CadenceSRC&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\ConversaVit&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\ConversaVit&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\nxp_utilities_public&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\nxp_utilities_public&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\hifi4_nn&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\hifi4_nn&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\ConversaVit\tuning_files&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\ConversaVit\tuning_files&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\ConversaVit\models&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\ConversaVit\models&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceSRC&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceCommon&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceOpusDec&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceSbcDec&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="C:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/nxp_rt600_RI23_11_newlib/xtensa-elf/include/xcc/c++"/>
                                     									
@@ -731,7 +747,7 @@
                                     								
                                 </option>
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1576321311" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1770503242" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
                                     									
                                     <listOptionValue builtIn="false" value="NDEBUG=1"/>
                                     									
@@ -745,9 +761,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="HIFI4=1"/>
                                     									
-                                    <listOptionValue builtIn="false" value="WORKSPACE_DIRECTORY=&quot;C:/Users/nxa14582/Documents/IMXRT600_Workspace/RT600_IW611_BT_Stan_Zhang/V_0_1_4_1&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="RDSP_USES_IEEE754_CODE=1"/>
+                                    <listOptionValue builtIn="false" value="WORKSPACE_DIRECTORY=&quot;C:/Users/nxa14582/Documents/IMXRT600_Workspace/RT600_IW611_BT_Stan_Zhang/V_0_1_5_0&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="RT600=1"/>
                                     									
@@ -1327,43 +1341,49 @@
                                     								
                                 </option>
                                 								
-                                <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.28585489" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+                                <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1986373635" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
                                 							
                             </tool>
                             							
-                            <tool errorParsers="org.eclipse.cdt.core.VCErrorParser;org.eclipse.cdt.core.GASErrorParser" id="org.eclipse.cdt.build.core.settings.holder.28585490" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+                            <tool id="org.eclipse.cdt.build.core.settings.holder.1281845123" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.2043611218" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.incpaths.689482608" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\board&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\board&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\component\lists&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\component\lists&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\component\serial_manager&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\component\serial_manager&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\component\uart&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\component\uart&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\drivers&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\drivers&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\MIMXRT685S&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\MIMXRT685S&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\source&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\source&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\utilities&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\utilities&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\NatureDspLibary\include&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\NatureDspLibary\include&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\CadenceSRC&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\ConversaVit&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\ConversaVit&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\nxp_utilities_public&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\nxp_utilities_public&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\hifi4_nn&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\hifi4_nn&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\ConversaVit\tuning_files&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\ConversaVit\tuning_files&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\ConversaVit\models&quot;"/>
                                     									
-                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_4_1\Rt685Conversa_handsfree_hifi4\ConversaVit\models&quot;"/>
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceSRC&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceCommon&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceOpusDec&quot;"/>
+                                    									
+                                    <listOptionValue builtIn="false" value="&quot;C:\Users\nxa14582\Documents\IMXRT600_Workspace\RT600_IW611_BT_Stan_Zhang\V_0_1_5_0\Rt685Conversa_handsfree_hifi4\CadenceSbcDec&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="C:/usr/xtensa/XtDevTools/install/builds/RI-2023.11-win32/nxp_rt600_RI23_11_newlib/xtensa-elf/include/xcc/c++"/>
                                     									
@@ -1383,7 +1403,7 @@
                                     								
                                 </option>
                                 								
-                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.814010149" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+                                <option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="org.eclipse.cdt.build.core.settings.holder.symbols.1458461944" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
                                     									
                                     <listOptionValue builtIn="false" value="NDEBUG=1"/>
                                     									
@@ -1397,9 +1417,7 @@
                                     									
                                     <listOptionValue builtIn="false" value="HIFI4=1"/>
                                     									
-                                    <listOptionValue builtIn="false" value="WORKSPACE_DIRECTORY=&quot;C:/Users/nxa14582/Documents/IMXRT600_Workspace/RT600_IW611_BT_Stan_Zhang/V_0_1_4_1&quot;"/>
-                                    									
-                                    <listOptionValue builtIn="false" value="RDSP_USES_IEEE754_CODE=1"/>
+                                    <listOptionValue builtIn="false" value="WORKSPACE_DIRECTORY=&quot;C:/Users/nxa14582/Documents/IMXRT600_Workspace/RT600_IW611_BT_Stan_Zhang/V_0_1_5_0&quot;"/>
                                     									
                                     <listOptionValue builtIn="false" value="RT600=1"/>
                                     									
@@ -1979,25 +1997,19 @@
                                     								
                                 </option>
                                 								
-                                <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.28585495" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+                                <inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1476467737" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
                                 							
                             </tool>
                             						
                         </toolChain>
                         					
                     </folderInfo>
-                    					
-                    <sourceEntries>
-                        						
-                        <entry excluding="FromVictorSrc/evcp-example.c|drivers/fsl_pint.c|drivers/fsl_i2c_dma.c|Src/parameters/pugixml.cpp|ConversaDemo/tuning/Dell_GamingController_tuning3.cpp|Src/VoiceSeeker_main.cpp|drivers/fsl_i2c.c|Src/RdspAppUtilities.cpp|drivers/fsl_dmic_dma.c|drivers/fsl_dmic.c|drivers/fsl_i2s_dma.c|drivers/fsl_i2s.c|Src/parameters/system_pardefs.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-                        					
-                    </sourceEntries>
                     				
                 </configuration>
                 			
             </storageModule>
             			
-            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="Xtensa.28585473" moduleId="org.eclipse.cdt.core.settings" name="Xtensa">
+            <storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="Xtensa.860710276" moduleId="org.eclipse.cdt.core.settings" name="Xtensa">
                 				
                 <externalSettings/>
                 				
@@ -2005,380 +2017,60 @@
                     					
                     <extension id="com.tensilica.xide.cdt.XtensaELF" point="org.eclipse.cdt.core.BinaryParser"/>
                     					
+                    <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
                     <extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
                     					
-                    <extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    <extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="com.tensilica.xide.cdt.TCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
                     					
                     <extension id="com.tensilica.xide.cdt.XtLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
                     					
-                    <extension id="com.tensilica.xide.cdt.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-                    					
                     <extension id="com.tensilica.xide.cdt.XCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+                    					
+                    <extension id="com.tensilica.xide.cdt.FlexLmErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
                     				
                 </extensions>
                 			
             </storageModule>
             			
             <storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
-            			
-            <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
             		
         </cconfiguration>
         	
     </storageModule>
     	
+    <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+    	
+    <storageModule moduleId="org.eclipse.cdt.core.pathentry"/>
+    	
     <storageModule moduleId="cdtBuildSystem" version="4.0.0">
         		
-        <project id="dsp_audio_demo_bm_hifi4.null.40086070" name="dsp_audio_demo_bm_hifi4"/>
+        <project id="Rt685Conversa_handsfree_hifi4.null.121725401" name="Rt685Conversa_handsfree_hifi4"/>
         	
     </storageModule>
     	
+    <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+    	
     <storageModule moduleId="scannerConfiguration">
         		
-        <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
+        <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
         		
-        <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
+        <scannerConfigBuildInfo instanceId="Xtensa.860710276">
             			
-            <buildOutputProvider>
-                				
-                <openAction enabled="true" filePath=""/>
-                				
-                <parser enabled="true"/>
-                			
-            </buildOutputProvider>
-            			
-            <scannerInfoProvider id="specsFile">
-                				
-                <runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
-                				
-                <parser enabled="true"/>
-                			
-            </scannerInfoProvider>
-            		
-        </profile>
-        		
-        <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
-            			
-            <buildOutputProvider>
-                				
-                <openAction enabled="true" filePath=""/>
-                				
-                <parser enabled="true"/>
-                			
-            </buildOutputProvider>
-            			
-            <scannerInfoProvider id="makefileGenerator">
-                				
-                <runAction arguments="-f ${project_name}_scd.mk" command="make" useDefault="true"/>
-                				
-                <parser enabled="true"/>
-                			
-            </scannerInfoProvider>
-            		
-        </profile>
-        		
-        <profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile">
-            			
-            <buildOutputProvider>
-                				
-                <openAction enabled="true" filePath=""/>
-                				
-                <parser enabled="true"/>
-                			
-            </buildOutputProvider>
-            			
-            <scannerInfoProvider id="specsFile">
-                				
-                <runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
-                				
-                <parser enabled="true"/>
-                			
-            </scannerInfoProvider>
-            		
-        </profile>
-        		
-        <profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP">
-            			
-            <buildOutputProvider>
-                				
-                <openAction enabled="true" filePath=""/>
-                				
-                <parser enabled="true"/>
-                			
-            </buildOutputProvider>
-            			
-            <scannerInfoProvider id="specsFile">
-                				
-                <runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
-                				
-                <parser enabled="true"/>
-                			
-            </scannerInfoProvider>
-            		
-        </profile>
-        		
-        <profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC">
-            			
-            <buildOutputProvider>
-                				
-                <openAction enabled="true" filePath=""/>
-                				
-                <parser enabled="true"/>
-                			
-            </buildOutputProvider>
-            			
-            <scannerInfoProvider id="specsFile">
-                				
-                <runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
-                				
-                <parser enabled="true"/>
-                			
-            </scannerInfoProvider>
-            		
-        </profile>
-        		
-        <profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile">
-            			
-            <buildOutputProvider>
-                				
-                <openAction enabled="true" filePath=""/>
-                				
-                <parser enabled="true"/>
-                			
-            </buildOutputProvider>
-            			
-            <scannerInfoProvider id="specsFile">
-                				
-                <runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
-                				
-                <parser enabled="true"/>
-                			
-            </scannerInfoProvider>
-            		
-        </profile>
-        		
-        <profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP">
-            			
-            <buildOutputProvider>
-                				
-                <openAction enabled="true" filePath=""/>
-                				
-                <parser enabled="true"/>
-                			
-            </buildOutputProvider>
-            			
-            <scannerInfoProvider id="specsFile">
-                				
-                <runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
-                				
-                <parser enabled="true"/>
-                			
-            </scannerInfoProvider>
-            		
-        </profile>
-        		
-        <profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC">
-            			
-            <buildOutputProvider>
-                				
-                <openAction enabled="true" filePath=""/>
-                				
-                <parser enabled="true"/>
-                			
-            </buildOutputProvider>
-            			
-            <scannerInfoProvider id="specsFile">
-                				
-                <runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
-                				
-                <parser enabled="true"/>
-                			
-            </scannerInfoProvider>
-            		
-        </profile>
-        		
-        <scannerConfigBuildInfo instanceId="Xtensa.28585473">
-            			
-            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
-            			
-            <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
-                				
-                <buildOutputProvider>
-                    					
-                    <openAction enabled="true" filePath=""/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </buildOutputProvider>
-                				
-                <scannerInfoProvider id="specsFile">
-                    					
-                    <runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </scannerInfoProvider>
-                			
-            </profile>
-            			
-            <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
-                				
-                <buildOutputProvider>
-                    					
-                    <openAction enabled="true" filePath=""/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </buildOutputProvider>
-                				
-                <scannerInfoProvider id="makefileGenerator">
-                    					
-                    <runAction arguments="-f ${project_name}_scd.mk" command="make" useDefault="true"/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </scannerInfoProvider>
-                			
-            </profile>
-            			
-            <profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfile">
-                				
-                <buildOutputProvider>
-                    					
-                    <openAction enabled="true" filePath=""/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </buildOutputProvider>
-                				
-                <scannerInfoProvider id="specsFile">
-                    					
-                    <runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </scannerInfoProvider>
-                			
-            </profile>
-            			
-            <profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP">
-                				
-                <buildOutputProvider>
-                    					
-                    <openAction enabled="true" filePath=""/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </buildOutputProvider>
-                				
-                <scannerInfoProvider id="specsFile">
-                    					
-                    <runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </scannerInfoProvider>
-                			
-            </profile>
-            			
-            <profile id="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC">
-                				
-                <buildOutputProvider>
-                    					
-                    <openAction enabled="true" filePath=""/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </buildOutputProvider>
-                				
-                <scannerInfoProvider id="specsFile">
-                    					
-                    <runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </scannerInfoProvider>
-                			
-            </profile>
-            			
-            <profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfile">
-                				
-                <buildOutputProvider>
-                    					
-                    <openAction enabled="true" filePath=""/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </buildOutputProvider>
-                				
-                <scannerInfoProvider id="specsFile">
-                    					
-                    <runAction arguments="-E -P -v -dD ${plugin_state_location}/${specs_file}" command="gcc" useDefault="true"/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </scannerInfoProvider>
-                			
-            </profile>
-            			
-            <profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileCPP">
-                				
-                <buildOutputProvider>
-                    					
-                    <openAction enabled="true" filePath=""/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </buildOutputProvider>
-                				
-                <scannerInfoProvider id="specsFile">
-                    					
-                    <runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.cpp" command="g++" useDefault="true"/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </scannerInfoProvider>
-                			
-            </profile>
-            			
-            <profile id="org.eclipse.cdt.managedbuilder.core.GCCWinManagedMakePerProjectProfileC">
-                				
-                <buildOutputProvider>
-                    					
-                    <openAction enabled="true" filePath=""/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </buildOutputProvider>
-                				
-                <scannerInfoProvider id="specsFile">
-                    					
-                    <runAction arguments="-E -P -v -dD ${plugin_state_location}/specs.c" command="gcc" useDefault="true"/>
-                    					
-                    <parser enabled="true"/>
-                    				
-                </scannerInfoProvider>
-                			
-            </profile>
+            <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
             		
         </scannerConfigBuildInfo>
         	
     </storageModule>
     	
-    <storageModule moduleId="refreshScope" versionNumber="2">
-        		
-        <configuration configurationName="Xtensa">
-            			
-            <resource resourceType="PROJECT" workspacePath="/Rt685_Conversa_DspPrg"/>
-            		
-        </configuration>
-        	
-    </storageModule>
-    	
-    <storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
-    	
-    <storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-    	
-    <storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+    <storageModule moduleId="refreshScope"/>
     
 </cproject>

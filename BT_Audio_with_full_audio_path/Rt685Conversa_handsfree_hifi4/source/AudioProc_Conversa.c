@@ -45,6 +45,7 @@
 #include "AudioProc_Vit.h"
 
 #include "DspMainAudioFlow.h"
+#include "AudioDecoder.h"
 
 
 //tuning parameter file
@@ -57,7 +58,7 @@
 #define SkipConversa				0
 #define EnableLvlMeter				1
 
-uint32_t frmcount;
+extern XosSem 	 		  g_audioTask_audioVitProcessSemaphore;   						// Audio VIT task semaphore used to control the DSP audio process start/wait state.
 
 nxp_conversa_plugin_t conversaPluginParams;
 __attribute__((__section__(".control_reg_addr")))
@@ -71,9 +72,6 @@ S32 *BtTxOtBuf;
 
 S32 *SpkOtBufL;
 S32 *SpkOtBufR;
-
-//S32 *NtOtBufL; //B36932
-//S32 *NtOtBufR; //B36932
 
 S32 *RawMic32BitBuf0;
 S32 *RawMic32BitBuf1;
@@ -376,20 +374,167 @@ void InitConversa(void)
 		PRINTF("\tFAIL - DSP process init: Conversa failed to set parameter files (error code = %i)\r\n", retStatusConversa);
 		return;
 	}
-
-	PRINTF("\DMIC Interface:\r\n");
-	PRINTF("DMIC0 - PDM_DATA01(PIO2_20)- DMIC SEL = low\r\n");
-	PRINTF("DMIC1 - PDM_DATA01(PIO2_20)- DMIC SEL = high\r\n");
-	PRINTF("DMIC2 - PDM_DATA23(PIO2_21)- DMIC SEL = low\r\n");
-	PRINTF("DMIC3 - PDM_DATA23(PIO2_21)- DMIC SEL = high\r\n");
+	#if 0
+		PRINTF("\DMIC Interface:\r\n");
+		PRINTF("DMIC0 - PDM_DATA01(PIO2_20)- DMIC SEL = low\r\n");
+		PRINTF("DMIC1 - PDM_DATA01(PIO2_20)- DMIC SEL = high\r\n");
+		PRINTF("DMIC2 - PDM_DATA23(PIO2_21)- DMIC SEL = low\r\n");
+		PRINTF("DMIC3 - PDM_DATA23(PIO2_21)- DMIC SEL = high\r\n");
+	#endif
 	/* At this step Conversa instance is created */
 	InitConversaBufPtr();
 }
 
 extern T_CircularAudioBuf_S16  VitCircBuff;
 extern T_CircularAudioBuf_S16  VitCircBuff_RawMic;
-extern XosSem g_audioTask_audioVitProcessSemaphore;
- 
+
+#if 0
+__attribute__((__section__(".iram.text")))
+void DspMainAudioFlowProcOneFrame_HfpCall_(int OptionWord)
+{
+	DbgPin7Up();
+
+						//memset((S32 *)BtRxInBuf,0,sizeof(int)*AudioFrameSizeInSamplePerCh);
+
+						if(BtRxInBuf!=AudioOneFrameBuf_01)
+							while(1)
+							{
+								PRINTF("DSP: event from MCU is error \r\n");
+							}
+
+						//for(int i=0;i<AudioFrameSizeInSamplePerCh;i++)
+						for(int i=0;i<2;i++)
+							BtRxInBuf[i]=0;
+
+						//BtRxInBuf[0]=0;
+						//BtRxInBuf[1]=0;
+
+	static int TmpCnt3=0;
+	if(!(TmpCnt3%4))
+	{
+		xos_sem_put( &g_audioTask_audioVitProcessSemaphore );  	// Audio process semaphore put
+	}
+	TmpCnt3++;
+
+	DbgPin7Dn();
+}
+__attribute__((__section__(".iram.text")))
+void DspMainAudioFlowProcOneFrame_HfpCall__(int OptionWord)
+{
+	DbgPin7Up();
+
+	int OutSampleNum;
+
+/*
+	S32 *Ptr_Mic0=(S32 *)PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[0];
+	S32 *Ptr_Mic1=(S32 *)PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[1];
+	S32 *Ptr_Mic2=(S32 *)PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[2];
+	S32 *Ptr_Mic3=(S32 *)PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[3];
+	S32 *Ptr_Mic4=(S32 *)PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[4];
+	S32 *Ptr_Mic5=(S32 *)PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[5];
+	S32 *Ptr_Mic6=(S32 *)PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[6];
+	S32 *Ptr_Mic7=(S32 *)PtrVarBlockSharedByDspAndMcu->PdmInAudioBuf[7];
+
+	S16 RawMicSignal16BitForVitRef[AudioFrameSizeInSamplePerCh];
+
+	S16 i;
+*/
+
+	#if 1	//folding --- step 0: generate sine tone for debugging purpose
+		//sweeping signal overwrites USB down streaming L and R
+		CycCnt1=read_ccount();
+		//GenerateSineTone          (&SineToneGenerator1, (float *)RawMic32BitBuf1, AudioFrameSizeInSamplePerCh,1);
+		CycCnt2=read_ccount(); PtrVarBlockSharedByDspAndMcu->MonitorInfoArray1[1]= CycCnt2-CycCnt1;
+
+		CycCnt1=read_ccount();
+		//GenerateSineToneSingleFreq(&SineToneGenerator2, (float *)RawMic32BitBuf2, AudioFrameSizeInSamplePerCh,1);
+		CycCnt2=read_ccount(); PtrVarBlockSharedByDspAndMcu->MonitorInfoArray1[2]= CycCnt2-CycCnt1;
+
+		//vec_float2int((int *)RawMic32BitBuf1, (const float *)RawMic32BitBuf1,	-31,  AudioFrameSizeInSamplePerCh);
+		//vec_float2int((int *)RawMic32BitBuf2, (const float *)RawMic32BitBuf2,	-31,  AudioFrameSizeInSamplePerCh);
+	#endif
+
+	#if 0	//folding --- step1: get samples from BT Dn cir buffer, and convert all mic input buffers to float
+		if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HfpCall)
+		{
+			//in this case, conversa Tx and Rx are both really working, need to get the real Rx audio from BT
+			if(PtrVarBlockSharedByDspAndMcu->BtFs==8000)
+			{
+				#if UsePrimitiveSimpleSRC==1
+					for(int i=0;i<AudioFrameSizeInSamplePerCh/2;i++)
+					{
+						BtRxInBuf[2*i+0]=PtrVarBlockSharedByDspAndMcu->BTRxInAudio[i];
+						BtRxInBuf[2*i+1]=PtrVarBlockSharedByDspAndMcu->BTRxInAudio[i];
+					}
+				#else
+					//int ProcCadenceAsrc(xa_codec_handle_t *xa_process_handle, int *AudioS32DstPtr, int *AudioS32SrcPtr, int InSampleNum, int *OutputSampleNum)
+					ProcCadenceAsrc( &SRC_process_Ref_handle,    BtRxInBuf, (S32 *)PtrVarBlockSharedByDspAndMcu->BTRxInAudio,  AudioFrameSizeInSamplePerCh/2,    &OutSampleNum  );
+				#endif
+
+				vec_int2float((float *)BtRxInBuf, (const int *)BtRxInBuf,	                            -31,  AudioFrameSizeInSamplePerCh);
+			}else if(PtrVarBlockSharedByDspAndMcu->BtFs==16000)
+			{
+				vec_int2float((float *)BtRxInBuf, (const int *)PtrVarBlockSharedByDspAndMcu->BTRxInAudio,	-31,  AudioFrameSizeInSamplePerCh);
+			}else
+			{
+				//should never come here
+				PRINTF("DSP: audio flow error --- BT fs is not 8Khz or 16KHz - call\r\n");
+			}
+		}else if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy)
+		{
+			//in this case, only conversa Tx for VIT is really working, no need for audio from BT, set Rx audio to 0
+			memset((S32 *)BtRxInBuf,0,sizeof(int)*AudioFrameSizeInSamplePerCh);
+		}else
+		{
+			//should never come here
+			PRINTF("DSP: event from MCU is error \r\n");
+		}
+
+		for(int i=0;i<AudioFrameSizeInSamplePerCh;i++)
+			RawMicSignal16BitForVitRef[i]=(Ptr_Mic0[i]>>16);
+
+
+		//here ??? can not explain: if to use Ptr_Mic0,1,2,3 inplace converting, conversa input is wrong.
+		//have to use Ptr_Mic4,5,6,7 for holding the converted float samples from Ptr_Mic0,1,2,3
+		vec_int2float((float *)Ptr_Mic4, (const int *)Ptr_Mic0,	-31,  AudioFrameSizeInSamplePerCh);
+		vec_int2float((float *)Ptr_Mic5, (const int *)Ptr_Mic1,	-31,  AudioFrameSizeInSamplePerCh);
+		vec_int2float((float *)Ptr_Mic6, (const int *)Ptr_Mic2,	-31,  AudioFrameSizeInSamplePerCh);
+		vec_int2float((float *)Ptr_Mic7, (const int *)Ptr_Mic3,	-31,  AudioFrameSizeInSamplePerCh);
+		//vec_int2float((float *)Ptr_Mic4, (const int *)Ptr_Mic4,	-31,  AudioFrameSizeInSamplePerCh);
+		//vec_int2float((float *)Ptr_Mic5, (const int *)Ptr_Mic5,	-31,  AudioFrameSizeInSamplePerCh);
+		//vec_int2float((float *)Ptr_Mic6, (const int *)Ptr_Mic6,	-31,  AudioFrameSizeInSamplePerCh);
+		//vec_int2float((float *)Ptr_Mic7, (const int *)Ptr_Mic7,	-31,  AudioFrameSizeInSamplePerCh);
+
+		memcpy(RawMic32BitBuf0,Ptr_Mic4,sizeof(S32)*AudioFrameSizeInSamplePerCh);
+		memcpy(RawMic32BitBuf1,Ptr_Mic5,sizeof(S32)*AudioFrameSizeInSamplePerCh);
+		memcpy(RawMic32BitBuf2,Ptr_Mic6,sizeof(S32)*AudioFrameSizeInSamplePerCh);
+		memcpy(RawMic32BitBuf3,Ptr_Mic7,sizeof(S32)*AudioFrameSizeInSamplePerCh);
+
+		#if EnableLvlMeter==1
+			MicInMeterLvl1_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter1, (float *)RawMic32BitBuf0);
+			MicInMeterLvl2_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter2, (float *)RawMic32BitBuf1);
+			MicInMeterLvl3_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter3, (float *)RawMic32BitBuf2);
+			MicInMeterLvl4_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter4, (float *)RawMic32BitBuf3);
+		#endif
+
+	#endif
+
+
+	ToTempSkipVitPorcess=1;
+	//xos_sem_put( &g_audioTask_audioVitProcessSemaphore );  	// Audio process semaphore put
+
+	#if 1
+		if ((AudioFrameCnt % 128) < 64)
+			LedOn_G();
+		else
+			LedOff_G();
+	#endif
+
+	DbgPin7Dn();
+}
+#endif
+
+
 __attribute__((__section__(".iram.text")))
 void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 {
@@ -410,23 +555,19 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 
 	S16 i;
 
-	S32 *NtOtBufL; //B36932
-	S32 *NtOtBufR; //B36932
 
-	//generate sine tone for debugging purpose
-	#if 0
+	#if 0	//folding --- step 0: generate sine tone for debugging purpose
 		//sweeping signal overwrites USB down streaming L and R
 		CycCnt1=read_ccount();
 		GenerateSineTone          (&SineToneGenerator1, (float *)RawMic32BitBuf1, AudioFrameSizeInSamplePerCh,1);
-		CycCnt2=read_ccount(); PtrVarBlockSharedByDspAndMcu->U32TmpArray[1]= CycCnt2-CycCnt1;
+		CycCnt2=read_ccount(); PtrVarBlockSharedByDspAndMcu->MonitorInfoArray1[1]= CycCnt2-CycCnt1;
 		CycCnt1=read_ccount();
 		GenerateSineToneSingleFreq(&SineToneGenerator2, (float *)RawMic32BitBuf2, AudioFrameSizeInSamplePerCh,1);
-		CycCnt2=read_ccount(); PtrVarBlockSharedByDspAndMcu->U32TmpArray[2]= CycCnt2-CycCnt1;
+		CycCnt2=read_ccount(); PtrVarBlockSharedByDspAndMcu->MonitorInfoArray1[2]= CycCnt2-CycCnt1;
 
 		vec_float2int((int *)RawMic32BitBuf1, (const float *)RawMic32BitBuf1,	-31,  AudioFrameSizeInSamplePerCh);
 		vec_float2int((int *)RawMic32BitBuf2, (const float *)RawMic32BitBuf2,	-31,  AudioFrameSizeInSamplePerCh);
 	#endif
-
 
 	#if 1	//folding --- step1: get samples from BT Dn cir buffer, and convert all mic input buffers to float
 		if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HfpCall)
@@ -456,13 +597,8 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 			}
 		}else if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy)
 		{
-			//process audio input from NT
-			//B36932 translate NT input from INT to Float,16KHz only
-			vec_int2float((float *)SpkOtBufL, (const int *)PtrVarBlockSharedByDspAndMcu->I2SInNvtBufL,	-31,  AudioFrameSizeInSamplePerCh);
-			vec_int2float((float *)SpkOtBufR, (const int *)PtrVarBlockSharedByDspAndMcu->I2SInNvtBufR,	-31,  AudioFrameSizeInSamplePerCh);
-
 			//in this case, only conversa Tx for VIT is really working, no need for audio from BT, set Rx audio to 0
-			//B36932 memset((S32 *)BtRxInBuf,0,sizeof(BtRxInBuf));
+			memset((S32 *)BtRxInBuf,0,sizeof(int)*AudioFrameSizeInSamplePerCh);
 		}else
 		{
 			//should never come here
@@ -471,6 +607,7 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 
 		for(int i=0;i<AudioFrameSizeInSamplePerCh;i++)
 			RawMicSignal16BitForVitRef[i]=(Ptr_Mic0[i]>>16);
+
 
 		//here ??? can not explain: if to use Ptr_Mic0,1,2,3 inplace converting, conversa input is wrong.
 		//have to use Ptr_Mic4,5,6,7 for holding the converted float samples from Ptr_Mic0,1,2,3
@@ -497,261 +634,144 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 
 	#endif
 
-	#if SkipConversa==0	//folding --- step2: Conversa processing
-		//real conversa
-		NXP_STATUS retStatusConversa = OK;
-		status_t   retStatus 		 = kStatus_Success;
+	#if 1	//folding --- step2: Conversa processing
+		#if SkipConversa==0	//folding --- step2: Conversa processing
+			//real conversa
+			NXP_STATUS retStatusConversa = OK;
+			status_t   retStatus 		 = kStatus_Success;
 
-		S32 VitInTmpBuf32Bit [AudioFrameSizeInSamplePerCh];
-		S16 VitInTmpBuf16Bit [AudioFrameSizeInSamplePerCh];
+			S32 VitInTmpBuf32Bit [AudioFrameSizeInSamplePerCh];
+			S16 VitInTmpBuf16Bit [AudioFrameSizeInSamplePerCh];
 
-		PL_FLOAT*  pp_inputAudioData_Tx_FLT [4];
-		PL_FLOAT*  pp_inputAudioData_Rx_FLT [2];
-		PL_FLOAT** p_currentSensingInput 	= NULL;		// current sensing input
-		PL_FLOAT*  p_outputAudioData_Tx_FLT = NULL; 	// conversa out pointer
-		PL_FLOAT*  ConversaTmpOutputPtr		= NULL;
-		PL_FLOAT** pp_outputAudioData_Rx_FLT= NULL;
+			PL_FLOAT*  pp_inputAudioData_Tx_FLT [4];
+			PL_FLOAT*  pp_inputAudioData_Rx_FLT [2];
+			PL_FLOAT** p_currentSensingInput 	= NULL;		// current sensing input
+			PL_FLOAT*  p_outputAudioData_Tx_FLT = NULL; 	// conversa out pointer
+			PL_FLOAT*  ConversaTmpOutputPtr		= NULL;
+			PL_FLOAT** pp_outputAudioData_Rx_FLT= NULL;
 
-		#if 1
-			pp_inputAudioData_Tx_FLT[0]=(float *)Ptr_Mic4; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=(float *)Ptr_Mic5; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=(float *)Ptr_Mic6; //C8, glasses mic location
-		#else
-			pp_inputAudioData_Tx_FLT[0]=(float *)RawMic32BitBuf0;
-			pp_inputAudioData_Tx_FLT[1]=(float *)RawMic32BitBuf1;
-			pp_inputAudioData_Tx_FLT[2]=(float *)RawMic32BitBuf2;
-		#endif
+			#if 1
+				pp_inputAudioData_Tx_FLT[0]=(float *)Ptr_Mic4; //A3, glasses mic location
+				//pp_inputAudioData_Tx_FLT[1]=(float *)Ptr_Mic6; //C7, glasses mic location
+				pp_inputAudioData_Tx_FLT[1]=(float *)Ptr_Mic5; //C7, glasses mic location
+				pp_inputAudioData_Tx_FLT[2]=(float *)Ptr_Mic6; //C8, glasses mic location
+			#else
+				pp_inputAudioData_Tx_FLT[0]=(float *)RawMic32BitBuf0;
+				pp_inputAudioData_Tx_FLT[1]=(float *)RawMic32BitBuf1;
+				pp_inputAudioData_Tx_FLT[2]=(float *)RawMic32BitBuf2;
+			#endif
 
-		//memset(BtRxInBuf,0,sizeof(BtRxInBuf));
-		pp_inputAudioData_Rx_FLT[0]=(float *)BtRxInBuf;
+			//memset((S32 *)BtRxInBuf,0,sizeof(int)*AudioFrameSizeInSamplePerCh);
+			pp_inputAudioData_Rx_FLT[0]=(float *)BtRxInBuf;
 
-		retStatusConversa = NxpConversa_Plugin_Process( &conversaPluginParams,
-													    pp_inputAudioData_Tx_FLT,
-														pp_inputAudioData_Rx_FLT,
-														p_currentSensingInput );
+			retStatusConversa = NxpConversa_Plugin_Process( &conversaPluginParams,
+															pp_inputAudioData_Tx_FLT,
+															pp_inputAudioData_Rx_FLT,
+															p_currentSensingInput );
 
-		if (retStatusConversa != OK) 						// if return status not OK
-		{
-			if (retStatusConversa == LICENSE_EXPIRED)       // if license expired occurs
+			if (retStatusConversa != OK) 						// if return status not OK
 			{
-				PRINTF("FAIL: conversa LICENSE_EXPIRED error\r\n");
-				retStatus = kStatus_LicenseError;
+				if (retStatusConversa == LICENSE_EXPIRED)       // if license expired occurs
+				{
+					PRINTF("FAIL: conversa LICENSE_EXPIRED error\r\n");
+					retStatus = kStatus_LicenseError;
+				}
+				else
+				{
+					PRINTF("FAIL: conversa process error %d\r\n",retStatusConversa);
+					retStatus = kStatus_Fail;
+				}
+			}
+
+			p_outputAudioData_Tx_FLT = NxpConversa_Plugin_GetTxOut(&conversaPluginParams);
+			if (p_outputAudioData_Tx_FLT != PL_NULL)
+			{
+				memcpy(ConversaTxOut32BitBuf, p_outputAudioData_Tx_FLT, sizeof(float)*AudioFrameSizeInSamplePerCh);
 			}
 			else
 			{
-				PRINTF("FAIL: conversa process error %d\r\n",retStatusConversa);
-				retStatus = kStatus_Fail;
+				PRINTF("FAIL: conversaProcess return NULL TxOut pointer\r\n");
+				retStatus = kStatus_NullPointer;
 			}
-		}
 
-		p_outputAudioData_Tx_FLT = NxpConversa_Plugin_GetTxOut(&conversaPluginParams);
-		if (p_outputAudioData_Tx_FLT != PL_NULL)
-		{
-			memcpy(ConversaTxOut32BitBuf, p_outputAudioData_Tx_FLT, sizeof(float)*AudioFrameSizeInSamplePerCh);
-		}
-		else
-		{
-			PRINTF("FAIL: conversaProcess return NULL TxOut pointer\r\n");
-			retStatus = kStatus_NullPointer;
-		}
-
-		pp_outputAudioData_Rx_FLT = NxpConversa_Plugin_GetRxOut(&conversaPluginParams);
-		if (pp_outputAudioData_Rx_FLT[0] != PL_NULL)
-		{
-		}
-		else
-		{
-			PRINTF("FAIL: conversaProcess return NULL RxOut pointer\r\n");
-			retStatus = kStatus_OutOfRange;
-		}
-
-
-		//------------------take out internal output streaming from conversa and put to VIT input cir buffer, with converting float --> int --> short in-------
-		//---beg---
-		#if 1	//folding
-			#if 1
-				ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxAecOut(&conversaPluginParams, 0);
-				if(ConversaTmpOutputPtr!=PL_NULL)
-				{
-					memcpy(AecOut32BitBuf, ConversaTmpOutputPtr, sizeof(float)*AudioFrameSizeInSamplePerCh);
-				}else
-				{
-					PRINTF("FAIL: conversaProcess return NULL AecOut pointer\r\n");
-					retStatus = kStatus_NullPointer;
-				}
-			#endif
-
-			#if 1
-				ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxBfOut(&conversaPluginParams);
-				if(ConversaTmpOutputPtr!=PL_NULL)
-				{
-					memcpy(BfOut32BitBuf, ConversaTmpOutputPtr, sizeof(float)*AudioFrameSizeInSamplePerCh);
-				}else
-				{
-					PRINTF("FAIL: conversaProcess return NULL BfOut pointer\r\n");
-					retStatus = kStatus_NullPointer;
-				}
-			#endif
-
-			#if 1
-				ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxNlpOut(&conversaPluginParams);
-				if(ConversaTmpOutputPtr!=PL_NULL)
-				{
-					memcpy(NlpOut32BitBuf, ConversaTmpOutputPtr, sizeof(float)*AudioFrameSizeInSamplePerCh);
-				}else
-				{
-					PRINTF("FAIL: conversaProcess return NULL NlpOut pointer\r\n");
-					retStatus = kStatus_NullPointer;
-				}
-			#endif
-
-			//select one of the following 5
-			vec_float2int((int *)VitInTmpBuf32Bit, (const float *)BfOut32BitBuf,		-31,  AudioFrameSizeInSamplePerCh);		//use conversa bf out as VIT input
-			//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)AecOut32BitBuf,		-31,  AudioFrameSizeInSamplePerCh);		//use conversa aec out as VIT input
-			//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)NlpOut32BitBuf,		-31,  AudioFrameSizeInSamplePerCh);		//use conversa nlp out as VIT input
-			//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)ConversaTxOut32BitBuf,-31,  AudioFrameSizeInSamplePerCh);	//use conversa final tx out as VIT input
-			//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)RawMic32BitBuf0,		-31,  AudioFrameSizeInSamplePerCh);	//use raw mic 0 bf out as VIT input
-
-			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
-				VitInTmpBuf16Bit[i]=(VitInTmpBuf32Bit[i]>>16);
-
-			if(CirAudioBuf_SpaceAvailableInSamples_S16(&VitCircBuff) >= AudioFrameSizeInSamplePerCh)
+			pp_outputAudioData_Rx_FLT = NxpConversa_Plugin_GetRxOut(&conversaPluginParams);
+			if (pp_outputAudioData_Rx_FLT[0] != PL_NULL)
 			{
-				//PRINTF(".\r\n");
-				CirAudioBuf_WriteSamples_S16(&VitCircBuff, AudioFrameSizeInSamplePerCh, VitInTmpBuf16Bit);
-				CirAudioBuf_WriteSamples_S16(&VitCircBuff_RawMic, AudioFrameSizeInSamplePerCh, RawMicSignal16BitForVitRef);
 			}
-
-			//trigger VIT task to step on
-			if(CirAudioBuf_SpaceOccupiedInSamples_S16(&VitCircBuff) >= VIT_SAMPLES_PER_30MS_FRAME)
+			else
 			{
-				xos_sem_put( &g_audioTask_audioVitProcessSemaphore );  	// Audio process semaphore put
-				//PRINTF("1\r\n");
+				PRINTF("FAIL: conversaProcess return NULL RxOut pointer\r\n");
+				retStatus = kStatus_OutOfRange;
 			}
-		#endif
-		//---end---
-		//------------------take out internal output streaming from conversa and put to VIT input cir buffer, with converting float --> int --> short in-------
 
-		#if EnableLvlMeter==1
-			#if 0
-				ConversaOutLvl1_InDb=GetRmsMeterLogValue(AudioMeter1, (float *)ConversaTxOut32BitBuf);
-				ConversaOutLvl2_InDb=GetRmsMeterLogValue(AudioMeter2, (float *)AecOut32BitBuf);
-				ConversaOutLvl3_InDb=GetRmsMeterLogValue(AudioMeter3, (float *)BfOut32BitBuf);
-				ConversaOutLvl4_InDb=GetRmsMeterLogValue(AudioMeter4, (float *)NlpOut32BitBuf);
+
+			//------------------take out internal output streaming from conversa and put to VIT input cir buffer, with converting float --> int --> short in-------
+			//---beg---
+			#if 1	//folding
+				#if 1
+					ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxAecOut(&conversaPluginParams, 0);
+					if(ConversaTmpOutputPtr!=PL_NULL)
+					{
+						memcpy(AecOut32BitBuf, ConversaTmpOutputPtr, sizeof(float)*AudioFrameSizeInSamplePerCh);
+					}else
+					{
+						PRINTF("FAIL: conversaProcess return NULL AecOut pointer\r\n");
+						retStatus = kStatus_NullPointer;
+					}
+				#endif
+
+				#if 1
+					ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxBfOut(&conversaPluginParams);
+					if(ConversaTmpOutputPtr!=PL_NULL)
+					{
+						memcpy(BfOut32BitBuf, ConversaTmpOutputPtr, sizeof(float)*AudioFrameSizeInSamplePerCh);
+					}else
+					{
+						PRINTF("FAIL: conversaProcess return NULL BfOut pointer\r\n");
+						retStatus = kStatus_NullPointer;
+					}
+				#endif
+
+				#if 1
+					ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxNlpOut(&conversaPluginParams);
+					if(ConversaTmpOutputPtr!=PL_NULL)
+					{
+						memcpy(NlpOut32BitBuf, ConversaTmpOutputPtr, sizeof(float)*AudioFrameSizeInSamplePerCh);
+					}else
+					{
+						PRINTF("FAIL: conversaProcess return NULL NlpOut pointer\r\n");
+						retStatus = kStatus_NullPointer;
+					}
+				#endif
+
+				//select one of the following 5
+				vec_float2int((int *)VitInTmpBuf32Bit, (const float *)BfOut32BitBuf,		-31,  AudioFrameSizeInSamplePerCh);		//use conversa bf out as VIT input
+				//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)AecOut32BitBuf,		-31,  AudioFrameSizeInSamplePerCh);		//use conversa aec out as VIT input
+				//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)NlpOut32BitBuf,		-31,  AudioFrameSizeInSamplePerCh);		//use conversa nlp out as VIT input
+				//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)ConversaTxOut32BitBuf,-31,  AudioFrameSizeInSamplePerCh);	//use conversa final tx out as VIT input
+				//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)RawMic32BitBuf0,		-31,  AudioFrameSizeInSamplePerCh);	//use raw mic 0 bf out as VIT input
+
+				for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+					VitInTmpBuf16Bit[i]=(VitInTmpBuf32Bit[i]>>16);
+
+				xos_mutex_lock(&g_audio_vitBufferMutex);
+					if(CirAudioBuf_SpaceAvailableInSamples_S16(&VitCircBuff) >= AudioFrameSizeInSamplePerCh)
+					{
+						//PRINTF(".\r\n");
+						CirAudioBuf_WriteSamples_S16(&VitCircBuff, AudioFrameSizeInSamplePerCh, VitInTmpBuf16Bit);
+						CirAudioBuf_WriteSamples_S16(&VitCircBuff_RawMic, AudioFrameSizeInSamplePerCh, RawMicSignal16BitForVitRef);
+					}
+					//trigger VIT task to step on
+					if(CirAudioBuf_SpaceOccupiedInSamples_S16(&VitCircBuff) >= VIT_SAMPLES_PER_30MS_FRAME)
+					{
+						ToTempSkipVitPorcess=0;
+						xos_sem_put( &g_audioTask_audioVitProcessSemaphore );  	// Audio process semaphore put
+						//PRINTF("1\r\n");
+					}
+				xos_mutex_unlock(&g_audio_vitBufferMutex);
 			#endif
-			#if 0
-				ConversaOutLvl1_InDb=GetPeakMeterValue(AudioMeter1, (float *)ConversaTxOut32BitBuf);
-				ConversaOutLvl2_InDb=GetPeakMeterValue(AudioMeter2, (float *)AecOut32BitBuf);
-				ConversaOutLvl3_InDb=GetPeakMeterValue(AudioMeter3, (float *)BfOut32BitBuf);
-				ConversaOutLvl4_InDb=GetPeakMeterValue(AudioMeter4, (float *)NlpOut32BitBuf);
-			#endif
-			#if 1
-				ConversaOutLvl1_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter5, (float *)ConversaTxOut32BitBuf);
-				ConversaOutLvl2_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter6, (float *)AecOut32BitBuf);
-				ConversaOutLvl3_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter7, (float *)BfOut32BitBuf);
-				ConversaOutLvl4_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter8, (float *)NlpOut32BitBuf);
-			#endif
-		#endif
-
-		float *FltDstPtr;
-		float *FltSrcPtr;
-		if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HfpCall)
-		{
-		//real conversa rx out --> to spk out L
-			FltDstPtr=(float *)SpkOtBufL;
-			FltSrcPtr=(float *)pp_outputAudioData_Rx_FLT[0];
-		for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
-		{
-			*FltDstPtr++=*FltSrcPtr++;
-		}
-
-		//raw mic1 signal --> to spk out R --- can be changed to other interested audio source
-		FltDstPtr=(float *)SpkOtBufR;
-		FltSrcPtr=(float *)RawMic32BitBuf0;
-		for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
-		{
-			*FltDstPtr++=*FltSrcPtr++;
-		}
-
-		//real conversa tx out --> to BT tx out
-		FltDstPtr=(float *)BtTxOtBuf;
-		FltSrcPtr=(float *)p_outputAudioData_Tx_FLT;
-		for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
-		{
-			*FltDstPtr++=*FltSrcPtr++;
-		}
-		}else if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy)
-		{
-			//not sure why "NtOtBufL" data is not correct
-			//real conversa tx out --> to NT out L
-			FltDstPtr=(float *)NtOtBufL;
-			FltSrcPtr=(float *)p_outputAudioData_Tx_FLT;
-			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
-			{
-				*FltDstPtr++=*FltSrcPtr++;
-			}
-
-			//raw mic1 signal --> to NT out R --- can be changed to other interested audio source
-			FltDstPtr=(float *)NtOtBufR;
-			FltSrcPtr=(float *)RawMic32BitBuf0;
-			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
-			{
-				*FltDstPtr++=*FltSrcPtr++;
-			}
-
-		}
-	#else
-		//fake conversa down link --- ref in --> spk out
-		float *FltDstPtr=(float *)SpkOtBufL;
-		float *FltSrcPtr=(float *)BtRxInBuf;
-		for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
-		{
-			*FltDstPtr++=*FltSrcPtr++;
-		}
-
-		//fake conversa up link --- mic0 --> tx out
-		FltDstPtr=(float *)BtTxOtBuf;
-		FltSrcPtr=(float *)Ptr_Mic4;
-		for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
-		{
-			*FltDstPtr++=*FltSrcPtr++;
-		}
-
-		//raw mic1 signal --> spk out
-		FltDstPtr=(float *)SpkOtBufR;
-		FltSrcPtr=(float *)Ptr_Mic5;	//could be any one of other raw mics
-		for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
-		{
-			*FltDstPtr++=*FltSrcPtr++;
-			//*FltDstPtr++=0.001f * i;
-		}
-
-		//------------------take out raw mic1 signal and put to VIT input cir buffer-----------------
-		//---beg---
-		#if 1
-			if(CirAudioBuf_SpaceAvailableInSamples_S16(&VitCircBuff) >= AudioFrameSizeInSamplePerCh)
-			{
-				//PRINTF(".\r\n");
-				CirAudioBuf_WriteSamples_S16(&VitCircBuff,        AudioFrameSizeInSamplePerCh, RawMicSignal16BitForVitRef);
-				CirAudioBuf_WriteSamples_S16(&VitCircBuff_RawMic, AudioFrameSizeInSamplePerCh, RawMicSignal16BitForVitRef);
-			}
-
-			//trigger VIT task to step on
-			if(CirAudioBuf_SpaceOccupiedInSamples_S16(&VitCircBuff) >= VIT_SAMPLES_PER_30MS_FRAME)
-			{
-				xos_sem_put( &g_audioTask_audioVitProcessSemaphore );  	// Audio process semaphore put
-				//PRINTF("1\r\n");
-			}
-		#endif
-		//---end---
-		//------------------take out raw mic1 signal and put to VIT input cir buffer-----------------
-
-
-		#if 1	//put raw mic 1 to
-			memcpy(ConversaTxOut32BitBuf, Ptr_Mic4, sizeof(float)*AudioFrameSizeInSamplePerCh);
-			memcpy(AecOut32BitBuf,        Ptr_Mic4, sizeof(float)*AudioFrameSizeInSamplePerCh);
-			memcpy(BfOut32BitBuf,         Ptr_Mic4, sizeof(float)*AudioFrameSizeInSamplePerCh);
-			memcpy(NlpOut32BitBuf,        Ptr_Mic4, sizeof(float)*AudioFrameSizeInSamplePerCh);
+			//---end---
+			//------------------take out internal output streaming from conversa and put to VIT input cir buffer, with converting float --> int --> short in-------
 
 			#if EnableLvlMeter==1
 				#if 0
@@ -773,24 +793,115 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 					ConversaOutLvl4_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter8, (float *)NlpOut32BitBuf);
 				#endif
 			#endif
+
+
+			//real conversa rx out --> to spk out L
+			float *FltDstPtr=(float *)SpkOtBufL;
+			float *FltSrcPtr=(float *)pp_outputAudioData_Rx_FLT[0];
+			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+			{
+				*FltDstPtr++=*FltSrcPtr++;
+			}
+
+			//raw mic1 signal --> to spk out R --- can be changed to other interested audio source
+			FltDstPtr=(float *)SpkOtBufR;
+			FltSrcPtr=(float *)RawMic32BitBuf0;
+			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+			{
+				*FltDstPtr++=*FltSrcPtr++;
+			}
+
+			//real conversa tx out --> to BT tx out
+			FltDstPtr=(float *)BtTxOtBuf;
+			FltSrcPtr=(float *)p_outputAudioData_Tx_FLT;
+			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+			{
+				*FltDstPtr++=*FltSrcPtr++;
+			}
+
+		#else
+			//fake conversa down link --- ref in --> spk out
+			float *FltDstPtr=(float *)SpkOtBufL;
+			float *FltSrcPtr=(float *)BtRxInBuf;
+			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+			{
+				*FltDstPtr++=*FltSrcPtr++;
+			}
+
+			//fake conversa up link --- mic0 --> tx out
+			FltDstPtr=(float *)BtTxOtBuf;
+			FltSrcPtr=(float *)Ptr_Mic4;
+			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+			{
+				*FltDstPtr++=*FltSrcPtr++;
+			}
+
+			//raw mic1 signal --> spk out
+			FltDstPtr=(float *)SpkOtBufR;
+			FltSrcPtr=(float *)Ptr_Mic5;	//could be any one of other raw mics
+			for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+			{
+				*FltDstPtr++=*FltSrcPtr++;
+				//*FltDstPtr++=0.001f * i;
+			}
+
+			//------------------take out raw mic1 signal and put to VIT input cir buffer-----------------
+			//---beg---
+			#if 1
+				xos_mutex_lock(&g_audio_vitBufferMutex);
+					if(CirAudioBuf_SpaceAvailableInSamples_S16(&VitCircBuff) >= AudioFrameSizeInSamplePerCh)
+					{
+						//PRINTF(".\r\n");
+						CirAudioBuf_WriteSamples_S16(&VitCircBuff,        AudioFrameSizeInSamplePerCh, RawMicSignal16BitForVitRef);
+						CirAudioBuf_WriteSamples_S16(&VitCircBuff_RawMic, AudioFrameSizeInSamplePerCh, RawMicSignal16BitForVitRef);
+					}
+					//trigger VIT task to step on
+					if(CirAudioBuf_SpaceOccupiedInSamples_S16(&VitCircBuff) >= VIT_SAMPLES_PER_30MS_FRAME)
+					{
+						xos_sem_put( &g_audioTask_audioVitProcessSemaphore );  	// Audio process semaphore put
+						//PRINTF("1\r\n");
+					}
+				xos_mutex_UNlock(&g_audio_vitBufferMutex);
+			#endif
+			//---end---
+			//------------------take out raw mic1 signal and put to VIT input cir buffer-----------------
+
+
+			#if 1	//put raw mic 1 to
+				memcpy(ConversaTxOut32BitBuf, Ptr_Mic4, sizeof(float)*AudioFrameSizeInSamplePerCh);
+				memcpy(AecOut32BitBuf,        Ptr_Mic4, sizeof(float)*AudioFrameSizeInSamplePerCh);
+				memcpy(BfOut32BitBuf,         Ptr_Mic4, sizeof(float)*AudioFrameSizeInSamplePerCh);
+				memcpy(NlpOut32BitBuf,        Ptr_Mic4, sizeof(float)*AudioFrameSizeInSamplePerCh);
+
+				#if EnableLvlMeter==1
+					#if 0
+						ConversaOutLvl1_InDb=GetRmsMeterLogValue(AudioMeter1, (float *)ConversaTxOut32BitBuf);
+						ConversaOutLvl2_InDb=GetRmsMeterLogValue(AudioMeter2, (float *)AecOut32BitBuf);
+						ConversaOutLvl3_InDb=GetRmsMeterLogValue(AudioMeter3, (float *)BfOut32BitBuf);
+						ConversaOutLvl4_InDb=GetRmsMeterLogValue(AudioMeter4, (float *)NlpOut32BitBuf);
+					#endif
+					#if 0
+						ConversaOutLvl1_InDb=GetPeakMeterValue(AudioMeter1, (float *)ConversaTxOut32BitBuf);
+						ConversaOutLvl2_InDb=GetPeakMeterValue(AudioMeter2, (float *)AecOut32BitBuf);
+						ConversaOutLvl3_InDb=GetPeakMeterValue(AudioMeter3, (float *)BfOut32BitBuf);
+						ConversaOutLvl4_InDb=GetPeakMeterValue(AudioMeter4, (float *)NlpOut32BitBuf);
+					#endif
+					#if 1
+						ConversaOutLvl1_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter5, (float *)ConversaTxOut32BitBuf);
+						ConversaOutLvl2_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter6, (float *)AecOut32BitBuf);
+						ConversaOutLvl3_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter7, (float *)BfOut32BitBuf);
+						ConversaOutLvl4_InDb=GetSignaLvlIndB_ByFrameRms(AudioRmsMeter8, (float *)NlpOut32BitBuf);
+					#endif
+				#endif
+			#endif
 		#endif
 	#endif
-
 
 	#if 1	//folding --- step3: put samples to BT Up cir buffer, and convert tx samples from float to int, and SpkOtBufL to PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL
 		//convert SpkOtBufL to int and put to  PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL
 		#if 1
-			if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HfpCall)
-			{
 			vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL, (const float *)SpkOtBufL,	-31,  AudioFrameSizeInSamplePerCh);
 			vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SLineOtBufR, (const float *)SpkOtBufR,	-31,  AudioFrameSizeInSamplePerCh);	//mic1 to spk R --- this is for test
-			}else if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy)
-			{
-				//now none process the audio input from NT, just copy it to I2SLineOtBuf
-				//maybe there have process in the future
-				vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL, (const float *)SpkOtBufL,	-31,  AudioFrameSizeInSamplePerCh);
-				vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SLineOtBufR, (const float *)SpkOtBufR,	-31,  AudioFrameSizeInSamplePerCh);
-			}
 		#else
 			//conversa BF output
 			vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL, (const float *)BtTxOtBuf,	-31,  AudioFrameSizeInSamplePerCh);
@@ -834,16 +945,8 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 			}
 		}else if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy)
 		{
-			//16KHz only
-			vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufL, (const float *)ConversaTxOut32BitBuf,	-31,  AudioFrameSizeInSamplePerCh);
-			vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufR, (const float *)NtOtBufL,	-31,  AudioFrameSizeInSamplePerCh);
-			//vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufL, (const float *)NtOtBufL,	-31,  AudioFrameSizeInSamplePerCh);
-			//vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufR, (const float *)NtOtBufR,	-31,  AudioFrameSizeInSamplePerCh);
-			//vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufL, (const float *)SpkOtBufL,	-31,  AudioFrameSizeInSamplePerCh);
-			//vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufR, (const float *)SpkOtBufR,	-31,  AudioFrameSizeInSamplePerCh);
-
 			//in this case, only conversa Tx for VIT is really working, no need to put audio to BT, set Tx audio to 0
-			//memset((S32 *)BtTxOtBuf,0,sizeof(BtTxOtBuf));
+			memset((S32 *)BtTxOtBuf,0,sizeof(int)*AudioFrameSizeInSamplePerCh);
 		}else
 		{
 			//should never come here
@@ -854,8 +957,53 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 
 	#endif
 
+	#if 1	//folding --- step4: get audio from sbc decoder and opus decoder, or clear the decoder buffer if the decoder is NOT running
+		#if EnableOpusDec==1
+			unsigned short *OtPtrS16_Opus;
+			//take out OPUS output audio, and mix with UAC, with satuation, no gaining
+			xos_mutex_lock(&g_audio_OpusDecoderMutex);
+			if(CirAudioBuf_SpaceOccupiedInSamples_S32(&OpusOutputCirBuf_LRMixed) >= AudioFrameSizeInSamplePerCh)
+			{
+				OtPtrS16_Opus=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&OpusOutputCirBuf_LRMixed, AudioFrameSizeInSamplePerCh);
+				for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+				{
+					AudioOneFrameBuf_OpusDecodedL[i]=*OtPtrS16_Opus++;
+					AudioOneFrameBuf_OpusDecodedR[i]=*OtPtrS16_Opus++;
+				}
+			}else
+			{
+				memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(AudioOneFrameBuf_OpusDecodedL));
+				memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(AudioOneFrameBuf_OpusDecodedR));
+			}
+			xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+			//mix with satuation: EapProcOtBuf + OpusTmpBuf --> EapProcInBuf, all buffers should not be overlapped
+			//vec_add32x32 ( EapProcInBuf, EapProcOtBuf, OpusTmpBuf, AudioFrameSizeInSamplePerCh*2);		//this vect add is with satuation
+		#endif
+		#if EnableSbcDec==1
+			unsigned short *OtPtrS16_Sbc;
+			//take out Sbc output audio, and mix with UAC, with satuation, no gaining
+			xos_mutex_lock(&g_audio_SbcDecoderMutex);
+				if((CirAudioBuf_SpaceOccupiedInSamples_S32(&SbcOutputCirBuf_LRMixed) >= AudioFrameSizeInSamplePerCh)&&(SbcOutputCirBuf_LRMixed_IsHalfFull==1))
+				{
+					OtPtrS16_Sbc=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&SbcOutputCirBuf_LRMixed, AudioFrameSizeInSamplePerCh);
+					for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
+					{
+						AudioOneFrameBuf_SbcDecodedL[i]=*OtPtrS16_Sbc++;
+						AudioOneFrameBuf_SbcDecodedR[i]=*OtPtrS16_Sbc++;
+					}
+				}else
+				{
+					memset(AudioOneFrameBuf_SbcDecodedL,0,sizeof(AudioOneFrameBuf_SbcDecodedL));
+					memset(AudioOneFrameBuf_SbcDecodedR,0,sizeof(AudioOneFrameBuf_SbcDecodedR));
+				}
+			xos_mutex_unlock(&g_audio_SbcDecoderMutex);
 
-	#if 1	//folding --- step4: put interested audio channels to UAC 8 ch: mic0,1,2,3, ConversaTxOut, AecOut[0], BfOut, NlpOut
+			//mix with satuation: EapProcOtBuf + SbcTmpBuf --> EapProcInBuf, all buffers should not be overlapped
+			//vec_add32x32 ( EapProcInBuf, EapProcOtBuf, SbcTmpBuf, AudioFrameSizeInSamplePerCh*2);		//this vect add is with satuation
+		#endif
+	#endif
+
+	#if 1	//folding --- step5: put interested audio channels to UAC 8 ch: mic0,1,2,3, ConversaTxOut, AecOut[0], BfOut, NlpOut
 		//S32 UacUpAudioBuf[AudioFrameSizeInSamplePerCh*8];
 		vec_float2int((int *)RawMic32BitBuf0, (const float *)RawMic32BitBuf0,	-31,  AudioFrameSizeInSamplePerCh);
 		vec_float2int((int *)RawMic32BitBuf1, (const float *)RawMic32BitBuf1,	-31,  AudioFrameSizeInSamplePerCh);
@@ -877,37 +1025,33 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 			ASR_WavPulse=ASR_WavPulse_NothingDetected;
 		}
 
+		//fill USB up streaming buffer --- 8 channels, all 16KHz, 32bit
 		for(i=0;i<AudioFrameSizeInSamplePerCh;i++)
 		{
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=RawMic32BitBuf0[i];
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=RawMic32BitBuf1[i];
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=RawMic32BitBuf2[i];
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=RawMic32BitBuf3[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=PtrVarBlockSharedByDspAndMcu->I2SInNvtBufL[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=PtrVarBlockSharedByDspAndMcu->I2SInNvtBufR[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=PtrVarBlockSharedByDspAndMcu->I2SLineOtBufR[i];
-
-				//B36932 PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=MicInMeterLvl1_InDb/100.0f*(float)0x7fffffff;
-				//B36932 PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=MicInMeterLvl2_InDb/100.0f*(float)0x7fffffff;
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=MicInMeterLvl1_InDb/100.0f*(float)0x7fffffff;
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=MicInMeterLvl2_InDb/100.0f*(float)0x7fffffff;
+					//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=(AudioOneFrameBuf_OpusDecodedL[i] <<16);
+					PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=(AudioOneFrameBuf_OpusDecodedR[i] <<16);
+					PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=(AudioOneFrameBuf_SbcDecodedL[i] <<16);
+					//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=(AudioOneFrameBuf_SbcDecodedR[i] <<16);
 
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=ConversaTxOut32BitBuf[i];
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=AecOut32BitBuf[i];
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=BfOut32BitBuf[i];
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=NlpOut32BitBuf[i];
-				//B36932 PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=ConversaOutLvl1_InDb/100.0f*(float)0x7fffffff;
-				//B36932 PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=ConversaOutLvl2_InDb/100.0f*(float)0x7fffffff;
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=ConversaOutLvl1_InDb/100.0f*(float)0x7fffffff;
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=ConversaOutLvl2_InDb/100.0f*(float)0x7fffffff;
 					//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=PtrVarBlockSharedByDspAndMcu->UacDnAudioBufL[i*3];	// *3, because Uac Dn is 48KHz
 					//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=PtrVarBlockSharedByDspAndMcu->UacDnAudioBufR[i*3];	// *3, because Uac Dn is 48KHz
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufL[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=PtrVarBlockSharedByDspAndMcu->I2SOtNvtBufR[i];
-
 		}
 	#endif
 
-	frmcount++;
 	#if 1
-		if ((frmcount % 128) < 64)
+		if ((AudioFrameCnt % 128) < 64)
 			LedOn_G();
 		else
 			LedOff_G();

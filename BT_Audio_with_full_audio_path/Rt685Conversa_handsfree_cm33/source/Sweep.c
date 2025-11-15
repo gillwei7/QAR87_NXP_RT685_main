@@ -26,15 +26,9 @@ void InitSineToneGen1(void)
 
 void InitSineToneGen2(void)
 {
-	#if EnableOnlyMicSpk_NoBT==1
-		//                                          Amplitude(),      FreqBeg,   FreqEnd,  Sweeping Duration,  Fs
-		//                                        in between +/- 1      Hz          Hz            Sec          Hz
-		InitSineToneGenerator(&SineToneGenerator2,     0.99f,          0.1f,     24000.0f,       20.0f,        Fs_I2SToAmp_MicSpkTest);
-	#else
 		//                                          Amplitude(),      FreqBeg,   FreqEnd,  Sweeping Duration,  Fs
 		//                                        in between +/- 1      Hz          Hz            Sec          Hz
 		InitSineToneGenerator(&SineToneGenerator2,     0.99f,          0.1f,     24000.0f,       20.0f,        16000);
-	#endif
 }
 
 void InitSineToneGenerator(TSineToneGenerator *PtrSinGen, float A, float fBeg, float fEnd, float TimeInS, unsigned int Fs)

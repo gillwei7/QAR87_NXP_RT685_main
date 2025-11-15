@@ -148,8 +148,8 @@ const clock_sys_pll_config_t g_sysPllConfig_BOARD_BootClockRUN =
 const clock_audio_pll_config_t g_audioPllConfig_BOARD_BootClockRUN =
     {
         .audio_pll_src = kCLOCK_AudioPllXtalIn,   /* OSC clock */
-        .numerator = 528,                         /* Numerator of the Audio PLL fractional loop divider is null */
-        .denominator = 1000,                      /* Denominator of the Audio PLL fractional loop divider is null */
+        .numerator = 5280,                         /* Numerator of the Audio PLL fractional loop divider is null */
+        .denominator = 10000,                      /* Denominator of the Audio PLL fractional loop divider is null */
         .audio_pll_mult = kCLOCK_AudioPllMult22   /* Divide by 22 */
     };
 /*******************************************************************************

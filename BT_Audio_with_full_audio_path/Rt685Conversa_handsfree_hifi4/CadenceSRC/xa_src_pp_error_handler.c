@@ -53,6 +53,7 @@ const char *ppb_xa_src_pp_config_non_fatal[] = {
     "Invalid config for enable asrc",
     "Invalid asrc drift",
     "Invalid config for enable cubic interpolation",    
+    "Invalid config for enable pull mode",  
 };
 
 /* Fatal Errors */

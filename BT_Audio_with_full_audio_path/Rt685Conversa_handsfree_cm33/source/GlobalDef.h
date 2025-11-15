@@ -11,20 +11,10 @@
 
 
 //------------------------settings can be changed ----------------------
-//If UsingQAR87Board == 1, the program can be run on the QAR87 development board.
-//Defined in properties preprocessor #define UsingQAR87Board										1
-
-#define EnableConversa										1		//when this is set to 0, this demo is the same as the original SDK HFP example
-
 //sub working modes (workstate) enable or disable --- go to WorkStateManager.h to setup
 
-#if EnableConversa==1
 #define LetComConnectTuningTool								1		//0 or 1 can be selected
 #define EnableUsbComAndAudio								1		//0 or 1 can be selected
-#else
-#define EnableUsbComAndAudio								0		//must be 0 when not using conversa
-#define LetComConnectTuningTool								0		//must be 0 when not using conversa
-#endif
 
 #define EnableAudioPllAdjustingToSyncBetweenBtFsAndLocalFs	1		//should always enable this to keep I2S data sync with BT (on buffer under flow or over flow)
 
@@ -39,21 +29,16 @@
 
 #define	Rt685I2SToNvtIsI2SMaster							1
 #define Rt685I2SToAmpIsI2SMaster							1		//could be 1 or 0, both works
-//#define Rt685I2SToNvtBitWidth								32
+
+//#define Rt685I2SToNvtBitWidth								32		//CAN not use this one --- 128*3 makes dma packet size bigger than 2048!!!
 #define Rt685I2SToNvtBitWidth								16
 
-#define EnableOnlyMicSpk_NoBT								0		//only when doing basic audio flow test, set this to 1
-#if EnableOnlyMicSpk_NoBT==1
-	//Note: PDM is always in 16KHz Fs
-	#define Fs_I2SToAmp_MicSpkTest							16000
-	//#define Fs_I2SToAmp_MicSpkTest						48000
-#endif
 //#define Fs_I2SToNvt_MicSpkTest								16000
 #define Fs_I2SToNvt_MicSpkTest							48000
 
 #define EnableVitBeforeTheCall								1
 
-
+#define AmpIsAlwaysIn48Or16KHz								1		//when set to 1, means a2dp 44.1KHz will also be SRCed to 48K and play out --- this helps to match UAC interface, and also good for MIC, cause MIC is always 16KHz or 48KHz
 //------------------------settings can be changed ----------------------
 
 
@@ -127,6 +112,7 @@ typedef long long			s64;
 
 #include "DefForBothMcuAndDsp.h"
 
+extern volatile T_CommonVarSharedByDspAndMcu VarBlockSharedByDspAndMcu;
 
 //--------------- USB PID definition according to MCU type and USB audio format ----------------------
 #if EnableUsbComAndAudio==1
@@ -187,9 +173,9 @@ typedef long long			s64;
 
 
 #define PRINTF_M(x, ...)		do {			\
-SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);	\
+SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);	\
 	PRINTF(x, ##__VA_ARGS__);					\
-SEMA42_Unlock(APP_SEMA42, SEMA42_GATE);			\
+SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);			\
 } while(0)
 
 

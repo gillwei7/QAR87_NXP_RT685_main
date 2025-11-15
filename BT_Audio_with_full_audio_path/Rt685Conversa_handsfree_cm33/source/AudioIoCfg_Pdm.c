@@ -21,7 +21,6 @@
 #include "fsl_i2s_bridge.h"
 
 #include "GlobalDef.h"
-#if EnableConversa==1
 
 #include "SubFunc.h"
 #include "AudioIoCfg_I2s.h"
@@ -375,34 +374,37 @@ void ImmediatelyStartDmicDmaChannels(U8 MicSelectBits)	//bit0~7 --> dmic ch0~7
 	NVIC_SetPriority(DMA0_IRQn, (USB_DEVICE_INTERRUPT_PRIORITY + 1U));
 	EnableIRQ(DMA0_IRQn);
 }
-void Init_MicDmaCfgCh(U8 MicSelectBits)
+void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW)
 {
+	assert((SampleBitW==16)||(SampleBitW==32));
+	assert(FrmSizeInSample<=AudioFrameSizeInSamplePerCh_PDM);
+
 	#if EnableMic01==1
 		if(MicSelectBits&0x01)
 		{
 			MicDmaCfgCh0[0].data                   = (void *)MicInputDmaDualBuf_0;
-			MicDmaCfgCh0[0].dataWidth              = sizeof(S32);
-			MicDmaCfgCh0[0].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh0[0].dataWidth              = SampleBitW/8;
+			MicDmaCfgCh0[0].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh0[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh0[0].linkTransfer           = &MicDmaCfgCh0[1];
 
 			MicDmaCfgCh0[1].data                   = (void *)&MicInputDmaDualBuf_0[AudioFrameSizeInSamplePerCh_PDM];
-			MicDmaCfgCh0[1].dataWidth              = sizeof(S32);
-			MicDmaCfgCh0[1].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh0[1].dataWidth              = SampleBitW/8;
+			MicDmaCfgCh0[1].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh0[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh0[1].linkTransfer           = &MicDmaCfgCh0[0];
 		}
 		if(MicSelectBits&0x02)
 		{
 			MicDmaCfgCh1[0].data                   = (void *)MicInputDmaDualBuf_1;
-			MicDmaCfgCh1[0].dataWidth              = sizeof(S32);
-			MicDmaCfgCh1[0].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh1[0].dataWidth              = SampleBitW/8;
+			MicDmaCfgCh1[0].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh1[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh1[0].linkTransfer           = &MicDmaCfgCh1[1];
 
 			MicDmaCfgCh1[1].data                   = (void *)&MicInputDmaDualBuf_1[AudioFrameSizeInSamplePerCh_PDM];
-			MicDmaCfgCh1[1].dataWidth              = sizeof(S32);
-			MicDmaCfgCh1[1].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh1[1].dataWidth              = SampleBitW/8;
+			MicDmaCfgCh1[1].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh1[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh1[1].linkTransfer           = &MicDmaCfgCh1[0];
 		}
@@ -412,28 +414,28 @@ void Init_MicDmaCfgCh(U8 MicSelectBits)
 		if(MicSelectBits&0x04)
 		{
 			MicDmaCfgCh2[0].data                   = (void *)MicInputDmaDualBuf_2;
-			MicDmaCfgCh2[0].dataWidth              = sizeof(S32);
-			MicDmaCfgCh2[0].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh2[0].dataWidth              = SampleBitW/8;
+			MicDmaCfgCh2[0].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh2[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh2[0].linkTransfer           = &MicDmaCfgCh2[1];
 
 			MicDmaCfgCh2[1].data                   = (void *)&MicInputDmaDualBuf_2[AudioFrameSizeInSamplePerCh_PDM];
-			MicDmaCfgCh2[1].dataWidth              = sizeof(S32);
-			MicDmaCfgCh2[1].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh2[1].dataWidth              = SampleBitW/8;
+			MicDmaCfgCh2[1].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh2[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh2[1].linkTransfer           = &MicDmaCfgCh2[0];
 		}
 		if(MicSelectBits&0x08)
 		{
 			MicDmaCfgCh3[0].data                   = (void *)MicInputDmaDualBuf_3;
-			MicDmaCfgCh3[0].dataWidth              = sizeof(S32);
-			MicDmaCfgCh3[0].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh3[0].dataWidth              = SampleBitW/8;
+			MicDmaCfgCh3[0].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh3[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh3[0].linkTransfer           = &MicDmaCfgCh3[1];
 
 			MicDmaCfgCh3[1].data                   = (void *)&MicInputDmaDualBuf_3[AudioFrameSizeInSamplePerCh_PDM];
-			MicDmaCfgCh3[1].dataWidth              = sizeof(S32);
-			MicDmaCfgCh3[1].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh3[1].dataWidth              = SampleBitW/8;
+			MicDmaCfgCh3[1].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh3[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh3[1].linkTransfer           = &MicDmaCfgCh3[0];
 		}
@@ -691,14 +693,33 @@ void BOARD_Init_DMA_PDM(U8 MicSelectBits)
 	#endif
 
 }
-void BOARD_Init_DMIC(U8 MicSelectBits, U8 SkipInitGlobalDMIC0)
+void BOARD_Init_DMIC(U8 MicSelectBits, U8 SkipInitGlobalDMIC0, int Fs)
 {
+	assert((Fs==16000)||(Fs==32000)||(Fs==44100)||(Fs==48000));
+
 	dmic_channel_config_t dmic_channel_cfg;
 	memset(&dmic_channel_cfg, 0U, sizeof(dmic_channel_config_t));
 	dmic_channel_cfg.divhfclk            = kDMIC_PdmDiv1;
 
+	switch(Fs)
+	{
+		case 16000:
 	dmic_channel_cfg.osr                 = 48U;
 	dmic_channel_cfg.gainshft            = 6U;
+			break;
+		case 32000:
+			dmic_channel_cfg.osr                 = 48U;
+			dmic_channel_cfg.gainshft            = 6U;
+			break;
+		case 44100:
+			dmic_channel_cfg.osr                 = 32U;
+			dmic_channel_cfg.gainshft            = 6U;
+			break;
+		case 48000:
+			dmic_channel_cfg.osr                 = 32U;
+			dmic_channel_cfg.gainshft            = 6U;
+			break;
+	}
 
 	dmic_channel_cfg.preac2coef          = kDMIC_CompValueZero;
 	dmic_channel_cfg.preac4coef          = kDMIC_CompValueZero;
@@ -716,7 +737,22 @@ void BOARD_Init_DMIC(U8 MicSelectBits, U8 SkipInitGlobalDMIC0)
 #endif
 	}
 
-	DMIC_Use2fs(DMIC0, false);
+	switch(Fs)
+	{
+		case 16000:
+			DMIC_Use2fs(DMIC0, false);	//24.576/8 --> 3.072M, /OSR=48 --> 64KHz -->half down = 32KHz(2Fs) --- NOT use 2Fs --> further half down to 16KHz
+			break;
+		case 32000:
+			DMIC_Use2fs(DMIC0, true);	//24.576/8 --> 3.072M, /OSR=48 --> 64KHz -->half down = 32KHz(2Fs) --- use 2Fs --> 32KHz
+			break;
+		case 44100:
+			DMIC_Use2fs(DMIC0, true);	//222.5792/8-->2.8244M,/OSR=32 -->88.2KHz-->half down =44.1KHz(2Fs) --- use 2Fs --> 44.1KHz
+			break;
+		case 48000:
+			DMIC_Use2fs(DMIC0, true);	//24.576/8 --> 3.072M, /OSR=32 --> 96KHz -->half down = 48KHz(2Fs) ---  use 2Fs --> 48KHz
+			break;
+	}
+
 
 	//init DMIC0 ch0
 	#if EnableMic01==1
@@ -1447,4 +1483,3 @@ void ConfigDmicChainedDma(U8 MicSelectBits)
 }
 #endif
 
-#endif

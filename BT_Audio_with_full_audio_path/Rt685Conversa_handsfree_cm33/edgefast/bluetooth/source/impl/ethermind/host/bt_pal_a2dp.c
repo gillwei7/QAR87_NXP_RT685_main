@@ -34,6 +34,10 @@
 #include "BT_fops.h"
 #include "BT_dbase_api.h"
 
+#include "fsl_gpio.h"
+#include "GlobalDef.h"
+#include "SubFunc.h"
+
 #if ((defined(CONFIG_BT_A2DP)) && (CONFIG_BT_A2DP > 0U))
 
 #if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
@@ -2247,9 +2251,104 @@ static API_RESULT ethermind_a2dp_notify_cb
             else
 #endif
             {
+                uint32_t timestamp;
+                uint8_t *data;
+                uint8_t *data1;
+                uint16_t seq_number;
+                uint8_t offset;
+
+                /**
+                 *   Media Packet: 12 Octets of RTP header, followed by Media Payload
+                 *   For SBC, the Media Payload will have one byte of header containing
+                 *   number of frames, followed by SBC Frames.
+                 */
+                data = (uint8_t *)event_data;
+
+                /* Extract Sequence Number */
+                seq_number = *(data + 2);
+                seq_number <<= 8;
+                seq_number |= *(data + 3);
+
+                /* Extract Time Stamp */
+                timestamp = *(data + 4);
+                timestamp <<= 8;
+                timestamp |= *(data + 5);
+                timestamp <<= 8;
+                timestamp |= *(data + 6);
+                timestamp <<= 8;
+                timestamp |= *(data + 7);
+
+
+
+                offset = 13U;		//12 ??? 13 ???
+                data1=data+offset;
+
+                /*
+
+                uint16_t packet_length;
+                unsigned int d0;
+                unsigned int d1;
+
+                d0=*(data1 + 0);
+                d0<<=8;
+                d0|=(*(data1 + 1));
+                d0<<=8;
+                d0|=(*(data1 + 2));
+                d0<<=8;
+                d0|=(*(data1 + 3));
+
+                d1=*(data1 + 4);
+                d1<<=8;
+                d1|=(*(data1 + 5));
+                d1<<=8;
+                d1|=(*(data1 + 6));
+                d1<<=8;
+                d1|=(*(data1 + 7));
+
+                packet_length=*(data1 + 5);
+                packet_length<<=8;
+                packet_length|=*(data1 + 4);
+
+                PRINTF("BT: %d %d %d %d %x %x \r\n", seq_number, timestamp, event_datalen - offset, packet_length,d0,d1);		//watch fill raw sbc data to JPL
+                */
+				#if 1
+					#if 0
+						//static U32 TotalSbcBytes=0;
+						//TotalSbcBytes+=event_datalen - offset;
+						//PRINTF("BT: %d %d %d %d \r\n", seq_number, timestamp, event_datalen - offset, TotalSbcBytes);		//watch fill raw sbc data to JPL
+//						PRINTF("BT: %d %d %d \r\n", seq_number, timestamp, event_datalen - offset);		//watch fill raw sbc data to JPL
+					#else
+						//this part is to check how long it is after playing 5000 a2dp frames ---> should be 5073~5079K * 5000 cycles, do this test to verify if BT host is streaming out a2dp sbc farmes at the correct rate
+						static unsigned int a,aPre;
+						static int CycCntN=0;
+						static int CycCntAcc=0;
+						int d;
+
+						GET_CYCLE_COUNTER(a);
+						d=a-aPre;
+						if(CycCntN)
+							CycCntAcc+=d/1000;
+
+						CycCntN++;
+						if(CycCntN==1000)
+						{
+							CycCntN=0;
+							PRINTF("1000 average: %d \r\n", CycCntAcc/1000);		//watch fill raw sbc data to JPL
+							CycCntAcc=0;
+						}else
+						{
+							//PRINTF("BT: %d %d %d \r\n", seq_number, timestamp, event_datalen - offset);		//watch fill raw sbc data to JPL
+						}
+
+						aPre=a;
+					#endif
+				#endif
+
+
                 a2dp_streamer_data_t streamerData;
-                streamerData.data = (uint8_t *)event_data;
-                streamerData.data_length = event_datalen;
+                streamerData.data = data+offset;
+                streamerData.data_length = event_datalen-offset;
+
                 a2dp_control_ind_callback_call(ep_state, A2DP_CONTROL_SINK_STREAMER_DATA, 0, &streamerData);
             }
             break;

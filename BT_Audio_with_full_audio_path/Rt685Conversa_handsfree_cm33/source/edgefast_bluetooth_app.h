@@ -35,3 +35,4 @@
 #define SDMMCHOST_OPERATION_VOLTAGE_3V3
 #endif
 
+#define A2DP_SINK_AUDIO

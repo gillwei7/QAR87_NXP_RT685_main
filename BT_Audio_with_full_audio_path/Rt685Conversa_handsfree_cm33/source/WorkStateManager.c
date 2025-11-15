@@ -26,7 +26,7 @@
 //#include "Sweep.h"
 #include "MainAudioFlow.h"
 #include "WorkStateManager.h"
-
+#include "SubFunc.h"
 
 int AudioPortIsActive_I2SToAmp;
 int AudioPortIsActive_I2SToNvt;
@@ -39,8 +39,24 @@ int volatile AllowAudioInterfaceReInit_Fc25=1;		//maybe this is not necessary --
 int WorkStateIsChanged=0;
 int RequestToGetIntoHfp=0;
 int RequestToGetOutofHfp=0;
+int RequestToGetIntoA2dpPlay=0;
+int RequestToGetOutofA2dpPlay=0;
 TDeviceWorkState DeviceWorkStateCur;
 TDeviceWorkState DeviceWorkStatePre;
+
+U32 AudioPortI2SAndPdmCfg;
+/*
+AudioPortI2SAndPdmCfg:
+bit 0~1: 		I2S_Amp Fs: 0,1,2,3 -> 16K, 32K, 44.1K, 48K
+bit 2~3: 		I2S_Amp Bit: 0,1,2 -> disabled, 16, 32bit
+
+bit 4~5:  	I2S_Nvt Fs: 0,1,2,3 -> 16K, 32K, 44.1K, 48K
+bit 6~7:  	I2S_Nvt Bit: 0,1,2 -> disabled, 16, 32bit
+
+bit 8~9:   	PDM Fs: 0,1,2,3 -> 16K, 32K, 44.1K, 48K
+bit 10~15:  	PDM ch enable
+*/
+
 
 
 const char *WorkStateName[]=
@@ -124,12 +140,16 @@ void WorkStateInit(int WhichState, U32 Opt)
 			PRINTF_M("    Mcu: WorkState_HfpCall Init is done\r\n");
 			break;
 		case WorkState_HomeVitStandby:
-			InitAudioInterface_HomeVitStandby(0);
+			InitAudioInterface_HomeVitStandby(AmpFc1Fc3);//in case PDM and Smart amp are required only in HomeStandby mode
 			PRINTF_M("    Mcu: WorkState_HomeVitStandby Init is done\r\n");
 			break;
 		#if EnableWorkState_AudioIoDbg==1
 			case WorkState_AudioIoDbg:
-				InitAudioInterface_AudioIoDebug(1); //to enable FC5,6 to connect with NT98532
+			#if UsingQAR87Board == 1
+				InitAudioInterface_AudioIoDebug(BtPcmFc2Fc4_AmpFc1Fc3);//to enable FC5,6 to connect with NT98532
+			#else	
+				InitAudioInterface_AudioIoDebug(BtPcmFc5Fc2_CodecFc1Fc3);
+			#endif
 				PRINTF_M("    Mcu: WorkState_AudioIoDbg Init is done\r\n");
 				break;
 		#endif
@@ -147,7 +167,7 @@ void WorkStateInit(int WhichState, U32 Opt)
 		#endif
 		#if EnableWorkState_MusicPlayer==1
 			case WorkState_MusicPlayer:
-				InitAudioInterface_MusicPlayer(0);
+				InitAudioInterface_MusicPlayer(AmpFc1Fc3);//in case smart amp is required only for music play
 				PRINTF_M("    Mcu: WorkState_MusicPlayer Init is done\r\n");
 				break;
 		#endif
@@ -427,12 +447,22 @@ void AppEvtProc_VideoAi()
 void Manager_Task(void *pvParameters)
 {
 
+#if 1
+	DeviceWorkStateCur=WorkState_HomeVitStandby;
+	DeviceWorkStatePre=WorkState_Void;
+	WorkStateIsChanged=1;			//this is to init audio to homevit on startup
+#else
 	DeviceWorkStateCur=WorkState_HomeVitStandby;
 	DeviceWorkStatePre=WorkState_HomeVitStandby;
 
 	WorkStateIsChanged=0;
+#endif
+
 	RequestToGetIntoHfp=0;
 	RequestToGetOutofHfp=0;
+	RequestToGetIntoA2dpPlay=0;
+	RequestToGetOutofA2dpPlay=0;
+
 
 	AllowAudioInterfaceReInit_PdmI2S=1;
 	AllowAudioInterfaceReInit_Fc25=1;
@@ -455,18 +485,25 @@ void Manager_Task(void *pvParameters)
 	{
 		vTaskDelay(40);
 
+		//Step 0, get app event
+		//to do...
+		//B36932 GenBtnEvt();
+		//B36932 ButtonEventProcess();// should be handled by each app event
+
 		//------------------------step 1, check events for switching work state, and change work state----------------------------------
 		//---beg---
 
 		//check app events for switching workstate
 		#if 1	//folding
+			//getting into/out of HFP
+			/*
 			if(RequestToGetIntoHfp)
 			{
 				DeviceWorkStatePre=DeviceWorkStateCur;
 				DeviceWorkStateCur=WorkState_HfpCall;
 				WorkStateIsChanged=1;
 				RequestToGetIntoHfp=0;
-				PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+				//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 			}
 
 			if(RequestToGetOutofHfp)
@@ -475,25 +512,52 @@ void Manager_Task(void *pvParameters)
 				DeviceWorkStatePre=WorkState_HfpCall;
 				WorkStateIsChanged=1;
 				RequestToGetOutofHfp=0;
-				PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+				//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 			}
+		 	*/
 
 			#if EnableWorkState_MusicPlayer==1
+				//getting into/out of A2dp
+				if(RequestToGetIntoA2dpPlay)
+				{
+					if(DeviceWorkStateCur!=WorkState_MusicPlayer)
+					{
+						DeviceWorkStatePre=DeviceWorkStateCur;
+						DeviceWorkStateCur=WorkState_MusicPlayer;
+						WorkStateIsChanged=1;
+					}
+					RequestToGetIntoA2dpPlay=0;
+					//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+				}
+				if(RequestToGetOutofA2dpPlay)
+				{
+					if(DeviceWorkStateCur==WorkState_MusicPlayer)
+					{
+						DeviceWorkStateCur=DeviceWorkStatePre;
+						DeviceWorkStatePre=WorkState_MusicPlayer;
+						WorkStateIsChanged=1;
+					}
+					RequestToGetOutofA2dpPlay=0;
+					//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+				}
+				#if 0
+					//this part is to check switching when A2dp BT is NOT added
 				if((DeviceWorkStateCur!=WorkState_MusicPlayer)&&(VarBlockSharedByDspAndMcu.CurVoiceMenu==ASR_Menu_MusicPlayer))
 				{
 					DeviceWorkStatePre=DeviceWorkStateCur;
 					DeviceWorkStateCur=WorkState_MusicPlayer;
 					WorkStateIsChanged=1;
-					PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 				}
 				if((DeviceWorkStateCur==WorkState_MusicPlayer)&&(VarBlockSharedByDspAndMcu.CurVoiceMenu!=ASR_Menu_MusicPlayer))
 				{
 					DeviceWorkStateCur=DeviceWorkStatePre;
 					DeviceWorkStatePre=WorkState_MusicPlayer;
 					WorkStateIsChanged=1;
-					PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 				}
 			#endif
+		#endif
 		#endif
 
 		//check voice events for switching workstate
@@ -511,7 +575,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_AudioIoDbg;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					#if EnableWorkState_VideoRecording==1
@@ -521,7 +585,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_VideoRecording;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					#if EnableWorkState_MediaPlayer==1
@@ -531,7 +595,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_MediaPlayer;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					#if EnableWorkState_MusicPlayer==1
@@ -544,7 +608,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_Translation;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					#if EnableWorkState_AiConversation==1
@@ -554,7 +618,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_AiConversation;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					#if EnableWorkState_VideoAi==1
@@ -564,7 +628,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_VideoAi;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					break;
@@ -578,7 +642,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_HomeVitStandby;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					break;
@@ -590,7 +654,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_HomeVitStandby;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					break;
@@ -602,7 +666,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_HomeVitStandby;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					break;
@@ -614,7 +678,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_HomeVitStandby;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					break;
@@ -626,7 +690,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_HomeVitStandby;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					break;
@@ -638,7 +702,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_HomeVitStandby;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					break;
@@ -650,7 +714,7 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_HomeVitStandby;
 							WorkStateIsChanged=1;
-							PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 						}
 					#endif
 					break;
@@ -669,7 +733,7 @@ void Manager_Task(void *pvParameters)
 				if((AllowAudioInterfaceReInit_PdmI2S)&&(AllowAudioInterfaceReInit_Fc25))
 						break;
 			}
-			#if 0
+			#if 1
 				WorkStateDeInit(DeviceWorkStatePre,  0);
 				WorkStateInit  (DeviceWorkStateCur,  0);
 			#else
@@ -680,7 +744,14 @@ void Manager_Task(void *pvParameters)
 					WorkStateDeInit(DeviceWorkStatePre,  0);
 					WorkStateInit  (DeviceWorkStateCur,  0);
 				}
+				if(DeviceWorkStateCur==WorkState_MusicPlayer)
+				{
+					//now, only test going to audio IO debug
+					WorkStateDeInit(DeviceWorkStatePre,  0);
+					WorkStateInit  (DeviceWorkStateCur,  0);
+				}
 			#endif
+			PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 			WorkStateIsChanged=0;
 		}
 		//---end---

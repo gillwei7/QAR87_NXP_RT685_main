@@ -9,6 +9,23 @@
 #ifndef __DspMainAudioFlow_H___
 #define __DspMainAudioFlow_H___
 
+
+extern XosMutex 		  g_audio_vitBufferMutex;										// VIT buffer mutex for accessing VIT buffer on Audio and VIT task
+extern XosMutex			  g_audio_SbcDecoderMutex;
+extern XosMutex			  g_audio_OpusDecoderMutex;						//to really use mutex protecting cir buffer --- should move audio signal flow process to a task --- to be done later
+
+extern uint8_t domainId;
+extern U32 AudioFrameCnt;
+extern int ToTempSkipVitPorcess;
+
+extern S32 SrcIn_2S32Mixed [48*20*2];		//to hold 20ms at 48KHz, stereo
+extern S32 SrcOut_2S32Mixed [48*20*2];		//to hold 20ms at 48KHz, stereo
+
+extern S16 AudioOneFrameBuf_OpusDecodedL [AudioFrameSizeInSamplePerCh];
+extern S16 AudioOneFrameBuf_OpusDecodedR [AudioFrameSizeInSamplePerCh];
+extern S16 AudioOneFrameBuf_SbcDecodedL [AudioFrameSizeInSamplePerCh];
+extern S16 AudioOneFrameBuf_SbcDecodedR [AudioFrameSizeInSamplePerCh];
+
 extern S32 AudioOneFrameBuf_01 [AudioFrameSizeInSamplePerCh];
 extern S32 AudioOneFrameBuf_02 [AudioFrameSizeInSamplePerCh];
 extern S32 AudioOneFrameBuf_03 [AudioFrameSizeInSamplePerCh];

@@ -53,10 +53,13 @@
  * Variables
  ******************************************************************************/
 
-XosThread 		  g_audioVitTask_thread;			 							// Audio task thread
-PL_UINT8	 	  g_audioVitTask_stack 	[DSP_AUDIO_VIT_THREAD_STACK_SIZE_BYTE];	// Audio task memory stack allocated
+//XosThread 		  g_audioVitTask_thread;			 							// Audio task thread
+//PL_UINT8	 	  g_audioVitTask_stack 	[DSP_AUDIO_VIT_THREAD_STACK_SIZE_BYTE];	// Audio task memory stack allocated
+
 XosSem 	 		  g_audioTask_audioVitProcessSemaphore;   						// Audio VIT task semaphore used to control the DSP audio process start/wait state.
 XosMutex 		  g_audio_vitBufferMutex;										// VIT buffer mutex for accessing VIT buffer on Audio and VIT task
+XosMutex 		  g_audio_SbcDecoderMutex;										// VIT buffer mutex for accessing VIT buffer on Audio and VIT task
+XosMutex 		  g_audio_OpusDecoderMutex;										// VIT buffer mutex for accessing VIT buffer on Audio and VIT task
 
 T_CircularAudioBuf_S16  VitCircBuff;
 T_CircularAudioBuf_S16  VitCircBuff_RawMic;

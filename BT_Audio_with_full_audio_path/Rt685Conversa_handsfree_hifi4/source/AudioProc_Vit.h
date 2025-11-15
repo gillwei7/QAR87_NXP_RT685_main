@@ -21,8 +21,8 @@
 #define ASE_DetectDisplayInUacWav				1
 
 #define APP_VIT_FRAME_SIZE_InSAMPLEs			VIT_SAMPLES_PER_30MS_FRAME
-#define DSP_AUDIO_VIT_THREAD_STACK_SIZE_BYTE 	(3*1024U)						// DSP audio VIT thread stack size in bytes
-#define DSP_AUDIO_VIT_THREAD_PRIORITY   		(XOS_MAX_PRIORITY - 4)			// DSP audio VIT thread priority
+//#define DSP_AUDIO_VIT_THREAD_STACK_SIZE_BYTE 	(3*1024U)						// DSP audio VIT thread stack size in bytes
+//#define DSP_AUDIO_VIT_THREAD_PRIORITY   		(XOS_MAX_PRIORITY - 4)			// DSP audio VIT thread priority
 
 
 #define MEMORY_ALIGNMENT            8       		// In bytes
@@ -122,6 +122,11 @@ extern ASR_WavPulseType ASR_WavPulse;
 #endif
 
 extern AUDIO_vit_st	vitPluginParams;
+
+
+extern XosMutex 		  g_audio_vitBufferMutex;										// VIT buffer mutex for accessing VIT buffer on Audio and VIT task
+extern XosMutex			  g_audio_SbcDecoderMutex;
+extern XosMutex			  g_audio_OpusDecoderMutex;						//to really use mutex protecting cir buffer --- should move audio signal flow process to a task --- to be done later
 
 extern void InitVit(void);
 extern void ConfigAndStartVitTask(void);

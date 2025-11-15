@@ -96,30 +96,59 @@ volatile int AsrcFsInCurrent;
 volatile int AsrcFsInTarget;
 
 
-char *binName = NULL;
-//WORD  g_w_malloc_count;
-//pVOID g_pv_arr_alloc_memory[MAX_MEM_ALLOCS];
+//char *binName = NULL;
 
+//heap space count for each SRC processor
 WORD  g_w_malloc_count_Ref;
 WORD  g_w_malloc_count_TxOut;
+WORD  g_w_malloc_DecoderOpus;
+WORD  g_w_malloc_DecoderSbc;
+//static heap space for each SRC processor
 pVOID g_pv_arr_alloc_memory_Ref[MAX_MEM_ALLOCS];
 pVOID g_pv_arr_alloc_memory_TxOut[MAX_MEM_ALLOCS];
+pVOID g_pv_arr_alloc_memory_DecoderOpus[MAX_MEM_ALLOCS];
+pVOID g_pv_arr_alloc_memory_DecoderSbc[MAX_MEM_ALLOCS];
+//API obj for each SRC processor
+xa_codec_handle_t SRC_process_Ref_handle;
+xa_codec_handle_t SRC_process_TxOut_handle;
+xa_codec_handle_t DecoderSbc_handle;
+xa_codec_handle_t DecoderOpus_handle;
 
+xa_codec_handle_t SrcHandle_AlgCtnBus1;
+xa_codec_handle_t SrcHandle_AlgCtnBus2;
+xa_codec_handle_t SrcHandle_AlgCtnTx1;
+xa_codec_handle_t SrcHandle_AlgCtnTx2;
+xa_codec_handle_t SrcHandle_AlgCtnRx1;
+xa_codec_handle_t SrcHandle_AlgCtnMic01;
+xa_codec_handle_t SrcHandle_AlgCtnMic23;
+xa_codec_handle_t SrcHandle_AlgCtnMic45;
+
+WORD  g_w_malloc_SrcHandle_AlgCtnBus1;
+WORD  g_w_malloc_SrcHandle_AlgCtnBus2;
+WORD  g_w_malloc_SrcHandle_AlgCtnTx1;
+WORD  g_w_malloc_SrcHandle_AlgCtnTx2;
+WORD  g_w_malloc_SrcHandle_AlgCtnRx1;
+WORD  g_w_malloc_SrcHandle_AlgCtnMic01;
+WORD  g_w_malloc_SrcHandle_AlgCtnMic23;
+WORD  g_w_malloc_SrcHandle_AlgCtnMic45;
+
+pVOID g_pv_arr_alloc_memory_SrcHandle_AlgCtnBus1[MAX_MEM_ALLOCS];
+pVOID g_pv_arr_alloc_memory_SrcHandle_AlgCtnBus2[MAX_MEM_ALLOCS];
+pVOID g_pv_arr_alloc_memory_SrcHandle_AlgTx1[MAX_MEM_ALLOCS];
+pVOID g_pv_arr_alloc_memory_SrcHandle_AlgTx2[MAX_MEM_ALLOCS];
+pVOID g_pv_arr_alloc_memory_SrcHandle_AlgRx1[MAX_MEM_ALLOCS];
+pVOID g_pv_arr_alloc_memory_SrcHandle_AlgMic01[MAX_MEM_ALLOCS];
+pVOID g_pv_arr_alloc_memory_SrcHandle_AlgMic23[MAX_MEM_ALLOCS];
+pVOID g_pv_arr_alloc_memory_SrcHandle_AlgMic45[MAX_MEM_ALLOCS];
 
 
 /*  Pointers to the raw input/output buffers used by the file I/O in the main loop. */
 pVOID ppin_buffer;
 pVOID ppout_buffer;
 
-/* API obj */
-//xa_codec_handle_t xa_process_handle;
-xa_codec_handle_t SRC_process_Ref_handle;
-xa_codec_handle_t SRC_process_TxOut_handle;
-
-
-xa_error_info_struct *p_proc_err_info;
+static xa_error_info_struct *p_proc_err_info;
 /* The process API function */
-xa_codec_func_t *p_xa_process_api;
+static xa_codec_func_t *p_xa_process_api;
 
 /********************************************************************************
  * UserConfig defines a structure for command-line configuration parameters
@@ -144,8 +173,8 @@ typedef struct _user_config
 #endif /* #ifdef ASRC_ENABLE */
 } user_config ;
 
-WORD8 pb_input_file_path[XA_MAX_CMD_LINE_LENGTH] = "";
-WORD8 pb_output_file_path[XA_MAX_CMD_LINE_LENGTH] = "";
+//WORD8 pb_input_file_path[XA_MAX_CMD_LINE_LENGTH] = "";
+//WORD8 pb_output_file_path[XA_MAX_CMD_LINE_LENGTH] = "";
 
 /* User Defaults */
 const user_config default_config =
@@ -186,9 +215,6 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     user_config def_user_config;
     int i;
     *w_malloc_count = 0;
-
-	//PRINTF("Cadence, %d \r\n", *w_malloc_count);
-
 
     /* Error code */
     XA_ERRORCODE err_code = XA_NO_ERROR;
@@ -241,7 +267,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 		    //SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
 				PRINTF("\n%s LIB version : %s  API version : %s\n", pb_process_name, pb_lib_version, pb_api_version);
 				PRINTF("Cadence, Inc. https://www.cadence.com\n\n");
-		    //SEMA42_Unlock(APP_SEMA42, SEMA42_GATE);
+		    //SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
 		#endif  //DISPLAY_MESSAGE
     }
 
@@ -599,7 +625,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     {
 	    //SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
 		PRINTF("malloc_count: %d\n", *w_malloc_count);
-	    //SEMA42_Unlock(APP_SEMA42, SEMA42_GATE);
+	    //SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
     }
 
 	return XA_NO_ERROR;

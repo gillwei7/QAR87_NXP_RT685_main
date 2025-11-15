@@ -690,4 +690,4 @@ status_t BOARD_Accel_I2C_Receive(
 }
 #endif/* SDK_I2C_BASED_COMPONENT_USED */
 
-#endif 
+#endif /* SDK_I2C_BASED_COMPONENT_USED */

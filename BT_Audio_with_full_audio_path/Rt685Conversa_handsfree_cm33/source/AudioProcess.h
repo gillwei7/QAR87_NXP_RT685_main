@@ -9,7 +9,6 @@
 #define __AudioProcess_h__
 
 
-#if EnableConversa==1
 
 extern unsigned char NeedToMute_Mic1;
 extern unsigned char NeedToMute_Mic2;
@@ -32,6 +31,5 @@ extern void GenerateSinWavFromTable_S16_SingleCh(S16 *DstPtr, int L);		//L shoul
 extern void CheckI2SInputBufAodAndAdjustAudioPll(int AodValue);
 
 
-#endif
 
 #endif

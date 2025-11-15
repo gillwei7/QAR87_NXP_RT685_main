@@ -1458,7 +1458,7 @@
                   <setting id="PLL0_PFD2_CLK_GATE" value="Enabled" locked="false"/>
                   <setting id="SYSCON.AUDIOPLL0CLKSEL.sel" value="SYSCON.SYSOSCBYPASS" locked="false"/>
                   <setting id="SYSCON.AUDIOPLL0_PFD0_DIV.scale" value="22" locked="true"/>
-                  <setting id="SYSCON.AUDIOPLLCLKDIV.scale" value="18" locked="true"/>
+                  <setting id="SYSCON.AUDIOPLLCLKDIV.scale" value="17" locked="true"/>
                   <setting id="SYSCON.AUDIO_PLL0_PFD0_MUL.scale" value="18" locked="true"/>
                   <setting id="SYSCON.FLEXSPIFCLKDIV.scale" value="9" locked="true"/>
                   <setting id="SYSCON.FLEXSPIFCLKSEL.sel" value="SYSCON.MAINPLLCLKDIV" locked="false"/>
@@ -1473,9 +1473,9 @@
                   <setting id="SYSCON.PLL0_PFD0_MUL.scale" value="18" locked="true"/>
                   <setting id="SYSCON.PLL0_PFD2_DIV.scale" value="24" locked="true"/>
                   <setting id="SYSCON.PLL0_PFD2_MUL.scale" value="18" locked="true"/>
-                  <setting id="SYSCON.PLL1.denom" value="1000" locked="true"/>
-                  <setting id="SYSCON.PLL1.div" value="22" locked="true"/>
-                  <setting id="SYSCON.PLL1.num" value="528" locked="true"/>
+                  <setting id="SYSCON.PLL1.denom" value="18750" locked="true"/>
+                  <setting id="SYSCON.PLL1.div" value="19" locked="true"/>
+                  <setting id="SYSCON.PLL1.num" value="10270" locked="true"/>
                   <setting id="SYSCON.SYSCPUAHBCLKDIV.scale" value="2" locked="false"/>
                   <setting id="SYSCON.SYSPLL0CLKSEL.sel" value="SYSCON.SYSOSCBYPASS" locked="false"/>
                   <setting id="SYSCTL_PDRUNCFG_AUDIOPLL_CFG" value="No" locked="false"/>

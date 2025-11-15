@@ -13,7 +13,6 @@
 
 #include "GlobalDef.h"
 
-#if EnableConversa==1
 
 #include "fsl_dmic_dma.h"
 #include "fsl_i2s_dma.h"
@@ -81,12 +80,12 @@ extern volatile U8 PdmCh4DmaTransferringIsUsingBufA;
 extern volatile U8 PdmCh6DmaTransferringIsUsingBufA;
 
 
-extern void Init_MicDmaCfgCh(U8 MicSelectBits);
+extern void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW);
 
 
 extern void BOARD_DeInit_DMA_PDM(U8 MicSelectBits);
 extern void BOARD_Init_DMA_PDM(U8 MicSelectBits);
-extern void BOARD_Init_DMIC(U8 MicSelectBits, U8 SkipInitGlobalDMIC0);
+extern void BOARD_Init_DMIC(U8 MicSelectBits, U8 SkipInitGlobalDMIC0, int Fs);
 
 extern int GetPdmCh0DmaTransferringIsUsingBufAOrB(void);
 extern int GetPdmCh2DmaTransferringIsUsingBufAOrB(void);
@@ -99,8 +98,6 @@ extern void ConfigDmicChainedDma(U8 MicSelectBits);
 extern void ImmediatelyStartDmicDmaChannels(U8 MicSelectBits);
 
 extern void SCO_AudioFlow_SemaphorePost(void);
-
-#endif
 
 #endif
 

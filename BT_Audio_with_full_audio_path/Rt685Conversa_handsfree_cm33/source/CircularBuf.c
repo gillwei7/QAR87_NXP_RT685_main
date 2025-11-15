@@ -14,7 +14,6 @@
 #include "board.h"
 #include "GlobalDef.h"
 
-#if EnableConversa==1
 
 
 #include "CircularBufManagement.h"
@@ -93,29 +92,59 @@ void ClearBTUpDnAudioBufDataArea(void)
 	DbgPin6Dn();
 }
 */
-void InitAudioCircularBuf(void)
-{
-	InitCirAudioBuf_S16(&BTUpAudioBuf_S16,
-			BTUpAudioBuf_DataArea,BTUpAudioBuf_Len_InSamples
-			);
-	InitCirAudioBuf_S16(&BTDnAudioBuf_S16,
-			BTDnAudioBuf_DataArea,BTDnAudioBuf_Len_InSamples
-			);
 
-	//ClearBTUpDnAudioBufDataArea();
+void ClearAudioCirBuf(int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir)
+{
+	if(ToClrBtCir)
+	{
+		CirAudioBuf_ClearAllSamples_S16(&BTUpAudioBuf_S16);
+		CirAudioBuf_ClearAllSamples_S16(&BTDnAudioBuf_S16);
+	}
+	if(ToClrUacCir)
+	{
+		CirUacUpAudioBuf_ClearAllSamples_MultiCh(&UacUpAudioBuf_MCh);
+		CirUacDnAudioBuf_ClearAllSamples_MultiCh(&UacDnAudioBuf_MCh);
+	}
+	if(ToClrSbcCir)
+	{
+		CirAudioBuf_ClearAllSamples_S8((T_CircularAudioBuf_S8 *)&VarBlockSharedByDspAndMcu.CirBuf_SbcRaw);
+	}
+}
+void InitAudioCircularBuf(int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir)
+{
+	if(ToInitBtCir)
+	{
+		InitCirAudioBuf_S16(&BTUpAudioBuf_S16,
+				BTUpAudioBuf_DataArea,BTUpAudioBuf_Len_InSamples
+				);
+		InitCirAudioBuf_S16(&BTDnAudioBuf_S16,
+				BTDnAudioBuf_DataArea,BTDnAudioBuf_Len_InSamples
+				);
+
+		//ClearBTUpDnAudioBufDataArea();
+	}
 
 	#if EnableUsbComAndAudio==1
-		InitCirUacUpAudioBuf_MultiCh(&UacUpAudioBuf_MCh,
-				UacUpAudioBuf_MCh_DataArea,UacUpBuf_LengthInSamples
-				);
-		InitCirUacDnAudioBuf_MultiCh(&UacDnAudioBuf_MCh,
-				UacDnAudioBuf_MCh_DataArea,UacDnBuf_LengthInSamples
-				);
-		memset(AllZeroBuf_48PointsSingleCh_16Bit,0,sizeof(AllZeroBuf_48PointsSingleCh_16Bit));
+		if(ToInitUacCir)
+		{
+			InitCirUacUpAudioBuf_MultiCh(&UacUpAudioBuf_MCh,
+					UacUpAudioBuf_MCh_DataArea,UacUpBuf_LengthInSamples
+					);
+			InitCirUacDnAudioBuf_MultiCh(&UacDnAudioBuf_MCh,
+					UacDnAudioBuf_MCh_DataArea,UacDnBuf_LengthInSamples
+					);
+			memset(AllZeroBuf_48PointsSingleCh_16Bit,0,sizeof(AllZeroBuf_48PointsSingleCh_16Bit));
+		}
 	#endif
 
 
-
+	if(ToInitSbcCir)
+	{
+		InitCirAudioBuf_S8((T_CircularAudioBuf_S8 *)&VarBlockSharedByDspAndMcu.CirBuf_SbcRaw,
+				(S8 *)VarBlockSharedByDspAndMcu.CirBuf_SbcRaw_DataArea,CirBuf_SbcRaw_LengthInBytes
+				);
+		memset((void *)VarBlockSharedByDspAndMcu.CirBuf_SbcRaw_DataArea,0,sizeof(VarBlockSharedByDspAndMcu.CirBuf_SbcRaw_DataArea));
+	}
 
 
 	#if Rt685I2SToNvtIsI2SMaster==0
@@ -141,4 +170,3 @@ void InitAudioCircularBuf(void)
 
 
 
-#endif

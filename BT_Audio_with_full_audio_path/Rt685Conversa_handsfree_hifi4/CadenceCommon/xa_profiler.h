@@ -76,25 +76,26 @@ static inline void xa_compute_mcps(xa_profiler *p_prof, WORD32 samples_decoded, 
         }
     }                
 
-	#if 0
-		unsigned long long total_msec =
-			(unsigned long long)((double)p_prof->total_samples / samp_freq * 1000.0);
-		int msec = (int)(total_msec % 1000);
-		unsigned long long total_seconds = total_msec / 1000;
-		int seconds = (int)(total_seconds % 60);
-		int minutes = (int)(total_seconds / 60);
+#if 0
+	unsigned long long total_msec =
+		(unsigned long long)((double)p_prof->total_samples / samp_freq * 1000.0);
+	int msec = (int)(total_msec % 1000);
+	unsigned long long total_seconds = total_msec / 1000;
+	int seconds = (int)(total_seconds % 60);
+	int minutes = (int)(total_seconds / 60);
 
 
-		#if 1
-			fprintf(stdout, "[%d|%lld] %d:%02d.%03d MCPS: %.2f Average: %.2f Peak: %.2f @ [%d] %s\n",
-				p_prof->frame_count, gen_strm_pos, minutes, seconds, msec,
-				Curr, Ave, p_prof->Peak, p_prof->Peak_frame, p_prof->id);
-		#else
+	#ifdef EnableSimuPrint
+		fprintf(stdout, "[%d|%lld] %d:%02d.%03d MCPS: %.2f Average: %.2f Peak: %.2f @ [%d] %s\n",
+			p_prof->frame_count, gen_strm_pos, minutes, seconds, msec,
+			Curr, Ave, p_prof->Peak, p_prof->Peak_frame, p_prof->id);
+	#endif
+	#ifdef EnableOpusDecodingPrint
 			PRINTF("[%d|%lld] %d:%02d.%03d MCPS: %d Average: %d Peak: %d @ [%d] %s\n",
 				p_prof->frame_count, gen_strm_pos, minutes, seconds, msec,
 				(int)(Curr*100), (int)(Ave*100), (int)(p_prof->Peak*100), p_prof->Peak_frame, p_prof->id);
-		#endif
 	#endif
+#endif
 }
 
 #define INIT_XA_PROFILER(x, a)                  do { memset(&x, 0, sizeof(xa_profiler)); \

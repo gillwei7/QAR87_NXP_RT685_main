@@ -32,6 +32,8 @@
 #include "db_gen.h"
 #include "app_shell.h"
 #include "app_connect.h"
+#include "sco_audio_pl.h"
+#include "app_a2dp_sink.h"
 
 #include "GlobalDef.h"
 
@@ -47,12 +49,14 @@
 #define APP_HFP_HF_INITIAL_VGS_GAIN 12
 #define APP_HFP_HF_INITIAL_VGM_GAIN 12
 #define HFP_CLASS_OF_DEVICE (0x200404U)
+struct bt_conn *conn_rider_phone = NULL;
+static volatile uint8_t s_call_status = 0;
+static  uint8_t s_call_setup_status = 0;
 
 #if UsingQAR87Board == 1
 extern TaskHandle_t       sI2CTaskHandle  ;
 #endif
 
-static volatile uint8_t s_call_status = 0;
 hfp_hf_get_config hfp_hf_config = {
     .bt_hfp_hf_vgs             = APP_HFP_HF_INITIAL_VGS_GAIN,
     .bt_hfp_hf_vgm             = APP_HFP_HF_INITIAL_VGM_GAIN,
@@ -126,6 +130,12 @@ static struct bt_sdp_attribute hfp_hf_attrs[] = {
 };
 static struct bt_sdp_record hfp_hf_rec = BT_SDP_RECORD(hfp_hf_attrs);
 
+void hfp_hf_register_service()
+{
+	bt_sdp_register_service(&hfp_hf_rec);
+}
+
+
 static void auth_cancel(struct bt_conn *conn)
 {
     char addr[BT_ADDR_LE_STR_LEN];
@@ -166,10 +176,10 @@ static void connected(struct bt_conn *conn, int err)
     {
         return;
     }
-    default_conn = conn;
+    conn_rider_phone = conn;
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
     bt_conn_get_info(conn, &info);
-    app_auto_connect_save_addr(info.br.dst);
+   // app_auto_connect_save_addr(info.br.dst);
 #endif
 }
 
@@ -177,9 +187,9 @@ static void disconnected(struct bt_conn *conn)
 {
     PRINTF("HFP BT Disconnected !\n");
 
-    if (default_conn)
+    if (conn_rider_phone)
     {
-        default_conn = NULL;
+        conn_rider_phone = NULL;
     }
 }
 
@@ -201,9 +211,21 @@ static void call(struct bt_conn *conn, uint32_t value)
     printf("Call indicator value: %u\n", value);
 }
 
+int call_status()
+{
+  if (s_call_setup_status || s_call_status )
+	  return 0;
+  else
+	  return 1;
+}
 static void call_setup(struct bt_conn *conn, uint32_t value)
 {
     printf("Call Setup indicator value: %u\n", value);
+
+    s_call_setup_status  = value;
+
+    if (value == 1 || value == 2)
+    	sbc_deinit();
 }
 
 static void call_held(struct bt_conn *conn, uint32_t value)
@@ -291,14 +313,14 @@ void app_cmd_complete_cb(struct bt_conn *conn, struct bt_hfp_hf_cmd_complete *cm
 {
     if ((NULL != cmd) && (cmd->type != HFP_HF_CMD_OK))
     {
-        if (cmd->type == HFP_HF_CMD_ERR_FROM_AG)
+       /* if (cmd->type == HFP_HF_CMD_ERR_FROM_AG)
         {
                 printf("> hfp api fail because peer device reject/return error\n");
         }
         else
         {
                 printf("> hfp api fail error :%d\n", cmd->type);
-        }
+        }*/
     }
 }
 
@@ -319,10 +341,20 @@ static struct bt_hfp_hf_cb hf_cb = {
     .indicator_status = indicator_status,
     .get_config      = app_hfp_hf_get_config,
     .list_current_calls = app_list_current_calls,
-    .cmd_complete_cb = app_cmd_complete_cb,
+  //  .cmd_complete_cb = app_cmd_complete_cb,
 };
 
 static void handsfree_enable(void)
+{
+    int err;
+
+    err = bt_hfp_hf_register(&hf_cb);
+    if (err < 0)
+    {
+        printf("HFP HF Registration failed (err %d)\n", err);
+    }
+}
+void hfp_hf_init(void)
 {
     int err;
 
@@ -337,9 +369,9 @@ int app_hfp_hf_discover(struct bt_conn *conn, uint8_t channel)
 {
     int err = 0;
 
-    if (default_conn == conn)
+    if (conn_rider_phone == conn)
     {
-        err = bt_hfp_hf_connect(default_conn, channel);
+        err = bt_hfp_hf_connect(conn_rider_phone, channel);
         if (err)
         {
             PRINTF("fail to connect hfp_hf (err: %d)\r\n", err);
@@ -348,6 +380,7 @@ int app_hfp_hf_discover(struct bt_conn *conn, uint8_t channel)
     return err;
 }
 
+#if 0
 static void bt_ready(int err)
 {
     struct net_buf *buf = NULL;
@@ -390,100 +423,99 @@ static void bt_ready(int err)
     app_a2dp_hf_auto_connect();
     
 }
+#else
+extern void bt_ready(int err);
+#endif
 
 void hfp_AnswerCall(void)
 {
-    bt_hfp_hf_send_cmd(default_conn, BT_HFP_HF_ATA);
+    bt_hfp_hf_send_cmd(conn_rider_phone, BT_HFP_HF_ATA);
     s_call_status = 2;
 }
 
 void hfp_RejectCall(void)
 {
-    bt_hfp_hf_send_cmd(default_conn, BT_HFP_HF_AT_CHUP);
+    bt_hfp_hf_send_cmd(conn_rider_phone, BT_HFP_HF_AT_CHUP);
     s_call_status = 0;
 }
 void hfp_dial(const char *number)
 {
-    bt_hfp_hf_dial(default_conn, number);
+    bt_hfp_hf_dial(conn_rider_phone, number);
 }
 void dial_memory(int location)
 {
-    bt_hfp_hf_dial_memory(default_conn, location);
+    bt_hfp_hf_dial_memory(conn_rider_phone, location);
 }
 void hfp_last_dial(void)
 {
-    bt_hfp_hf_last_dial(default_conn);
+    bt_hfp_hf_last_dial(conn_rider_phone);
 }
 void hfp_start_voice_recognition(void)
 {
-    bt_hfp_hf_start_voice_recognition(default_conn);
+    bt_hfp_hf_start_voice_recognition(conn_rider_phone);
 }
 
 void hfp_hf_get_last_voice_tag_number(void)
 {
-    bt_hfp_hf_get_last_voice_tag_number(default_conn);
+    bt_hfp_hf_get_last_voice_tag_number(conn_rider_phone);
 }
 
 void hfp_stop_voice_recognition(void)
 {
-    bt_hfp_hf_stop_voice_recognition(default_conn);
+    bt_hfp_hf_stop_voice_recognition(conn_rider_phone);
 }
 
 void hfp_volume_update(hf_volume_type_t type, int volume)
 {
-    bt_hfp_hf_volume_update(default_conn, type, volume);
+    bt_hfp_hf_volume_update(conn_rider_phone, type, volume);
 }
 void hfp_enable_ccwa(uint8_t enable)
 {
     if (enable)
     {
-        bt_hfp_hf_enable_call_waiting_notification(default_conn);
+        bt_hfp_hf_enable_call_waiting_notification(conn_rider_phone);
     }
     else
     {
-        bt_hfp_hf_disable_call_waiting_notification(default_conn);
+        bt_hfp_hf_disable_call_waiting_notification(conn_rider_phone);
     }
 }
 void hfp_enable_clip(uint8_t enable)
 {
     if (enable)
     {
-        bt_hfp_hf_enable_clip_notification(default_conn);
+        bt_hfp_hf_enable_clip_notification(conn_rider_phone);
     }
     else
     {
-        bt_hfp_hf_disable_clip_notification(default_conn);
+        bt_hfp_hf_disable_clip_notification(conn_rider_phone);
     }
 }
 
 void hfp_multiparty_call_option(uint8_t option)
 {
-    bt_hfp_hf_multiparty_call_option(default_conn, (hf_multiparty_call_option_t)option);
+    bt_hfp_hf_multiparty_call_option(conn_rider_phone, (hf_multiparty_call_option_t)option);
 }
 
 void hfp_trigger_codec_connection(void)
 {
-    bt_hfp_hf_trigger_codec_connection(default_conn);
+    bt_hfp_hf_trigger_codec_connection(conn_rider_phone);
 }
 
 void hfp_hf_query_list_current_calls(void)
 {
-    bt_hfp_hf_query_list_current_calls(default_conn);
+    bt_hfp_hf_query_list_current_calls(conn_rider_phone);
 }
 
 extern void StartAudioTask(void);
 extern void StartMicSpkTest(void);
 //extern void Manager_Task(void);
 extern void Manager_Task(void *pvParameters);
+extern void connect_paired_device(uint8_t device_index);
 
-void peripheral_hfp_hf_task(void *pvParameters)
+void hfp_hf_a2dp_task(void *pvParameters)
 {
     int err = 0;
-
-
-	#if EnableOnlyMicSpk_NoBT==1
-		StartMicSpkTest();		//USB audio up streaming also works well in this testing, USB audio down streaming is not used, because USB audio sync is not running
-	#endif
 
     PRINTF("Bluetooth Handsfree demo start...\n");
 
@@ -494,7 +526,28 @@ void peripheral_hfp_hf_task(void *pvParameters)
         PRINTF("Bluetooth init failed (err %d)\n", err);
         return;
     }
-
+#if 0
+    if(g_pairedDeviceCount)
+    {
+    	//try to connect paired device at startup
+    	connect_paired_device(1);
+    }else
+    {
+		//configure BT discoverable and connectable at startup
+		bt_br_set_connectable(false);
+		if (bt_br_set_connectable(true))
+		{
+		   PRINTF("BR/EDR set/reset connectable failed\n");
+		   return;
+		}
+		if (bt_br_set_discoverable(true))
+		{
+		  PRINTF("BR/EDR set discoverable failed\n");
+		   return;
+		}
+		PRINTF("BR/EDR set connectable and discoverable done\n");
+    }
+#endif
     StartAudioTask();
 
 	BaseType_t result = 0;

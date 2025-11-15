@@ -39,9 +39,6 @@
 
 #include "GlobalDef.h"
 
-
-#if EnableConversa==1
-
 #include "fsl_inputmux.h"
 #include "fsl_mu.h"
 #include "fsl_sema42.h"
@@ -70,7 +67,6 @@
 #include "UsbApp.h"
 #include "Sweep.h"
 
-#endif
 
 #endif
 
@@ -117,6 +113,18 @@ extern usb_device_composite_struct_t g_composite;
 
 #if 1
 /*${variable:start}*/
+wm8904_config_t wm8904Config = {
+    .i2cConfig          = {.codecI2CInstance = BOARD_CODEC_I2C_INSTANCE},
+    .recordSource       = kWM8904_RecordSourceLineInput,
+    .recordChannelLeft  = kWM8904_RecordChannelLeft2,
+    .recordChannelRight = kWM8904_RecordChannelRight2,
+    .playSource         = kWM8904_PlaySourceDAC,
+    .slaveAddress       = WM8904_I2C_ADDRESS,
+    .protocol           = kWM8904_ProtocolI2S,
+    .format             = {.sampleRate = kWM8904_SampleRate48kHz, .bitWidth = kWM8904_BitWidth16},
+    .master             = true,
+};
+codec_config_t boardCodecConfig = {.codecDevType = kCODEC_WM8904, .codecDevConfig = &wm8904Config};
 
 /*
  * AUDIO PLL setting: Frequency = Fref * (MULT + NUM / DENOM)
@@ -124,12 +132,30 @@ extern usb_device_composite_struct_t g_composite;
  *                              = 532.48MHz
  */
 /*setting for multiple of 8Khz,such as 48Khz/16Khz/32KHz*/
-const clock_audio_pll_config_t audioPllConfig = {
+const clock_audio_pll_config_t audioPllConfig_48K = {
     .audio_pll_src  = kCLOCK_AudioPllXtalIn, /* OSC clock */
-    .numerator      = 5040,                  /* Numerator of the Audio PLL fractional loop divider is null */
-    .denominator    = 27000,                 /* Denominator of the Audio PLL fractional loop divider is null */
+    .numerator 		= 5280,                         /* Numerator of the Audio PLL fractional loop divider is null */
+    .denominator 	= 10000,                      /* Denominator of the Audio PLL fractional loop divider is null */
     .audio_pll_mult = kCLOCK_AudioPllMult22  /* Divide by 22 */
 };
+//should be used together with CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 18U); /* Set AUDIOPLLCLKDIV divider to value 18 */
+//and CLOCK_InitAudioPfd(kCLOCK_Pfd0, 22);
+
+
+/*
+ * AUDIO PLL setting: Frequency = Fref * (MULT + NUM / DENOM)
+ *                              = 24 * (20 + 5040/13125)
+ *                              = 489.216MHz
+ */
+/*setting for 44.1Khz*/
+const clock_audio_pll_config_t audioPllConfig_44p1K = {
+    .audio_pll_src  = kCLOCK_AudioPllXtalIn, /* OSC clock */
+    .numerator      = 10270,                  /* Numerator of the Audio PLL fractional loop divider is null */
+    .denominator    = 18750,                 /* Denominator of the Audio PLL fractional loop divider is null */
+    .audio_pll_mult = kCLOCK_AudioPllMult19  /* Divide by 20 */
+};
+//should be used together with CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 17U); /* Set AUDIOPLLCLKDIV divider to value 17 */
+//and CLOCK_InitAudioPfd(kCLOCK_Pfd0, 22);
 
 //boardCodecScoConfig and wm8904ScoConfig is for audio after ring tone
 wm8904_config_t wm8904ScoConfig = {
@@ -139,22 +165,8 @@ wm8904_config_t wm8904ScoConfig = {
     .recordChannelRight = kWM8904_RecordChannelRight2,
     .playSource         = kWM8904_PlaySourceDAC,
     .slaveAddress       = WM8904_I2C_ADDRESS,
-#if EnableConversa==1	
     .protocol           = kWM8904_ProtocolI2S,
-	#if EnableOnlyMicSpk_NoBT==1
-		#if Fs_I2SToAmp_MicSpkTest==16000
-			.format             = {.sampleRate = kWM8904_SampleRate16kHz, .bitWidth = kWM8904_BitWidth32},
-		#endif
-		#if Fs_I2SToAmp_MicSpkTest==48000
-			.format             = {.sampleRate = kWM8904_SampleRate48kHz, .bitWidth = kWM8904_BitWidth32},
-		#endif
-	#else
 		.format             = {.sampleRate = kWM8904_SampleRate16kHz, .bitWidth = kWM8904_BitWidth32},
-	#endif
-#else
-    .protocol           = kWM8904_ProtocolPCMB,
-    .format             = {.sampleRate = kWM8904_SampleRate8kHz, .bitWidth = kWM8904_BitWidth16},
-#endif
     .mclk_HZ            = 24576000,
 
 #if Rt685I2SToAmpIsI2SMaster==1
@@ -310,6 +322,7 @@ uint8_t APP_GetMCoreDomainID(void)
     return 1U;
 }
 
+#if 0
 /*${function:start}*/
 void BOARD_SwitchAudioFrameLen(uint32_t sampleRate)
 {
@@ -328,13 +341,14 @@ void BOARD_SwitchAudioFrameLen(uint32_t sampleRate)
 #endif
   }
 }
+#endif
 
 void InitAudioPLLForAllAudioPeripherals(void)
 {
     CLOCK_DeinitAudioPll();
-	CLOCK_InitAudioPll(&audioPllConfig);
-	CLOCK_InitAudioPfd(kCLOCK_Pfd0, 26);         /* Enable Audio PLL clock */
-	CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 15U); /* Set AUDIOPLLCLKDIV divider to value 15 */
+	CLOCK_InitAudioPll(&audioPllConfig_48K);
+	CLOCK_InitAudioPfd(kCLOCK_Pfd0, 22);         /* Enable Audio PLL clock */
+	CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 18U); /* Set AUDIOPLLCLKDIV divider to value 18 */
 }
 
 void InitBaseAudioClkForPdm(void)
@@ -398,16 +412,31 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
     }
     else
     {
-        CLOCK_InitAudioPll(&audioPllConfig);
-        CLOCK_InitAudioPfd(kCLOCK_Pfd0, 26);         /* Enable Audio PLL clock */
-        CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 15U); /* Set AUDIOPLLCLKDIV divider to value 15 */
 
-		#if EnableConversa==1
+        if (44100U == sampleRate)
+        {
+			CLOCK_InitAudioPll(&audioPllConfig_44p1K);
+			CLOCK_InitAudioPfd(kCLOCK_Pfd0, 22);         /* Enable Audio PLL clock */
+			CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 17U); /* Set AUDIOPLLCLKDIV divider to value 17 */
+        }
+        else if (0U == sampleRate % 8000U)
+        {
+			CLOCK_InitAudioPll(&audioPllConfig_48K);
+			CLOCK_InitAudioPfd(kCLOCK_Pfd0, 22);         /* Enable Audio PLL clock */
+			CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 18U); /* Set AUDIOPLLCLKDIV divider to value 18 */
+        }
+        else
+        {
+        	//should not happen here
+            // no action
+        	return 0;
+        }		
+
+
 			#if EnableAudioPllAdjustingToSyncBetweenBtFsAndLocalFs==1
 				AUDIOPLL0NUM_StartingUpValue = CLKCTL1->AUDIOPLL0NUM;
 				AUDIOPLL0NUM_AdjustingValue=0;
 			#endif
-		#endif
 
         /* attach main clock to I3C (500MHz / 20 = 25MHz). */
         CLOCK_AttachClk(kMAIN_CLK_to_I3C_CLK);
@@ -416,24 +445,50 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 
 		switch(I2SClkShareCfgIdx)
 		{
-			case 0:
+			case BtPcmFc5Fc2_CodecFc1Fc3:
+				//this is for EVK board
 		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
 		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3);
 		        /* attach AUDIO PLL clock to FLEXCOMM2 (I2S2) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);
-			#if UsingQAR87Board == 1
-				/* attach AUDIO PLL clock to FLEXCOMM4 (I2S4) */
-        		CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
-			#else
 		        /* attach AUDIO PLL clock to FLEXCOMM5 (I2S5) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
-			#endif
-				
+		        //zzz to add NVT audio PLL later
+		        //CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM6);
 			break;
-			case 1:
-			#if UsingQAR87Board == 1
+			case BtPcmFc2Fc4_AmpFc1Fc3:
+				//this is for QR87 big board
+				//BT HFP PCM (FC2, FC4) and Smart Amp (FC1, FC3) for both HFP and A2DP
+		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
+		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
+		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
+		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3);
+		        /* attach AUDIO PLL clock to FLEXCOMM2 (I2S2) */
+		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);
+				/* attach AUDIO PLL clock to FLEXCOMM4 (I2S4) */
+        		CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
+		        //zzz to add NVT audio PLL later
+		        //CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM6);
+			break;
+			case AmpFc1Fc3:
+				//this is for QR87 big board
+				//smart amplifier
+		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
+		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
+		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
+		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3);
+
+		        // I2S for NT98532 connection
+		        /* attach AUDIO PLL clock to FLEXCOMM5 (I2S5) */
+		        //CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
+		        /* attach AUDIO PLL clock to FLEXCOMM6 (I2S6) */
+        		//CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM6);
+
+			break;
+			case NvtFc5Fc6_AmpFc1Fc3:
+				//this is for QR87 big board
 				//smart amplifier
 		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
 		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
@@ -446,27 +501,15 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 		        /* attach AUDIO PLL clock to FLEXCOMM6 (I2S6) */
         		CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM6);
 
-			#endif
+
 			break;
-			case 2:
-		        /* attach AUDIO PLL clock to FLEXCOMM1 (I2S1) */
-		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM1);
-		        /* attach AUDIO PLL clock to FLEXCOMM3 (I2S3) */
-		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM3);
-		        /* attach AUDIO PLL clock to FLEXCOMM2 (I2S2) */
-		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM2);
-			#if UsingQAR87Board == 1
-				/* attach AUDIO PLL clock to FLEXCOMM4 (I2S4) */
-        		CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM4);
-			#else
-		        /* attach AUDIO PLL clock to FLEXCOMM5 (I2S5) */
-		        CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
-			#endif
+			default:
+				//this is for ... reserved
+				//...
 			break;
 		}
 
-
-        /* attach AUDIO PLL clock to MCLK (AudioPll * (18 / 26) / 15 / 1 = 24.576MHz / 22.5792MHz) */
+        // attach AUDIO PLL clock to MCLK , 24.576MHz or 22.5792MHz
         CLOCK_AttachClk(kAUDIO_PLL_to_MCLK_CLK);
         CLOCK_SetClkDiv(kCLOCK_DivMclkClk, 1);
         SYSCTL1->MCLKPINDIR = SYSCTL1_MCLKPINDIR_MCLKPINDIR_MASK;
@@ -484,31 +527,25 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 		#else
 			switch(I2SClkShareCfgIdx)
 			{
-				case 0:
-					#if UsingQAR87Board == 1
-						SetFcClkSharing(DEMO_MICBUF_TX_INSTANCE, DEMO_SPKBUF_RX_INSTANCE, 0); //BT PCM interface, share clk of DEMO_MICBUF_TX_INSTANCE to DEMO_SPKBUF_RX_INSTANCE, using internal share group 0
-						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
-					#else
-						SetFcClkSharing(FcIdx_RxFrNvt, FcIdx_TxToNvt, 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
-						SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrAmp to FcIdx_TxToAmp, using internal share group 1
-					#endif
+				case BtPcmFc5Fc2_CodecFc1Fc3:
+					//this is for EVK board --- with BT connected
+					SetFcClkSharing(FcIdx_RxFrBt,  FcIdx_TxToBt,  0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
+					SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 1
 				break;
-				case 1:
-
-					#if UsingQAR87Board == 1
-						SetFcClkSharing(FcIdx_TxToNvt, FcIdx_RxFrNvt, 0);	//share clk of FcIdx_TxToNvt to FcIdx_RxFrNvt, using internal share group 0
+				case BtPcmFc2Fc4_AmpFc1Fc3:
+					//this is for QR87 big board --- with BT connected
+					SetFcClkSharing(FcIdx_TxToBt, FcIdx_RxFrBt,  0);	//share clk of FcIdx_RxFrBt  to FcIdx_TxToBt,  using internal share group 0
 						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
-					#else
-						SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrAmp to FcIdx_TxToAmp, using internal share group 1
-					#endif
 				break;
-				case 2:
-					SetFcClkSharing(FcIdx_RxFrNvt, FcIdx_TxToNvt, 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
-					#if UsingQAR87Board == 1
+				case AmpFc1Fc3:
+					//this is for QR87 big board --- A2DP Amp only
+					//SetFcClkSharing(FcIdx_TxToNvt,FcIdx_RxFrNvt , 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
 						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
-					#else
-						SetFcClkSharing(FcIdx_RxFrAmp, FcIdx_TxToAmp, 1);	//share clk of FcIdx_RxFrAmp to FcIdx_TxToAmp, using internal share group 1
-					#endif
+				break;
+				case NvtFc5Fc6_AmpFc1Fc3:
+					//this is for QR87 big board --- with NVT connected
+					SetFcClkSharing(FcIdx_TxToNvt,FcIdx_RxFrNvt , 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
+						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
 				break;
 			}
 		#endif
@@ -555,7 +592,7 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 			wm8904ScoConfig1.mclk_HZ                       = wm8904ScoConfig.mclk_HZ;
 		#endif
     }
-    BOARD_SwitchAudioFrameLen(sampleRate);
+    //BOARD_SwitchAudioFrameLen(sampleRate);
     return CLOCK_GetMclkClkFreq();
 }
 
@@ -676,12 +713,10 @@ void BOARD_InitHardware(void)
 	PRINTF("RT685 MCU: start\r\n");
 #endif
 
-#if EnableConversa==1
-
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
-	PRINTF("RT685 MCU: ------------ McuVer 0.1.4.1 ------------ \r\n");
-	//PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
+	PRINTF("RT685 MCU: ------------ McuVer 0.1.5.0 ------------ \r\n");
+	PRINTF("RT685 MCU: -----IW611 BT HFP A2DP with Conversa------- \r\n");
 
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: size of shared memory structure is %d \r\n", sizeof(VarBlockSharedByDspAndMcu));
@@ -719,16 +754,6 @@ void BOARD_InitHardware(void)
 
 	//boot DSP and handshake with DSP
 	#if 1	//folding
-		#if EnableOnlyMicSpk_NoBT==1
-			//no need to boot DSP, but should init the SEMA42
-			/* Clear SEMA42 reset */
-			RESET_PeripheralReset(kSEMA_RST_SHIFT_RSTn);
-			/* SEMA42 init */
-			SEMA42_Init(APP_SEMA42);
-			/* Reset the sema42 gate */
-			SEMA42_ResetAllGates(APP_SEMA42);
-			domainId = APP_GetMCoreDomainID();
-		#else
 			//need to boot DSP
 			PRINTF("RT685 MCU: Booting DSP\r\n");
 			/* Clear MUA reset before run DSP core */
@@ -767,18 +792,39 @@ void BOARD_InitHardware(void)
 
 			memset((void *)&VarBlockSharedByDspAndMcu, 0, sizeof(VarBlockSharedByDspAndMcu));
 
-			VarBlockSharedByDspAndMcu.U32ControlPara[10]=0x1234abcd;		//a flag for DSP side to check
+		//init opus file ptrs
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 0]=(unsigned int)&OpusFileBeg1;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 1]=(unsigned int)&OpusFileEnd1;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 2]=(unsigned int)&OpusFileBeg2;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 3]=(unsigned int)&OpusFileEnd2;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 4]=(unsigned int)&OpusFileBeg3;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 5]=(unsigned int)&OpusFileEnd3;
+		/*
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 6]=(unsigned int)&OpusFileBeg4;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 7]=(unsigned int)&OpusFileEnd4;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 8]=(unsigned int)&OpusFileBeg5;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 9]=(unsigned int)&OpusFileEnd5;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[10]=(unsigned int)&OpusFileBeg6;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[11]=(unsigned int)&OpusFileEnd6;
+		*/
+
+		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[0]=(unsigned int)&SbcFileBeg1;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[1]=(unsigned int)&SbcFileEnd1;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[2]=(unsigned int)&SbcFileBeg2;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[3]=(unsigned int)&SbcFileEnd2;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[4]=(unsigned int)&SbcFileBeg3;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[5]=(unsigned int)&SbcFileEnd3;
+
+
+		VarBlockSharedByDspAndMcu.Cm33Hifi1HandShakeCheck=0x1234abcd;		//a flag for DSP side to check
 			MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, (U32)&VarBlockSharedByDspAndMcu);
 
 			DelayMsByReadingCycCnt(20);		//wait a while to let DSP priting finish
 
-			SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
+		SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
 			BOARD_InitDebugConsole();		//not sure --- conflict with DSP init debug console --- earlier prints can not be displayed
 			PRINTF("RT685 MCU: DSP handshake is received\r\n");
-			SEMA42_Unlock(APP_SEMA42, SEMA42_GATE);
-		#endif
-	#endif
-
+		SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
 #endif
 
     DMA_Init(dmaBases[EXAMPLE_DMA_INSTANCE]);

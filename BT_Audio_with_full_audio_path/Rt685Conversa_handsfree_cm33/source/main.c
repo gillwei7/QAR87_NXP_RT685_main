@@ -22,8 +22,10 @@
 #include "task.h"
 
 #include "app_handsfree.h"
-#include "hal_common.h"
 
+#if UsingQAR87Board == 1
+#include "hal_common.h"
+#endif
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -46,7 +48,7 @@ int main(void)
     BOARD_InitHardware();
     hal_board_init();
 
-    if (xTaskCreate(peripheral_hfp_hf_task, "peripheral_hfp_hf_task", configMINIMAL_STACK_SIZE * 8, NULL,		//was configMINIMAL_STACK_SIZE * 8
+    if (xTaskCreate(hfp_hf_a2dp_task, "hfp_hf_a2dp_task", configMINIMAL_STACK_SIZE * 8, NULL,		//was configMINIMAL_STACK_SIZE * 8
                     tskIDLE_PRIORITY + 1, NULL) != pdPASS)
     {
         PRINTF("pherial hrs task creation failed!\r\n");
@@ -58,3 +60,20 @@ int main(void)
     for (;;)
         ;
 }
+
+
+
+
+/*
+
+shell commands:
+
+bt connect_paired 1
+
+bt playopus 2
+bt playsbc 1
+
+*/
+
+
+

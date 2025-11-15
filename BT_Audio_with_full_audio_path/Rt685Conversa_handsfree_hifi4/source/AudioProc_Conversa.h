@@ -127,13 +127,14 @@ typedef struct
 
 extern uint8_t domainId;
 
-extern uint32_t frmcount;
+extern U32 AudioFrameCnt;
 
 
 
 
 extern void InitConversa(void);
 
+extern void DspMainAudioFlowProcOneFrame_HfpCall_(int OptionWord);
 extern void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord);
 
 

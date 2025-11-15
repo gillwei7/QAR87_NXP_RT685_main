@@ -30,18 +30,27 @@ typedef signed short s16;
 typedef signed int s32;
 typedef signed long long s64;
 
-//If UsingQAR87Board == 1, the program can run on the QAR87 development board.
-#define UsingQAR87Board		1
-#define Using_UART5			0 // =0 will use FC2 (PIO0_15)
+
+#define EnableOpusDecodingPrint		1
+#define EnableSbcDecodingPrint		1
+
+
+#define DoAudioFrameProcInMuInterrupt	1
+
+#define EnableOpusDec		1
+#define EnableSbcDec		1
+
+#define DecoderSbc_SrcInSizeInSamples	256
+#define DecoderOpus_SrcInSizeInSamples	256
+
+
+
 
 #define _Value_Pow_2_31_	2147483648
 //#define _Value_Pow_2_30_	1073741824
-
 #define _Value_Pow_2_15_	32768
-
 #define _Value_Pow_2_Neg31_	0.0000000004656612873077392578125
 #define _Value_Pow_2_Neg15_	0.000030517578125
-
 #define Pi_Value            3.14159265353846
 
 
@@ -63,44 +72,6 @@ typedef signed long long s64;
 #define     DbgPin7                     19
 #define     DbgPin8                     20
 
-#if UsingQAR87Board == 1	//running on QAR87 board
-#define     DbgPin5Up()
-#define     DbgPin5Dn()
-#define     DbgPin6Up()
-#define     DbgPin6Dn()
-#define     DbgPin7Up()
-#define     DbgPin7Dn()
-#define     DbgPin8Up()
-#define     DbgPin8Dn()
-
-#define     LedOn_G()
-#define     LedOff_G()
-#define     LedOn_R()
-#define     LedOff_R()
-#define     LedOn_B()
-#define     LedOff_B()
-
-#else	//running on RT685-EVK
-
-#define     DbgPin5Up()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 1)
-#define     DbgPin5Dn()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 0)
-#define     DbgPin6Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 1)
-#define     DbgPin6Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 0)
-#define     DbgPin7Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin7, 1)
-#define     DbgPin7Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin7, 0)
-#define     DbgPin8Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin8, 1)
-#define     DbgPin8Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin8, 0)
-
-
-#define     LedOn_G()                   GPIO_PinWrite(GPIO, LedGrnPinPort, LedGrnPin, 1)
-#define     LedOff_G()                  GPIO_PinWrite(GPIO, LedGrnPinPort, LedGrnPin, 0)
-#define     LedOn_R()                   GPIO_PinWrite(GPIO, LedRedPinPort, LedRedPin, 1)
-#define     LedOff_R()                  GPIO_PinWrite(GPIO, LedRedPinPort, LedRedPin, 0)
-#define     LedOn_B()                   GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 1)
-#define     LedOff_B()                  GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 0)
-
-#endif
-
 #define APP_MU MUB
 #define CHN_MU_REG_NUM 0U
 #define BOOT_FLAG 0x01U
@@ -108,6 +79,46 @@ typedef signed long long s64;
 
 //#include "..\..\Rt685_UsbAudio_McuPrg\source\UsbAudioCfg.h"
 #include "..\..\Rt685Conversa_handsfree_cm33\source\DefForBothMcuAndDsp.h"
+
+//If UsingQAR87Board == 1, the program can run on the QAR87 development board.
+#define UsingQAR87Board		1
+#define Using_UART5			1 // =0 will use FC2 (PIO0_15)
+
+#if UsingQAR87Board == 1	//running on QAR87 board
+	#define     DbgPin5Up()
+	#define     DbgPin5Dn()
+	#define     DbgPin6Up()
+	#define     DbgPin6Dn()
+	#define     DbgPin7Up()
+	#define     DbgPin7Dn()
+	#define     DbgPin8Up()
+	#define     DbgPin8Dn()
+
+	#define     LedOn_G()
+	#define     LedOff_G()
+	#define     LedOn_R()
+	#define     LedOff_R()
+	#define     LedOn_B()
+	#define     LedOff_B()
+#else	//running on RT685-EVK
+	#define     DbgPin5Up()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 1)
+	#define     DbgPin5Dn()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 0)
+	#define     DbgPin6Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 1)
+	#define     DbgPin6Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 0)
+	#define     DbgPin7Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin7, 1)
+	#define     DbgPin7Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin7, 0)
+	#define     DbgPin8Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin8, 1)
+	#define     DbgPin8Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin8, 0)
+
+	#define     LedOn_G()                   GPIO_PinWrite(GPIO, LedGrnPinPort, LedGrnPin, 1)
+	#define     LedOff_G()                  GPIO_PinWrite(GPIO, LedGrnPinPort, LedGrnPin, 0)
+	#define     LedOn_R()                   GPIO_PinWrite(GPIO, LedRedPinPort, LedRedPin, 1)
+	#define     LedOff_R()                  GPIO_PinWrite(GPIO, LedRedPinPort, LedRedPin, 0)
+	#define     LedOn_B()                   GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 1)
+	#define     LedOff_B()                  GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 0)
+#endif
+
+
 
 extern volatile T_CommonVarSharedByDspAndMcu *PtrVarBlockSharedByDspAndMcu;
 

@@ -63,7 +63,7 @@
 
 /*! @brief Macro to set shell task stack size. */
 #ifndef SHELL_TASK_STACK_SIZE
-#define SHELL_TASK_STACK_SIZE (1000U)
+#define SHELL_TASK_STACK_SIZE (2000U)//(2000U)
 #endif
 
 /*! @brief Whether print copyright. */

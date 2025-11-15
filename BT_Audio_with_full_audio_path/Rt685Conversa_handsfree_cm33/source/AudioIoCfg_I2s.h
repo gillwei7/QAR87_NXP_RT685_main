@@ -13,7 +13,6 @@
 
 #include "GlobalDef.h"
 
-#if EnableConversa==1
 
 #include "fsl_dmic_dma.h"
 #include "fsl_i2s_dma.h"
@@ -48,6 +47,14 @@
 #define I2S_TxToNt_DMA_CHANNEL 	(11)			//flexcomm5 tx
 #define I2S_RxFrNt_DMA_CHANNEL 	(12)			//flexcomm6 rx
 
+
+#define FcIdx_RxFrBt			4
+#define FcIdx_TxToBt			2
+#define I2STxToBtInstance		(I2S2)
+#define I2SRxFrBtInstance		(I2S4)//B36932 should be I2S4 (I2S5)
+#define I2S_TxToBt_DMA_CHANNEL 	(5)				//flexcomm2 tx to BT
+#define I2S_RxFrBt_DMA_CHANNEL 	(8)				//flexcomm4 rx from BT
+
 #else
 //having I2S1 and I2S2 swapped, is to aviod using a wire connecting I2STx0 to AMP Data Input --- only use a jump connecting JP8.2 and JP8.3
 #define FcIdx_RxFrAmp			1
@@ -64,6 +71,14 @@
 #define I2SRxFrNtInstance		(I2S5)
 #define I2S_TxToNt_DMA_CHANNEL 	(5)				//flexcomm2 rx
 #define I2S_RxFrNt_DMA_CHANNEL 	(10)			//flexcomm5 tx
+
+#define FcIdx_RxFrBt			5
+#define FcIdx_TxToBt			2
+#define I2STxToBtInstance		(I2S2)
+#define I2SRxFrBtInstance		(I2S5)
+#define I2S_TxToBt_DMA_CHANNEL 	(5)				//flexcomm2 rx
+#define I2S_RxFrBt_DMA_CHANNEL 	(10)			//flexcomm5 tx
+
 #endif
 /*
  	 	 	 	 	 DMA ch
@@ -90,13 +105,24 @@
 #define DEMO_DMA (DMA0)			//DMA0 is for MCU side
 
 
-#define DEMO_I2SToAmpTx_MODE 		kI2S_MasterSlaveNormalMaster //kI2S_MasterSlaveNormalSlave //B36932, need to check whether is "kI2S_MasterSlaveNormalMaster"
-
+#if UsingQAR87Board == 1
+	#define DEMO_I2SFrAmpRx_MODE 		kI2S_MasterSlaveNormalSlave
+	#if Rt685I2SToAmpIsI2SMaster==1
+		#define DEMO_I2SToAmpTx_MODE 	kI2S_MasterSlaveNormalMaster
+	#else
+		#define DEMO_I2SToAmpTx_MODE	kI2S_MasterSlaveNormalSlave
+	#endif
+#else
+	#define DEMO_I2SToAmpTx_MODE 		kI2S_MasterSlaveNormalSlave
 #if Rt685I2SToAmpIsI2SMaster==1
 	#define DEMO_I2SFrAmpRx_MODE 	kI2S_MasterSlaveNormalMaster
 #else
 	#define DEMO_I2SFrAmpRx_MODE	kI2S_MasterSlaveNormalSlave
 #endif
+#endif
+
+
+
 
 #if Rt685I2SToNvtIsI2SMaster==1
 	#define I2STxToNt_ClkMode		kI2S_MasterSlaveNormalMaster //B36932 kI2S_MasterSlaveNormalSlave
@@ -106,29 +132,35 @@
 	#define I2SRxFrNt_ClkMode		kI2S_MasterSlaveNormalSlave
 #endif
 
+/*
+* For configure flexcomm group for different application,
+* used in "BOARD_SwitchAudioFreq"
+* naming, "connection device name + Flexcomm number(1st is clock source)" _ "connection device name + Flexcomm number(1st is clock source)"
+*/
+enum FlexcommSetOfApp{
+	BtPcmFc5Fc2_CodecFc1Fc3,
+	BtPcmFc2Fc4_AmpFc1Fc3,
+	AmpFc1Fc3,
+	NvtFc5Fc6_AmpFc1Fc3
+
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 extern unsigned int *Ptr_dma_descriptor_table0;
 
 
-extern volatile S32 I2S3Tx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerCh*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-extern volatile S32 I2S3Tx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerCh*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-extern volatile S32 I2S1Rx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerCh*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-extern volatile S32 I2S1Rx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerCh*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S32 I2S3Tx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S32 I2S3Tx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S32 I2S1Rx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S32 I2S1Rx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
 
 
-#if Rt685I2SToNvtBitWidth==16
-	extern volatile S16 I2STxToNtCh0And1Mixed_A[AudioFrameSizeInSamplePerCh_NVT*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-	extern volatile S16 I2STxToNtCh0And1Mixed_B[AudioFrameSizeInSamplePerCh_NVT*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-	extern volatile S16 I2SRxFrNtCh0And1Mixed_A[AudioFrameSizeInSamplePerCh_NVT*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-	extern volatile S16 I2SRxFrNtCh0And1Mixed_B[AudioFrameSizeInSamplePerCh_NVT*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-#endif
-#if Rt685I2SToNvtBitWidth==32
-	extern volatile S32 I2STxToNtCh0And1Mixed_A[AudioFrameSizeInSamplePerCh_NVT*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-	extern volatile S32 I2STxToNtCh0And1Mixed_B[AudioFrameSizeInSamplePerCh_NVT*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-	extern volatile S32 I2SRxFrNtCh0And1Mixed_A[AudioFrameSizeInSamplePerCh_NVT*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-	extern volatile S32 I2SRxFrNtCh0And1Mixed_B[AudioFrameSizeInSamplePerCh_NVT*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-#endif
+extern volatile S32 I2STxToNtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S32 I2STxToNtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S32 I2SRxFrNtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S32 I2SRxFrNtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+
 
 extern volatile U8 I2S1DmaTransferringIsUsingBufA;
 extern volatile U8 I2S3DmaTransferringIsUsingBufA;
@@ -160,10 +192,10 @@ extern void WaitForLRCKRisingEdge_FcTxToNt(void);
 extern void WaitForLRCKFallingEdge_FcTxToNt(void);
 
 
-extern void ConfigI2S3ChainedDma(void);
-extern void ConfigI2S1ChainedDma(void);
-extern void ConfigI2STxToNtChainedDma(void);
-extern void ConfigI2SRxFrNtChainedDma(void);
+extern void ConfigI2S3ChainedDma(int FrmSizeInSample, int SampleBitW);
+extern void ConfigI2S1ChainedDma(int FrmSizeInSample, int SampleBitW);
+extern void ConfigI2STxToNtChainedDma(int FrmSizeInSample, int SampleBitW);
+extern void ConfigI2SRxFrNtChainedDma(int FrmSizeInSample, int SampleBitW);
 
 extern void ClearDmaBuf_I2S3Tx0(void);
 extern void ClearDmaBuf_I2S1Rx0(void);
@@ -185,10 +217,10 @@ extern void BOARD_Init_DMA_I2S_Fc1(void);
 extern void BOARD_Init_DMA_I2S_FcTxToNt(void);
 extern void BOARD_Init_DMA_I2S_FcRxFrNt(void);
 
-extern void BOARD_Init_I2S_Fc3(void);
-extern void BOARD_Init_I2S_Fc1(void);
-extern void BOARD_Init_I2S_FcTxToNt(void);
-extern void BOARD_Init_I2S_FcRxFrNt(void);
+extern void BOARD_Init_I2S_Fc3(int Fs, int BitW);
+extern void BOARD_Init_I2S_Fc1(int Fs, int BitW);
+extern void BOARD_Init_I2S_FcTxToNt(int Fs, int BitW);
+extern void BOARD_Init_I2S_FcRxFrNt(int Fs, int BitW);
 
 extern int GetI2S3DmaTransferringIsUsingBufAOrB(void);
 extern int GetI2S1DmaTransferringIsUsingBufAOrB(void);
@@ -204,8 +236,6 @@ extern U16 UsbUpStreamingStopMonitorCnt;
 extern U16 UsbDnStreamingStopMonitorCnt;
 
 extern int CheckIfI2SToNtIsStopped(void);
-
-#endif
 
 #endif
 

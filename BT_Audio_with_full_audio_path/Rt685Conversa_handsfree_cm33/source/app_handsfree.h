@@ -14,8 +14,8 @@
 /*******************************************************************************
  * API
  ******************************************************************************/
-
-void peripheral_hfp_hf_task(void *param);
+void hfp_hf_register_service();
+void hfp_hf_a2dp_task(void *param);
 void hfp_AnswerCall(void);
 void hfp_RejectCall(void);
 void hfp_dial(const char *number);
@@ -24,11 +24,14 @@ void hfp_last_dial(void);
 void hfp_start_voice_recognition(void);
 void hfp_hf_get_last_voice_tag_number(void);
 void hfp_stop_voice_recognition(void);
-void hfp_volume_update(hf_volume_type_t type, int volume);
+//void hfp_volume_update(hf_volume_type_t type, int volume);
 void hfp_enable_ccwa( uint8_t enable);
 void hfp_enable_clip( uint8_t enable);
 void hfp_multiparty_call_option(uint8_t option);
 void hfp_trigger_codec_connection(void);
 int app_hfp_hf_discover(struct bt_conn *conn, uint8_t channel);
 void hfp_hf_query_list_current_calls(void);
+void hfp_hf_init(void);
+int call_status();
+
 #endif /* __APPL_PERIPHERAL_HFP_HF_MAIN_H__ */

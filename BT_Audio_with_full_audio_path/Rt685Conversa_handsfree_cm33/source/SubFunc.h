@@ -80,11 +80,17 @@ extern void BOARD_I3C_ReleaseBus(void);
 
 extern int EnableMicBufRingForDbg;
 
-
+#if 0
 #define TotalBtnNum						2			//could be max 32
 #define ButtonDoubleClickInterval       70          //70*8ms=56ms
 #define ButtonLongPressInterval         5           //5*8 ms=40ms
 #define ButtonLongPressFirstInterval    140         //140*8ms=11200ms
+#else
+#define TotalBtnNum						2			//could be max 32
+#define ButtonDoubleClickInterval       15          //70*8ms=56ms
+#define ButtonLongPressInterval         2           //5*8 ms=40ms
+#define ButtonLongPressFirstInterval    30         //140*8ms=11200ms
+#endif
 
 #define BTN_EVT_NONE                            0x00
 #define BTN_EVT_SING_PRESS                      0x01
@@ -117,6 +123,27 @@ extern TBtnEvtVarGroup BtnEvtVarGroup[TotalBtnNum];
 extern void GenBtnEvt(void);
 extern void InitBtnEvt(void);
 
+extern int SbcFileBeg1;
+extern int SbcFileEnd1;
+extern int SbcFileBeg2;
+extern int SbcFileEnd2;
+extern int SbcFileBeg3;
+extern int SbcFileEnd3;
+
+extern int OpusFileBeg1;
+extern int OpusFileEnd1;
+extern int OpusFileBeg2;
+extern int OpusFileEnd2;
+extern int OpusFileBeg3;
+extern int OpusFileEnd3;
+/*
+extern int OpusFileBeg4;
+extern int OpusFileEnd4;
+extern int OpusFileBeg5;
+extern int OpusFileEnd5;
+extern int OpusFileBeg6;
+extern int OpusFileEnd6;
+*/
 
 #endif
 

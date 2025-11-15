@@ -14,7 +14,6 @@
 
 #include "GlobalDef.h"
 
-#if EnableConversa==1
 
 #include "fsl_mu.h"
 #include "fsl_sema42.h"
@@ -491,4 +490,3 @@ void TestFirFilter(void)
 #endif
 
 
-#endif

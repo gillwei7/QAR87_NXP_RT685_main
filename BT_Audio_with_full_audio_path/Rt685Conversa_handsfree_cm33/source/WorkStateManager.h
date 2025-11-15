@@ -8,6 +8,73 @@
 #ifndef __WorkStateManager_h__
 #define __WorkStateManager_h__
 
+
+
+
+
+
+
+//---------------------------------defines for AudioPortI2SAndPdmCfg related-----------------------------------------
+//---beg---
+
+/*
+AudioPortI2SAndPdmCfg:
+bit 0~1: 		I2S_Amp Fs: 0,1,2,3 -> 16K, 32K, 44.1K, 48K
+bit 2~3: 		I2S_Amp Bit: 0,1,2 -> disabled, 16, 32bit
+
+bit 4~5:  	I2S_Nvt Fs: 0,1,2,3 -> 16K, 32K, 44.1K, 48K
+bit 6~7:  	I2S_Nvt Bit: 0,1,2 -> disabled, 16, 32bit
+
+bit 8~9:   	PDM Fs: 0,1,2,3 -> 16K, 32K, 44.1K, 48K
+bit 10~15:  	PDM ch enable
+*/
+
+#define AudioPortI2SAndPdmCfg_GetAmpI2SFs(x)  (((x) & 0x03) >> 0)
+#define AudioPortI2SAndPdmCfg_GetAmpI2SBit(x) (((x) & 0x0c) >> 2)
+
+#define AudioPortI2SAndPdmCfg_GetNvtI2SFs(x)  (((x) & 0x30) >> 4)
+#define AudioPortI2SAndPdmCfg_GetNvtI2SBit(x) (((x) & 0xc0) >> 6)
+
+#define AudioPortI2SAndPdmCfg_GetPdmFs(x)        (((x) & 0x0300) >> 8)
+#define AudioPortI2SAndPdmCfg_GetPdmEnableBit(x) (((x) & 0xfc00) >>10)
+
+#define AudioPortI2SAndPdmCfg_SetAmpI2SFs(x, y)  x=(((x) & ~0x03) | (((y) & 0x03) << 0))
+#define AudioPortI2SAndPdmCfg_SetAmpI2SBit(x, y) x=(((x) & ~0x0C) | (((y) & 0x03) << 2))
+
+#define AudioPortI2SAndPdmCfg_SetNvtI2SFs(x, y)  x=(((x) & ~0x30) | (((y) & 0x03) << 4))
+#define AudioPortI2SAndPdmCfg_SetNvtI2SBit(x, y) x=(((x) & ~0xC0) | (((y) & 0x03) << 6))
+
+#define AudioPortI2SAndPdmCfg_SetPdmFs(x, y)        x=(((x) & ~0x0300) | (((y) & 0x03) << 8))
+#define AudioPortI2SAndPdmCfg_SetPdmEnableBit(x, y) x=(((x) & ~0xfc00) | (((y) & 0x3f) <<10))
+
+enum
+{
+	Fs_16000  = 0,
+	Fs_32000,
+	Fs_44100,
+	Fs_48000,
+};
+
+enum
+{
+	BitWidth_I2SIsDisabled = 0,
+	BitWidth_16,
+	BitWidth_32,
+};
+
+extern U32 AudioPortI2SAndPdmCfg;
+//---end---
+//---------------------------------defines for AudioPortI2SAndPdmCfg related-----------------------------------------
+
+
+
+
+
+
+
+
+
+
 #define EnableWorkState_AudioIoDbg							1
 #define EnableWorkState_VideoRecording						1
 #define EnableWorkState_MediaPlayer							1
@@ -43,6 +110,8 @@ typedef enum
 	WorkState_VideoAi,
 } TDeviceWorkState;
 
+extern uint8_t domainId;
+
 extern TDeviceWorkState DeviceWorkStateCur;
 
 extern int AudioPortIsActive_I2SToAmp;
@@ -55,6 +124,9 @@ extern int AmpState;
 extern int WorkStateIsChanged;
 extern int RequestToGetIntoHfp;
 extern int RequestToGetOutofHfp;
+extern int RequestToGetIntoA2dpPlay;
+extern int RequestToGetOutofA2dpPlay;
+
 
 extern volatile int AllowAudioInterfaceReInit_PdmI2S;
 extern volatile int AllowAudioInterfaceReInit_Fc25;

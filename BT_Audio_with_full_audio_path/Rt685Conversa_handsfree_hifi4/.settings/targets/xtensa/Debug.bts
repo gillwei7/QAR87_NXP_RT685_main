@@ -7,16 +7,24 @@
                     <StringListMapEntry>
                         <key>Includes</key>
                         <value flag="-I" inheritance="donotinherit">
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/board}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/component/lists}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/component/serial_manager}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/component/uart}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/drivers}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/MIMXRT685S}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/source}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/utilities}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/NatureDspLibary/include}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/CadenceSRC}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/board}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/component/lists}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/component/serial_manager}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/component/uart}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/drivers}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/MIMXRT685S}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/source}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/utilities}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/NatureDspLibary/include}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/nxp_utilities_public}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/hifi4_nn}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit/tuning_files}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit/models}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceSRC}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceCommon}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceOpusDec}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceSbcDec}</ListEntry>
                         </value>
                     </StringListMapEntry>
                 </StringListMapOptions>
@@ -33,7 +41,9 @@
                             <ListEntry key="WORKSPACE_DIRECTORY" value="&quot;${unixpath:${workspace_loc}}&quot;"/>
                             <ListEntry key="RDSP_USES_IEEE754_CODE" value="1"/>
                             <ListEntry key="RT600" value="1"/>
-                            <ListEntry key="RDSP_ENABLE_PRINTF" value="1"/>
+                            <ListEntry key="CORE_DSP" value=""/>
+                            <ListEntry key="PRINTF_ADVANCED_ENABLE" value="0"/>
+                            <ListEntry key="PRINTF_FLOAT_ENABLE" value="0"/>
                         </value>
                     </KeyValueListMapEntry>
                 </KeyValueListMapOptions>
@@ -81,10 +91,6 @@
             <LinkerOptions>
                 <BooleanMapOptions>
                     <BooleanMapEntry>
-                        <key>CreateMinsize</key>
-                        <value selected="true"/>
-                    </BooleanMapEntry>
-                    <BooleanMapEntry>
                         <key>GenerateMapFile</key>
                         <value selected="true"/>
                     </BooleanMapEntry>
@@ -93,22 +99,32 @@
                     <StringListMapEntry>
                         <key>LibrarySearchPath</key>
                         <value flag="-L" inheritance="prepend">
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/NatureDspLibary}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685_UsbAudio_DspPrg/CadenceSRC}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/NatureDspLibary}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/hifi4_nn}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceCommon}</ListEntry>
                         </value>
                     </StringListMapEntry>
                     <StringListMapEntry>
                         <key>LinkerAdditionalOptions</key>
                         <value flag="" inheritance="append">
-                            <ListEntry>--orphan-handling=place</ListEntry>
+                            <ListEntry>--orphan-handling=place&#13;
+--gc-sections&#13;
+--cref&#13;
+--sort-section=alignment</ListEntry>
                         </value>
                     </StringListMapEntry>
                     <StringListMapEntry>
                         <key>Libraries</key>
                         <value flag="-l" inheritance="prepend">
-                            <ListEntry>xos</ListEntry>
+                            <ListEntry>NXP_Conversa_RT685HiFi4</ListEntry>
+                            <ListEntry>VIT_v6.6.0_EngineeringRelease</ListEntry>
                             <ListEntry>naturedsp</ListEntry>
                             <ListEntry>xa_asrc_src_pp</ListEntry>
+                            <ListEntry>xa_opus_dec</ListEntry>
+                            <ListEntry>xa_sbc_dec</ListEntry>
+                            <ListEntry>xa_nn</ListEntry>
+                            <ListEntry>xos</ListEntry>
                         </value>
                     </StringListMapEntry>
                 </StringListMapOptions>
