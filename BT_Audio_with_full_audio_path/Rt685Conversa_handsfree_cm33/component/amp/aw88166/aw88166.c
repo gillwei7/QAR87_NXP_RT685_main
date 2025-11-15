@@ -11,7 +11,8 @@
 #include "aw88166.h"
 //#include "aw_params_20241105.h"
 //#include "aw_params.h"
-#include "aw_params_music44.1k16bit_bck32fs.h"
+//B36932 #include "aw_params_music44.1k16bit_bck32fs.h"
+#include "aw_params_music_48k_32bit_20251112.h" //B36932
 
 
 static status_t aw_dev0_i2c_write_func(uint16_t dev_addr, uint8_t reg_addr,
