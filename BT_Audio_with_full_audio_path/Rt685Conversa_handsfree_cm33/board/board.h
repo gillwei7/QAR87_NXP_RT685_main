@@ -440,7 +440,7 @@
 #define FG_GLF70302_ENABLE            0
 #define LED_KTD2027_ENABLE            1
 #define AMP_AW88166_ENABLE            1
-#define SOC_SPI_ENABLE                0
+#define SOC_SPI_ENABLE                1
 
 #endif
 

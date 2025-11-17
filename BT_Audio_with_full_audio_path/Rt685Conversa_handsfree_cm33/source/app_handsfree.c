@@ -555,19 +555,12 @@ void hfp_hf_a2dp_task(void *pvParameters)
 	assert(pdPASS == result);
 #if UsingQAR87Board == 1
 
-//    if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 1000, NULL,
-//                    tskIDLE_PRIORITY + 2, NULL) != pdPASS)
-//    {
-//        PRINTF("Task creation failed!.\r\n");
-//        while (1);
-//    }
-//
-//    if (xTaskCreate(passive_spi_handler_task, "PASSIVE", configMINIMAL_STACK_SIZE + 200, NULL,
-//                    tskIDLE_PRIORITY + 3, NULL) != pdPASS)
-//    {
-//        PRINTF("Task creation failed!.\r\n");
-//        while (1);
-//    }
+    if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 1000, NULL,
+                    tskIDLE_PRIORITY + 2, NULL) != pdPASS)
+    {
+        PRINTF("Task creation failed!.\r\n");
+        while (1);
+    }
 
 	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 1000, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
     {

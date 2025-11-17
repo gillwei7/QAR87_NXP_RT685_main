@@ -83,11 +83,11 @@ void Init_I2C_Component(void)
 	hal_pmic_glf70583_init();
 #endif
 #if CHG_BQ25618_ENABLE
-//	hal_power_charger_bq25618_init();
+	hal_power_charger_bq25618_init();
 #endif
 #if LED_KTD2027_ENABLE
-//	hal_led_ktd2027_init();
-//	hal_led_ktd2027_power_on_indicator(); //White light turns on first
+	hal_led_ktd2027_init();
+	hal_led_ktd2027_power_on_indicator(); //White light turns on first
 #endif
 #if TOUCH_AW93305_ENABLE
 	hal_touch_aw93305_init(); //Touch Init
@@ -97,7 +97,7 @@ void Init_I2C_Component(void)
 	ss_set_battery(&ss, battery_info.soc);
 #endif
 #if AMP_AW88166_ENABLE
-//	hal_amp_aw88166_init(); // Init AMP
+	hal_amp_aw88166_init(); // Init AMP
 #endif
 #if CHG_BQ25618_ENABLE
 
