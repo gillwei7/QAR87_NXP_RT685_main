@@ -81,6 +81,8 @@ QueueHandle_t transfer_evt_queue = NULL;
 QueueSetHandle_t spi_evt_set = NULL;
 
 
+extern volatile usage_status_t current_usage_status;
+extern volatile uint8_t Usage_Status ;
 extern volatile SystemStatus ss ;
 uint8_t Novatek_boot_completed = 0;
 
@@ -158,6 +160,10 @@ static void handle_passive_ack_frame(const uint8_t *frame)
         case 0x50: //Update Layer
 				PRINTF("[Passive] ACK:[50 %02X] Update Layer \r\n",val);
 				ss.layer = val;
+			break;
+        case 0x40: //Update Usage Status
+				PRINTF("[Passive] ACK:[40 %02X] Update Usage Status \r\n",val);
+				usage_status_change(val);
 			break;
 
         default:

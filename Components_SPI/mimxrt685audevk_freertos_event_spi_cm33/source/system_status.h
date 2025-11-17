@@ -15,6 +15,20 @@
 #define BATTERY_FULL_VOLTAGE   4450//(mV)
 #define BATTERY_EMPTY_VOLTAGE  3300//(mV)
 
+
+typedef enum {
+    USAGE_STATUS_HOME = 0,          // 使用 Home
+    USAGE_STATUS_MENU,              // 使用 Menu
+    USAGE_STATUS_ABOUT,             // 使用 About
+    USAGE_STATUS_MUSIC_PLAYER,      // 使用 Music Player
+    USAGE_STATUS_MEDIA_PLAYER,      // 使用 Media Player
+    USAGE_STATUS_VIDEO_RECORDING,   // 使用 Video Recording
+    USAGE_STATUS_TAKE_PHOTO,        // 使用拍照
+    USAGE_STATUS_VIDEO_AI,          // 使用 Video AI
+    USAGE_STATUS_TRANSLATION        // 使用翻譯
+} usage_status_t;
+
+
 typedef enum {
     BATTERY_STATE_NORMAL = 0,       // 一般狀態
     BATTERY_STATE_LOW,              // 電量過低
@@ -71,6 +85,10 @@ void ss_set_charging(SystemStatus* s, bool on);
 bool ss_is_charging(const SystemStatus* s);
 void ss_set_battery(SystemStatus* s, uint8_t percent);
 uint8_t ss_get_battery(const SystemStatus* s);
+
+
+
+void usage_status_change(uint8_t status);
 
 /*
 

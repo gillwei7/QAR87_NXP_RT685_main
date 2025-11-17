@@ -36,6 +36,7 @@
 #define PRESS_TOUCH_HEX_VALUE 0x13
 #define FORWARD_SLIDE_HEX_VALUE 0x14
 #define BACK_SLIDE_HEX_VALUE 0x15
+#define USAGE_STATUS_HEX_VALUE 0x30
 
 void spi_handler_task(void *pvParameters);
 
