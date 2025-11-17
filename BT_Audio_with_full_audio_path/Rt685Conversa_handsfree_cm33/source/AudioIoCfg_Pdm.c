@@ -72,27 +72,27 @@
 
 #if EnableMic01==1
 	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
-	volatile S32 MicInputDmaDualBuf_0[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	volatile S32 MicInputDmaDualBuf_0[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
-	volatile S32 MicInputDmaDualBuf_1[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	volatile S32 MicInputDmaDualBuf_1[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 #if EnableMic23==1
 	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
-	volatile S32 MicInputDmaDualBuf_2[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	volatile S32 MicInputDmaDualBuf_2[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
-	volatile S32 MicInputDmaDualBuf_3[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	volatile S32 MicInputDmaDualBuf_3[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 #if EnableMic45==1
 	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
-	volatile S32 MicInputDmaDualBuf_4[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	volatile S32 MicInputDmaDualBuf_4[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
-	volatile S32 MicInputDmaDualBuf_5[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	volatile S32 MicInputDmaDualBuf_5[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 #if EnableMic67==1
 	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
-	volatile S32 MicInputDmaDualBuf_6[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	volatile S32 MicInputDmaDualBuf_6[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
-	volatile S32 MicInputDmaDualBuf_7[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	volatile S32 MicInputDmaDualBuf_7[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 
 #if EnableMic01==1
@@ -119,15 +119,15 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 		{
 			.data                   = (void *)MicInputDmaDualBuf_0,
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh0[1],
 		},
 
 		{
-			.data                   = (void *)&MicInputDmaDualBuf_0[AudioFrameSizeInSamplePerCh_PDM],
+			.data                   = (void *)&MicInputDmaDualBuf_0[AudioFrameSizeInSamplePerCh_16KHz],
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh0[0],
 		},
@@ -138,15 +138,15 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 		{
 			.data                   = (void *)MicInputDmaDualBuf_1,
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh1[1],
 		},
 
 		{
-			.data                   = (void *)&MicInputDmaDualBuf_1[AudioFrameSizeInSamplePerCh_PDM],
+			.data                   = (void *)&MicInputDmaDualBuf_1[AudioFrameSizeInSamplePerCh_16KHz],
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh1[0],
 		},
@@ -159,15 +159,15 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 		{
 			.data                   = (void *)MicInputDmaDualBuf_2,
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh2[1],
 		},
 
 		{
-			.data                   = (void *)&MicInputDmaDualBuf_2[AudioFrameSizeInSamplePerCh_PDM],
+			.data                   = (void *)&MicInputDmaDualBuf_2[AudioFrameSizeInSamplePerCh_16KHz],
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh2[0],
 		},
@@ -178,15 +178,15 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 		{
 			.data                   = (void *)MicInputDmaDualBuf_3,
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh3[1],
 		},
 
 		{
-			.data                   = (void *)&MicInputDmaDualBuf_3[AudioFrameSizeInSamplePerCh_PDM],
+			.data                   = (void *)&MicInputDmaDualBuf_3[AudioFrameSizeInSamplePerCh_16KHz],
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh3[0],
 		},
@@ -199,15 +199,15 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 		{
 			.data                   = (void *)MicInputDmaDualBuf_4,
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh4[1],
 		},
 
 		{
-			.data                   = (void *)&MicInputDmaDualBuf_4[AudioFrameSizeInSamplePerCh_PDM],
+			.data                   = (void *)&MicInputDmaDualBuf_4[AudioFrameSizeInSamplePerCh_16KHz],
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh4[0],
 		},
@@ -218,15 +218,15 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 		{
 			.data                   = (void *)MicInputDmaDualBuf_5,
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh5[1],
 		},
 
 		{
-			.data                   = (void *)&MicInputDmaDualBuf_5[AudioFrameSizeInSamplePerCh_PDM],
+			.data                   = (void *)&MicInputDmaDualBuf_5[AudioFrameSizeInSamplePerCh_16KHz],
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh5[0],
 		},
@@ -239,15 +239,15 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 		{
 			.data                   = (void *)MicInputDmaDualBuf_6,
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh6[1],
 		},
 
 		{
-			.data                   = (void *)&MicInputDmaDualBuf_6[AudioFrameSizeInSamplePerCh_PDM],
+			.data                   = (void *)&MicInputDmaDualBuf_6[AudioFrameSizeInSamplePerCh_16KHz],
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh6[0],
 		},
@@ -258,15 +258,15 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 		{
 			.data                   = (void *)MicInputDmaDualBuf_7,
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh7[1],
 		},
 
 		{
-			.data                   = (void *)&MicInputDmaDualBuf_7[AudioFrameSizeInSamplePerCh_PDM],
+			.data                   = (void *)&MicInputDmaDualBuf_7[AudioFrameSizeInSamplePerCh_16KHz],
 			.dataWidth              = sizeof(S32),
-			.dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32),
+			.dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32),
 			.dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth,
 			.linkTransfer           = &MicDmaCfgCh7[0],
 		},
@@ -377,7 +377,7 @@ void ImmediatelyStartDmicDmaChannels(U8 MicSelectBits)	//bit0~7 --> dmic ch0~7
 void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW)
 {
 	assert((SampleBitW==16)||(SampleBitW==32));
-	assert(FrmSizeInSample<=AudioFrameSizeInSamplePerCh_PDM);
+	assert(FrmSizeInSample<=AudioFrameSizeInSamplePerCh_16KHz);
 
 	#if EnableMic01==1
 		if(MicSelectBits&0x01)
@@ -388,7 +388,7 @@ void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW)
 			MicDmaCfgCh0[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh0[0].linkTransfer           = &MicDmaCfgCh0[1];
 
-			MicDmaCfgCh0[1].data                   = (void *)&MicInputDmaDualBuf_0[AudioFrameSizeInSamplePerCh_PDM];
+			MicDmaCfgCh0[1].data                   = (void *)&MicInputDmaDualBuf_0[AudioFrameSizeInSamplePerCh_16KHz];
 			MicDmaCfgCh0[1].dataWidth              = SampleBitW/8;
 			MicDmaCfgCh0[1].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh0[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
@@ -402,7 +402,7 @@ void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW)
 			MicDmaCfgCh1[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh1[0].linkTransfer           = &MicDmaCfgCh1[1];
 
-			MicDmaCfgCh1[1].data                   = (void *)&MicInputDmaDualBuf_1[AudioFrameSizeInSamplePerCh_PDM];
+			MicDmaCfgCh1[1].data                   = (void *)&MicInputDmaDualBuf_1[AudioFrameSizeInSamplePerCh_16KHz];
 			MicDmaCfgCh1[1].dataWidth              = SampleBitW/8;
 			MicDmaCfgCh1[1].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh1[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
@@ -419,7 +419,7 @@ void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW)
 			MicDmaCfgCh2[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh2[0].linkTransfer           = &MicDmaCfgCh2[1];
 
-			MicDmaCfgCh2[1].data                   = (void *)&MicInputDmaDualBuf_2[AudioFrameSizeInSamplePerCh_PDM];
+			MicDmaCfgCh2[1].data                   = (void *)&MicInputDmaDualBuf_2[AudioFrameSizeInSamplePerCh_16KHz];
 			MicDmaCfgCh2[1].dataWidth              = SampleBitW/8;
 			MicDmaCfgCh2[1].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh2[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
@@ -433,7 +433,7 @@ void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW)
 			MicDmaCfgCh3[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh3[0].linkTransfer           = &MicDmaCfgCh3[1];
 
-			MicDmaCfgCh3[1].data                   = (void *)&MicInputDmaDualBuf_3[AudioFrameSizeInSamplePerCh_PDM];
+			MicDmaCfgCh3[1].data                   = (void *)&MicInputDmaDualBuf_3[AudioFrameSizeInSamplePerCh_16KHz];
 			MicDmaCfgCh3[1].dataWidth              = SampleBitW/8;
 			MicDmaCfgCh3[1].dataSize               = FrmSizeInSample*SampleBitW/8;
 			MicDmaCfgCh3[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
@@ -446,13 +446,13 @@ void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW)
 		{
 			MicDmaCfgCh4[0].data                   = (void *)MicInputDmaDualBuf_4;
 			MicDmaCfgCh4[0].dataWidth              = sizeof(S32);
-			MicDmaCfgCh4[0].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh4[0].dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32);
 			MicDmaCfgCh4[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh4[0].linkTransfer           = &MicDmaCfgCh4[1];
 
-			MicDmaCfgCh4[1].data                   = (void *)&MicInputDmaDualBuf_4[AudioFrameSizeInSamplePerCh_PDM];
+			MicDmaCfgCh4[1].data                   = (void *)&MicInputDmaDualBuf_4[AudioFrameSizeInSamplePerCh_16KHz];
 			MicDmaCfgCh4[1].dataWidth              = sizeof(S32);
-			MicDmaCfgCh4[1].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh4[1].dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32);
 			MicDmaCfgCh4[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh4[1].linkTransfer           = &MicDmaCfgCh4[0];
 		}
@@ -460,13 +460,13 @@ void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW)
 		{
 			MicDmaCfgCh5[0].data                   = (void *)MicInputDmaDualBuf_5;
 			MicDmaCfgCh5[0].dataWidth              = sizeof(S32);
-			MicDmaCfgCh5[0].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh5[0].dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32);
 			MicDmaCfgCh5[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh5[0].linkTransfer           = &MicDmaCfgCh5[1];
 
-			MicDmaCfgCh5[1].data                   = (void *)&MicInputDmaDualBuf_5[AudioFrameSizeInSamplePerCh_PDM];
+			MicDmaCfgCh5[1].data                   = (void *)&MicInputDmaDualBuf_5[AudioFrameSizeInSamplePerCh_16KHz];
 			MicDmaCfgCh5[1].dataWidth              = sizeof(S32);
-			MicDmaCfgCh5[1].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh5[1].dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32);
 			MicDmaCfgCh5[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh5[1].linkTransfer           = &MicDmaCfgCh5[0];
 		}
@@ -476,13 +476,13 @@ void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW)
 		{
 			MicDmaCfgCh6[0].data                   = (void *)MicInputDmaDualBuf_6;
 			MicDmaCfgCh6[0].dataWidth              = sizeof(S32);
-			MicDmaCfgCh6[0].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh6[0].dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32);
 			MicDmaCfgCh6[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh6[0].linkTransfer           = &MicDmaCfgCh6[1];
 
-			MicDmaCfgCh6[1].data                   = (void *)&MicInputDmaDualBuf_6[AudioFrameSizeInSamplePerCh_PDM];
+			MicDmaCfgCh6[1].data                   = (void *)&MicInputDmaDualBuf_6[AudioFrameSizeInSamplePerCh_16KHz];
 			MicDmaCfgCh6[1].dataWidth              = sizeof(S32);
-			MicDmaCfgCh6[1].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh6[1].dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32);
 			MicDmaCfgCh6[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh6[1].linkTransfer           = &MicDmaCfgCh6[0];
 		}
@@ -490,13 +490,13 @@ void Init_MicDmaCfgCh(U8 MicSelectBits,int FrmSizeInSample, int SampleBitW)
 		{
 			MicDmaCfgCh7[0].data                   = (void *)MicInputDmaDualBuf_7;
 			MicDmaCfgCh7[0].dataWidth              = sizeof(S32);
-			MicDmaCfgCh7[0].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh7[0].dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32);
 			MicDmaCfgCh7[0].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh7[0].linkTransfer           = &MicDmaCfgCh7[1];
 
-			MicDmaCfgCh7[1].data                   = (void *)&MicInputDmaDualBuf_7[AudioFrameSizeInSamplePerCh_PDM];
+			MicDmaCfgCh7[1].data                   = (void *)&MicInputDmaDualBuf_7[AudioFrameSizeInSamplePerCh_16KHz];
 			MicDmaCfgCh7[1].dataWidth              = sizeof(S32);
-			MicDmaCfgCh7[1].dataSize               = AudioFrameSizeInSamplePerCh_PDM*sizeof(S32);
+			MicDmaCfgCh7[1].dataSize               = AudioFrameSizeInSamplePerCh_16KHz*sizeof(S32);
 			MicDmaCfgCh7[1].dataAddrInterleaveSize = kDMA_AddressInterleave1xWidth;
 			MicDmaCfgCh7[1].linkTransfer           = &MicDmaCfgCh7[0];
 		}
@@ -704,8 +704,8 @@ void BOARD_Init_DMIC(U8 MicSelectBits, U8 SkipInitGlobalDMIC0, int Fs)
 	switch(Fs)
 	{
 		case 16000:
-	dmic_channel_cfg.osr                 = 48U;
-	dmic_channel_cfg.gainshft            = 6U;
+			dmic_channel_cfg.osr                 = 48U;
+			dmic_channel_cfg.gainshft            = 6U;
 			break;
 		case 32000:
 			dmic_channel_cfg.osr                 = 48U;
@@ -1040,11 +1040,7 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DmaTxRxIsDone|=AudioPdmPortsBitMapFlag_Mic01;
 
 	if(DmaTxRxIsDone==DmaTxRxIsExpected)
-		#if CallAudioFrameProcessInIntr==1
-			ProcessAudio_AfterAudioInputBufIsReady_InCall();
-		#else
-			SCO_AudioFlow_SemaphorePost();
-		#endif
+		SCO_AudioFlow_SemaphorePost();
 
 	DbgPin7Dn();
 	return;
@@ -1063,11 +1059,7 @@ void DMicRx_Callback2(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DmaTxRxIsDone|=AudioPdmPortsBitMapFlag_Mic23;
 
 	if(DmaTxRxIsDone==DmaTxRxIsExpected)
-		#if CallAudioFrameProcessInIntr==1
-			ProcessAudio_AfterAudioInputBufIsReady_InCall();
-		#else
-			SCO_AudioFlow_SemaphorePost();
-		#endif
+		SCO_AudioFlow_SemaphorePost();
 
 	DbgPin7Dn();
 	return;
@@ -1086,11 +1078,7 @@ void DMicRx_Callback4(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DmaTxRxIsDone|=AudioPdmPortsBitMapFlag_Mic45;
 
 	if(DmaTxRxIsDone==DmaTxRxIsExpected)
-		#if CallAudioFrameProcessInIntr==1
-			ProcessAudio_AfterAudioInputBufIsReady_InCall();
-		#else
-			SCO_AudioFlow_SemaphorePost();
-		#endif
+		SCO_AudioFlow_SemaphorePost();
 
 	DbgPin7Dn();
 	return;
@@ -1109,11 +1097,7 @@ void DMicRx_Callback6(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DmaTxRxIsDone|=AudioPdmPortsBitMapFlag_Mic67;
 
 	if(DmaTxRxIsDone==DmaTxRxIsExpected)
-		#if CallAudioFrameProcessInIntr==1
-			ProcessAudio_AfterAudioInputBufIsReady_InCall();
-		#else
-			SCO_AudioFlow_SemaphorePost();
-		#endif
+		SCO_AudioFlow_SemaphorePost();
 
 	DbgPin7Dn();
 	return;
@@ -1190,10 +1174,6 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		DmaDoneI2sPorts=0;
 	}
 	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic01;
-#if CallAudioFrameProcessInIntr==1
-	if((DmaDonePdmPorts==ActivedPdmPorts)&&(DmaDoneI2sPorts==ActivedI2sPorts))
-		ProcessAudio_AfterAudioInputBufIsReady_InCall();
-#endif
 	LedPin4Dn();
 }
 void DMicRx_Callback1(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
@@ -1205,10 +1185,6 @@ void DMicRx_Callback1(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		DmaDoneI2sPorts=0;
 	}
 	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic01;
-#if CallAudioFrameProcessInIntr==1
-	if((DmaDonePdmPorts==ActivedPdmPorts)&&(DmaDoneI2sPorts==ActivedI2sPorts))
-		ProcessAudio_AfterAudioInputBufIsReady_InCall();
-#endif
 	DbgPin1Dn();
 }
 #endif
@@ -1223,10 +1199,6 @@ void DMicRx_Callback2(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		DmaDoneI2sPorts=0;
 	}
 	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic23;
-#if CallAudioFrameProcessInIntr==1
-	if((DmaDonePdmPorts==ActivedPdmPorts)&&(DmaDoneI2sPorts==ActivedI2sPorts))
-		ProcessAudio_AfterAudioInputBufIsReady_InCall();
-#endif
 	LedPin4Dn();
 }
 void DMicRx_Callback3(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
@@ -1238,10 +1210,6 @@ void DMicRx_Callback3(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		DmaDoneI2sPorts=0;
 	}
 	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic23;
-#if CallAudioFrameProcessInIntr==1
-	if((DmaDonePdmPorts==ActivedPdmPorts)&&(DmaDoneI2sPorts==ActivedI2sPorts))
-		ProcessAudio_AfterAudioInputBufIsReady_InCall();
-#endif
 	DbgPin1Dn();
 }
 #endif
@@ -1256,10 +1224,6 @@ void DMicRx_Callback4(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		DmaDoneI2sPorts=0;
 	}
 	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic45;
-#if CallAudioFrameProcessInIntr==1
-	if((DmaDonePdmPorts==ActivedPdmPorts)&&(DmaDoneI2sPorts==ActivedI2sPorts))
-		ProcessAudio_AfterAudioInputBufIsReady_InCall();
-#endif
 	LedPin4Dn();
 }
 void DMicRx_Callback5(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
@@ -1271,10 +1235,6 @@ void DMicRx_Callback5(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		DmaDoneI2sPorts=0;
 	}
 	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic45;
-#if CallAudioFrameProcessInIntr==1
-	if((DmaDonePdmPorts==ActivedPdmPorts)&&(DmaDoneI2sPorts==ActivedI2sPorts))
-		ProcessAudio_AfterAudioInputBufIsReady_InCall();
-#endif
 	DbgPin1Dn();
 }
 #endif
@@ -1289,10 +1249,6 @@ void DMicRx_Callback6(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		DmaDoneI2sPorts=0;
 	}
 	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic67;
-#if CallAudioFrameProcessInIntr==1
-	if((DmaDonePdmPorts==ActivedPdmPorts)&&(DmaDoneI2sPorts==ActivedI2sPorts))
-		ProcessAudio_AfterAudioInputBufIsReady_InCall();
-#endif
 	LedPin4Dn();
 }
 void DMicRx_Callback7(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
@@ -1304,10 +1260,6 @@ void DMicRx_Callback7(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		DmaDoneI2sPorts=0;
 	}
 	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic67;
-#if CallAudioFrameProcessInIntr==1
-	if((DmaDonePdmPorts==ActivedPdmPorts)&&(DmaDoneI2sPorts==ActivedI2sPorts))
-		ProcessAudio_AfterAudioInputBufIsReady_InCall();
-#endif
 	DbgPin1Dn();
 }
 #endif

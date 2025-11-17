@@ -58,20 +58,20 @@ extern unsigned int *Ptr_dma_descriptor_table0;
 extern U32 TimePoint_PrevAudioCallBack;
 
 #if EnableMic01==1
-	extern volatile S32 MicInputDmaDualBuf_0[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
-	extern volatile S32 MicInputDmaDualBuf_1[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	extern volatile S32 MicInputDmaDualBuf_0[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
+	extern volatile S32 MicInputDmaDualBuf_1[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 #if EnableMic23==1
-	extern volatile S32 MicInputDmaDualBuf_2[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
-	extern volatile S32 MicInputDmaDualBuf_3[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	extern volatile S32 MicInputDmaDualBuf_2[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
+	extern volatile S32 MicInputDmaDualBuf_3[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 #if EnableMic45==1
-	extern volatile S32 MicInputDmaDualBuf_4[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
-	extern volatile S32 MicInputDmaDualBuf_5[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	extern volatile S32 MicInputDmaDualBuf_4[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
+	extern volatile S32 MicInputDmaDualBuf_5[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 #if EnableMic67==1
-	extern volatile S32 MicInputDmaDualBuf_6[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
-	extern volatile S32 MicInputDmaDualBuf_7[AudioFrameSizeInSamplePerCh_PDM * PDM_Rx_BUFFER_NUM];
+	extern volatile S32 MicInputDmaDualBuf_6[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
+	extern volatile S32 MicInputDmaDualBuf_7[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 
 extern volatile U8 PdmCh0DmaTransferringIsUsingBufA;

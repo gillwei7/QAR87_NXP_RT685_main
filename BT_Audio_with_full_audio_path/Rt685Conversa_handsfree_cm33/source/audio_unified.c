@@ -673,8 +673,8 @@ void USB_MicUpStreamDataRateControl_AdjustPacketLength(int AodInCirBuf)//amount 
 	#endif
 
 
-	HiLimitInSample=(UacUpBuf_LengthInSamples-AudioFrameSizeInSamplePerCh)*3/4+AudioFrameSizeInSamplePerCh;
-	LoLimitInSample=(UacUpBuf_LengthInSamples-AudioFrameSizeInSamplePerCh)*1/4+AudioFrameSizeInSamplePerCh;
+	HiLimitInSample=(UacUpBuf_LengthInSamples-AudioFrameSizeInSamplePerCh_16KHz)*3/4+AudioFrameSizeInSamplePerCh_16KHz;
+	LoLimitInSample=(UacUpBuf_LengthInSamples-AudioFrameSizeInSamplePerCh_16KHz)*1/4+AudioFrameSizeInSamplePerCh_16KHz;
 
 	//if don't adjust packet length, the buffer does over/underflow --- this is proved !!!
 	//check samples in the buffer --- and do adjust packet size, one more or one less ---- should be used when USB upstream is in async mode
@@ -690,7 +690,7 @@ void USB_MicUpStreamDataRateControl_AdjustPacketLength(int AodInCirBuf)//amount 
 		#if EnableUacCirBufUnderflowOverFlowPrint==1
 			//PRINTF("x\r\n");
 		#endif
-	}else if(AodInCirBuf >= AudioFrameSizeInSamplePerCh)
+	}else if(AodInCirBuf >= AudioFrameSizeInSamplePerCh_16KHz)
 	{	//mic audio data is going to be not enough
 		PacketSize--;		//cir buffer data gets less and less, should let UAC take away 1 less sample
 		#if EnableUacCirBufUnderflowOverFlowPrint==1
@@ -810,7 +810,7 @@ usb_status_t USB_DeviceAudioCompositeCallback(class_handle_t handle, uint32_t ev
 
 				//half full means: after taking away 1 frame audio from the DN buffer, memaining audio data is >= half of the size of (total buffer size - 1 frame amount)
 				if ((CirUacDnAudioBuf_SpaceOccupiedInSamples_MultiCh(&UacDnAudioBuf_MCh) >= UacDnBuf_CenterLevelInSamples) && (PtrUsbDevComposite->audioUnified.startPlayHalfFull == 0))
-				//if ((CirUacDnAudioBuf_SpaceOccupiedInSamples_MultiCh(&UacDnAudioBuf_MCh) >= (UacDnBuf_LengthInSamples-AudioFrameSizeInSamplePerCh)/2+AUDIO_OUT_SAMPLING_RATE_KHZ) && (PtrUsbDevComposite->audioUnified.startPlayHalfFull == 0))
+				//if ((CirUacDnAudioBuf_SpaceOccupiedInSamples_MultiCh(&UacDnAudioBuf_MCh) >= (UacDnBuf_LengthInSamples-AudioFrameSizeInSamplePerCh_16KHz)/2+AUDIO_OUT_SAMPLING_RATE_KHZ) && (PtrUsbDevComposite->audioUnified.startPlayHalfFull == 0))
 				{
 					PtrUsbDevComposite->audioUnified.startPlayHalfFull = 1;
 				}

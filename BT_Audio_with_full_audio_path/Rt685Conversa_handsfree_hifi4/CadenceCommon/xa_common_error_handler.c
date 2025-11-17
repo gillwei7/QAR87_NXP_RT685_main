@@ -130,7 +130,7 @@ XA_ERRORCODE xa_error_handler(
     if (!is_fatal)
     	return XA_NO_ERROR;
 
-	#if 0
+	#if 1
 		PRINTF("\n");
 
 		if (!is_fatal)

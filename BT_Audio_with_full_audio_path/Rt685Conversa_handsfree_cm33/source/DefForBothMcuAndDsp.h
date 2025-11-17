@@ -10,8 +10,6 @@
 #define __DefForBothMcuAndDsp_h__
 
 
-#define SEMA42_ID_SbcRawCirBufferProtect	0x04
-#define SEMA42_ID_PrintProtect				0x03
 
 #if EnableUsbComAndAudio==1
 
@@ -120,26 +118,23 @@
 #define MuEvtDspToMcu_AudioProcIsFinished_VideoAi			0x00000090
 
 
+
+#define SEMA42_ID_SbcRawCirBufferProtect	0x00
+#define SEMA42_ID_PrintProtect				0x01
+
 #define APP_SEMA42								SEMA42
-#define SEMA42_GATE0							0U
-#define SEMA42_GATE1							1U
+#define SEMA42_GATE0							SEMA42_ID_PrintProtect
+#define SEMA42_GATE1							SEMA42_ID_SbcRawCirBufferProtect
 #define SEMA42_GATE2							2U
 
-#define AudioFrameSizeInSamplePerChMaxForDMABuf		(128*2)
-
+#define AudioFrameSizeInSamplePerChMaxForDMABuf		(128*3)
 //both PDM and I2S are 16KHz
-#define AudioFrameSizeInSamplePerCh 			(128)			//conversa must work with framesize=128, should never change this value, unless Conversa lib's frame size is changed
-#define AudioFrameSizeInSamplePerCh_PDM 		(128)
-#if Fs_I2SToNvt_MicSpkTest==16000
-	#define AudioFrameSizeInSamplePerCh_NVT 		(128*1)
-#endif
-#if Fs_I2SToNvt_MicSpkTest==48000
-	#define AudioFrameSizeInSamplePerCh_NVT 		(128*3)
-#endif
+#define AudioFrameSizeInSamplePerCh_16KHz 			(128)			//conversa must work with framesize=128, should never change this value, unless Conversa lib's frame size is changed --- this is 8ms
+#define AudioFrameSizeInSamplePerCh_48KHz 			(128*3)			//this is 8ms
 
 #if Rt685I2SToNvtIsI2SMaster==0
 #define AudioFrameSizeInSamplePerCh_I2SToNvt		48
-#define I2SNt_CirBuf_LenInSamples					(48*6+AudioFrameSizeInSamplePerCh)			//this is 8.66ms
+#define I2SNt_CirBuf_LenInSamples					(48*6+AudioFrameSizeInSamplePerCh_16KHz)			//this is 8.66ms
 #endif
 
 
@@ -215,34 +210,35 @@ typedef enum _VoiceCommandItem
 typedef struct
 {
 	//part 1 --- one frame of audio buf for each source and sink port
-	__attribute__((aligned(32))) S32 PdmInAudioBuf[8][AudioFrameSizeInSamplePerCh_PDM];
+	__attribute__((aligned(32))) S32 PdmInAudioBuf[8][AudioFrameSizeInSamplePerCh_16KHz];
 
-	__attribute__((aligned(32))) S32 UacUpAudioBuf[AudioFrameSizeInSamplePerCh*8];		//this buffer is channel mixed, and to be used as cir buffer data source
-	__attribute__((aligned(32))) S32 UacDnAudioBufL[AudioFrameSizeInSamplePerCh*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh space
-	__attribute__((aligned(32))) S32 UacDnAudioBufR[AudioFrameSizeInSamplePerCh*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh space
-	__attribute__((aligned(32))) S32 I2SLineInBufL[AudioFrameSizeInSamplePerCh]; // from amp, for AEC, not use now
-	__attribute__((aligned(32))) S32 I2SLineInBufR[AudioFrameSizeInSamplePerCh];
-	__attribute__((aligned(32))) S32 I2SInNvtBufL[AudioFrameSizeInSamplePerCh]; //from nvt, cm33 write in, DSP conversa process
-	__attribute__((aligned(32))) S32 I2SInNvtBufR[AudioFrameSizeInSamplePerCh];
+	__attribute__((aligned(32))) S32 UacUpAudioBuf[AudioFrameSizeInSamplePerCh_16KHz*8];		//this buffer is channel mixed, and to be used as cir buffer data source
+	__attribute__((aligned(32))) S32 UacDnAudioBufL[AudioFrameSizeInSamplePerCh_48KHz*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh_16KHz space
+	__attribute__((aligned(32))) S32 UacDnAudioBufR[AudioFrameSizeInSamplePerCh_48KHz*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh_16KHz space
+	__attribute__((aligned(32))) S16 I2SLineInBufL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		// from amp, for AEC, not use now
+	__attribute__((aligned(32))) S16 I2SLineInBufR[AudioFrameSizeInSamplePerChMaxForDMABuf];
+	__attribute__((aligned(32))) S16 I2SInNvtBufL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		//from nvt, cm33 write in, DSP conversa process
+	__attribute__((aligned(32))) S16 I2SInNvtBufR[AudioFrameSizeInSamplePerChMaxForDMABuf];
 
-	__attribute__((aligned(32))) S32 I2SLineOtBufL[AudioFrameSizeInSamplePerCh]; //tx to amp, ex. Conversa RX output 
-	__attribute__((aligned(32))) S32 I2SLineOtBufR[AudioFrameSizeInSamplePerCh];
-	__attribute__((aligned(32))) S32 I2SOtNvtBufL[AudioFrameSizeInSamplePerCh]; //out to nvt, DSP write, cm33 deliver to nvt
-	__attribute__((aligned(32))) S32 I2SOtNvtBufR[AudioFrameSizeInSamplePerCh];
+	__attribute__((aligned(32))) S16 I2SLineOtBufL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		//tx to amp, ex. Conversa RX output
+	__attribute__((aligned(32))) S16 I2SLineOtBufR[AudioFrameSizeInSamplePerChMaxForDMABuf];
+	__attribute__((aligned(32))) S16 I2SOtNvtBufL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		//out to nvt, DSP write, cm33 deliver to nvt
+	__attribute__((aligned(32))) S16 I2SOtNvtBufR[AudioFrameSizeInSamplePerChMaxForDMABuf];
 
-	__attribute__((aligned(32))) S32 BTRxInAudio[AudioFrameSizeInSamplePerCh];	//MCU side writes in the full frame if BT is at 16KHz, writes in half if BT is at 8KHz
-	__attribute__((aligned(32))) S32 BTTxOtAudio[AudioFrameSizeInSamplePerCh];	//MCU side takes out the full frame if BT is at 16KHz, takes out half if BT is at 8KHz
+	__attribute__((aligned(32))) S32 BTRxInAudio[AudioFrameSizeInSamplePerCh_16KHz];	//MCU side writes in the full frame if BT is at 16KHz, writes in half if BT is at 8KHz
+	__attribute__((aligned(32))) S32 BTTxOtAudio[AudioFrameSizeInSamplePerCh_16KHz];	//MCU side takes out the full frame if BT is at 16KHz, takes out half if BT is at 8KHz
 
 
 	//part 2 --- others
-	U32 BtFs;
+	U32 BtHfpFs;
 	U32 I2SFs_Nvt;
-	U32 I2SFs_Loc;
-	U32 PdmFs_Loc;
+	U32 I2SFs_Amp;
+	U32 PdmFs;
 	U32 UacUpFs;
 	U32 UacDnFs;
-	U32 I2SFrmSizeInSamples_Loc;
-	U32 PdmFrmSizeInSamples_Loc;
+	U32 I2SFrmSizeInSamples_Amp;
+	U32 I2SFrmSizeInSamples_Nvt;
+	U32 PdmFrmSizeInSamples;
 
 	U32 U32CycCntHistory	[100];
 	U32 MonitorInfoArray1	[20];
@@ -269,6 +265,7 @@ typedef struct
 		U32 PreVoiceMenu;
 		U32 CurrentVoiceCommandIntent;
 		U32 CurrentVoiceCommandTagName;
+		U32 WWIsDetected;
 	#endif
 
 	U32 U32Tmp2;

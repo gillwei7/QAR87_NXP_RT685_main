@@ -919,6 +919,12 @@ status_t swProcessVIT( AUDIO_vit_st* 			 p_definitionVIT,
             }
             else if (s_WakeWord.Id > 0)
             {
+            	//this is to start playing an OPUS file as the WW detecting prompt sound --- a short quick OPUS sound
+            	CommandToPlayWakeSound();
+				//this is to let MCU side print the WW detected event
+				PtrVarBlockSharedByDspAndMcu->WWIsDetected=1;
+
+
                 g_wakeWordLength = s_WakeWord.StartOffset;
 
                 PRINTF("[ASR] Wake Word: %s(%d) --- In %s menu\r\n", (s_WakeWord.pName == PL_NULL) ? "UNDEF" : s_WakeWord.pName, s_WakeWord.Id, MenuItemName[PtrVarBlockSharedByDspAndMcu->CurVoiceMenu]);
@@ -958,6 +964,7 @@ status_t swProcessVIT( AUDIO_vit_st* 			 p_definitionVIT,
 					// Notify App Task Wake Word Detected
 					xTaskNotify(appTaskHandle, kWakeWordDetected, eSetBits);
 				#endif
+
             }
         }
         else if (VIT_DetectionResults == VIT_INTENT_DETECTED)

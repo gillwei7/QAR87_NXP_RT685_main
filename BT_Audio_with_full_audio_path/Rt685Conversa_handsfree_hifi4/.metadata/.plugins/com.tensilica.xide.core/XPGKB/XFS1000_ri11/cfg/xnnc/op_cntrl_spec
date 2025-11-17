@@ -1,0 +1,216 @@
+
+option 		save top1_5
+
+params		out_cntrl-output_tensors`out_cntrl-labels_file`out_cntrl-extra_args
+
+resolving	out_cntrl-labels_file
+
+pattern 	^(\[[\w\/\:\s]*\])\s+save\s+top1_5\s+([\w\/\.\:\-\\]*)\s*(.*)
+
+assembly  	${out_cntrl-output_tensors} save top1_5 ${LABEL_FILE_LOC}/${out_cntrl-labels_file} ${out_cntrl-extra_args}
+
+minV		2.0.0
+
+maxV		999999
+----------------------------------------------------------------------------------
+option 		save SegStats
+
+params		out_cntrl-output_tensors`out_cntrl-labels_file`out_cntrl-extra_args
+
+resolving	out_cntrl-labels_file
+
+pattern 	^(\[[\w\/\:\s]*\])\s+save\s+SegStats\s+([\w\/\.\:\-\\]*)\s*(.*)
+
+assembly	${out_cntrl-output_tensors} save SegStats ${LABEL_FILE_LOC}/${out_cntrl-labels_file} ${out_cntrl-extra_args}
+
+minV		2.0.0
+
+maxV		999999
+------------------------------------------------------------------------------------
+option		save voc_det_AP
+
+params		out_cntrl-output_tensors`out_cntrl-annotation_dir`out_cntrl-extra_args
+
+pattern 	^(\[[\w\s\/\:]*\])\s+save\s+voc_det_AP\s+([\w\/\.\:\-\\]*)\s*(.*)
+
+resolving	out_cntrl-annotation_dir
+
+assembly	${out_cntrl-output_tensors} save voc_det_AP ${ANNOTATION_DIR_LOC}/${out_cntrl-annotation_dir} ${out_cntrl-extra_args}
+
+minV		2.0.0
+
+maxV		999999
+-------------------------------------------------------------------------------------------
+option		save coco_det_AP
+
+params		out_cntrl-output_tensors`out_cntrl-labels_file`out_cntrl-num_classes`out_cntrl-extra_args
+
+resolving	out_cntrl-labels_file
+
+pattern 	^(\[[\w\s\/\:]*\])\s+save\s+coco_det_AP\s+([\w\/\.\:\-\\]*)\s+(\d+)\s*(.*)
+
+assembly	${out_cntrl-output_tensors} save coco_det_AP ${LABEL_FILE_LOC}/${out_cntrl-labels_file} ${out_cntrl-num_classes} ${out_cntrl-extra_args}
+
+minV		2.0.0
+
+maxV		999999
+-------------------------------------------------------------------------------------------------------
+option		save psnr
+
+params		out_cntrl-output_tensors`out_cntrl-extra_args
+
+pattern		^(\[[\w\s\/\:]*\])\s+save\s+psnr\s*(.*)
+
+assembly	${out_cntrl-output_tensors} save psnr ${out_cntrl-extra_args}
+
+minV		2.0.0
+
+maxV		999999
+---------------------------------------------------------------------------------------------------------
+option 		save l1
+
+params		out_cntrl-output_tensors
+
+pattern 	^(\[[\w\s\/\:]*\])\s+save\s+l1.*
+
+assembly	${out_cntrl-output_tensors} save l1
+
+minV		2.0.0
+
+maxV		999999
+--------------------------------------------------------------------------------------------------------------------------
+
+option 		save l2
+
+params		out_cntrl-output_tensors
+
+pattern 	^(\[[\w\s\/\:]*\])\s+save\s+l2.*
+
+assembly	${out_cntrl-output_tensors} save l2
+
+minV		2.0.0
+
+maxV		999999
+-----------------------------------------------------------------------------------------------------------------------------------
+option		save TextMetric
+
+params		out_cntrl-output_tensors`out_cntrl-decoder`out_cntrl-labels_file`out_cntrl-extra_args
+
+resolving 	out_cntrl-labels_file
+
+pattern		^(\[[\w\s\/\:]*\])\s+save\s+TextMetric\s+([\w\:]*)\s*labels::([\w\/\.\-\:\\]*)\s*(.*)
+
+assembly	${out_cntrl-output_tensors} save TextMetric Decoder=CTCGreedy labels=${LABEL_FILE_LOC}/${out_cntrl-labels_file} ${out_cntrl-extra_args}
+		
+minV		2.2.0
+
+maxV		999999
+----------------------------------------------------------------------------------------------------------------------------------------	
+option		save squad1_qa
+
+params		out_cntrl-output_tensors`out_cntrl-labels_file`out_cntrl-vocab_file`out_cntrl-extra_args
+
+resolving 	out_cntrl-labels_file`out_cntrl-vocab_file
+
+pattern		^(\[[\w\s\/\:]*\])\s+save squad1_qa\s*dataset::(.*\.json)\s*vocab::(.*\.txt)(.*)
+
+assembly	${out_cntrl-output_tensors} save squad1_qa dataset=${LABEL_FILE_LOC}/${out_cntrl-labels_file} vocab=${LABEL_FILE_LOC}/${out_cntrl-vocab_file} ${out_cntrl-extra_args}
+		
+minV		2.3.0
+
+maxV		999999
+----------------------------------------------------------------------------------------------------------------------------------------
+option		save squad2_qa
+
+params		out_cntrl-output_tensors`out_cntrl-labels_file`out_cntrl-vocab_file`out_cntrl-extra_args
+
+resolving 	out_cntrl-labels_file`out_cntrl-vocab_file
+
+pattern		^(\[[\w\s\/\:]*\])\s+save squad2_qa\s*dataset::(.*\.json)\s*vocab::(.*\.txt)(.*)
+
+assembly	${out_cntrl-output_tensors} save squad2_qa dataset=${LABEL_FILE_LOC}/${out_cntrl-labels_file} vocab=${LABEL_FILE_LOC}/${out_cntrl-vocab_file} ${out_cntrl-extra_args}
+		
+minV		2.3.0
+
+maxV		999999
+----------------------------------------------------------------------------------------------------------------------------------------	
+option 		save xinferPP
+
+params 		out_cntrl-output_tensors`out_cntrl-extra_args`out_cntrl-ismodel`out_cntrl-model_file
+
+resolving	out_cntrl-model_file
+
+pattern		^(\[[\w\:\s\/]*\])\s*save\s*xinferPP\s*(.*\s*--extra_inputs\s*[\w:\{\}=,-]*)\s*(--model)?\s*(.*)
+
+assembly 	${out_cntrl-output_tensors} save xinferPP ${out_cntrl-extra_args} ${out_cntrl-ismodel} ${MODEL_FILE_LOC}/${out_cntrl-model_file}
+
+minV		2.2.0
+
+maxV		999999
+--------------------------------------------------------------------------------------------------------------------------------------------------
+option		TextMetric
+
+params		out_cntrl-output_tensors`out_cntrl-decoder`out_cntrl-labels_file`out_cntrl-extra_args
+
+resolving 	out_cntrl-labels_file
+
+pattern		^(\[[\w\s\/\:]*\])\s+TextMetric\s+([\w\:]*)\s*labels::([\w\/\.\-\:\\]*)\s*(.*)
+
+assembly	${out_cntrl-output_tensors} TextMetric Decoder=CTCGreedy labels=${LABEL_FILE_LOC}/${out_cntrl-labels_file} ${out_cntrl-extra_args}
+
+minV		2.2.0
+
+maxV		999999
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+option		save
+
+params		out_cntrl-output_tensors
+
+pattern		^(\[[\w\/\:\s]*\])\s+save\s*
+
+assembly	${out_cntrl-output_tensors} save
+
+minV		2.0.0
+
+maxV		999999
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+option		save coco_mask_AP
+
+params		out_cntrl-output_tensors`out_cntrl-labels_file`out_cntrl-num_classes`out_cntrl-extra_args
+
+resolving	out_cntrl-labels_file
+
+pattern 	^(\[[\w\s\/\:]*\])\s+save\s+coco_mask_AP\s+([\w\/\.\:\-\\]*)\s+(\d+)\s*(.*)
+
+assembly	${out_cntrl-output_tensors} save coco_mask_AP ${LABEL_FILE_LOC}/${out_cntrl-labels_file} ${out_cntrl-num_classes} ${out_cntrl-extra_args}
+
+minV		2.2.0
+
+maxV		999999
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+option 		save xoutputPP
+
+params		out_cntrl-output_tensors`out_cntrl-labels_file`out_cntrl-extra_args
+
+resolving	out_cntrl-labels_file
+
+pattern 	^(\[[\w\/\:\s]*\])\s+save\s+xoutputPP\s+([\w\/\.\:\-\\]*)\s*(.*)
+
+assembly	${out_cntrl-output_tensors} save xoutputPP ${LABEL_FILE_LOC}/${out_cntrl-labels_file} ${out_cntrl-extra_args}
+
+minV		2.5.0
+
+maxV		999999
+-----------------------------------------------------------------------------------------------------------------------------------------------------
+option		notFound
+
+params		out_cntrl-extra_args
+
+pattern 	^(.*)
+
+assembly	${out_cntrl-extra_args}
+
+minV		2.0.0
+
+maxV		999999
+-------------------------------------------------------------------------------------------------------------------------------------------------------

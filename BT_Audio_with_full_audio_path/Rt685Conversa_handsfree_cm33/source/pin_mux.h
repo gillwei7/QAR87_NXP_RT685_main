@@ -1363,7 +1363,7 @@ void BOARD_InitScoPins(void); /* Function assigned for the Cortex-M33 */
 #define IOPCTL_PIO_PUPD_DI 0x00u          /*!<@brief Disable pull-up / pull-down function */
 #define IOPCTL_PIO_SLEW_RATE_NORMAL 0x00u /*!<@brief Normal mode */
 
-/*! @name PIO0_3 (coord H2), J1[3]/J36[4]/J45[58]
+/*! @name PIO0_25 (coord A9), J19[20]/J38[24]
   @{ */
 /* Routed pin properties */
 /*!
@@ -1374,7 +1374,7 @@ void BOARD_InitScoPins(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITFOURDBGPINS_DbgPin5_SIGNAL PIO0
 /*!
  * @brief Signal channel */
-#define BOARD_INITFOURDBGPINS_DbgPin5_CHANNEL 3
+#define BOARD_INITFOURDBGPINS_DbgPin5_CHANNEL 25
 
 /* Symbols to be used with GPIO driver */
 /*!
@@ -1385,19 +1385,19 @@ void BOARD_InitScoPins(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITFOURDBGPINS_DbgPin5_INIT_GPIO_VALUE 0U
 /*!
  * @brief GPIO pin mask */
-#define BOARD_INITFOURDBGPINS_DbgPin5_GPIO_PIN_MASK (1U << 3U)
+#define BOARD_INITFOURDBGPINS_DbgPin5_GPIO_PIN_MASK (1U << 25U)
 /*!
  * @brief PORT peripheral base pointer */
 #define BOARD_INITFOURDBGPINS_DbgPin5_PORT 0U
 /*!
  * @brief PORT pin number */
-#define BOARD_INITFOURDBGPINS_DbgPin5_PIN 3U
+#define BOARD_INITFOURDBGPINS_DbgPin5_PIN 25U
 /*!
  * @brief PORT pin mask */
-#define BOARD_INITFOURDBGPINS_DbgPin5_PIN_MASK (1U << 3U)
+#define BOARD_INITFOURDBGPINS_DbgPin5_PIN_MASK (1U << 25U)
 /* @} */
 
-/*! @name PIO0_4 (coord J1), J1[5]/J45[60]
+/*! @name PIO2_15 (coord E2), J1[8]
   @{ */
 /* Routed pin properties */
 /*!
@@ -1405,10 +1405,10 @@ void BOARD_InitScoPins(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITFOURDBGPINS_DbgPin6_PERIPHERAL GPIO
 /*!
  * @brief Signal name */
-#define BOARD_INITFOURDBGPINS_DbgPin6_SIGNAL PIO0
+#define BOARD_INITFOURDBGPINS_DbgPin6_SIGNAL PIO2
 /*!
  * @brief Signal channel */
-#define BOARD_INITFOURDBGPINS_DbgPin6_CHANNEL 4
+#define BOARD_INITFOURDBGPINS_DbgPin6_CHANNEL 15
 
 /* Symbols to be used with GPIO driver */
 /*!
@@ -1419,19 +1419,19 @@ void BOARD_InitScoPins(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITFOURDBGPINS_DbgPin6_INIT_GPIO_VALUE 0U
 /*!
  * @brief GPIO pin mask */
-#define BOARD_INITFOURDBGPINS_DbgPin6_GPIO_PIN_MASK (1U << 4U)
+#define BOARD_INITFOURDBGPINS_DbgPin6_GPIO_PIN_MASK (1U << 15U)
 /*!
  * @brief PORT peripheral base pointer */
-#define BOARD_INITFOURDBGPINS_DbgPin6_PORT 0U
+#define BOARD_INITFOURDBGPINS_DbgPin6_PORT 2U
 /*!
  * @brief PORT pin number */
-#define BOARD_INITFOURDBGPINS_DbgPin6_PIN 4U
+#define BOARD_INITFOURDBGPINS_DbgPin6_PIN 15U
 /*!
  * @brief PORT pin mask */
-#define BOARD_INITFOURDBGPINS_DbgPin6_PIN_MASK (1U << 4U)
+#define BOARD_INITFOURDBGPINS_DbgPin6_PIN_MASK (1U << 15U)
 /* @} */
 
-/*! @name PIO0_19 (coord A1), J30[3]
+/*! @name PIO1_2 (coord A7), J27[7]
   @{ */
 /* Routed pin properties */
 /*!
@@ -1439,10 +1439,10 @@ void BOARD_InitScoPins(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITFOURDBGPINS_DbgPin7_PERIPHERAL GPIO
 /*!
  * @brief Signal name */
-#define BOARD_INITFOURDBGPINS_DbgPin7_SIGNAL PIO0
+#define BOARD_INITFOURDBGPINS_DbgPin7_SIGNAL PIO1
 /*!
  * @brief Signal channel */
-#define BOARD_INITFOURDBGPINS_DbgPin7_CHANNEL 19
+#define BOARD_INITFOURDBGPINS_DbgPin7_CHANNEL 2
 
 /* Symbols to be used with GPIO driver */
 /*!
@@ -1453,19 +1453,19 @@ void BOARD_InitScoPins(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITFOURDBGPINS_DbgPin7_INIT_GPIO_VALUE 0U
 /*!
  * @brief GPIO pin mask */
-#define BOARD_INITFOURDBGPINS_DbgPin7_GPIO_PIN_MASK (1U << 19U)
+#define BOARD_INITFOURDBGPINS_DbgPin7_GPIO_PIN_MASK (1U << 2U)
 /*!
  * @brief PORT peripheral base pointer */
-#define BOARD_INITFOURDBGPINS_DbgPin7_PORT 0U
+#define BOARD_INITFOURDBGPINS_DbgPin7_PORT 1U
 /*!
  * @brief PORT pin number */
-#define BOARD_INITFOURDBGPINS_DbgPin7_PIN 19U
+#define BOARD_INITFOURDBGPINS_DbgPin7_PIN 2U
 /*!
  * @brief PORT pin mask */
-#define BOARD_INITFOURDBGPINS_DbgPin7_PIN_MASK (1U << 19U)
+#define BOARD_INITFOURDBGPINS_DbgPin7_PIN_MASK (1U << 2U)
 /* @} */
 
-/*! @name PIO0_20 (coord B2), J30[4]
+/*! @name PIO0_21 (coord C7), J19[12]/J38[6]
   @{ */
 /* Routed pin properties */
 /*!
@@ -1476,7 +1476,7 @@ void BOARD_InitScoPins(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITFOURDBGPINS_DbgPin8_SIGNAL PIO0
 /*!
  * @brief Signal channel */
-#define BOARD_INITFOURDBGPINS_DbgPin8_CHANNEL 20
+#define BOARD_INITFOURDBGPINS_DbgPin8_CHANNEL 21
 
 /* Symbols to be used with GPIO driver */
 /*!
@@ -1487,16 +1487,16 @@ void BOARD_InitScoPins(void); /* Function assigned for the Cortex-M33 */
 #define BOARD_INITFOURDBGPINS_DbgPin8_INIT_GPIO_VALUE 0U
 /*!
  * @brief GPIO pin mask */
-#define BOARD_INITFOURDBGPINS_DbgPin8_GPIO_PIN_MASK (1U << 20U)
+#define BOARD_INITFOURDBGPINS_DbgPin8_GPIO_PIN_MASK (1U << 21U)
 /*!
  * @brief PORT peripheral base pointer */
 #define BOARD_INITFOURDBGPINS_DbgPin8_PORT 0U
 /*!
  * @brief PORT pin number */
-#define BOARD_INITFOURDBGPINS_DbgPin8_PIN 20U
+#define BOARD_INITFOURDBGPINS_DbgPin8_PIN 21U
 /*!
  * @brief PORT pin mask */
-#define BOARD_INITFOURDBGPINS_DbgPin8_PIN_MASK (1U << 20U)
+#define BOARD_INITFOURDBGPINS_DbgPin8_PIN_MASK (1U << 21U)
 /* @} */
 
 /*!

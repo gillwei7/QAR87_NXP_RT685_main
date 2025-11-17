@@ -27,10 +27,10 @@
 #include "MainAudioFlow.h"
 
 
-__attribute__((aligned(32))) S32 I2SInAudioBufL[AudioFrameSizeInSamplePerCh];
-__attribute__((aligned(32))) S32 I2SInAudioBufR[AudioFrameSizeInSamplePerCh];
-__attribute__((aligned(32))) S32 I2SOtAudioBufL[AudioFrameSizeInSamplePerCh];
-__attribute__((aligned(32))) S32 I2SOtAudioBufR[AudioFrameSizeInSamplePerCh];
+__attribute__((aligned(32))) S32 I2SInAudioBufL[AudioFrameSizeInSamplePerCh_16KHz];
+__attribute__((aligned(32))) S32 I2SInAudioBufR[AudioFrameSizeInSamplePerCh_16KHz];
+__attribute__((aligned(32))) S32 I2SOtAudioBufL[AudioFrameSizeInSamplePerCh_16KHz];
+__attribute__((aligned(32))) S32 I2SOtAudioBufR[AudioFrameSizeInSamplePerCh_16KHz];
 
 volatile S32 *I2SInputCh01Ptr;
 volatile S32 *I2SOtputCh01Ptr;

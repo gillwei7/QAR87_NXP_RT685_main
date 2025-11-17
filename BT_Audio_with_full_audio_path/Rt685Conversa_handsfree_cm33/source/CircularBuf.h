@@ -15,7 +15,7 @@
 #define BTDnAudioBuf_Len_InSamples	1024		//this is 128ms at 16KHz
 
 #define BTUpAudioBuf_MaxReadLen_InSamples	512	//actually no need for this extra space --- when DMA sending the audio data in this cir buffer, MUST move the audio from the cir buffer to a 4 bytes aligned space
-#define BTDnAudioBuf_MaxReadLen_InSamples	(AudioFrameSizeInSamplePerCh/2)
+#define BTDnAudioBuf_MaxReadLen_InSamples	(AudioFrameSizeInSamplePerCh_16KHz/2)
 
 
 
@@ -38,14 +38,8 @@ extern U8 UpStreamingIsStarted;
 
 #if Rt685I2SToNvtIsI2SMaster==0
 	//only when NT is I2S master, we use cir buffer
-	#if Rt685I2SToNvtBitWidth==32
-		extern T_CircularAudioBuf_S64 I2SRxFrNt_CirBuf;
-		extern T_CircularAudioBuf_S64 I2STxToNt_CirBuf;
-	#endif
-	#if Rt685I2SToNvtBitWidth==16
-		extern T_CircularAudioBuf_S32 I2SRxFrNt_CirBuf;
-		extern T_CircularAudioBuf_S32 I2STxToNt_CirBuf;
-	#endif
+	extern T_CircularAudioBuf_S32 I2SRxFrNt_CirBuf;
+	extern T_CircularAudioBuf_S32 I2STxToNt_CirBuf;
 #endif
 
 extern T_CircularAudioBuf_S16 BTDnAudioBuf_S16;

@@ -31,12 +31,11 @@ extern int InitOpusDecoderForOneOpusFile(int OpusFileIdx);
 extern void DeInitOpusDecoderForOneOpusFile(void);
 
 extern void OpusDecodeProcess(void);
-extern void InitOpusOutputCirBuf(void);
+extern void InitOpusOutputCirBuf(int fs, int ToClearMem);
 #endif
 
 #if EnableSbcDec==1
 extern int SbcDecoderIsMutedButStillRunning;
-extern int SbcOutputCirBuf_LRMixed_IsHalfFull;
 extern int SbcDecoderIsInited;
 extern int SbcDecoderIsRunning;
 extern T_CircularAudioBuf_S32 SbcOutputCirBuf_LRMixed;
@@ -47,7 +46,7 @@ extern int InitSbcDecoderForOneSbcFile(int SbcFileIdx);
 extern void DeInitSbcDecoderForOneSbcFile(void);
 
 extern int SbcDecodeProcess(int SbcFileIdx);
-extern void InitSbcOutputCirBuf(void);
+extern void InitSbcOutputCirBuf(int fs, int ToClearMem);
 
 #endif
 

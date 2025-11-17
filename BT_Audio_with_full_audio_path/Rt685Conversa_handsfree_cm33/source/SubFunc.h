@@ -9,7 +9,7 @@
 #ifndef __SubFunc___
 #define __SubFunc___
 
-
+/*
 #define     LedGrnPinPort               0
 #define     LedBluPinPort               0
 #define     LedRedPinPort               0
@@ -18,33 +18,46 @@
 #define     LedBluPin                   26
 #define     LedRedPin                   31
 
-#define     DbgPin5Port                 0
-#define     DbgPin6Port                 0
-#define     DbgPin7Port                 0
-#define     DbgPin8Port                 0
-
-#define     DbgPin5                     3
-#define     DbgPin6                     4
-#define     DbgPin7                     19
-#define     DbgPin8                     20
-
-#define     DbgPin5Up()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 1)
-#define     DbgPin5Dn()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 0)
-#define     DbgPin6Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 1)
-#define     DbgPin6Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 0)
-
-#define     DbgPin7Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin7, 1)
-#define     DbgPin7Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin7, 0)
-#define     DbgPin8Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin8, 1)
-#define     DbgPin8Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin8, 0)
-
-
 #define     LedOn_G()                   GPIO_PinWrite(GPIO, LedGrnPinPort, LedGrnPin, 1)
 #define     LedOff_G()                  GPIO_PinWrite(GPIO, LedGrnPinPort, LedGrnPin, 0)
 #define     LedOn_R()                   GPIO_PinWrite(GPIO, LedRedPinPort, LedRedPin, 1)
 #define     LedOff_R()                  GPIO_PinWrite(GPIO, LedRedPinPort, LedRedPin, 0)
 #define     LedOn_B()                   GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 1)
 #define     LedOff_B()                  GPIO_PinWrite(GPIO, LedBluPinPort, LedBluPin, 0)
+*/
+
+#define     DbgPin5Port                 0
+#define     DbgPin6Port                 2
+#define     DbgPin7Port                 1
+#define     DbgPin8Port                 0
+
+#define     DbgPin5                     25
+#define     DbgPin6                     15
+#define     DbgPin7                     2
+#define     DbgPin8                     21
+
+#if UsingDbgPins == 1
+	#define     DbgPin5Up()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 1)
+	#define     DbgPin5Dn()                 GPIO_PinWrite(GPIO, DbgPin5Port, DbgPin5, 0)
+	#define     DbgPin6Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 1)
+	#define     DbgPin6Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin6, 0)
+
+	#define     DbgPin7Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin7, 1)
+	#define     DbgPin7Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin7, 0)
+	#define     DbgPin8Up()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin8, 1)
+	#define     DbgPin8Dn()                 GPIO_PinWrite(GPIO, DbgPin6Port, DbgPin8, 0)
+#else
+	#define     DbgPin5Up()
+	#define     DbgPin5Dn()
+	#define     DbgPin6Up()
+	#define     DbgPin6Dn()
+
+	#define     DbgPin7Up()
+	#define     DbgPin7Dn()
+	#define     DbgPin8Up()
+	#define     DbgPin8Dn()
+#endif
+
 
 #define     BtnPin1Port                   1
 #define     BtnPin2Port                   0
@@ -80,16 +93,16 @@ extern void BOARD_I3C_ReleaseBus(void);
 
 extern int EnableMicBufRingForDbg;
 
-#if 0
-#define TotalBtnNum						2			//could be max 32
-#define ButtonDoubleClickInterval       70          //70*8ms=56ms
-#define ButtonLongPressInterval         5           //5*8 ms=40ms
-#define ButtonLongPressFirstInterval    140         //140*8ms=11200ms
+#if 1
+	//8ms call cycle
+	#define TotalBtnNum						2			//could be max 32
+	#define ButtonLongPressInterval         5           //5*8 ms=40ms
+	#define ButtonLongPressFirstInterval    140         //140*8ms=1120ms
 #else
-#define TotalBtnNum						2			//could be max 32
-#define ButtonDoubleClickInterval       15          //70*8ms=56ms
-#define ButtonLongPressInterval         2           //5*8 ms=40ms
-#define ButtonLongPressFirstInterval    30         //140*8ms=11200ms
+	//40ms call cycle
+	#define TotalBtnNum						2			//could be max 32
+	#define ButtonLongPressInterval         2           //2*40 ms=80ms
+	#define ButtonLongPressFirstInterval    30          //30*40ms=1200ms
 #endif
 
 #define BTN_EVT_NONE                            0x00
@@ -105,7 +118,7 @@ typedef struct
     uint8_t BtnDnCnt;
     uint8_t BtnIsDn;
     uint8_t BtnLongPressEvtEnabled;
-    uint8_t BtnLongPressType;                           // 1: ���������¼� ��2: ���������¼�
+    uint8_t BtnLongPressType;                           //1: long press event is only once,  2: long press event occurs at a certain interval as long as the press is being pressed
     uint8_t BtnLongPressEvtIsAlreadyGenerated;
     uint8_t DoubleClickEvtEnabled;
     uint8_t DoubleClickEvtCnt;

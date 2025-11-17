@@ -1,0 +1,390 @@
+sim:
+   n: sim
+   hasrom: false 
+   editable: true
+   version:
+    -  
+     hi: 999999
+     lo: 0
+sim-local:
+    n: sim-local
+    hasrom: false 
+    editable: true
+    desc: (needs XtensaTools 7.1)
+    version:
+    - 
+     hi: 999999
+     lo: 7.1.0
+sim-stacklocal:
+    n: sim-stacklocal
+    desc: (needs XtensaTools 12.0.4)
+    hasrom: false 
+    editable: true
+    version:
+    -
+     hi: 999999
+     lo: 12.0.4 
+sim-rom:
+    n: sim-rom
+    hasrom: true 
+    editable: true
+    version:
+    -
+     hi: 999999
+     lo: 0
+gdbio:
+    n: gdbio
+    hasrom: false 
+    editable: true
+    desc: (needs XtensaTools 7)
+    version:
+    -
+     hi: 999999
+     lo: 7.0.0
+gdbio-local:
+    n: gdbio-local
+    hasrom: false 
+    editable: true
+    desc: (needs XtensaTools 12.0.7)
+    version:
+    -
+     hi: 999999
+     lo: 12.0.7
+gdbio-stacklocal:
+    n: gdbio-stacklocal
+    hasrom: false 
+    editable: true
+    desc: (needs XtensaTools 12.0.7)
+    version:
+    -
+     hi: 999999
+     lo: 12.0.7
+gdbio-rom:
+    n: gdbio-rom
+    hasrom: true 
+    editable: true
+    desc: (needs XtensaTools 7.1)
+    version:
+    -
+     hi: 999999
+     lo: 7.1.0
+ngo-sample-gdbio:
+    n: ngo-sample-gdbio
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 7.1)
+    version:
+    -
+     hi: 999999
+     lo: 7.1.0
+linux:
+    n : linux
+    hasrom: false
+    editable: false
+    desc: (needs MMU)
+    version:
+    -
+     hi: 999999
+     lo: 0
+piload:
+    n: piload
+    hasrom: false
+    editable: false
+    desc: (needs XtensaTools 7.1)
+    version:
+    -
+     hi: 999999
+     lo: 7.1.0
+pisplitload:
+    n: pisplitload
+    hasrom: false
+    editable: false
+    desc: (needs XtensaTools 10.0.2)
+    version:
+    -
+     hi: 999999
+     lo: 10.0.2
+min-rt:
+    n: min-rt
+    hasrom: false
+    editable: true
+    version:
+    -
+     hi: 999999
+     lo: 0
+min-rt-rom:
+    n: min-rt-rom
+    hasrom: true
+    editable: true
+    version:
+    -
+     hi: 999999
+     lo: 0
+min-rt-local:
+    n: min-rt-local
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 8.0.2)
+    version:
+    -
+     hi: 999999
+     lo: 8.0.2
+nort:
+    n: nort
+    hasrom: false
+    editable: true
+    version:
+    -
+     hi: 999999
+     lo: 0
+nort-rom:
+    n: nort-rom
+    hasrom: true
+    editable: true
+    version:
+    -
+     hi: 999999
+     lo: 0
+rtos-ram:
+    n: rtos-ram
+    hasrom: false
+    editable: true
+    desc: (deprecated from XtensaTools 14.06 onwards)
+    version:
+    -
+     hi: 14.06
+     lo: 0
+rtos-ramp:
+    n: rtos-ramp
+    hasrom: true
+    editable: true
+    desc: (deprecated from XtensaTools 14.06 onwards)
+    version:
+    -
+     hi: 14.06
+     lo: 0
+rtos-res:
+    n: rtos-res
+    hasrom: false
+    editable: true
+    desc: (deprecated from XtensaTools 14.06 onwards)
+    version:
+    -
+     hi: 14.06
+     lo: 0
+rtos-rom:
+    n: rtos-rom
+    hasrom: true
+    editable: true
+    desc: (deprecated from XtensaTools 14.06 onwards)
+    version:
+    -
+     hi: 14.06
+     lo: 0
+tiny:
+    n: tiny
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 7)
+    version:
+    -
+     hi: 999999
+     lo: 7.0.0
+tiny-rom:
+    n: tiny-rom
+    hasrom: true
+    editable: true
+    desc: (needs XtensaTools 7)
+    version:
+    -
+     hi: 999999
+     lo: 7.0.0
+xtml605-rt:
+    n: xtml605-rt
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 9.0.3)
+    version:
+    -
+     hi: 999999
+     lo: 9.0.3
+xtml605-rt-rom:
+    n: xtml605-rt-rom
+    hasrom: true
+    editable: true
+    desc: (needs XtensaTools 9.0.3)
+    version:
+    -
+     hi: 999999
+     lo: 9.0.3
+xtkc705-rt:
+    n: xtkc705-rt
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 10.0.2)
+    version:
+    -
+     hi: 999999
+     lo: 10.0.2
+xtkc705-rt-rom:
+    n: xtkc705-rt-rom
+    hasrom: true
+    editable: true
+    desc: (needs XtensaTools 10.0.2) 
+    version:
+    -
+     hi: 999999
+     lo: 10.0.2
+xtav60-rt:
+    n: xtav60-rt
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 7.1)
+    version:
+    -
+     hi: 14.08
+     lo: 7.1.0
+xtav60-rt-rom:
+    n: xtav60-rt-rom
+    hasrom: true
+    editable: true
+    desc: (needs XtensaTools 7.1)
+    version:
+    -
+     hi: 14.08
+     lo: 7.1.0
+xtav110-rt:
+    n: xtav110-rt
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 9)
+    version:
+    -
+     hi: 14.08
+     lo: 9.0.0
+xtav110-rt-rom:
+    n: xtav110-rt-rom
+    hasrom: true
+    editable: true
+    desc: (needs XtensaTools 9)
+    version:
+    -
+     hi: 14.08
+     lo: 9.0.0
+xtav200-rt:
+    n: xtav200-rt
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 7.1)      
+    version:
+    -
+     hi: 14.08
+     lo: 7.1.0
+xtav200-rt-rom:
+    n: xtav200-rt-rom
+    hasrom: true
+    editable: true
+    desc: (needs XtensaTools 7.1)
+    version:
+    -
+     hi: 14.08
+     lo: 7.1.0
+sim-mc:
+    n: sim-mc
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 14.00)
+    version:
+    -
+     hi: 999999
+     lo: '14.00'
+sim-mc-stacklocal:
+    n: sim-mc-stacklocal
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 14.00)
+    version:
+    -
+     hi: 999999
+     lo: '14.00'
+sim-sanitizer:
+    n: sim-sanitizer
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 14.01)
+    version:
+    -
+     hi: 999999
+     lo: '14.01'
+pimultload:
+    n: pimultload
+    hasrom: false
+    editable: false
+    desc: (needs XtensaTools 14.02) 
+    version:
+    -
+     hi: 999999
+     lo: '14.02'
+sim-mc-rom:
+    n: sim-mc-rom
+    hasrom: true
+    editable: true
+    desc: (needs XtensaTools 14.05)
+    version:
+    -
+     hi: 999999
+     lo: '14.05'
+min-rt-mc:
+    n: min-rt-mc
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 14.05)
+    version:
+    -
+     hi: 999999
+     lo: 14.05
+min-rt-mc-stacklocal:
+    n: min-rt-mc-stacklocal
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 14.05)
+    version:
+    -
+     hi: 999999
+     lo: 14.05
+app-board:
+    n: app-board
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 14.06)
+    version:
+    -
+     hi: 999999
+     lo: 14.06
+app-sim:
+    n: app-sim
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 14.06)
+    version:
+    -
+     hi: 999999
+     lo: 14.06
+secmon-board:
+    n: secmon-board
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 14.06)
+    version:
+    -
+     hi: 999999
+     lo: 14.06
+secmon-sim:
+    n: secmon-sim
+    hasrom: false
+    editable: true
+    desc: (needs XtensaTools 14.06)
+    version:
+    -
+     hi: 999999
+     lo: 14.06

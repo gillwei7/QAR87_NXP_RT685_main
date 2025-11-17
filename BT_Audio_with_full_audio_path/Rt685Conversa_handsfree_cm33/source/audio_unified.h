@@ -32,8 +32,8 @@
 //NOTE: when I2S freq is 48KHz, framesize is 48, UacDnBuf_LengthInMs can be be 6*2, and feedback adj makes NO noise, because adjust is smooth enough ???
 #define UacDnBuf_LengthInMs 					(12 * 2)								//24ms
 #define UacDnBuf_LengthInSamples 				(UacDnBuf_LengthInMs * AUDIO_OUT_SAMPLING_RATE_KHZ)									//12ms
-//#define UacDnBuf_MaxReadLengthInSamples			(AudioFrameSizeInSamplePerCh)			//I2S DMA intr(callback)  will read this buffer, and the read size is 1 frame
-#define UacDnBuf_MaxReadLengthInSamples			(AudioFrameSizeInSamplePerCh*3)		//when UAC is 48KHz, I2S is 16KHz, max read len is 3*Frmsize
+//#define UacDnBuf_MaxReadLengthInSamples			(AudioFrameSizeInSamplePerCh_16KHz)			//I2S DMA intr(callback)  will read this buffer, and the read size is 1 frame
+#define UacDnBuf_MaxReadLengthInSamples			(AudioFrameSizeInSamplePerCh_16KHz*3)		//when UAC is 48KHz, I2S is 16KHz, max read len is 3*Frmsize
 
 #define AUDIO_SPEAKER_UsbDnBufCenterLevelInSamples  (UacDnBuf_LengthInMs*AUDIO_OUT_SAMPLING_RATE_KHZ/2)
 

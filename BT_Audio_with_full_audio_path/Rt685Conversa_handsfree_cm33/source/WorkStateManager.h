@@ -16,7 +16,7 @@
 
 //---------------------------------defines for AudioPortI2SAndPdmCfg related-----------------------------------------
 //---beg---
-
+#if 0	//--- decided not to use the following part
 /*
 AudioPortI2SAndPdmCfg:
 bit 0~1: 		I2S_Amp Fs: 0,1,2,3 -> 16K, 32K, 44.1K, 48K
@@ -63,12 +63,36 @@ enum
 };
 
 extern U32 AudioPortI2SAndPdmCfg;
+#endif
+extern int BtA2dpFs_ProvidedFromBtStack;
 //---end---
 //---------------------------------defines for AudioPortI2SAndPdmCfg related-----------------------------------------
 
 
 
 
+
+
+//---------------------------------defines for HFP stack request and events-----------------------------------------
+//---beg---
+#if UseEventToControlBtHfp==1
+typedef enum
+{
+	HfpRequest_None  = 0,
+	HfpRequest_AudioSetup,
+	HfpRequest_AudioStart,
+	HfpRequest_AudioStop,
+	HfpRequest_SetCodecAmpVolume,
+	HfpRequest_RingToneStart,
+	HfpRequest_RingToneStop,
+} TBtHfpRequest;
+
+extern TBtHfpRequest BtHfpRequest;
+extern EventGroupHandle_t EvtGrpHdl_StateMangerTaskToBtStack;
+
+#endif
+//---end---
+//---------------------------------defines for HFP stack request and events-----------------------------------------
 
 
 
@@ -108,6 +132,19 @@ typedef enum
 	WorkState_Translation,
 	WorkState_AiConversation,
 	WorkState_VideoAi,
+
+	//-------------------------
+	WorkState_Void_Pre,
+	WorkState_HfpCall_Pre,
+	WorkState_HomeVitStandby_Pre,
+	WorkState_AudioIoDbg_Pre,
+	WorkState_VideoRecording_Pre,
+	WorkState_MediaPlayer_Pre,
+	WorkState_MusicPlayer_Pre,
+	WorkState_Translation_Pre,
+	WorkState_AiConversation_Pre,
+	WorkState_VideoAi_Pre,
+
 } TDeviceWorkState;
 
 extern uint8_t domainId;

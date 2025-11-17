@@ -55,6 +55,9 @@
 #include "task.h"
 #endif
 
+#include "GlobalDef.h"
+
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -1058,6 +1061,8 @@ int DbgConsole_Printf(const char *fmt_s, ...)
     return result;
 }
 
+
+extern void PRINTF_UsbCom(uint8_t *data, size_t len);
 /* See fsl_debug_console.h for documentation of this function. */
 int DbgConsole_Vprintf(const char *fmt_s, va_list formatStringArg)
 {
@@ -1069,7 +1074,16 @@ int DbgConsole_Vprintf(const char *fmt_s, va_list formatStringArg)
         /* format print log first */
         logLength = StrFormatPrintf(fmt_s, formatStringArg, printBuf, DbgConsole_PrintCallback);
         /* print log */
+
+		#if PRINTF_GoesToUsbCom==1
+			PRINTF_UsbCom((uint8_t *)printBuf, (size_t)logLength);
+			//result = DbgConsole_SendDataReliable((uint8_t *)printBuf, (size_t)logLength);
+		#else
+			#if(Using_UART5ToPrint)||(Using_UART2ToPrint)
         result = DbgConsole_SendDataReliable((uint8_t *)printBuf, (size_t)logLength);
+			#endif
+		#endif
+
     }
     return result;
 }

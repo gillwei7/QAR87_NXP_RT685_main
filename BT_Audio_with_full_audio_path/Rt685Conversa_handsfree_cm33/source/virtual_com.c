@@ -617,6 +617,14 @@ Type and send b/B to ...\r\n\
 "
 };
 
+#if PRINTF_GoesToUsbCom==1
+__attribute__((section("CodeQuickAccess")))
+void PRINTF_UsbCom(uint8_t *data, size_t len)
+{
+	USB_DeviceCdcAcmSend(PtrUsbDevComposite->cdcVcom.cdcAcmHandle, USB_CDC_VCOM_DIC_BULK_IN_ENDPOINT, data, len);
+}
+#endif
+
 __attribute__((section("CodeQuickAccess")))
 void USB_DeviceCdcVcomTask(void)
 {

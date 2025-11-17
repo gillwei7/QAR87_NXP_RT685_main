@@ -54,6 +54,7 @@
 #include "serial_manager.h"
 
 #include "fsl_debug_console.h"
+#include "GlobalDef.h"
 
 /*******************************************************************************
  * Definitions
@@ -866,6 +867,10 @@ DEBUG_CONSOLE_FUNCTION_PREFIX status_t DbgConsole_Flush(void)
 /* See fsl_debug_console.h for documentation of this function. */
 int DbgConsole_Printf(const char *formatString, ...)
 {
+	#if(!Using_UART5ToPrint)&&(!Using_UART2ToPrint)
+		return 0;
+	#endif
+
     va_list ap;
     int logLength = 0, dbgResult = 0;
     char printBuf[DEBUG_CONSOLE_PRINTF_MAX_LOG_LEN] = {'\0'};

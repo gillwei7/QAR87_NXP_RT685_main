@@ -50,6 +50,7 @@ void BOARD_InitDebugConsole(void)
 {
     uint32_t uartClkSrcFreq;
 
+	#if (Using_UART5ToPrint)||(Using_UART2ToPrint)
     /* attach FRG0 clock to FLEXCOMM0 (debug console) */
     CLOCK_SetFRGClock(BOARD_DEBUG_UART_FRG_CLK);
     CLOCK_AttachClk(BOARD_DEBUG_UART_CLK_ATTACH);
@@ -61,6 +62,7 @@ void BOARD_InitDebugConsole(void)
     uartClkSrcFreq = BOARD_DEBUG_UART_CLK_FREQ;
 
     DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
+	#endif
 }
 
 static status_t flexspi_hyper_ram_write_mcr(FLEXSPI_Type *base, uint8_t regAddr, uint32_t *mrVal)

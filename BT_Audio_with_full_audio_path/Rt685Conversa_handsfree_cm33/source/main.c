@@ -75,5 +75,12 @@ bt playsbc 1
 
 */
 
+/*
 
 
+ToAMp: fc1 ToAmp, fc3 FrAMP  (fc1 clk share to fc3), fc1 is master, AMP is slave
+ToBt:  fc4 toBT, fc2 FrBT //B36932 seems incorrect, should be fc4 frBT, fc toBT//  (fc2 clk share to fc4), fc2 is slave, BT is master
+ToNvt: fc5 toNvt, fc6 FrNvt  (fc5 clk share to fc6), fc5 is master, NVT is slave
+
+
+*/

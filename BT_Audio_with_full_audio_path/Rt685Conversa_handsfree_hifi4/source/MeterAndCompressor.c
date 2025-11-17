@@ -499,118 +499,76 @@ TAudioCompressor *AudioCompressor8;
 //------------------------------------------------------------------------------------------------------------------
 void InitMeterAndCompressor(void)
 {
-	#if 0
-	//this is the test to try init and de-init, check heap is released to the original address --- init one and de-init one, this is successful. If init all, then deinit them all, will fail --- but should be no problem
-		//init test
-		AudioRmsMeter1=InitRmsMeter(AudioFrameSizeInSamplePerCh,1);
-		if(AudioRmsMeter1==NULL)
-			PRINTF("DSP: InitMeterAndCompressor fail 1 \r\n");
-						//de-init test
-						if(DeInitRmsMeter(AudioRmsMeter1)==RtnValue_Fail)
-							PRINTF("DSP: InitMeterAndCompressor fail 7 \r\n");
-		AudioRmsMeter2=InitRmsMeter(AudioFrameSizeInSamplePerCh,1);
-		if(AudioRmsMeter2==NULL)
-			PRINTF("DSP: InitMeterAndCompressor fail 2 \r\n");
-						//de-init test
-						if(DeInitRmsMeter(AudioRmsMeter2)==RtnValue_Fail)
-							PRINTF("DSP: InitMeterAndCompressor fail 8 \r\n");
-
-		//init test
-		AudioMeter3=InitAudioMeter(AudioFrameSizeInSamplePerCh,1);
-		if(AudioMeter3==NULL)
-			PRINTF("DSP: InitMeterAndCompressor fail 3 \r\n");
-						//de-init test
-						if(DeInitAudioMeter(AudioMeter3)==RtnValue_Fail)
-							PRINTF("DSP: InitMeterAndCompressor fail 9 \r\n");
-		AudioMeter4=InitAudioMeter(AudioFrameSizeInSamplePerCh,1);
-		if(AudioMeter4==NULL)
-			PRINTF("DSP: InitMeterAndCompressor fail 4 \r\n");
-						//de-init test
-						if(DeInitAudioMeter(AudioMeter4)==RtnValue_Fail)
-							PRINTF("DSP: InitMeterAndCompressor fail 10 \r\n");
-
-		//init test
-		AudioCompressor1=InitAudioCompressor(AudioFrameSizeInSamplePerCh,1);
-		if(AudioCompressor1==NULL)
-			PRINTF("DSP: InitMeterAndCompressor fail 5 \r\n");
-						//de-init test
-						if(DeInitAudioCompressor(AudioCompressor1)==RtnValue_Fail)
-							PRINTF("DSP: InitMeterAndCompressor fail 11 \r\n");
-		AudioCompressor2=InitAudioCompressor(AudioFrameSizeInSamplePerCh,1);
-		if(AudioCompressor2==NULL)
-			PRINTF("DSP: InitMeterAndCompressor fail 6 \r\n");
-						//de-init test
-						if(DeInitAudioCompressor(AudioCompressor2)==RtnValue_Fail)
-							PRINTF("DSP: InitMeterAndCompressor fail 12 \r\n");
-	#endif
-
-
-	AudioRmsMeter1=InitRmsMeter(AudioFrameSizeInSamplePerCh,1);
+	//for Mic0~1 --- accurate enough
+	AudioRmsMeter1=InitRmsMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioRmsMeter1==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 1 \r\n");
-	AudioRmsMeter2=InitRmsMeter(AudioFrameSizeInSamplePerCh,1);
+	AudioRmsMeter2=InitRmsMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioRmsMeter2==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 2 \r\n");
-	AudioRmsMeter3=InitRmsMeter(AudioFrameSizeInSamplePerCh,1);
+	AudioRmsMeter3=InitRmsMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioRmsMeter3==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 1 \r\n");
-	AudioRmsMeter4=InitRmsMeter(AudioFrameSizeInSamplePerCh,1);
+	AudioRmsMeter4=InitRmsMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioRmsMeter4==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 2 \r\n");
 
-	AudioRmsMeter5=InitRmsMeter(AudioFrameSizeInSamplePerCh,1);
+	//for conversa output signals --- accurate enough
+	AudioRmsMeter5=InitRmsMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioRmsMeter5==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 1 \r\n");
-	AudioRmsMeter6=InitRmsMeter(AudioFrameSizeInSamplePerCh,1);
+	AudioRmsMeter6=InitRmsMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioRmsMeter6==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 2 \r\n");
-	AudioRmsMeter7=InitRmsMeter(AudioFrameSizeInSamplePerCh,1);
+	AudioRmsMeter7=InitRmsMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioRmsMeter7==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 1 \r\n");
-	AudioRmsMeter8=InitRmsMeter(AudioFrameSizeInSamplePerCh,1);
+	AudioRmsMeter8=InitRmsMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioRmsMeter8==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 2 \r\n");
 
-	AudioMeter1=InitAudioMeter(AudioFrameSizeInSamplePerCh,1);
+	//for conversa output signals --- not accurate enough, not used --- calculating result still needs to be adjusted
+	AudioMeter1=InitAudioMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioMeter1==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 3 \r\n");
-	AudioMeter2=InitAudioMeter(AudioFrameSizeInSamplePerCh,1);
+	AudioMeter2=InitAudioMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioMeter2==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 4 \r\n");
-	AudioMeter3=InitAudioMeter(AudioFrameSizeInSamplePerCh,1);
+	AudioMeter3=InitAudioMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioMeter3==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 3 \r\n");
-	AudioMeter4=InitAudioMeter(AudioFrameSizeInSamplePerCh,1);
+	AudioMeter4=InitAudioMeter(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioMeter4==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 4 \r\n");
 
 
-	AudioCompressor1=InitAudioCompressor(AudioFrameSizeInSamplePerCh,1);
+	//not used for now
+	AudioCompressor1=InitAudioCompressor(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioCompressor1==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 5 \r\n");
-	AudioCompressor2=InitAudioCompressor(AudioFrameSizeInSamplePerCh,1);
+	AudioCompressor2=InitAudioCompressor(AudioFrameSizeInSamplePerCh_16KHz,1);
 	if(AudioCompressor2==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 6 \r\n");
 
-	AudioCompressor3=InitAudioCompressor(AudioFrameSizeInSamplePerCh,1);
-	if(AudioCompressor1==NULL)
+	AudioCompressor3=InitAudioCompressor(AudioFrameSizeInSamplePerCh_16KHz,1);
+	if(AudioCompressor3==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 7 \r\n");
-	AudioCompressor4=InitAudioCompressor(AudioFrameSizeInSamplePerCh,1);
-	if(AudioCompressor2==NULL)
+	AudioCompressor4=InitAudioCompressor(AudioFrameSizeInSamplePerCh_16KHz,1);
+	if(AudioCompressor4==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 8 \r\n");
 
-	AudioCompressor5=InitAudioCompressor(AudioFrameSizeInSamplePerCh,1);
-	if(AudioCompressor1==NULL)
+	AudioCompressor5=InitAudioCompressor(AudioFrameSizeInSamplePerCh_16KHz,1);
+	if(AudioCompressor5==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 7 \r\n");
-	AudioCompressor6=InitAudioCompressor(AudioFrameSizeInSamplePerCh,1);
-	if(AudioCompressor2==NULL)
+	AudioCompressor6=InitAudioCompressor(AudioFrameSizeInSamplePerCh_16KHz,1);
+	if(AudioCompressor6==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 8 \r\n");
 
-	AudioCompressor7=InitAudioCompressor(AudioFrameSizeInSamplePerCh,1);
-	if(AudioCompressor1==NULL)
+	AudioCompressor7=InitAudioCompressor(AudioFrameSizeInSamplePerCh_16KHz,1);
+	if(AudioCompressor7==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 7 \r\n");
-	AudioCompressor8=InitAudioCompressor(AudioFrameSizeInSamplePerCh,1);
-	if(AudioCompressor2==NULL)
+	AudioCompressor8=InitAudioCompressor(AudioFrameSizeInSamplePerCh_16KHz,1);
+	if(AudioCompressor8==NULL)
 		PRINTF("DSP: InitMeterAndCompressor fail 8 \r\n");
 
 /*

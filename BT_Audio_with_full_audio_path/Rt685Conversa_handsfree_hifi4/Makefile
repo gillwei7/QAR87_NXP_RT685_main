@@ -18,7 +18,7 @@ export SHELL = cmd
 export PATH = C:\usr\xtensa\XtDevTools\install\tools\RI-2023.11-win32\XtensaToolslib\iss\;C:\usr\xtensa\XtDevTools\install\tools\RI-2023.11-win32\XtensaTools\bin\;C:\WINDOWS\system32
 
 all:
-	cmd /c "cd /D ""C:\\Users\\nxa14582\\Documents\\IMXRT600_Workspace\\RT600_IW611_BT_Stan_Zhang\\V_0_1_5_0\\Rt685Conversa_handsfree_hifi4\\bin\\nxp_rt600_RI23_11_newlib\\Release"" && $(MAKE) all  "
+	cmd /c "cd /D ""C:\\Users\\nxa14582\\Documents\\IMXRT600_Workspace\\RT600_IW611_BT_Stan_Zhang\\V_0_1_5_4\\Rt685Conversa_handsfree_hifi4\\bin\\nxp_rt600_RI23_11_newlib\\Release"" && $(MAKE) all  "
 
 clean:
-	cmd /c "cd /D ""C:\\Users\\nxa14582\\Documents\\IMXRT600_Workspace\\RT600_IW611_BT_Stan_Zhang\\V_0_1_5_0\\Rt685Conversa_handsfree_hifi4\\bin\\nxp_rt600_RI23_11_newlib\\Release"" && $(MAKE) clean  "
+	cmd /c "cd /D ""C:\\Users\\nxa14582\\Documents\\IMXRT600_Workspace\\RT600_IW611_BT_Stan_Zhang\\V_0_1_5_4\\Rt685Conversa_handsfree_hifi4\\bin\\nxp_rt600_RI23_11_newlib\\Release"" && $(MAKE) clean  "

@@ -11,37 +11,34 @@
 
 
 //------------------------settings can be changed ----------------------
-//sub working modes (workstate) enable or disable --- go to WorkStateManager.h to setup
+//sub working modes (work state) enable or disable --- go to WorkStateManager.h to setup
 
-#define LetComConnectTuningTool								1		//0 or 1 can be selected
+#define UseEventToControlBtHfp								0		//set to 1 to have hfp event processed in workstate manager ---- not realized yet, don't set it to 1 !!!
+
 #define EnableUsbComAndAudio								1		//0 or 1 can be selected
+#define LetComConnectTuningTool								1		//0 or 1 can be selected
+#if LetComConnectTuningTool==1
+	#define PRINTF_GoesToUsbCom								0		//must be 0
+#else
+	#define PRINTF_GoesToUsbCom								1		//if defined to 1, PRINTF doesn't use UART but goes to USB com
+#endif
 
 #define EnableAudioPllAdjustingToSyncBetweenBtFsAndLocalFs	1		//should always enable this to keep I2S data sync with BT (on buffer under flow or over flow)
-
-#define CallAudioFrameProcessInIntr							0		//should be 0 in this HFP conversa demo
 
 #define EnableMonitorUsbAudioUpStreamLengthAdjusting		1		//should be 1, if 0 then UAC up streaming may get buffer over/under flow
 
 #define EnableBtCirBufUnderflowOverFlowPrint				0
 #define EnableUacCirBufUnderflowOverFlowPrint				0
 #define EnableUartComWatchPrint								0
-#define EnableUsbComWatchPrint								0		//to use this, must set #define LetComConnectTuningTool	0, (otherwise there is no USB COM print --- USB COM is for Conversa tuning)
+#define EnableUsbComWatchPrint								0		//to use this, must set #define LetComConnectTuningTool	0, and must set #define PRINTF_GoesToUsbCom 0,  (otherwise there is no USB COM print --- USB COM is for Conversa tuning)
 
 #define	Rt685I2SToNvtIsI2SMaster							1
 #define Rt685I2SToAmpIsI2SMaster							1		//could be 1 or 0, both works
 
-//#define Rt685I2SToNvtBitWidth								32		//CAN not use this one --- 128*3 makes dma packet size bigger than 2048!!!
-#define Rt685I2SToNvtBitWidth								16
+#define NvtI2SFs_16KHz										16000
+#define NvtI2SFs_48KHz										48000
 
-//#define Fs_I2SToNvt_MicSpkTest								16000
-#define Fs_I2SToNvt_MicSpkTest							48000
-
-#define EnableVitBeforeTheCall								1
-
-#define AmpIsAlwaysIn48Or16KHz								1		//when set to 1, means a2dp 44.1KHz will also be SRCed to 48K and play out --- this helps to match UAC interface, and also good for MIC, cause MIC is always 16KHz or 48KHz
 //------------------------settings can be changed ----------------------
-
-
 
 
 
@@ -69,12 +66,8 @@
 	#define LetComConnectTuningTool							0
 #endif
 
-#if ((Rt685I2SToNvtBitWidth!=16)&&(Rt685I2SToNvtBitWidth!=32))
-	#error Rt685I2SToNvtBitWidth must be either 16 or 32
-#endif
-
-#if ((Fs_I2SToNvt_MicSpkTest!=16000)&&(Fs_I2SToNvt_MicSpkTest!=48000))
-	#error Fs_I2SToNvt_MicSpkTest must be either 16000 or 48000
+#if ((NvtI2SFs_48KHz!=16000)&&(NvtI2SFs_48KHz!=48000))
+	#error NvtI2SFs_48KHz must be either 16000 or 48000
 #endif
 
 

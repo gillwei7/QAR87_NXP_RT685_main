@@ -86,7 +86,7 @@ __attribute__((weak)) void sco_audio_play_ringtone_exit_pl_ext (void)
 {
 }
 
-__attribute__((weak))  API_RESULT sco_audio_set_speaker_volume(UCHAR volume)
+__attribute__((weak))  API_RESULT sco_audio_set_speaker_volume_ext(UCHAR volume)
 {
     return API_SUCCESS;
 }
@@ -251,7 +251,7 @@ void sco_audio_play_inband_ringtone_pl (void)
 void sco_audio_set_speaker_volume_pl(UCHAR value)
 {
 #ifndef HFP_BRIDGING
-    (void)sco_audio_set_speaker_volume(value);
+    (void)sco_audio_set_speaker_volume_ext(value);
 #endif //HFP_BRIDGING
 }
 

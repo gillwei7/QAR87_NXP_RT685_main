@@ -68,6 +68,8 @@
 
 #endif
 
+#include "GlobalDef.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -1079,6 +1081,10 @@ shell_status_t SHELL_Write(shell_handle_t shellHandle, const char *buffer, uint3
     shell_context_handle_t *shellContextHandle;
     uint32_t primask;
     shell_status_t status;
+
+	#if PRINTF_GoesToUsbCom==1
+		return kStatus_SHELL_Success;
+	#endif
 
     assert(shellHandle);
     assert(buffer);

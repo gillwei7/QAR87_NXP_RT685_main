@@ -95,6 +95,7 @@
 								<option id="com.crt.advproject.gcc.hdrlib.560018517" name="Library headers" superClass="com.crt.advproject.gcc.hdrlib" useByScannerDiscovery="false" value="com.crt.advproject.gcc.hdrlib.newlibnano" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.361539840" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="CPU_MIMXRT685SFVKB"/>
+									<listOptionValue builtIn="false" value="UsingDbgPins=0"/>
 									<listOptionValue builtIn="false" value="UsingQAR87Board=1"/>
 									<listOptionValue builtIn="false" value="MX25U12843G=1"/>
 									<listOptionValue builtIn="false" value="USB_DEVICE_INTERRUPT_PRIORITY=3"/>
@@ -149,7 +150,8 @@
 									<listOptionValue builtIn="false" value="DEBUG"/>
 									<listOptionValue builtIn="false" value="__NEWLIB__"/>
 									<listOptionValue builtIn="false" value="USB_STACK_USE_DEDICATED_RAM=1"/>
-									<listOptionValue builtIn="false" value="Using_UART5=1"/>
+									<listOptionValue builtIn="false" value="Using_UART5ToPrint=0"/>
+									<listOptionValue builtIn="false" value="Using_UART2ToPrint=1"/>
 								</option>
 								<option id="com.crt.advproject.gcc.fpu.183191050" name="Floating point" superClass="com.crt.advproject.gcc.fpu" useByScannerDiscovery="true" value="com.crt.advproject.gcc.fpu.fpv5sp.hard" valueType="enumerated"/>
 								<option id="com.crt.advproject.gcc.thumb.2031422085" name="Thumb mode" superClass="com.crt.advproject.gcc.thumb" useByScannerDiscovery="false" value="true" valueType="boolean"/>
@@ -161,6 +163,10 @@
 								<option id="gnu.c.compiler.option.preprocessor.undef.symbol.830844600" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol" useByScannerDiscovery="false"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1740982771" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/hal}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/amp/aw88166/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/pca9422}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/glf70583}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/binary}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/flash_config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/CMSIS}&quot;"/>
@@ -274,10 +280,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/source/impl/ethermind/controller/configs/mbedtls}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template/ARM_CM33_3_priority_bits}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/pca9422}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/glf70583}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/amp/aw88166/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/hal}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.include.files.835145872" name="Include files (-include)" superClass="gnu.c.compiler.option.include.files" useByScannerDiscovery="false"/>
 								<option id="com.crt.advproject.gcc.exe.debug.option.optimization.level.1465075246" name="Optimization Level" superClass="com.crt.advproject.gcc.exe.debug.option.optimization.level" useByScannerDiscovery="true" value="gnu.c.optimization.level.none" valueType="enumerated"/>
@@ -449,10 +451,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/source/impl/ethermind/controller/configs/mbedtls}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template/ARM_CM33_3_priority_bits}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/pca9422}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/glf70583}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/amp/aw88166/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/hal}&quot;"/>
 								</option>
 								<option id="gnu.both.asm.option.warnings.nowarn.1921627512" name="Suppress warnings (-W)" superClass="gnu.both.asm.option.warnings.nowarn"/>
 								<option id="gnu.both.asm.option.version.626550245" name="Announce version (-v)" superClass="gnu.both.asm.option.version"/>
@@ -747,12 +745,12 @@
 								<option id="gnu.c.compiler.option.preprocessor.preprocess.975097757" name="Preprocess only (-E)" superClass="gnu.c.compiler.option.preprocessor.preprocess" useByScannerDiscovery="false"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.23640748" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="CPU_MIMXRT685SFVKB"/>
-									<listOptionValue builtIn="false" value="MX25U12843G=0"/>
-									<listOptionValue builtIn="false" value="UsingQAR87Board=0"/>
-									<listOptionValue builtIn="false" value="USB_STACK_USE_DEDICATED_RAM=1"/>
+									<listOptionValue builtIn="false" value="UsingDbgPins=1"/>
+									<listOptionValue builtIn="false" value="UsingQAR87Board=1"/>
+									<listOptionValue builtIn="false" value="MX25U12843G=1"/>
 									<listOptionValue builtIn="false" value="USB_DEVICE_INTERRUPT_PRIORITY=3"/>
-									<listOptionValue builtIn="false" value="CONFIG_BT_IND_DNLD"/>
 									<listOptionValue builtIn="false" value="CPU_MIMXRT685SFVKB_cm33"/>
+									<listOptionValue builtIn="false" value="CONFIG_BT_IND_DNLD"/>
 									<listOptionValue builtIn="false" value="MCUXPRESSO_SDK"/>
 									<listOptionValue builtIn="false" value="BOOT_HEADER_ENABLE=1"/>
 									<listOptionValue builtIn="false" value="FSL_SDK_DRIVER_QUICK_ACCESS_ENABLE=1"/>
@@ -781,7 +779,7 @@
 									<listOptionValue builtIn="false" value="SDK_DEBUGCONSOLE=1"/>
 									<listOptionValue builtIn="false" value="MCUX_META_BUILD"/>
 									<listOptionValue builtIn="false" value="MIMXRT685S_cm33_SERIES"/>
-									<listOptionValue builtIn="false" value="DEBUG_CONSOLE_TRANSFER_NON_BLOCKING=1"/>
+									<listOptionValue builtIn="false" value="DEBUG_CONSOLE_TRANSFER_NON_BLOCKING=0"/>
 									<listOptionValue builtIn="false" value="OSA_USED"/>
 									<listOptionValue builtIn="false" value="SERIAL_PORT_TYPE_UART=1"/>
 									<listOptionValue builtIn="false" value="SDK_I2C_BASED_COMPONENT_USED=1"/>
@@ -801,11 +799,17 @@
 									<listOptionValue builtIn="false" value="__USE_CMSIS"/>
 									<listOptionValue builtIn="false" value="NDEBUG"/>
 									<listOptionValue builtIn="false" value="__NEWLIB__"/>
-									<listOptionValue builtIn="false" value="Using_UART5=0"/>
+									<listOptionValue builtIn="false" value="USB_STACK_USE_DEDICATED_RAM=1"/>
+									<listOptionValue builtIn="false" value="Using_UART5ToPrint=1"/>
+									<listOptionValue builtIn="false" value="Using_UART2ToPrint=0"/>
 								</option>
 								<option id="gnu.c.compiler.option.preprocessor.undef.symbol.1493010107" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol" useByScannerDiscovery="false"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.include.paths.1386231933" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/amp/aw88166/Inc}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/hal}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/glf70583}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/pca9422}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/flash_config}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/CMSIS}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/CMSIS/m-profile}&quot;"/>
@@ -913,11 +917,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/source/impl/ethermind/controller/configs/mbedtls}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template/ARM_CM33_3_priority_bits}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/pca9422}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/glf70583}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/amp/aw88166}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/amp/aw88166/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/hal}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.include.files.243616939" name="Include files (-include)" superClass="gnu.c.compiler.option.include.files" useByScannerDiscovery="false"/>
 								<option id="gnu.c.compiler.option.optimization.flags.446181376" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags" useByScannerDiscovery="false" value="-fno-common" valueType="string"/>
@@ -1087,11 +1086,6 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/source/impl/ethermind/controller/configs/mbedtls}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template/ARM_CM33_3_priority_bits}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/pca9422}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/pmic/glf70583}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/amp/aw88166}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/amp/aw88166/Inc}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/hal}&quot;"/>
 								</option>
 								<option id="gnu.both.asm.option.warnings.nowarn.1891090211" name="Suppress warnings (-W)" superClass="gnu.both.asm.option.warnings.nowarn"/>
 								<option id="gnu.both.asm.option.version.879596887" name="Announce version (-v)" superClass="gnu.both.asm.option.version"/>

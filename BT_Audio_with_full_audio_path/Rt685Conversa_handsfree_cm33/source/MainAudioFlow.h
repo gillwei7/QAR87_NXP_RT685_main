@@ -28,8 +28,10 @@
 #define AudioI2sPortsBitMapFlag_FcTxToNt		0x40
 #define AudioI2sPortsBitMapFlag_FcRxFrNt		0x80
 
-extern int BTAudioBitWidth;
-extern int BTAudioFs;
+extern int BtHfpAudioVolume;
+extern int BtHfpAudioFs;
+extern int BtHfpAudioBitWidth;
+
 
 extern volatile U8 PdmIsStarted;
 extern volatile U8 I2sIsStarted;
@@ -53,6 +55,12 @@ extern volatile S32 *MicInputCh5Ptr;
 extern volatile S32 *MicInputCh6Ptr;
 extern volatile S32 *MicInputCh7Ptr;
 
+extern U32 I2SOutputMuteCntNvt;
+extern U32 I2SOutputMuteCntAmp;
+extern U32 PdmInputMuteCnt;
+
+
+extern void InitHfpAudioIntfToBT(int MclkFreq, int Fs);
 extern void DeInitCodec(void);
 extern void InitAndStartCodec(int fs, int bits, int Mfreq);
 extern int CheckTimePoint_CurrentIntrIsAStartingOne(void);
@@ -70,7 +78,7 @@ extern void Deinit_Board_Audio(void);
 extern void USB_MicUpStreamDataRateControl_AdjustPacketLength(int AodInCirBuf);
 
 
-extern void ProcessAudio_AfterAudioInputBufIsReady_InCall(void);
+extern void ProcessAudio_AfterAudioInputBufIsReady_HfpCall(void);
 extern void ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy(void);
 
 extern void ProcessAudio_AfterAudioInputBufIsReady_AudioIoDbg(void);
@@ -83,6 +91,8 @@ extern void ProcessAudio_AfterAudioInputBufIsReady_VideoAi(void);
 
 extern void ProcessAudio_AfterAudioInputBufIsReady_TestMicSpk(void);
 
+extern void McuMainAudioFlowFinalize_HfpCall(void);
+extern void McuMainAudioFlowFinalize_HomeVitStandBy(void);
 extern void McuMainAudioFlowFinalize_AudioIoDbg(void);
 extern void McuMainAudioFlowFinalize_VideoRecording(void);
 extern void McuMainAudioFlowFinalize_MediaPlayer(void);
@@ -94,7 +104,7 @@ extern void McuMainAudioFlowFinalize_VideoAi(void);
 
 extern void InitAudioInterface_AudioIoDebug(int Opt);
 extern void DeInitAudioInterface_AudioIoDebug(int Opt);
-extern void InitAudioInterface_HfpCall(int Opt);
+extern void InitAudioInterface_HfpCall(int Opt, U32 samplingRate, U32 bitWidth);
 extern void DeInitAudioInterface_HfpCall(int Opt);
 extern void InitAudioInterface_HomeVitStandby(int Opt);
 extern void DeInitAudioInterface_HomeVitStandby(int Opt);

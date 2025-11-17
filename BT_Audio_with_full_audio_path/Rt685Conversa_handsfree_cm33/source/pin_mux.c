@@ -57,18 +57,30 @@ void BOARD_InitBootPins(void)
     BOARD_Init_Audio_Pins();//connect to codec
     BOARD_InitFlexSPI0APins();
     BOARD_InitScoPins(); //connect to BT PCM
-    //BOARD_InitFourDbgPins();
+
+	#if UsingDbgPins == 1
+		BOARD_InitFourDbgPins();
+	#endif
+
     BOARD_InitDmicPins();
     BOARD_Init_RTvsNT_Audio_Pins();
 
 #else
     BOARD_InitDevGpioPins();
     BOARD_InitDevIBtUartPins();
+#if Using_UART5ToPrint
     BOARD_InitDevDebugUartFC5Pins();
+#else
+    BOARD_InitDevI2S3NT98532FC5FC6Pins();
+#endif
     BOARD_InitDevButtonsPins();
     BOARD_InitDevI3CPins();
     BOARD_InitDevI2SAmpFC1FC3Pins();
+#if Using_UART2ToPrint
+    BOARD_InitDevDebugUartFC2Pins();
+#else
     BOARD_InitDevI2S2IW612FC2FC4Pins();
+#endif
     BOARD_InitDevUsbPins();
     BOARD_InitDevDmicPins();
     BOARD_InitDevSPI532Pins();
@@ -366,7 +378,7 @@ BOARD_InitDEBUG_UARTPins:
 void BOARD_InitDEBUG_UARTPins(void)
 {
 #if UsingQAR87Board == 1
-#if Using_UART5
+	#if Using_UART5ToPrint
 //FC5
     const uint32_t port1_pin4_config = (/* Pin is configured as FC5_TXD_SCL_MISO_WS */
                                         IOPCTL_PIO_FUNC1 |
@@ -388,7 +400,8 @@ void BOARD_InitDEBUG_UARTPins(void)
                                         IOPCTL_PIO_INV_DI);
     /* PORT0 PIN1 (coords: G2) is configured as FC0_TXD_SCL_MISO_WS */
     IOPCTL_PinMuxSet(IOPCTL, 1U, 4U, port1_pin4_config);
-#else
+	#endif
+	#if Using_UART2ToPrint
 //FC2
     const uint32_t port0_pin15_config = (/* Pin is configured as FC2_TXD_SCL_MISO_WS */
                                         IOPCTL_PIO_FUNC1 |
@@ -2944,10 +2957,11 @@ void BOARD_InitScoPins(void)
 BOARD_InitFourDbgPins:
 - options: {callFromInitBoot: 'true', coreID: cm33, enableClock: 'true'}
 - pin_list:
-  - {pin_num: H2, peripheral: GPIO, signal: 'PIO0, 3', pin_signal: PIO0_3/FC0_CTS_SDA_SSEL0/CTIMER0_MAT3/FC1_SSEL2/SEC_PIO0_3, direction: OUTPUT}
-  - {pin_num: J1, peripheral: GPIO, signal: 'PIO0, 4', pin_signal: PIO0_4/FC0_RTS_SCL_SSEL1/CTIMER_INP0/FC1_SSEL3/CMP0_OUT/SEC_PIO0_4, direction: OUTPUT}
-  - {pin_num: A1, peripheral: GPIO, signal: 'PIO0, 19', pin_signal: PIO0_19/FC2_SSEL2/SCT0_GPI4/SCT0_OUT4/CTIMER_INP5/UTICK_CAP0/SEC_PIO0_19/ADC0_2, direction: OUTPUT}
-  - {pin_num: B2, peripheral: GPIO, signal: 'PIO0, 20', pin_signal: PIO0_20/FC2_SSEL3/SCT0_GPI5/SCT0_OUT5/CTIMER0_MAT2/CTIMER_INP11/SEC_PIO0_20/ADC0_10, direction: OUTPUT}
+  - {pin_num: A9, peripheral: GPIO, signal: 'PIO0, 25', pin_signal: PIO0_25/FC3_RTS_SCL_SSEL1/FREQME_GPIO_CLK/CTIMER_INP6/FC2_SSEL3/TRACEDATA(3)/CLKIN/SEC_PIO0_25,
+    direction: OUTPUT}
+  - {pin_num: E2, peripheral: GPIO, signal: 'PIO2, 15', pin_signal: PIO2_15/SCT0_OUT9/CLKIN/CMP0_D, direction: OUTPUT}
+  - {pin_num: A7, peripheral: GPIO, signal: 'PIO1, 2', pin_signal: PIO1_2/FC4_SSEL3/SCT0_GPI3/SCT0_OUT9/CTIMER1_MAT1/CMP0_C, direction: OUTPUT}
+  - {pin_num: C7, peripheral: GPIO, signal: 'PIO0, 21', pin_signal: PIO0_21/FC3_SCK/CTIMER3_MAT0/TRACECLK/SEC_PIO0_21, direction: OUTPUT}
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS ***********
  */
 /* clang-format on */
@@ -2965,56 +2979,41 @@ void BOARD_InitFourDbgPins(void)
     /* Enables the clock for the GPIO0 module */
     CLOCK_EnableClock(kCLOCK_HsGpio0);
 
-    gpio_pin_config_t DbgPin5_config = {
-        .pinDirection = kGPIO_DigitalOutput,
-        .outputLogic = 0U
-    };
-    /* Initialize GPIO functionality on pin PIO0_3 (pin H2)  */
-    GPIO_PinInit(BOARD_INITFOURDBGPINS_DbgPin5_GPIO, BOARD_INITFOURDBGPINS_DbgPin5_PORT, BOARD_INITFOURDBGPINS_DbgPin5_PIN, &DbgPin5_config);
+    /* Enables the clock for the GPIO1 module */
+    CLOCK_EnableClock(kCLOCK_HsGpio1);
 
-    gpio_pin_config_t DbgPin6_config = {
-        .pinDirection = kGPIO_DigitalOutput,
-        .outputLogic = 0U
-    };
-    /* Initialize GPIO functionality on pin PIO0_4 (pin J1)  */
-    GPIO_PinInit(BOARD_INITFOURDBGPINS_DbgPin6_GPIO, BOARD_INITFOURDBGPINS_DbgPin6_PORT, BOARD_INITFOURDBGPINS_DbgPin6_PIN, &DbgPin6_config);
-
-    gpio_pin_config_t DbgPin7_config = {
-        .pinDirection = kGPIO_DigitalOutput,
-        .outputLogic = 0U
-    };
-    /* Initialize GPIO functionality on pin PIO0_19 (pin A1)  */
-    GPIO_PinInit(BOARD_INITFOURDBGPINS_DbgPin7_GPIO, BOARD_INITFOURDBGPINS_DbgPin7_PORT, BOARD_INITFOURDBGPINS_DbgPin7_PIN, &DbgPin7_config);
+    /* Enables the clock for the GPIO2 module */
+    CLOCK_EnableClock(kCLOCK_HsGpio2);
 
     gpio_pin_config_t DbgPin8_config = {
         .pinDirection = kGPIO_DigitalOutput,
         .outputLogic = 0U
     };
-    /* Initialize GPIO functionality on pin PIO0_20 (pin B2)  */
+    /* Initialize GPIO functionality on pin PIO0_21 (pin C7)  */
     GPIO_PinInit(BOARD_INITFOURDBGPINS_DbgPin8_GPIO, BOARD_INITFOURDBGPINS_DbgPin8_PORT, BOARD_INITFOURDBGPINS_DbgPin8_PIN, &DbgPin8_config);
 
-    const uint32_t DbgPin7 = (/* Pin is configured as PIO0_19 */
-                              IOPCTL_PIO_FUNC0 |
-                              /* Disable pull-up / pull-down function */
-                              IOPCTL_PIO_PUPD_DI |
-                              /* Enable pull-down function */
-                              IOPCTL_PIO_PULLDOWN_EN |
-                              /* Disable input buffer function */
-                              IOPCTL_PIO_INBUF_DI |
-                              /* Normal mode */
-                              IOPCTL_PIO_SLEW_RATE_NORMAL |
-                              /* Normal drive */
-                              IOPCTL_PIO_FULLDRIVE_DI |
-                              /* Analog mux is disabled */
-                              IOPCTL_PIO_ANAMUX_DI |
-                              /* Pseudo Output Drain is disabled */
-                              IOPCTL_PIO_PSEDRAIN_DI |
-                              /* Input function is not inverted */
-                              IOPCTL_PIO_INV_DI);
-    /* PORT0 PIN19 (coords: A1) is configured as PIO0_19 */
-    IOPCTL_PinMuxSet(IOPCTL, BOARD_INITFOURDBGPINS_DbgPin7_PORT, BOARD_INITFOURDBGPINS_DbgPin7_PIN, DbgPin7);
+    gpio_pin_config_t DbgPin5_config = {
+        .pinDirection = kGPIO_DigitalOutput,
+        .outputLogic = 0U
+    };
+    /* Initialize GPIO functionality on pin PIO0_25 (pin A9)  */
+    GPIO_PinInit(BOARD_INITFOURDBGPINS_DbgPin5_GPIO, BOARD_INITFOURDBGPINS_DbgPin5_PORT, BOARD_INITFOURDBGPINS_DbgPin5_PIN, &DbgPin5_config);
 
-    const uint32_t DbgPin8 = (/* Pin is configured as PIO0_20 */
+    gpio_pin_config_t DbgPin7_config = {
+        .pinDirection = kGPIO_DigitalOutput,
+        .outputLogic = 0U
+    };
+    /* Initialize GPIO functionality on pin PIO1_2 (pin A7)  */
+    GPIO_PinInit(BOARD_INITFOURDBGPINS_DbgPin7_GPIO, BOARD_INITFOURDBGPINS_DbgPin7_PORT, BOARD_INITFOURDBGPINS_DbgPin7_PIN, &DbgPin7_config);
+
+    gpio_pin_config_t DbgPin6_config = {
+        .pinDirection = kGPIO_DigitalOutput,
+        .outputLogic = 0U
+    };
+    /* Initialize GPIO functionality on pin PIO2_15 (pin E2)  */
+    GPIO_PinInit(BOARD_INITFOURDBGPINS_DbgPin6_GPIO, BOARD_INITFOURDBGPINS_DbgPin6_PORT, BOARD_INITFOURDBGPINS_DbgPin6_PIN, &DbgPin6_config);
+
+    const uint32_t DbgPin8 = (/* Pin is configured as PIO0_21 */
                               IOPCTL_PIO_FUNC0 |
                               /* Disable pull-up / pull-down function */
                               IOPCTL_PIO_PUPD_DI |
@@ -3032,10 +3031,10 @@ void BOARD_InitFourDbgPins(void)
                               IOPCTL_PIO_PSEDRAIN_DI |
                               /* Input function is not inverted */
                               IOPCTL_PIO_INV_DI);
-    /* PORT0 PIN20 (coords: B2) is configured as PIO0_20 */
+    /* PORT0 PIN21 (coords: C7) is configured as PIO0_21 */
     IOPCTL_PinMuxSet(IOPCTL, BOARD_INITFOURDBGPINS_DbgPin8_PORT, BOARD_INITFOURDBGPINS_DbgPin8_PIN, DbgPin8);
 
-    const uint32_t DbgPin5 = (/* Pin is configured as PIO0_3 */
+    const uint32_t DbgPin5 = (/* Pin is configured as PIO0_25 */
                               IOPCTL_PIO_FUNC0 |
                               /* Disable pull-up / pull-down function */
                               IOPCTL_PIO_PUPD_DI |
@@ -3053,10 +3052,10 @@ void BOARD_InitFourDbgPins(void)
                               IOPCTL_PIO_PSEDRAIN_DI |
                               /* Input function is not inverted */
                               IOPCTL_PIO_INV_DI);
-    /* PORT0 PIN3 (coords: H2) is configured as PIO0_3 */
+    /* PORT0 PIN25 (coords: A9) is configured as PIO0_25 */
     IOPCTL_PinMuxSet(IOPCTL, BOARD_INITFOURDBGPINS_DbgPin5_PORT, BOARD_INITFOURDBGPINS_DbgPin5_PIN, DbgPin5);
 
-    const uint32_t DbgPin6 = (/* Pin is configured as PIO0_4 */
+    const uint32_t DbgPin7 = (/* Pin is configured as PIO1_2 */
                               IOPCTL_PIO_FUNC0 |
                               /* Disable pull-up / pull-down function */
                               IOPCTL_PIO_PUPD_DI |
@@ -3074,7 +3073,28 @@ void BOARD_InitFourDbgPins(void)
                               IOPCTL_PIO_PSEDRAIN_DI |
                               /* Input function is not inverted */
                               IOPCTL_PIO_INV_DI);
-    /* PORT0 PIN4 (coords: J1) is configured as PIO0_4 */
+    /* PORT1 PIN2 (coords: A7) is configured as PIO1_2 */
+    IOPCTL_PinMuxSet(IOPCTL, BOARD_INITFOURDBGPINS_DbgPin7_PORT, BOARD_INITFOURDBGPINS_DbgPin7_PIN, DbgPin7);
+
+    const uint32_t DbgPin6 = (/* Pin is configured as PIO2_15 */
+                              IOPCTL_PIO_FUNC0 |
+                              /* Disable pull-up / pull-down function */
+                              IOPCTL_PIO_PUPD_DI |
+                              /* Enable pull-down function */
+                              IOPCTL_PIO_PULLDOWN_EN |
+                              /* Disable input buffer function */
+                              IOPCTL_PIO_INBUF_DI |
+                              /* Normal mode */
+                              IOPCTL_PIO_SLEW_RATE_NORMAL |
+                              /* Normal drive */
+                              IOPCTL_PIO_FULLDRIVE_DI |
+                              /* Analog mux is disabled */
+                              IOPCTL_PIO_ANAMUX_DI |
+                              /* Pseudo Output Drain is disabled */
+                              IOPCTL_PIO_PSEDRAIN_DI |
+                              /* Input function is not inverted */
+                              IOPCTL_PIO_INV_DI);
+    /* PORT2 PIN15 (coords: E2) is configured as PIO2_15 */
     IOPCTL_PinMuxSet(IOPCTL, BOARD_INITFOURDBGPINS_DbgPin6_PORT, BOARD_INITFOURDBGPINS_DbgPin6_PIN, DbgPin6);
 }
 

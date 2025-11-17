@@ -66,7 +66,7 @@ uint8_t APP_GetDSPCoreDomainID(void)
 
 void AudioFrameProcess(U32 Mode)
 {
-	DbgPin7Up();
+	DbgPin6Up();
 
 	//get MIPS data
 	CycCntA=read_ccount();
@@ -75,6 +75,7 @@ void AudioFrameProcess(U32 Mode)
 	int Opt=0;
 	switch(Mode)
 	{
+		//may need to get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
 		case MuEvtMcuToDsp_AudioFrmIsReady_HfpCall:
 			DspMainAudioFlowProcOneFrame_HfpCall(MuEvtMcuToDsp_AudioFrmIsReady_HfpCall);
 		break;
@@ -82,31 +83,24 @@ void AudioFrameProcess(U32 Mode)
 			DspMainAudioFlowProcOneFrame_HfpCall(MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy);
 		break;
 		case MuEvtMcuToDsp_AudioFrmIsReady_AudioIoDbg:
-			//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
 			DspMainAudioFlowProcOneFrame_AudioIoDbg(Opt);
 		break;
 		case MuEvtMcuToDsp_AudioFrmIsReady_VideoRecording:
-			//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
 			DspMainAudioFlowProcOneFrame_VideoRecording(Opt);
 		break;
 		case MuEvtMcuToDsp_AudioFrmIsReady_MediaPlayer:
-			//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
 			DspMainAudioFlowProcOneFrame_MediaPlayer(Opt);
 		break;
 		case MuEvtMcuToDsp_AudioFrmIsReady_MusicPlayer:
-			//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
 			DspMainAudioFlowProcOneFrame_MusicPlayer(Opt);
 		break;
 		case MuEvtMcuToDsp_AudioFrmIsReady_Translation:
-			//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
 			DspMainAudioFlowProcOneFrame_Translation(Opt);
 		break;
 		case MuEvtMcuToDsp_AudioFrmIsReady_AiConversation:
-			//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
 			DspMainAudioFlowProcOneFrame_AiConversation(Opt);
 		break;
 		case MuEvtMcuToDsp_AudioFrmIsReady_VideoAi:
-			//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
 			DspMainAudioFlowProcOneFrame_VideoAi(Opt);
 		break;
 		default:
@@ -155,7 +149,7 @@ void AudioFrameProcess(U32 Mode)
 	}
 
 	AudioFrameCnt++;
-	DbgPin7Dn();
+	DbgPin6Dn();
 }
 
 void APP_MU_IRQHandler(void)
@@ -177,11 +171,7 @@ void APP_MU_IRQHandler(void)
     	    SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
     	}else
     	{
-			#if DoAudioFrameProcInMuInterrupt==1
-				xos_event_set(&MuEventFromMcu,MU_U32InfoFromMcu);
-			#else
-				AudioFrameProcess(MU_U32InfoFromMcu);
-			#endif
+			xos_event_set(&MuEventFromMcu,MU_U32InfoFromMcu);
     	}
     }
     //DbgPin7Dn();
@@ -234,25 +224,24 @@ extern int InitOpusDecoder(void);
 
 
 XosThread thread_VitAndAudioDec;
-XosThread thread_AlgCtnProc;
 XosThread thread_AudioFrameProc;
 
 int Task_VitAndAudioDec(void * arg, int32_t wake_value);
-int Task_AlgoContainerProc(void * arg, int32_t wake_value);
 int Task_AudioFrameProc(void * arg, int32_t wake_value);
 
 #define THREAD_STACK_SIZE_VitAndAudioDec	(10*1024)
 #define THREAD_PRIORITY_VitAndAudioDec	11
 U32 ThreadStackMem_VitAndAudioDec[THREAD_STACK_SIZE_VitAndAudioDec];
 
-#define THREAD_STACK_SIZE_AlgCtnProc	(10*1024)
-#define THREAD_PRIORITY_AlgCtnProc	12				//higher than VIT
-U32 ThreadStackMem_AlgCtnProc[THREAD_STACK_SIZE_AlgCtnProc];
-
 #define THREAD_STACK_SIZE_AudioFrameProc	(10*1024)
 #define THREAD_PRIORITY_AudioFrameProc	12				//higher than VIT
 U32 ThreadStackMem_AudioFrameProc[THREAD_STACK_SIZE_AudioFrameProc];
 
+void CommandToPlayWakeSound(void)
+{
+	PtrVarBlockSharedByDspAndMcu->NeedToStartPlayOpus=1;
+	PtrVarBlockSharedByDspAndMcu->PlayOpusFileIdx=0;		//opus file 0 is the wakesound
+}
 extern int XOS_Test(void);
 int main(void)
 {
@@ -302,9 +291,9 @@ int main(void)
     domainId = APP_GetDSPCoreDomainID();
 
     SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-    	PRINTF("RT685 DSP: Started -----IW611 BT HFP with Conversa------- \r\n");
-		PRINTF("RT685 DSP: started ----------- DspVer 0.1.4.9 ------------- \r\n");
-    	PRINTF("RT685 DSP: Started -----IW611 BT HFP with Conversa------- \r\n");
+		PRINTF("RT685 DSP: Started ---IW611 BT HFP A2DP with Conversa---- \r\n");
+		PRINTF("RT685 DSP: started ----------- DspVer 1.6.0 ------------- \r\n");
+    	PRINTF("RT685 DSP: Started ---IW611 BT HFP A2DP with Conversa---- \r\n");
     	PRINTF("RT685 DSP: DSP freq: %d Hz\r\n",CLOCK_GetFreq(kCLOCK_DspCpuClk));
 		InitMeterAndCompressor();
 		InitVit();
@@ -347,23 +336,23 @@ int main(void)
 
 	//init SRC
     SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-	//             (ptr to handle.             int InputBlockSizeInSamples,  int inFs, int outFs, int ChNum,          alloc_memory ptr array,           ptr numbers,              int NeedToDisplay)
-	InitCadenceAsrc(&SRC_process_Ref_handle,   AudioFrameSizeInSamplePerCh/2,   8000,     16000,      1,       (void **)&g_pv_arr_alloc_memory_Ref,   &g_w_malloc_count_Ref,                0     );
-	InitCadenceAsrc(&SRC_process_TxOut_handle, AudioFrameSizeInSamplePerCh  ,  16000,      8000,      1,       (void **)&g_pv_arr_alloc_memory_TxOut, &g_w_malloc_count_TxOut,              0     );
+	//             (ptr to handle.    int InputBlockSizeInSamples,        int inFs, int outFs, int ChNum,  EnableAsrc   NeedToDisplay)
+	InitCadenceAsrc(&SRC_ConversaRx1,   AudioFrameSizeInSamplePerCh_16KHz/2,   8000,     16000,      1,           0,             0     );
+	InitCadenceAsrc(&SRC_ConversaRx2,   AudioFrameSizeInSamplePerCh_48KHz  ,  48000,     16000,      2,           0,             0     );
+	InitCadenceAsrc(&SRC_ConversaTx1,   AudioFrameSizeInSamplePerCh_16KHz  ,  16000,      8000,      1,           0,             0     );
 
     SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
 
 	#if EnableOpusDec==1
-		InitOpusOutputCirBuf();
+		InitOpusOutputCirBuf(16000,1);
 		OpusDecoderIsRunning=0;
 	#endif
 
 
 	#if EnableOpusDec==1
-		InitSbcOutputCirBuf();
+		InitSbcOutputCirBuf(48000,1);
 		SbcDecoderIsRunning=0;
 		SbcDecoderIsInited=0;
-		SbcOutputCirBuf_LRMixed_IsHalfFull=0;
 		SbcDecoderIsMutedButStillRunning=0;
 	#endif
 
@@ -449,31 +438,17 @@ int main(void)
 		retStatus = kStatus_Fail;
 	}
 
-#if 0
-	retStatusXos = xos_thread_create(&thread_AlgCtnProc, NULL, Task_AlgoContainerProc, NULL, "Task_AlgoContainerProc",
-						ThreadStackMem_AlgCtnProc,
-						THREAD_STACK_SIZE_AlgCtnProc,
-						THREAD_PRIORITY_AlgCtnProc,
+	retStatusXos = xos_thread_create(&thread_AudioFrameProc, NULL, Task_AudioFrameProc, NULL, "Task_AudioFrameProc",
+						ThreadStackMem_AudioFrameProc,
+						THREAD_STACK_SIZE_AudioFrameProc,
+						THREAD_PRIORITY_AudioFrameProc,
 						0, 0);
 	if ( retStatusXos != XOS_OK )
 	{
-		PRINTF("FAIL - DSP init: Create Task_AlgoContainerProc (error = %d)\r\n",retStatusXos);
+		PRINTF("FAIL - DSP init: Create Task_AudioFrameProc (error = %d)\r\n",retStatusXos);
 		retStatus = kStatus_Fail;
 	}
-#endif
 
-	#if DoAudioFrameProcInMuInterrupt==1
-		retStatusXos = xos_thread_create(&thread_AudioFrameProc, NULL, Task_AudioFrameProc, NULL, "Task_AudioFrameProc",
-							ThreadStackMem_AudioFrameProc,
-							THREAD_STACK_SIZE_AudioFrameProc,
-							THREAD_PRIORITY_AudioFrameProc,
-							0, 0);
-		if ( retStatusXos != XOS_OK )
-		{
-			PRINTF("FAIL - DSP init: Create Task_AudioFrameProc (error = %d)\r\n",retStatusXos);
-			retStatus = kStatus_Fail;
-		}
-	#endif
 	xos_start(0);
 }
 
@@ -531,7 +506,7 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 					 *		- Run VIT process
 					 *		- Send message to MCU to indicate VIT process finished
 					 *******************************************************************/
-					DbgPin8Up();
+					DbgPin6Up();
 					VIT_Status = swProcessVIT( p_swIpVIT_handle,
 											   p_conversaToVitBuff_16b,
 											   p_conversaToVitBuff_16b_RawMic,
@@ -540,7 +515,9 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 											   &g_vitVcDetectionId
 											 );
 
-					DbgPin8Dn();
+					DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();
+					DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();
+					DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();
 
 					if (VIT_Status != VIT_SUCCESS)
 					{
@@ -550,7 +527,6 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 				}
 			#endif
 
-			DbgPin5Up();
 			#if 0	//print something to show DSP is active
 				if(!(g_vitFramecount%20))
 				{
@@ -561,6 +537,10 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 					SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
 				}
 			#endif
+
+
+			DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();
+			DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();
 
 			#if EnableOpusDec==1
 				//OPUS decoding temp place here --- later may move to a new task
@@ -657,7 +637,6 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 						SbcDecoderIsInited=0;
 						CirAudioBuf_ClearAllSamples_S8((T_CircularAudioBuf_S8 *)&PtrVarBlockSharedByDspAndMcu->CirBuf_SbcRaw);
 						SbcDecoderIsRunning=0;
-						SbcOutputCirBuf_LRMixed_IsHalfFull=0;
 						SbcDecoderIsMutedButStillRunning=0;
 					}else
 					{
@@ -701,7 +680,6 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 						SbcDecoderIsInited=0;
 						CirAudioBuf_ClearAllSamples_S8((T_CircularAudioBuf_S8 *)&PtrVarBlockSharedByDspAndMcu->CirBuf_SbcRaw);
 						SbcDecoderIsRunning=0;
-						SbcOutputCirBuf_LRMixed_IsHalfFull=0;
 						SbcDecoderIsMutedButStillRunning=0;
 					}else
 					{
@@ -740,132 +718,13 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 
 
 			#endif
-			DbgPin5Dn();
 
+			DbgPin6Dn();
 		}
 	}
 	return 0;
 }
 
-int Task_AlgoContainerProc(void * arg, int32_t wake_value)
-{
-	while(1)
-	{
-		xos_thread_sleep(xos_msecs_to_cycles(10-2));	//10ms delay
-		//DbgPin7Up();
-		PRINTF("111222333\r\n");
-		//DbgPin7Dn();
-	}
-
-	while(1)
-	{
-		xos_event_wait_any(&MuEventFromMcu, 0xFFFF);
-
-		U32 MU_U32InfoFromMcu;
-		xos_event_get(&MuEventFromMcu, &MU_U32InfoFromMcu);
-		xos_event_clear(&MuEventFromMcu, 0xffff);
-
-
-		DbgPin7Up();DbgPin7Up();DbgPin7Up();DbgPin7Up();DbgPin7Up();DbgPin7Up();DbgPin7Up();
-
-		//PRINTF("event: %x\n", MU_U32InfoFromMcu);
-
-				//get MIPS data
-				CycCntA=read_ccount();
-
-		//process audio according to different use cases
-		int Opt=0;
-//		/*
-		switch(MU_U32InfoFromMcu)
-		{
-			case MuEvtMcuToDsp_AudioFrmIsReady_HfpCall:
-				DspMainAudioFlowProcOneFrame_HfpCall(MuEvtMcuToDsp_AudioFrmIsReady_HfpCall);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy:
-				DspMainAudioFlowProcOneFrame_HfpCall(MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_AudioIoDbg:
-				//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
-				DspMainAudioFlowProcOneFrame_AudioIoDbg(Opt);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_VideoRecording:
-				//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
-				DspMainAudioFlowProcOneFrame_VideoRecording(Opt);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_MediaPlayer:
-				//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
-				DspMainAudioFlowProcOneFrame_MediaPlayer(Opt);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_MusicPlayer:
-				//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
-				DspMainAudioFlowProcOneFrame_MusicPlayer(Opt);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_Translation:
-				//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
-				DspMainAudioFlowProcOneFrame_Translation(Opt);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_AiConversation:
-				//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
-				DspMainAudioFlowProcOneFrame_AiConversation(Opt);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_VideoAi:
-				//get option word from PtrVarBlockSharedByDspAndMcu->U32ControlPara
-				DspMainAudioFlowProcOneFrame_VideoAi(Opt);
-				break;
-			default:
-				break;
-		}
-//		*/
-				//get MIPS data
-				CycCntB=read_ccount();
-				PtrVarBlockSharedByDspAndMcu->U32CycCntHistory[CycCntHistoryIdx]= CycCntB-CycCntA;		//1437169 cycles, 1.43M/4.5M * 600M = 190MIPS
-				PtrVarBlockSharedByDspAndMcu->MonitorInfoArray1[3]=CycCntB-CycCntA;
-				CycCntHistoryIdx++;
-				if(CycCntHistoryIdx>=100)
-					CycCntHistoryIdx=0;
-
-		//send response to MCU
-//		/*
-		switch(MU_U32InfoFromMcu)
-		{
-			case MuEvtMcuToDsp_AudioFrmIsReady_HfpCall:
-				MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtDspToMcu_AudioProcIsFinished_HfpCall);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy:
-				MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtDspToMcu_AudioProcIsFinished_HomeVitStandBy);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_AudioIoDbg:
-				MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtDspToMcu_AudioProcIsFinished_AudioIoDbg);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_VideoRecording:
-				MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtDspToMcu_AudioProcIsFinished_VideoRecording);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_MediaPlayer:
-				MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtDspToMcu_AudioProcIsFinished_MediaPlayer);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_MusicPlayer:
-				MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtDspToMcu_AudioProcIsFinished_MusicPlayer);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_Translation:
-				MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtDspToMcu_AudioProcIsFinished_Translation);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_AiConversation:
-				MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtDspToMcu_AudioProcIsFinished_AiConversation);
-				break;
-			case MuEvtMcuToDsp_AudioFrmIsReady_VideoAi:
-				MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtDspToMcu_AudioProcIsFinished_VideoAi);
-				break;
-			default:
-				break;
-		}
-//		*/
-		AudioFrameCnt++;
-		DbgPin7Dn();
-	}
-	return 0;
-}
-
-#if DoAudioFrameProcInMuInterrupt==1
 
 int Task_AudioFrameProc(void * arg, int32_t wake_value)
 {
@@ -890,5 +749,4 @@ int Task_AudioFrameProc(void * arg, int32_t wake_value)
 	return 0;
 }
 
-#endif
 

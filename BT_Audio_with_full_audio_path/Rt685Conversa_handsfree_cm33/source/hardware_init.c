@@ -714,9 +714,9 @@ void BOARD_InitHardware(void)
 #endif
 
 	PRINTF("\r\n");
-	PRINTF("RT685 MCU: -----IW611 BT HFP with Conversa------- \r\n");
-	PRINTF("RT685 MCU: ------------ McuVer 0.1.5.0 ------------ \r\n");
-	PRINTF("RT685 MCU: -----IW611 BT HFP A2DP with Conversa------- \r\n");
+	PRINTF("RT685 MCU: ----IW611 BT HFP A2DP with Conversa--- \r\n");
+	PRINTF("RT685 MCU: ------------ McuVer 1.6.0 ------------ \r\n");
+	PRINTF("RT685 MCU: ----IW611 BT HFP A2DP with Conversa--- \r\n");
 
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: size of shared memory structure is %d \r\n", sizeof(VarBlockSharedByDspAndMcu));
@@ -729,6 +729,9 @@ void BOARD_InitHardware(void)
 	TestGetCycCnt();		//can be closed after debug
 
 #if UsingQAR87Board == 1
+	#if UsingDbgPins == 1
+		//InitDbgPin(); //should be called after gpio init
+	#endif
 	InitSineToneGen1();
 	InitSineToneGen2();
 	InitBtnEvt(); //need more editing for Quanta board

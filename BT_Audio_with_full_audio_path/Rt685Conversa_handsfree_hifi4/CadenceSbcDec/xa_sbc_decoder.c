@@ -62,13 +62,14 @@ unsigned char *SbcFileBegPtr;
 unsigned char *SbcFileEndPtr;
 unsigned char *SbcFileCurrentPtr;
 
-int SbcOutputCirBuf_LRMixed_IsHalfFull;
 int SbcDecoderIsInited;
 int SbcDecoderIsMutedButStillRunning;
 int SbcDecoderIsRunning;
-#define SbcOutputCirBuf_LRMixed_LengthInSample		(140*48)		//40ms
+
+
+#define SbcOutputCirBuf_LRMixed_LengthInSample_Max		(SbcOutputCirBuf_LRMixed_LengthInMs*48)					//when fs is 48KHz, it is max sample size
 T_CircularAudioBuf_S32 SbcOutputCirBuf_LRMixed;
-int SbcOutputCirBuf_LRMixed_DataArea[SbcOutputCirBuf_LRMixed_LengthInSample+AudioFrameSizeInSamplePerCh];				//40ms + read size = AudioFrameSizeInSamplePerCh
+int SbcOutputCirBuf_LRMixed_DataArea[SbcOutputCirBuf_LRMixed_LengthInSample_Max+AudioFrameSizeInSamplePerCh_48KHz];	//+ extra read size = AudioFrameSizeInSamplePerCh
 int SbcPacketsDecoded;
 
 VOID xa_sbc_dec_error_handler_init();
@@ -315,6 +316,19 @@ static unsigned int output_wordsize (unsigned int sample_bits)
 {
   /* Round up to the next 2-byte size: 16 -> 2; 24 -> 4. */
   return 2 * ((sample_bits + 15) / 16);
+}
+
+void InitSbcOutputCirBuf(int fs, int ToClearMem)
+{
+	int SampleNum;
+
+	SampleNum=fs/1000*SbcOutputCirBuf_LRMixed_LengthInMs;
+	assert(SampleNum <= SbcOutputCirBuf_LRMixed_LengthInSample_Max);
+
+	InitCirAudioBuf_S32(&SbcOutputCirBuf_LRMixed,SbcOutputCirBuf_LRMixed_DataArea,SampleNum);
+
+	if(ToClearMem)
+		memset(SbcOutputCirBuf_LRMixed_DataArea,0,sizeof(SbcOutputCirBuf_LRMixed_DataArea));
 }
 
 #if 0
@@ -800,9 +814,17 @@ int InitSbcDecoderForOneSbcFile(int SbcFileIdx)
 
 
 	//init SRC
-	//             (ptr to handle.     int InputBlockSizeInSamples,     int inFs,                 int outFs,                   int ChNum,           alloc_memory ptr array,              ptr numbers,       int NeedToDisplay)
-	InitCadenceAsrc(&DecoderSbc_handle,DecoderSbc_SrcInSizeInSamples, i_samp_freq,   PtrVarBlockSharedByDspAndMcu->I2SFs_Loc,      2,      (void **)&g_pv_arr_alloc_memory_DecoderSbc, &g_w_malloc_DecoderSbc,         1     );
+	//             (ptr to handle.     int InputBlockSizeInSamples,  int inFs,                 int outFs,                  int ChNum,  EnableAsrc NeedToDisplay)
+	InitCadenceAsrc(&SRC_DecoderSbc,DecoderSbc_SrcInSizeInSamples, i_samp_freq,   PtrVarBlockSharedByDspAndMcu->I2SFs_Amp,      2,           1,          1     );
 	//                                 DecoderSbc_SrcInSizeInSamples is to reserve enough space for output, later the input block size in samples will be set again in the src processing
+
+	SRC_DecoderSbc.AodTgtValue=((T_CircularAudioBuf_S8 *)&PtrVarBlockSharedByDspAndMcu->CirBuf_SbcRaw)->LengthInSamples/2;
+	SRC_DecoderSbc.KiAccMax=1000000;
+	SRC_DecoderSbc.Kp=(float)(1.0f/20000000.0f);			//kp ki should be set to proper value according to each kind of SBC stream --- now only good for 44.1KHz sbc, 581 byte packet
+	SRC_DecoderSbc.Ki=(float)(1.0f/100000000.0f);			//kp ki should be set to proper value according to each kind of SBC stream --- now only good for 44.1KHz sbc, 581 byte packet
+
+
+	InitSbcOutputCirBuf(PtrVarBlockSharedByDspAndMcu->I2SFs_Amp,0);
 
 	//#if WAV_HEADER
 	#if 0
@@ -863,28 +885,30 @@ int SbcDecodeProcess(int SbcFileIdx)
 	int loopTime=0;
 
 	if(i_samp_freq==16000)
-		loopTime=4*2;		//4*8ms=32ms, this is > 30ms	*2 to doule sure call the decoding enough times
+		loopTime=4*2;		//4*8ms=32ms, this is > 30ms	*2 to double sure call the decoding enough times
 
 	if(i_samp_freq==48000)
-		loopTime=12*2;	//12*2.666ms=32ms, this is > 30ms	*2 to doule sure call the decoding enough times
+		loopTime=12*2;	//12*2.666ms=32ms, this is > 30ms	*2 to double sure call the decoding enough times
 
 	if(i_samp_freq==44100)
-		loopTime=11*2;	//11*2.902ms=31.9ms, this is > 30ms	*2 to doule sure call the decoding enough times
+		loopTime=11*2;	//11*2.902ms=31.9ms, this is > 30ms	*2 to double sure call the decoding enough times
 
+	int FreeAod_Audio;
+	int AodSbc;
 
-	for(int ii=0;ii<loopTime;ii++)	//to run the decoding multiple times to generate longer than 30ms samples
+	for(int ii=0;ii<loopTime;ii++)	//to run the decoding multiple times to generate longer than 32ms samples  --- signal flow side triggers this decoding once every 24ms or 32ms
 	{
-		int FreeAod;
 		xos_mutex_lock(&g_audio_SbcDecoderMutex);
-			FreeAod=CirAudioBuf_SpaceAvailableInSamples_S32(&SbcOutputCirBuf_LRMixed);
+		FreeAod_Audio=CirAudioBuf_SpaceAvailableInSamples_S32(&SbcOutputCirBuf_LRMixed);
 		xos_mutex_unlock(&g_audio_SbcDecoderMutex);
 
-		if(FreeAod>=50*48)
-		//if(FreeAod>=8*16)
+		int SamplesToGeGeneratedEachFrame=	PtrVarBlockSharedByDspAndMcu->I2SFs_Amp /1000 * 10;		//each frame is no more than 10ms --- SBC generates no more than 10ms
+
+		if(FreeAod_Audio>=SamplesToGeGeneratedEachFrame)
 		{
 			/* Execute process */
-			//U32 U32ToPrint1;
-			//U32 U32ToPrint2;
+			U32 U32ToPrint1;
+			U32 U32ToPrint2;
 
 			//PRINTF("Sbc Packet Strt: %d, %d\n", ui_inp_size, i_bytes_consumed);
 
@@ -900,9 +924,8 @@ int SbcDecodeProcess(int SbcFileIdx)
 				if(SbcFileIdx==0xffff)
 				{
 					//this is a2dp sbc streaming, not reading sbc from a file
-					int l;
 					SEMA42_Lock(APP_SEMA42, SEMA42_GATE1, domainId);
-						l=CirAudioBuf_SpaceOccupiedInSamples_S8((T_CircularAudioBuf_S8 *)(&PtrVarBlockSharedByDspAndMcu->CirBuf_SbcRaw));
+					AodSbc=CirAudioBuf_SpaceOccupiedInSamples_S8((T_CircularAudioBuf_S8 *)(&PtrVarBlockSharedByDspAndMcu->CirBuf_SbcRaw));
 					SEMA42_Unlock(APP_SEMA42, SEMA42_GATE1);
 
 					/*
@@ -917,7 +940,7 @@ int SbcDecodeProcess(int SbcFileIdx)
 								);
 					*/
 
-					if(l>=i_bytes_consumed)
+					if(AodSbc>=i_bytes_consumed)
 					{
 						SEMA42_Lock(APP_SEMA42, SEMA42_GATE1, domainId);
 							CirAudioBuf_ReadSamples_S8((T_CircularAudioBuf_S8 *)(&PtrVarBlockSharedByDspAndMcu->CirBuf_SbcRaw), i_bytes_consumed, (S8 *)(pb_inp_buf + (ui_inp_size - i_bytes_consumed)));
@@ -940,8 +963,8 @@ int SbcDecodeProcess(int SbcFileIdx)
 				SbcFrmSizeReadIn=i_bytes_read;
 				//U32ToPrint1=*   (U32 *)(pb_inp_buf + (ui_inp_size - i_bytes_consumed));
 				//U32ToPrint2=*(1+(U32 *)(pb_inp_buf + (ui_inp_size - i_bytes_consumed)));		//this is the new read in data
-				//U32ToPrint1=*(U32 *)(pb_inp_buf);
-				//U32ToPrint2=*(1+(U32 *)(pb_inp_buf));											//this is the data to be processed later, the head of the input buffer
+				U32ToPrint1=*(U32 *)(pb_inp_buf);
+				U32ToPrint2=*(1+(U32 *)(pb_inp_buf));											//this is the data to be processed later, the head of the input buffer
 
 			#else
 				i_bytes_read = fread(pb_inp_buf + (ui_inp_size - i_bytes_consumed),
@@ -1148,8 +1171,8 @@ int SbcDecodeProcess(int SbcFileIdx)
 						}
 						//PRINTF("i_buff_size 333 \n");
 
-						//     (xa_codec_handle_t *xa_process_handle, int *AudioS32DstPtr,  int *AudioS32SrcPtr,        int InSampleNum,    int *OutputSampleNum)
-						ProcCadenceAsrc(       &DecoderSbc_handle,      SrcOut_2S32Mixed,    SrcIn_2S32Mixed,       SamplesToProcessInThisLoop,    &OutSampleNum);
+						//            (TCadenceSRC *SRCPtr, int *AudioS32DstPtr,  int *AudioS32SrcPtr,        int InSampleNum,    int *OutputSampleNum)
+						ProcCadenceAsrc(&SRC_DecoderSbc,      SrcOut_2S32Mixed,    SrcIn_2S32Mixed,       SamplesToProcessInThisLoop,    &OutSampleNum);
 
 						//PRINTF("i_buff_size 444 \n");
 						//convert 32bit LRMixed buffer to 16Bit LRMixed buffer
@@ -1162,17 +1185,10 @@ int SbcDecodeProcess(int SbcFileIdx)
 							//*TmpDstPtr++=0-0x10*i;
 						}
 
-						//PRINTF("i_buff_size 555 \n");
 						//use SrcIn_2S32Mixed as the S16 mixed LR channel as input buffer for the cir buffer
 						xos_mutex_lock(&g_audio_SbcDecoderMutex);
 							CirAudioBuf_WriteSamples_S32(&SbcOutputCirBuf_LRMixed, OutSampleNum, SrcIn_2S32Mixed);
-							if(!SbcOutputCirBuf_LRMixed_IsHalfFull)
-							{
-								if(CirAudioBuf_GetUsagePercentage_S32(&SbcOutputCirBuf_LRMixed) > 40)
-									SbcOutputCirBuf_LRMixed_IsHalfFull=1;
-							}
 						xos_mutex_unlock(&g_audio_SbcDecoderMutex);
-
 					#endif
 
 					SrcSampleLeftUnProcessed-=SamplesToProcessInThisLoop;
@@ -1197,10 +1213,10 @@ int SbcDecodeProcess(int SbcFileIdx)
 
 			DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();
 			DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();
-			//PRINTF("Sbc Packet: %d, %d, %d %d %d H: %x %x Fs: %d %d\n", SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn, SbcFrmSizeToBeProcessed, i_bytes_consumed, U32ToPrint1, U32ToPrint2, i_samp_freq, ui_exec_done);
-			//PRINTF("Sbc Packet: %d, %d, %d %d %d \n", SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn, SbcFrmSizeToBeProcessed, i_bytes_consumed);
-			//PRINTF("Sbc Packet: %d, %d, %d \n", SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn);
-	//		PRINTF("Sbc Packet: %d, %d, %d %d %d \n", SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn, TotalAudioDataBytesGenerated, TotalSbcDataBytesConsumed);
+//			PRINTF("Sbc Packet: %d, %d, %d %d %d H: %x %x Fs: %d %d\n", SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn, SbcFrmSizeToBeProcessed, i_bytes_consumed, U32ToPrint1, U32ToPrint2, i_samp_freq, ui_exec_done);
+			//PRINTF("Sbc Packet: %d, %d, %d %d %d \n",                   SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn, SbcFrmSizeToBeProcessed, i_bytes_consumed);
+			//PRINTF("Sbc Packet: %d, %d, %d \n",                         SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn);
+			//PRINTF("Sbc Packet: %d, %d, %d %d %d \n",                   SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn, TotalAudioDataBytesGenerated, TotalSbcDataBytesConsumed);
 			DbgPin8Up();
 
 			SbcPacketsDecoded++;
@@ -1208,6 +1224,16 @@ int SbcDecodeProcess(int SbcFileIdx)
 			/* Do till the process execution is done */
 		}
 	}
+
+	if(SbcFileIdx==0xffff)
+	{
+		//this is a2dp sbc stream
+		CadenceSrc_UpdateDrifting(&SRC_DecoderSbc, ((T_CircularAudioBuf_S8 *)&PtrVarBlockSharedByDspAndMcu->CirBuf_SbcRaw)->LengthInSamples - AodSbc, 0);
+	}else
+	{
+
+	}
+
 	DbgPin8Dn();
 	return 0;
 }
@@ -1224,11 +1250,7 @@ void DeInitSbcDecoder(void)
 }
 void DeInitSbcDecoderForOneSbcFile(void)
 {
-	DeinitCadenceAsrc((void **)&g_pv_arr_alloc_memory_DecoderSbc, &g_w_malloc_DecoderSbc);
+	DeinitCadenceAsrc(&SRC_DecoderSbc);
 }
-void InitSbcOutputCirBuf(void)
-{
-	InitCirAudioBuf_S32(&SbcOutputCirBuf_LRMixed,SbcOutputCirBuf_LRMixed_DataArea,SbcOutputCirBuf_LRMixed_LengthInSample);
-	memset(SbcOutputCirBuf_LRMixed_DataArea,0,sizeof(SbcOutputCirBuf_LRMixed_DataArea));
-}
+
 

@@ -123,9 +123,10 @@ extern xa_error_info_struct xa_testbench_error_info;
 int OpusDecoderIsRunning;
 #if 1		//folding
 
-#define OpusOutputCirBuf_LRMixed_LengthInSample		(80*48)		//80ms
+
+#define OpusOutputCirBuf_LRMixed_LengthInSample_Max		(OpusOutputCirBuf_LRMixed_LengthInMs*48)				//when fs is 48KHz, it is max sample size
 T_CircularAudioBuf_S32 OpusOutputCirBuf_LRMixed;
-int OpusOutputCirBuf_LRMixed_DataArea[OpusOutputCirBuf_LRMixed_LengthInSample+AudioFrameSizeInSamplePerCh];				//40ms + read size = AudioFrameSizeInSamplePerCh
+int OpusOutputCirBuf_LRMixed_DataArea[OpusOutputCirBuf_LRMixed_LengthInSample_Max+AudioFrameSizeInSamplePerCh_48KHz];	//+ extra read size = AudioFrameSizeInSamplePerCh
 
 /* Function to convert a little endian int16 to a */
 /* big endian int16 or vica verca                 */
@@ -445,6 +446,18 @@ void InitOpusDecoderVarToDefault(void)
 	mcps_peak = 0; mcps_curr = 0; mcps_ave = 0; mcps_sum = 0;
 	peak_frame = 0;
 	#endif
+}
+
+void InitOpusOutputCirBuf(int fs, int ToClearMem)
+{
+	int SampleNum;
+
+	SampleNum=fs/1000*OpusOutputCirBuf_LRMixed_LengthInMs;
+	assert(SampleNum <= OpusOutputCirBuf_LRMixed_LengthInSample_Max);
+
+	InitCirAudioBuf_S32(&OpusOutputCirBuf_LRMixed,OpusOutputCirBuf_LRMixed_DataArea,SampleNum);
+	if(ToClearMem)
+		memset(OpusOutputCirBuf_LRMixed_DataArea,0,sizeof(OpusOutputCirBuf_LRMixed_DataArea));
 }
 
 int freadFromFlashBin(unsigned char *DstPtr, int SizeInByte, unsigned char **FileCurPtr, unsigned char *FileEndPtr)
@@ -938,10 +951,11 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
     }
 
 	//init SRC
-	//             (ptr to handle.     int InputBlockSizeInSamples,            int inFs,                            int outFs,             int ChNum,         alloc_memory ptr array,              ptr numbers,      int NeedToDisplay)
-	InitCadenceAsrc(&DecoderOpus_handle, DecoderOpus_SrcInSizeInSamples,dec_control.API_sampleRate,   PtrVarBlockSharedByDspAndMcu->I2SFs_Loc,  2, (void **)&g_pv_arr_alloc_memory_DecoderOpus, &g_w_malloc_DecoderOpus,         1    );
+	//             (ptr to handle.     int InputBlockSizeInSamples,            int inFs,                            int outFs,         int ChNum,  EnableAsrc NeedToDisplay)
+	InitCadenceAsrc(&SRC_DecoderOpus, DecoderOpus_SrcInSizeInSamples,dec_control.API_sampleRate,   PtrVarBlockSharedByDspAndMcu->I2SFs_Amp,  2,        0,           1      );
 	//                                   DecoderOpus_SrcInSizeInSamples is to reserve enough space for output, later the input block size in samples will be set again in the src processing
 
+	InitOpusOutputCirBuf(PtrVarBlockSharedByDspAndMcu->I2SFs_Amp,0);
     return 0;
 }
 
@@ -955,7 +969,7 @@ int OpusDecodeProcess(void)
 	while( 1 )
 	{
 	#else
-	for(int ii=0;ii<2;ii++)	//to run the decoding twice to generate 40ms
+	for(int ii=0;ii<2;ii++)	//to run the decoding twice to generate 40ms --- cause each time call this processing function, is 24~32ms interval
 	{
 		int FreeAod;
 
@@ -963,8 +977,9 @@ int OpusDecodeProcess(void)
 			FreeAod=CirAudioBuf_SpaceAvailableInSamples_S32(&OpusOutputCirBuf_LRMixed);
 		xos_mutex_unlock(&g_audio_OpusDecoderMutex);
 
-		if(FreeAod >= 20*48)
-		//if(FreeAod >= 20*16)
+		int SamplesToGeGeneratedEachFrame=	PtrVarBlockSharedByDspAndMcu->I2SFs_Amp /1000 * 21;		//each frame is 20ms --- 20ms is a fixed value
+
+		if(FreeAod >= SamplesToGeGeneratedEachFrame)
 	#endif
 		{
 			/* Set Input Pointer */
@@ -1193,8 +1208,8 @@ int OpusDecodeProcess(void)
 									SrcIn_2S32Mixed[2*i+1]=((*TmpSrcPtr++)<<16);
 								}
 							}
-							//     (xa_codec_handle_t *xa_process_handle, int *AudioS32DstPtr,  int *AudioS32SrcPtr,         int InSampleNum,    int *OutputSampleNum)
-							ProcCadenceAsrc(       &DecoderOpus_handle,     SrcOut_2S32Mixed,    SrcIn_2S32Mixed,      SamplesToProcessInThisLoop,    &OutSampleNum  );
+							//             (TCadenceSRC *SRCPtr, int *AudioS32DstPtr,  int *AudioS32SrcPtr,         int InSampleNum,    int *OutputSampleNum)
+							ProcCadenceAsrc( &SRC_DecoderOpus,     SrcOut_2S32Mixed,    SrcIn_2S32Mixed,      SamplesToProcessInThisLoop,    &OutSampleNum  );
 
 							//convert 32bit LRMixed buffer to 16Bit LRMixed buffer
 							S16 *TmpDstPtr=(S16 *)SrcIn_2S32Mixed;
@@ -1298,12 +1313,7 @@ void DeInitOpusDecoderForOneOpusFile(void)
     		free(p_ogg_inp_buf);
     }
 #endif
-	DeinitCadenceAsrc((void **)&g_pv_arr_alloc_memory_DecoderOpus, &g_w_malloc_DecoderOpus);
+	DeinitCadenceAsrc(&SRC_DecoderOpus);
 	OpusDecoderIsRunning=0;
 }
 
-void InitOpusOutputCirBuf(void)
-{
-	InitCirAudioBuf_S32(&OpusOutputCirBuf_LRMixed,OpusOutputCirBuf_LRMixed_DataArea,OpusOutputCirBuf_LRMixed_LengthInSample);
-	memset(OpusOutputCirBuf_LRMixed_DataArea,0,sizeof(OpusOutputCirBuf_LRMixed_DataArea));
-}

@@ -1,0 +1,46 @@
+# Copyright (c) 2017-2021 by Cadence Design Systems, Inc. ALL RIGHTS RESERVED.
+# These coded instructions, statements, and computer programs are the
+# copyrighted works and confidential proprietary information of Cadence.
+# They may not be modified, copied, reproduced, distributed, or disclosed to
+# third parties in any manner, medium, or form, in whole or in part, without
+# the prior written consent of Cadence.
+
+# this file has ASIL-D rules
+    
+options:                                                  
+  - fusa_iso26262:
+      bsdeps: { flexlock: '1:2', instMemErrorType: '0:2', dataMemErrorType: '0:2' }
+      exprdeps:
+      - [ [ 'prefetchEntries==0' ],
+          [ 'prefetch_memerror==0' ],
+          [ 'prefetch_memerror==2' ],
+          [ 'E:Selection of <${fusa_iso26262}> requires that <Prefetch Memory Error type> is either None or ECC' ] ]   
+      - [ [ 'flexlock==1', 'flexlock_mem_lockstep==1' ],
+          [ 'prefetchEntries==0' ],
+          [ 'prefetch_memerror==2' ],
+          [ 'E:Selection of ASIL-D compatibility requires that either <${flexlock}> is Lock Only and <${flexlock_mem_lockstep}> is selected OR <${prefetch_memerror}> is ECC' ] ]      
+      - [ [ 'flexlock==1', 'flexlock_mem_lockstep==1' ],
+          [ 'instMemErrorType==2' ],
+          [ 'E:Selection of ASIL-D compatibility requires that either <${flexlock}> is Lock Only and <${flexlock_mem_lockstep}> is selected OR <${instMemErrorType}> is ECC' ] ]       
+      - [ [ 'flexlock==1', 'flexlock_mem_lockstep==1' ],
+          [ 'dataMemErrorType==2' ],
+          [ 'E:Selection of ASIL-D compatibility requires that either <${flexlock}> is Lock Only and <${flexlock_mem_lockstep}> is selected OR <${dataMemErrorType}> is ECC' ] ]    
+      - [ [ 'flexlock==1', 'flexlock_mem_lockstep==1' ],
+          [ 'model:lmem[memName:=instram.0].sizeBytes==0' ],
+          [ 'model:lmem[memName:=instram.0].memError>0' ],
+          [ 'E:Selection of ASIL-D compatibility requires that either <${flexlock}> is Lock Only and <${flexlock_mem_lockstep}> is selected OR <Instruction RAM Memory Error> is selected' ] ]   
+      - [ [ 'flexlock==1', 'flexlock_mem_lockstep==1' ],
+          [ 'model:lmem[memName:=dataram.0].sizeBytes==0' ],
+          [ 'model:lmem[memName:=dataram.0].memError>0' ],
+          [ 'E:Selection of ASIL-D compatibility requires that either <${flexlock}> is Lock Only and <${flexlock_mem_lockstep}> is selected OR <Data RAM Memory Error> is selected' ] ]            
+      - [ [ 'flexlock==1', 'flexlock_mem_lockstep==1' ],
+          [ 'dc.size==0' ],
+          [ 'dc.memErr==1' ],
+          [ 'E:Selection of ASIL-D compatibility requires that either <${flexlock}> is Lock Only and <${flexlock_mem_lockstep}> is selected OR <${dc.memErr}> is selected' ] ]  
+      - [ [ 'flexlock==1', 'flexlock_mem_lockstep==1' ],
+          [ 'ic.size==0' ],
+          [ 'ic.memErr==1' ],
+          [ 'E:Selection of ASIL-D compatibility requires that either <${flexlock}> is Lock Only and <${flexlock_mem_lockstep}> is selected OR <${ic.memErr}> is selected' ] ]  
+  - dataMemErrorType:
+      bsdeps: { dataMemErrorWidth: '4' }      
+                                                                        

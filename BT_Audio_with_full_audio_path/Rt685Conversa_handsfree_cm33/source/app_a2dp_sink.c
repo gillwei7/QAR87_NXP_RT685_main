@@ -259,7 +259,9 @@ static void configure_a2dp_codec(void)
 		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
 	#endif
 
+	BtA2dpFs_ProvidedFromBtStack=CurrentStreamSbc_sampleRate_Hz;
 
+#if 0
 	if(CurrentStreamSbc_sampleRate_Hz==16000)
 		AudioPortI2SAndPdmCfg_SetAmpI2SFs(AudioPortI2SAndPdmCfg,Fs_16000);
 	if(CurrentStreamSbc_sampleRate_Hz==44100)
@@ -275,6 +277,7 @@ static void configure_a2dp_codec(void)
 	AudioPortI2SAndPdmCfg_SetNvtI2SBit(AudioPortI2SAndPdmCfg,BitWidth_I2SIsDisabled);
 	AudioPortI2SAndPdmCfg_SetPdmFs(AudioPortI2SAndPdmCfg, Fs_16000);
 	AudioPortI2SAndPdmCfg_SetPdmEnableBit(AudioPortI2SAndPdmCfg,0b000011);
+#endif
 
 	g_audioInit =1;
     //RequestToGetIntoA2dpPlay=1;	//should request to start once the sbc cir buffer is half full
@@ -291,12 +294,13 @@ void sbc_configured(struct bt_a2dp_endpoint_configure_result *configResult)
 
 			#ifdef A2DP_SINK_AUDIOxxx
 test
-				#if AmpIsAlwaysIn48Or16KHz==1
-					if(CurrentStreamSbc_sampleRate_Hz==44100)
+				//#if AmpIsAlwaysIn48Or16KHz==1
+				#if 1
+					if(C urrentStreamSbc_sampleRate_Hz==44100)
 						#if UsingQAR87Board == 1
 test						CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(48000, BtPcmFc2Fc4_AmpFc1Fc3);
 						#else
-						CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(48000, BtPcmFc5Fc2_CodecFc1Fc3);
+							CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(48000, BtPcmFc5Fc2_CodecFc1Fc3);
 						#endif
 					else
 						#if UsingQAR87Board == 1
@@ -304,12 +308,6 @@ test						CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(CurrentStreamSbc_
 						#else
 test						CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(CurrentStreamSbc_sampleRate_Hz, BtPcmFc5Fc2_CodecFc1Fc3);
 						#endif
-				#else
-					#if UsingQAR87Board == 1
-test					CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(CurrentStreamSbc_sampleRate_Hz, BtPcmFc2Fc4_AmpFc1Fc3);
-					#else
-					CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(CurrentStreamSbc_sampleRate_Hz, BtPcmFc5Fc2_CodecFc1Fc3);
-					#endif
 				#endif
 			#endif
 			CurrentStreamSbc_BitWidth=16;
@@ -334,6 +332,7 @@ test					CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(CurrentStreamSbc_s
         //g_audioInit = 1;
 
 		cmd_init_ct();
+		ClearAudioCirBuf(0,0,1);
 
 		/*AVRCP Profile level connection*/
 		avrcp_control_connect(conn_rider_phone);
@@ -430,10 +429,8 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 			//xfer.data           = data;
 
 
-			DbgPin6Up();
-			PRINTF("1 ");
+			//DbgPin6Up();
 			SEMA42_Lock(APP_SEMA42, SEMA42_GATE1, domainId);
-			PRINTF("2 ");
 				int FreeAod;
 				FreeAod=CirAudioBuf_SpaceAvailableInSamples_S8((volatile T_CircularAudioBuf_S8 *)&VarBlockSharedByDspAndMcu.CirBuf_SbcRaw);
 				//FreeAod=10000;
@@ -451,7 +448,6 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 				*/
 
 				//write a2dp sbc stream BIN to Cirbuffer
-				PRINTF("3 ");
 				if(FreeAod>=length)
 				{
 					//has space to fill
@@ -459,21 +455,19 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 				}else
 				{
 					//cir buffer doesn't have enough space --- this should not happen
-					PRINTF("sbc_streamer_data not enough space to put Sbc Raw data, in the cir buffer \r\n");
+//					PRINTF("sbc_streamer_data not enough space to put Sbc Raw data, in the cir buffer \r\n");
 					//PRINTF("f\r\n");
 				}
 
 				PRINTF("BT Sbc buf: %d\r\n", CirBuf_SbcRaw_LengthInBytes-FreeAod);
-			PRINTF("4 ");
 			SEMA42_Unlock(APP_SEMA42, SEMA42_GATE1);
-			PRINTF("5\r\n");
-			DbgPin6Dn();
+			//DbgPin6Dn();
 
 			if(DeviceWorkStateCur!=WorkState_MusicPlayer)
 			{
 				//request to get into WorkState_MusicPlayer after SBC buffer is half full
 				//if(CirAudioBuf_GetUsagePercentage_S8((T_CircularAudioBuf_S8 *)&VarBlockSharedByDspAndMcu.CirBuf_SbcRaw)>60)
-				if(FreeAod<CirBuf_SbcRaw_LengthInBytes*3/4)
+				if(FreeAod<CirBuf_SbcRaw_LengthInBytes*1/2)
 				{
 					//this is 3/4 full
 					RequestToGetIntoA2dpPlay=1;

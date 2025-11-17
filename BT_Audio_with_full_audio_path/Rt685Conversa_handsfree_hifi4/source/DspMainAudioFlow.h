@@ -18,26 +18,47 @@ extern uint8_t domainId;
 extern U32 AudioFrameCnt;
 extern int ToTempSkipVitPorcess;
 
+//for SRC
 extern S32 SrcIn_2S32Mixed [48*20*2];		//to hold 20ms at 48KHz, stereo
 extern S32 SrcOut_2S32Mixed [48*20*2];		//to hold 20ms at 48KHz, stereo
 
-extern S16 AudioOneFrameBuf_OpusDecodedL [AudioFrameSizeInSamplePerCh];
-extern S16 AudioOneFrameBuf_OpusDecodedR [AudioFrameSizeInSamplePerCh];
-extern S16 AudioOneFrameBuf_SbcDecodedL [AudioFrameSizeInSamplePerCh];
-extern S16 AudioOneFrameBuf_SbcDecodedR [AudioFrameSizeInSamplePerCh];
+//for decoding OPUS and SBC
+extern S16 AudioOneFrameBuf_OpusDecodedL[AudioFrameSizeInSamplePerCh_48KHz];
+extern S16 AudioOneFrameBuf_OpusDecodedR[AudioFrameSizeInSamplePerCh_48KHz];
+extern S16 AudioOneFrameBuf_SbcDecodedL [AudioFrameSizeInSamplePerCh_48KHz];
+extern S16 AudioOneFrameBuf_SbcDecodedR [AudioFrameSizeInSamplePerCh_48KHz];
 
-extern S32 AudioOneFrameBuf_01 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_02 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_03 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_04 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_05 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_06 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_07 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_08 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_09 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_10 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_11 [AudioFrameSizeInSamplePerCh];
-extern S32 AudioOneFrameBuf_12 [AudioFrameSizeInSamplePerCh];
+//for holding 6 ch mic input --- converted to float
+extern S32 AudioOneFrameBuf_16KHz_01 [AudioFrameSizeInSamplePerCh_16KHz];
+extern S32 AudioOneFrameBuf_16KHz_02 [AudioFrameSizeInSamplePerCh_16KHz];
+extern S32 AudioOneFrameBuf_16KHz_03 [AudioFrameSizeInSamplePerCh_16KHz];
+extern S32 AudioOneFrameBuf_16KHz_04 [AudioFrameSizeInSamplePerCh_16KHz];
+extern S32 AudioOneFrameBuf_16KHz_05 [AudioFrameSizeInSamplePerCh_16KHz];
+extern S32 AudioOneFrameBuf_16KHz_06 [AudioFrameSizeInSamplePerCh_16KHz];
+
+
+//for holding 48KHz input --- converted to float
+extern S32 AudioOneFrameBuf_48KHz_01 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S32 AudioOneFrameBuf_48KHz_02 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S32 AudioOneFrameBuf_48KHz_03 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S32 AudioOneFrameBuf_48KHz_04 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S32 AudioOneFrameBuf_48KHz_05 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S32 AudioOneFrameBuf_48KHz_06 [AudioFrameSizeInSamplePerCh_48KHz];
+
+//for temp1,2(L R) 48KHz float/S32 and SignalGenerator
+extern S32 AudioOneFrameBuf_48KHz_07 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S32 AudioOneFrameBuf_48KHz_08 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S32 AudioOneFrameBuf_48KHz_09 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S32 AudioOneFrameBuf_48KHz_10 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S32 AudioOneFrameBuf_48KHz_11 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S32 AudioOneFrameBuf_48KHz_12 [AudioFrameSizeInSamplePerCh_48KHz];
+
+//for temp1,2(L R) 48KHz S16
+extern S16 AudioOneFrameBuf_48KHz_13 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S16 AudioOneFrameBuf_48KHz_14 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S16 AudioOneFrameBuf_48KHz_15 [AudioFrameSizeInSamplePerCh_48KHz];
+extern S16 AudioOneFrameBuf_48KHz_16 [AudioFrameSizeInSamplePerCh_48KHz];
+
 
 extern void DspMainAudioFlowProcOneFrame_AudioIoDbg(int OptionWord);
 extern void DspMainAudioFlowProcOneFrame_VideoRecording(int OptionWord);
@@ -50,6 +71,8 @@ extern void DspMainAudioFlowProcOneFrame_VideoAi(int OptionWord);
 
 extern void SimpleSrc3xUp(S32 *DstPtr, S32 *SrcPtr, int LenOfInput);
 extern void SimpleSrc3xDn(S32 *DstPtr, S32 *SrcPtr, int LenOfOutput);
+
+extern void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float **PtrArray_OutSignals, S16 *RawMicSigForVitRef);
 
 #endif
 

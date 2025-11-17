@@ -18,8 +18,8 @@ extern "C" {
 
 typedef struct
 {
-	float GainArraySrc1[AudioFrameSizeInSamplePerCh];
-	float GainArraySrc2[AudioFrameSizeInSamplePerCh];
+	float GainArraySrc1[AudioFrameSizeInSamplePerChMaxForDMABuf];
+	float GainArraySrc2[AudioFrameSizeInSamplePerChMaxForDMABuf];
 	float SmoothingCoefAlfa;
 	float SmoothingCoefBeta;
 	float PrevGainSrc1;
@@ -31,7 +31,7 @@ typedef struct
 
 typedef struct
 {
-	float GainArray[AudioFrameSizeInSamplePerCh];
+	float GainArray[AudioFrameSizeInSamplePerChMaxForDMABuf];
 	float SmoothingCoefAlfa;
 	float SmoothingCoefBeta;
 	float PrevGain;

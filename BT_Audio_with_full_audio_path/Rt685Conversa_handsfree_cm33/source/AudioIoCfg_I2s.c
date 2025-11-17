@@ -49,22 +49,22 @@ i2s_dma_handle_t I2SRxFrNtHandle;
 i2s_dma_handle_t I2STxToNtHandle;
 
 __attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
-volatile S32 I2S3Tx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+volatile S16 I2S3Tx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
 __attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
-volatile S32 I2S3Tx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+volatile S16 I2S3Tx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
 __attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
-volatile S32 I2S1Rx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+volatile S16 I2S1Rx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
 __attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
-volatile S32 I2S1Rx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+volatile S16 I2S1Rx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
 
-	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
-volatile S32 I2STxToNtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
-volatile S32 I2STxToNtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
-volatile S32 I2SRxFrNtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
-volatile S32 I2SRxFrNtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
+volatile S16 I2STxToNtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
+volatile S16 I2STxToNtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
+volatile S16 I2SRxFrNtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
+volatile S16 I2SRxFrNtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
 
 __attribute__((__section__(".data.$Audio_IO_Data")))
 __attribute__((aligned(16)))
@@ -178,7 +178,6 @@ void ClearDmaBuf_I2SRxFrNt(void)
 	memset((void *)I2SRxFrNtCh0And1Mixed_B,0,sizeof(I2SRxFrNtCh0And1Mixed_B));
 }
 
-
 //in fsl_dma.c handle->base->CHANNEL[channel].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK; is removed --- this is to start all the DMA channel at the same time
 void EnableI2S3Tx0DmaChannel(void)
 {
@@ -257,7 +256,6 @@ void BOARD_Init_I2S_Fc3(int Fs, int BitW)
 	assert((Fs==16000)||(Fs==32000)||(Fs==44100)||(Fs==48000));
 
 	i2s_config_t I2S_Tx_config;
-
 	I2S_TxGetDefaultConfig(&I2S_Tx_config);
 
 	I2S_Tx_config.dataLength  = BitW;
@@ -291,7 +289,6 @@ void BOARD_Init_I2S_Fc1(int Fs, int BitW)
 	assert((Fs==16000)||(Fs==32000)||(Fs==44100)||(Fs==48000));
 
 	i2s_config_t I2S_Rx_config;
-
 	I2S_RxGetDefaultConfig(&I2S_Rx_config);
 
 	I2S_Rx_config.dataLength  = BitW;
@@ -709,11 +706,7 @@ void I2S3Tx0_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t complet
 	StartI2SToAmpAudioDmaFromDmicDmaIntr_Cnt=0;
 
 	if(DmaTxRxIsDone==DmaTxRxIsExpected)
-		#if CallAudioFrameProcessInIntr==1
-			ProcessAudio_AfterAudioInputBufIsReady_InCall();
-		#else
-			SCO_AudioFlow_SemaphorePost();
-		#endif
+		SCO_AudioFlow_SemaphorePost();
 	DbgPin7Dn();
 }
 __attribute__((section("CodeQuickAccess")))
@@ -729,11 +722,7 @@ void I2S1Rx0_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t complet
 	StartI2SToAmpAudioDmaFromDmicDmaIntr_Cnt=0;
 
 	if(DmaTxRxIsDone==DmaTxRxIsExpected)
-		#if CallAudioFrameProcessInIntr==1
-			ProcessAudio_AfterAudioInputBufIsReady_InCall();
-		#else
-			SCO_AudioFlow_SemaphorePost();
-		#endif
+		SCO_AudioFlow_SemaphorePost();
 	DbgPin7Dn();
 }
 __attribute__((section("CodeQuickAccess")))
@@ -750,11 +739,7 @@ void I2SRxFrNt_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t compl
 		StartI2SToNvtAudioDmaFromDmicDmaIntr_Cnt=0;
 
 		if(DmaTxRxIsDone==DmaTxRxIsExpected)
-			#if CallAudioFrameProcessInIntr==1
-				ProcessAudio_AfterAudioInputBufIsReady_InCall();
-			#else
-				SCO_AudioFlow_SemaphorePost();
-			#endif
+			SCO_AudioFlow_SemaphorePost();
 	#else
 
 		I2SToNtIsStarted=1;
@@ -777,34 +762,18 @@ void I2SRxFrNt_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t compl
 		//dual buffer select, and copy samples to circular buffer
 		I2SRxFrNtDmaTransferringIsUsingBufA=GetI2SRxFrNtDmaTransferringIsUsingBufAOrB();
 
-		#if Rt685I2SToNvtBitWidth==16
-			S16 *SrcPtr;
-			if(I2SRxFrNtDmaTransferringIsUsingBufA)
-			{
-				SrcPtr=(S16 *)I2SRxFrNtCh0And1Mixed_B;
-			}else
-			{
-				SrcPtr=(S16 *)I2SRxFrNtCh0And1Mixed_A;
-			}
-			if (CirAudioBuf_SpaceAvailableInSamples_S32(&I2SRxFrNt_CirBuf) >= (AudioFrameSizeInSamplePerCh_I2SToNvt))
-			{
-				CirAudioBuf_WriteSamples_S32(&I2SRxFrNt_CirBuf, AudioFrameSizeInSamplePerCh_I2SToNvt, (S32 *)SrcPtr);
-			}
-		#endif
-		#if Rt685I2SToNvtBitWidth==32
-			S32 *SrcPtr;
-			if(I2SRxFrNtDmaTransferringIsUsingBufA)
-			{
-				SrcPtr=(S32 *)I2SRxFrNtCh0And1Mixed_B;
-			}else
-			{
-				SrcPtr=(S32 *)I2SRxFrNtCh0And1Mixed_A;
-			}
-			if (CirAudioBuf_SpaceAvailableInSamples_S64(&I2SRxFrNt_CirBuf) >= (AudioFrameSizeInSamplePerCh_I2SToNvt))
-			{
-				CirAudioBuf_WriteSamples_S64(&I2SRxFrNt_CirBuf, AudioFrameSizeInSamplePerCh_I2SToNvt, (S64 *)SrcPtr);
-			}
-		#endif
+		S16 *SrcPtr;
+		if(I2SRxFrNtDmaTransferringIsUsingBufA)
+		{
+			SrcPtr=(S16 *)I2SRxFrNtCh0And1Mixed_B;
+		}else
+		{
+			SrcPtr=(S16 *)I2SRxFrNtCh0And1Mixed_A;
+		}
+		if (CirAudioBuf_SpaceAvailableInSamples_S32(&I2SRxFrNt_CirBuf) >= (AudioFrameSizeInSamplePerCh_I2SToNvt))
+		{
+			CirAudioBuf_WriteSamples_S32(&I2SRxFrNt_CirBuf, AudioFrameSizeInSamplePerCh_I2SToNvt, (S32 *)SrcPtr);
+		}
 	#endif
 	DbgPin6Dn();
 }
@@ -822,52 +791,28 @@ void I2STxToNt_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t compl
 		StartI2SToNvtAudioDmaFromDmicDmaIntr_Cnt=0;
 
 		if(DmaTxRxIsDone==DmaTxRxIsExpected)
-			#if CallAudioFrameProcessInIntr==1
-				ProcessAudio_AfterAudioInputBufIsReady_InCall();
-			#else
-				SCO_AudioFlow_SemaphorePost();
-			#endif
+			SCO_AudioFlow_SemaphorePost();
 	#else
 
 		//copy samples from cir buffer to I2S Tx DMA buffer
 		//dual buffer select, and copy samples to circular buffer
 		I2STxToNtDmaTransferringIsUsingBufA=GetI2STxToNtDmaTransferringIsUsingBufAOrB();
 
+		S16 *SrcPtr;
+		S16 *DstPtr;
+		if(I2STxToNtDmaTransferringIsUsingBufA)
+		{
+			DstPtr=(S16 *)I2STxToNtCh0And1Mixed_B;
+		}else
+		{
+			DstPtr=(S16 *)I2STxToNtCh0And1Mixed_A;
+		}
 
-		#if Rt685I2SToNvtBitWidth==16
-			S16 *SrcPtr;
-			S16 *DstPtr;
-			if(I2STxToNtDmaTransferringIsUsingBufA)
-			{
-				DstPtr=(S16 *)I2STxToNtCh0And1Mixed_B;
-			}else
-			{
-				DstPtr=(S16 *)I2STxToNtCh0And1Mixed_A;
-			}
-
-			if (CirAudioBuf_SpaceOccupiedInSamples_S32(&I2STxToNt_CirBuf) >= (AudioFrameSizeInSamplePerCh_I2SToNvt))
-			{
-				SrcPtr=(S16 *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&I2STxToNt_CirBuf, AudioFrameSizeInSamplePerCh_I2SToNvt);
-			}
-			memcpy(DstPtr,SrcPtr,sizeof(S16)*2*AudioFrameSizeInSamplePerCh_I2SToNvt);	//samples to I2S tx DMA buffer
-		#endif
-		#if Rt685I2SToNvtBitWidth==32
-			S32 *SrcPtr;
-			S32 *DstPtr;
-			if(I2STxToNtDmaTransferringIsUsingBufA)
-			{
-				DstPtr=(S32 *)I2STxToNtCh0And1Mixed_B;
-			}else
-			{
-				DstPtr=(S32 *)I2STxToNtCh0And1Mixed_A;
-			}
-
-			if (CirAudioBuf_SpaceOccupiedInSamples_S64(&I2STxToNt_CirBuf) >= (AudioFrameSizeInSamplePerCh_I2SToNvt))
-			{
-				SrcPtr=(S32 *)CirAudioBuf_ReadSamples_GetRdPtr_S64(&I2STxToNt_CirBuf, AudioFrameSizeInSamplePerCh_I2SToNvt);
-			}
-			memcpy(DstPtr,SrcPtr,sizeof(S32)*2*AudioFrameSizeInSamplePerCh_I2SToNvt);	//samples to I2S tx DMA buffer
-		#endif
+		if (CirAudioBuf_SpaceOccupiedInSamples_S32(&I2STxToNt_CirBuf) >= (AudioFrameSizeInSamplePerCh_I2SToNvt))
+		{
+			SrcPtr=(S16 *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&I2STxToNt_CirBuf, AudioFrameSizeInSamplePerCh_I2SToNvt);
+		}
+		memcpy(DstPtr,SrcPtr,sizeof(S16)*2*AudioFrameSizeInSamplePerCh_I2SToNvt);	//samples to I2S tx DMA buffer
 	#endif
 	DbgPin6Dn();
 }
@@ -953,6 +898,7 @@ void ConfigI2SRxFrNtChainedDma(int FrmSizeInSample, int SampleBitW)
 		I2SToNtIsStarted=0;
 	#endif
 }
+
 #endif
 
 

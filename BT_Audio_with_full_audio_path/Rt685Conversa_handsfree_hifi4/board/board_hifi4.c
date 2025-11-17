@@ -24,6 +24,8 @@ void BOARD_InitDebugConsole(void)
     /* attach FFR0 clock to FLEXCOMM0 (debug console) */
     //CLOCK_AttachClk(BOARD_DEBUG_UART_CLK_ATTACH);
 
-    uartClkSrcFreq = BOARD_DEBUG_UART_CLK_FREQ;
-    DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
+	#if(Using_UART5ToPrint)||(Using_UART2ToPrint)
+		uartClkSrcFreq = BOARD_DEBUG_UART_CLK_FREQ;
+		DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
+	#endif
 }

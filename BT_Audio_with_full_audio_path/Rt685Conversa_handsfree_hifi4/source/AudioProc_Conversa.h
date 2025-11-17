@@ -123,13 +123,31 @@ typedef struct
 	//AUDIO_deviceType_en					    conversaAudioDeviceType;		 // conversa audio device type
 } AUDIO_conversa_st;
 
-
+enum
+{
+	CONVERSA_OutSignalIdx_RxOut = 0,
+	CONVERSA_OutSignalIdx_TxOut,
+	CONVERSA_OutSignalIdx_AecOut,
+	CONVERSA_OutSignalIdx_BfOut,
+	CONVERSA_OutSignalIdx_NlpOut
+};
 
 extern uint8_t domainId;
 
 extern U32 AudioFrameCnt;
 
 
+extern nxp_conversa_plugin_t conversaPluginParams;
+
+extern S32 *RawMic32BitBuf0;
+extern S32 *RawMic32BitBuf1;
+extern S32 *RawMic32BitBuf2;
+extern S32 *RawMic32BitBuf3;
+
+extern S32 *ConversaTxOut32BitBuf;
+extern S32 *AecOut32BitBuf;
+extern S32 *BfOut32BitBuf;
+extern S32 *NlpOut32BitBuf;
 
 
 extern void InitConversa(void);

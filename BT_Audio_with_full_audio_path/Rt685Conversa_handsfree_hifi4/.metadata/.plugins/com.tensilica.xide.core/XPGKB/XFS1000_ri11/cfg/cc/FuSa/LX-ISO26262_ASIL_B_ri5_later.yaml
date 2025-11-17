@@ -1,0 +1,25 @@
+# Copyright (c) 2017-2021 by Cadence Design Systems, Inc. ALL RIGHTS RESERVED.
+# These coded instructions, statements, and computer programs are the
+# copyrighted works and confidential proprietary information of Cadence.
+# They may not be modified, copied, reproduced, distributed, or disclosed to
+# third parties in any manner, medium, or form, in whole or in part, without
+# the prior written consent of Cadence.
+
+# this file has rules specific FuSa ISO 26262 ASILB for RI.5 and later releases
+# basically this files says that if no FL and ASILB and RI.5 and later release then memory errors need to be ECC.
+    
+options:
+  - _dcls_without_lockonly_lockstep:
+      bsdeps: { instMemErrorType: 2, dataMemErrorType: 2,  dataMemErrorWidth: 4 } 
+      evalex:
+      - [ [ '${address_err}==0 && strcmp("${wizpage}","rel") && ${bwisanver}<27100080' ],
+          [ 'E:Selection of <${fusa_iso26262}> requires that <${address_err}> is selected for this release.' ] ]          
+      exprdeps:
+      - [ [ 'prefetchEntries==0' ],
+          [ 'prefetch_memerror==2' ],
+          [ 'E:Selection of <FuSa> requires that <Prefetch Memory Error type> is ECC' ] ]                                               
+  - fusa_iso26262:
+      bdeps: [ 'csr_parity~2' ]
+  
+                                                                
+                                                                         

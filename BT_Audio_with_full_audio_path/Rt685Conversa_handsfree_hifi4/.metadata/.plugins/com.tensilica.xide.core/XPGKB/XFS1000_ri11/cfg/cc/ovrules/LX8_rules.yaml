@@ -1,0 +1,148 @@
+# Copyright (c) 2022 by Cadence Design Systems, Inc. ALL RIGHTS RESERVED.
+# These coded instructions, statements, and computer programs are the
+# copyrighted works and confidential proprietary information of Cadence.
+# They may not be modified, copied, reproduced, distributed, or disclosed to
+# third parties in any manner, medium, or form, in whole or in part, without
+# the prior written consent of Cadence.
+
+# this file specifically contains LX8 rules
+
+options:
+  - scan:
+      bdeps: [ implCgGlobal ]
+  - implCgGlobal:
+      bdeps: [ scan ]   
+  - debugEnabled:
+      bdeps: [ '+ocd' ] 
+  - dataMemErrorType:
+      bsdeps2: { '1': { dataMemErrorWidth: '1' }, '2': { dataMemErrorWidth: '4' } }
+  - _lx_isa:
+      bdeps: [ '+debugEnabled', '+density', '+prid' ] 
+      bcons: [ fusa_iso26262 ]  
+      bsdeps: { axi_ecc: 'none' }
+      evalex:
+      - [ [ '${nsa}==0' ],
+          [ 'W: Its is strongly recommended that <${nsa}> instruction is selected to help improve interrupt latency' ] ]
+      - [ [ 'F:lx_visionp_128' ],
+          [ '${visionp1}==1' ],
+          [ 'E:This DSP is now transitioned, please select <${visionp_128}> instead' ] ]     
+      - [ [ 'F:lx_visionp_512' ],
+          [ '${ivp26_32}==1' ],
+          [ 'E:This DSP is now transitioned, please select <${visionp_512}> instead' ] ]                    
+# *****************      THE EA special rules, remove later  
+# on purpose using aprilfools feature, BECAUSE almost everyone has aprilfools.   
+      # bus    
+      - [ [ 'F:!aprilfools' ],
+          [ 'strcmp("${tempBus}","ahblite")' ],
+          [ 'E:AHBLite is not yet supported.' ] ]
+      - [ [ 'F:aprilfools' ],
+          [ 'strcmp("${tempBus}","ahblite")' ],
+          [ 'W:AHBLite is not yet supported. Your config might fail.' ] ]
+      # cc pso         
+      - [ [ 'F:!aprilfools' ],
+          [ '${cc_psodomain}>0' ],
+          [ 'E: <${cc_psodomain}> is not yet supported.' ] ]
+      - [ [ 'F:aprilfools' ],
+          [ '${cc_psodomain}>0' ],
+          [ 'W: <${cc_psodomain}> is not yet supported. Your config might fail.' ] ]
+      # l2 cache        
+      - [ [ 'F:!aprilfools' ],
+          [ '${l2_size}>0' ],
+          [ 'E:L2 Cache is not yet supported.' ] ]
+      - [ [ 'F:aprilfools' ],
+          [ '${l2_size}>0' ],
+          [ 'W:L2 Cache is not yet supported. Your config might fail.' ] ] 
+      #  wwdt                  
+      - [ [ 'F:!aprilfools' ],
+          [ '${wwdt}>0' ],
+          [ 'E:<${wwdt}> is not yet supported.' ] ] 
+      - [ [ 'F:aprilfools' ],
+          [ '${wwdt}>0' ],
+          [ 'W:<${wwdt}> is not yet supported. Your config might fail.' ] ]  
+      # fbc
+      - [ [ 'F:aprilfools' ],
+          [ '${udma_fbc_option}>0' ],
+          [ 'W:<${udma_fbc_option}> is not yet supported. Your config might fail.' ] ]
+      # flexlock                   
+      - [ [ 'F:!aprilfools' ],
+          [ '${flexlock}>0' ],
+          [ 'E:<${flexlock}> is not yet supported.' ] ]
+      - [ [ 'F:aprilfools' ],
+          [ '${flexlock}>0' ],
+          [ 'W:<${flexlock}> is not yet supported. Your config might fail.' ] ]
+      # secure mode                   
+      - [ [ 'F:!aprilfools' ],
+          [ '${secure_mode}>0' ],
+          [ 'E:<${secure_mode}> is not yet supported.' ] ]
+      - [ [ 'F:aprilfools' ],
+          [ '${secure_mode}>0' ],
+          [ 'W:<${secure_mode}> is not yet supported. Your config might fail.' ] ]  
+      # pipeline length             
+      - [ [ 'F:!aprilfools' ],
+          [ '${tempPipeLength}==5' ],
+          [ 'E:<${tempPipeLength}> 5 is not yet supported.' ] ]
+      - [ [ 'F:aprilfools' ],
+          [ '${tempPipeLength}==5' ],
+          [ 'W:<${tempPipeLength}> 5 is not yet supported. Your config might fail.' ] ]                    
+      # mmu                     
+      - [ [ 'F:!aprilfools' ],
+          [ 'strcmp("${mmuType}","IMMU")==0' ],
+          [ 'E:Only MPU is supported currently.' ] ]
+      - [ [ 'F:aprilfools' ],
+          [ 'strcmp("${mmuType}","IMMU")==0' ],
+          [ 'W:Only MPU is supported currently. Your config does not have MPU and might fail.' ] ] 
+      # iDMA AXI to AXI Channels           
+      - [ [ 'F:!aprilfools' ],
+          [ '${udma_axi_channels}>0' ],
+          [ 'E: <${udma_axi_channels}> is not yet supported.' ] ]
+      - [ [ 'F:aprilfools' ],
+          [ '${udma_axi_channels}>0' ],
+          [ 'W: <${udma_axi_channels}> is not yet supported. Your config might fail.' ] ]          
+      # ask Pete??      
+      - [ [ 'F:!aprilfools' ],
+          [ 'strcmp("${hw_rtl}","Production") && strcmp("${wizpage}","hw") && ${pdx4b_fpm128}==0 && ${visionp_128}==0 && ${visionp_512}==0 && ${hifi4}==0 && ${visionp1}==0 && ${ivp26_32}==0' ],
+          [ 'E:Production builds of the selected coprocessor are not supported.' ] ]
+# *****************      THE EA special rules            
+      exprdeps:
+      - [ [ 'model:lmem[memName:=dataport.0].sizeBytes==0' ],
+          [ 'E:LX8 ISA does not support XLMI' ] ]           
+  - tempBus:
+      bdeps2: { axi4: [ '+pifWriteResp', '+wbBypassAddrBits' ], 
+                ahblite: [ '+pifWriteResp', '+wbBypassAddrBits' ] }    
+      bcons2: { axi4: [ condStoreSync ] }                   
+      bsdeps2: { ahblite: { mmuType: 'CaMMU:CaXltMMU' }, axi4: { mmuType: 'IMMU:LinuxMMU' } }   
+  - mmuType:      
+      bcons2: { LinuxMMU: [ condStoreSync ] } 
+      bdeps2: { LinuxMMU: [ altPageSizes ] }     
+  - udma:  
+      exprdeps:
+      - [ [ 'model:lmem[memName:=instram.0].dma==0' ],
+          [ 'model:lmem[memName:=dataram.0].dma==1' ],
+          [ 'E:<${udma}> with instruction inbound requires that inbound is configured on datarams.' ] ]
+  - udma_reorder_buffer:
+      evalex:   
+      - [ [ '${udma_reorder_buffer}>0 && ${udma_reorder_buffer}!=${udma_max_reqs}' ],
+          [ 'E:<${udma_reorder_buffer}> if configured must be equal to <${udma_max_reqs}>.' ] ]    
+  - udma_data_width:
+      evalex:   
+      - [ [ '${udma}>0 && ${udma_data_width}==0 && ${pifWidthBits}<128' ],
+          [ 'E:When <${udma_data_width}> matches <${pifWidthBits}> the ${pifWidthBits} should be atleast 128.' ] ]
+  - intCount:
+      exprdeps:      
+       - [ [ 'l2_size==0' ],
+           [ 'model:int[typeId:=l2status].index<=31' ],
+           [ 'E:L2Status interrupt type can be placed only between 0-31 interrupt numbers.' ] ]
+       - [ [ 'l2_size==0' ],
+           [ 'model:int[typeId:=l2err].index<=31' ],
+           [ 'E:L2Err interrupt type can be placed only between 0-31 interrupt numbers.' ] ]
+       - [ [ 'pifWriteResp==0' ],
+           [ 'model:int[typeId:=writeerr].index<=31' ],
+           [ 'E:WriteErr interrupt type can be placed only between 0-31 interrupt numbers.' ] ]
+       - [ [ 'perfcounters=0' ],
+           [ 'model:int[typeId:=profiling].index<=31' ],
+           [ 'E:Profiling interrupt type can be placed only between 0-31 interrupt numbers.' ] ]    
+       - [ [ 'sg_scatter==0' ],
+           [ 'model:int[typeId:=SGErr].index<=31' ],
+           [ 'E:G/S Err interrupt type can be placed only between 0-31 interrupt numbers.' ] ]
+       - [ [ 'model:int[typeId:=nmi].index<=31' ],
+           [ 'E:NMI interrupt type can be placed only between 0-31 interrupt numbers.' ] ]

@@ -51,7 +51,7 @@
 #define FcIdx_RxFrBt			4
 #define FcIdx_TxToBt			2
 #define I2STxToBtInstance		(I2S2)
-#define I2SRxFrBtInstance		(I2S4)//B36932 should be I2S4 (I2S5)
+#define I2SRxFrBtInstance		(I2S4)			//B36932 should be I2S4 (I2S5)
 #define I2S_TxToBt_DMA_CHANNEL 	(5)				//flexcomm2 tx to BT
 #define I2S_RxFrBt_DMA_CHANNEL 	(8)				//flexcomm4 rx from BT
 
@@ -114,11 +114,11 @@
 	#endif
 #else
 	#define DEMO_I2SToAmpTx_MODE 		kI2S_MasterSlaveNormalSlave
-#if Rt685I2SToAmpIsI2SMaster==1
-	#define DEMO_I2SFrAmpRx_MODE 	kI2S_MasterSlaveNormalMaster
-#else
-	#define DEMO_I2SFrAmpRx_MODE	kI2S_MasterSlaveNormalSlave
-#endif
+	#if Rt685I2SToAmpIsI2SMaster==1
+		#define DEMO_I2SFrAmpRx_MODE 	kI2S_MasterSlaveNormalMaster
+	#else
+		#define DEMO_I2SFrAmpRx_MODE	kI2S_MasterSlaveNormalSlave
+	#endif
 #endif
 
 
@@ -137,7 +137,8 @@
 * used in "BOARD_SwitchAudioFreq"
 * naming, "connection device name + Flexcomm number(1st is clock source)" _ "connection device name + Flexcomm number(1st is clock source)"
 */
-enum FlexcommSetOfApp{
+enum FlexcommSetOfApp
+{
 	BtPcmFc5Fc2_CodecFc1Fc3,
 	BtPcmFc2Fc4_AmpFc1Fc3,
 	AmpFc1Fc3,
@@ -150,16 +151,16 @@ enum FlexcommSetOfApp{
 extern unsigned int *Ptr_dma_descriptor_table0;
 
 
-extern volatile S32 I2S3Tx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-extern volatile S32 I2S3Tx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-extern volatile S32 I2S1Rx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-extern volatile S32 I2S1Rx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S16 I2S3Tx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S16 I2S3Tx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S16 I2S1Rx0BufCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S16 I2S1Rx0BufCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
 
 
-extern volatile S32 I2STxToNtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-extern volatile S32 I2STxToNtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-extern volatile S32 I2SRxFrNtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
-extern volatile S32 I2SRxFrNtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S16 I2STxToNtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S16 I2STxToNtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S16 I2SRxFrNtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
+extern volatile S16 I2SRxFrNtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
 
 
 extern volatile U8 I2S1DmaTransferringIsUsingBufA;

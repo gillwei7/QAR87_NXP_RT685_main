@@ -22,6 +22,7 @@
 
 #include "SubFunc.h"
 
+/*
 void OpeningBlink(U32 l)
 {
 	int d;
@@ -50,7 +51,7 @@ void OpeningBlink(U32 l)
 		delay_ms(20);
 	}
 }
-
+*/
 void BlinkDbgPinNTime(int WhichPin, int NTimes)
 {
 	int i;
@@ -89,12 +90,13 @@ gpio_pin_config_t GPIO_Output_config =
 
 void InitDbgPin(void)
 {
-	GPIO_PortInit(GPIO, 0);
+	//GPIO_PortInit(GPIO, 0);		//enable this line --- print fails ???
 	GPIO_PortInit(GPIO, 1);
+	GPIO_PortInit(GPIO, 2);
 
-    GPIO_PinInit(GPIO, LedBluPinPort, LedBluPin, &GPIO_Output_config);
-    GPIO_PinInit(GPIO, LedRedPinPort, LedRedPin, &GPIO_Output_config);
-    GPIO_PinInit(GPIO, LedGrnPinPort, LedGrnPin, &GPIO_Output_config);
+    //GPIO_PinInit(GPIO, LedBluPinPort, LedBluPin, &GPIO_Output_config);
+    //GPIO_PinInit(GPIO, LedRedPinPort, LedRedPin, &GPIO_Output_config);
+    //GPIO_PinInit(GPIO, LedGrnPinPort, LedGrnPin, &GPIO_Output_config);
 
     GPIO_PinInit(GPIO, DbgPin5Port, DbgPin5, &GPIO_Output_config);
     GPIO_PinInit(GPIO, DbgPin6Port, DbgPin6, &GPIO_Output_config);
@@ -136,6 +138,7 @@ void InitDbgPin(void)
 			DbgPin8Dn();DelayMsByReadingCycCnt(1);
 		}
 	}
+
 }
 
 void delay_us(U32 d)
@@ -234,7 +237,7 @@ void GenBtnEvt(void)
 {
     uint8_t i;
     TBtnEvtVarGroup *TmpPtr1;
-    RawBtnState = ((RdBtn1Input()<<0)|(RdBtn2Input()<<1));//read real io input data
+    RawBtnState = ((RdBtn1Input()<<0)|(RdBtn2Input()<<1));
     //RawBtnState = ~RawBtnState;
 
     // Y = ((~A)&(B&C))|(A&(B|C))

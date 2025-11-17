@@ -36,6 +36,7 @@
 #include "app_a2dp_sink.h"
 
 #include "GlobalDef.h"
+#include "WorkStateManager.h"
 
 #if UsingQAR87Board == 1
 #include "spi_handler.h"
@@ -548,6 +549,8 @@ void hfp_hf_a2dp_task(void *pvParameters)
 		PRINTF("BR/EDR set connectable and discoverable done\n");
     }
 #endif
+
+    DeviceWorkStateCur=WorkState_Void;
     StartAudioTask();
 
 	BaseType_t result = 0;

@@ -1,0 +1,1 @@
+5-stage HiFi 1 DSP with Call0 ABI, 128 Byte Loop buffer, one 128 KB Inst RAM, two 128K Data RAMs (1 bank), 16K/4W I$, D$.

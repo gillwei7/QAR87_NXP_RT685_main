@@ -28,6 +28,7 @@
 #include "WorkStateManager.h"
 #include "SubFunc.h"
 
+
 int AudioPortIsActive_I2SToAmp;
 int AudioPortIsActive_I2SToNvt;
 int AudioPortIsActive_Pdm;
@@ -44,7 +45,13 @@ int RequestToGetOutofA2dpPlay=0;
 TDeviceWorkState DeviceWorkStateCur;
 TDeviceWorkState DeviceWorkStatePre;
 
-U32 AudioPortI2SAndPdmCfg;
+#if UseEventToControlBtHfp==1
+TBtHfpRequest BtHfpRequest;
+#endif
+
+
+int BtA2dpFs_ProvidedFromBtStack;
+//U32 AudioPortI2SAndPdmCfg;
 /*
 AudioPortI2SAndPdmCfg:
 bit 0~1: 		I2S_Amp Fs: 0,1,2,3 -> 16K, 32K, 44.1K, 48K
@@ -131,62 +138,71 @@ void WorkStateDeInit(int WhichState, U32 Opt)
 			break;
 	}
 }
-void WorkStateInit(int WhichState, U32 Opt)
+int WorkStateInit(int WhichState, U32 Opt)
 {
 	switch(WhichState)
 	{
-		case WorkState_HfpCall:
-			InitAudioInterface_HfpCall(0);
+		case WorkState_HfpCall_Pre:
+			InitAudioInterface_HfpCall(0, 16000, 16);
 			PRINTF_M("    Mcu: WorkState_HfpCall Init is done\r\n");
+			return(WorkState_HfpCall);
 			break;
-		case WorkState_HomeVitStandby:
+		case WorkState_HomeVitStandby_Pre:
 			InitAudioInterface_HomeVitStandby(AmpFc1Fc3);//in case PDM and Smart amp are required only in HomeStandby mode
 			PRINTF_M("    Mcu: WorkState_HomeVitStandby Init is done\r\n");
+			return(WorkState_HomeVitStandby);
 			break;
 		#if EnableWorkState_AudioIoDbg==1
-			case WorkState_AudioIoDbg:
-			#if UsingQAR87Board == 1
-				InitAudioInterface_AudioIoDebug(BtPcmFc2Fc4_AmpFc1Fc3);//to enable FC5,6 to connect with NT98532
-			#else	
-				InitAudioInterface_AudioIoDebug(BtPcmFc5Fc2_CodecFc1Fc3);
-			#endif
+			case WorkState_AudioIoDbg_Pre:
+				#if UsingQAR87Board == 1
+					InitAudioInterface_AudioIoDebug(BtPcmFc2Fc4_AmpFc1Fc3);//to enable FC5,6 to connect with NT98532
+				#else	
+					InitAudioInterface_AudioIoDebug(BtPcmFc5Fc2_CodecFc1Fc3);
+				#endif
 				PRINTF_M("    Mcu: WorkState_AudioIoDbg Init is done\r\n");
+				return(WorkState_AudioIoDbg);
 				break;
 		#endif
 		#if EnableWorkState_VideoRecording==1
-			case WorkState_VideoRecording:
+			case WorkState_VideoRecording_Pre:
 				InitAudioInterface_VideoRecording(0);
 				PRINTF_M("    Mcu: WorkState_VideoRecording Init is done\r\n");
+				return(WorkState_VideoRecording);
 				break;
 		#endif
 		#if EnableWorkState_MediaPlayer==1
-			case WorkState_MediaPlayer:
+			case WorkState_MediaPlayer_Pre:
 				InitAudioInterface_MediaPlayer(0);
 				PRINTF_M("    Mcu: WorkState_MediaPlayer Init is done\r\n");
+				return(WorkState_MediaPlayer);
 				break;
 		#endif
 		#if EnableWorkState_MusicPlayer==1
-			case WorkState_MusicPlayer:
+			case WorkState_MusicPlayer_Pre:
 				InitAudioInterface_MusicPlayer(AmpFc1Fc3);//in case smart amp is required only for music play
 				PRINTF_M("    Mcu: WorkState_MusicPlayer Init is done\r\n");
+				return(WorkState_MusicPlayer);
 				break;
 		#endif
 		#if EnableWorkState_Translation==1
-			case WorkState_Translation:
+			case WorkState_Translation_Pre:
 				InitAudioInterface_Translation(0);
 				PRINTF_M("    Mcu: WorkState_Translation Init is done\r\n");
+				return(WorkState_Translation);
 				break;
 		#endif
 		#if EnableWorkState_AiConversation==1
-			case WorkState_AiConversation:
+			case WorkState_AiConversation_Pre:
 				InitAudioInterface_AiConversation(0);
 				PRINTF_M("    Mcu: WorkState_AiConversation Init is done\r\n");
+				return(WorkState_AiConversation);
 				break;
 		#endif
 		#if EnableWorkState_VideoAi==1
-			case WorkState_VideoAi:
+			case WorkState_VideoAi_Pre:
 				InitAudioInterface_VideoAi(0);
 				PRINTF_M("    Mcu: WorkState_VideoAi Init is done\r\n");
+				return(WorkState_VideoAi);
 				break;
 		#endif
 		default:
@@ -215,7 +231,29 @@ void VocEvtProc_HfpCall(U32 VoiceCmd)
 }
 void AppEvtProc_HfpCall()
 {
-
+	#if UseEventToControlBtHfp==1
+		BaseType_t	PriorityTaskWoken = pdFALSE;
+		switch(BtHfpRequest)
+		{
+			case HfpRequest_AudioSetup:
+				break;
+			case HfpRequest_AudioStart:
+				//do nothing, here is actually to make hfp side wait till hfp audio init is done
+				xEventGroupSetBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_AudioStart);
+				break;
+			case HfpRequest_AudioStop:
+				break;
+			case HfpRequest_SetCodecAmpVolume:
+				//to add
+				xEventGroupSetBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_SetCodecAmpVolume);
+				break;
+			case HfpRequest_RingToneStart:
+				break;
+			case HfpRequest_RingToneStop:
+				break;
+		}
+		BtHfpRequest=HfpRequest_None;
+	#endif
 }
 void VocEvtProc_HomeVitStandby(U32 VoiceCmd)
 {
@@ -228,6 +266,7 @@ void VocEvtProc_HomeVitStandby(U32 VoiceCmd)
 		case ASR_VoiceCommand_HangUpThePhone:
 			break;
 		case ASR_VoiceCommand_TakePhoto:
+			PRINTF_M("VoiceCmd: take photo\r\n");
 			break;
 		default:
 			break;
@@ -306,6 +345,7 @@ void VocEvtProc_MediaPlayer(U32 VoiceCmd)
 		case ASR_VoiceCommand_HangUpThePhone:
 			break;
 		case ASR_VoiceCommand_TakePhoto:
+			PRINTF_M("VoiceCmd: take photo\r\n");
 			break;
 
 		case ASR_VoiceCommand_GoHomeMediaplayer:
@@ -342,6 +382,7 @@ void VocEvtProc_MusicPlayer(U32 VoiceCmd)
 		case ASR_VoiceCommand_HangUpThePhone:
 			break;
 		case ASR_VoiceCommand_TakePhoto:
+			PRINTF_M("VoiceCmd: take photo\r\n");
 			break;
 
 		case ASR_VoiceCommand_GoHomeMusicplayer:
@@ -446,17 +487,9 @@ void AppEvtProc_VideoAi()
 
 void Manager_Task(void *pvParameters)
 {
-
-#if 1
-	DeviceWorkStateCur=WorkState_HomeVitStandby;
+	DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 	DeviceWorkStatePre=WorkState_Void;
-	WorkStateIsChanged=1;			//this is to init audio to homevit on startup
-#else
-	DeviceWorkStateCur=WorkState_HomeVitStandby;
-	DeviceWorkStatePre=WorkState_HomeVitStandby;
-
-	WorkStateIsChanged=0;
-#endif
+	WorkStateIsChanged=1;				//this is to init audio to homevit on startup
 
 	RequestToGetIntoHfp=0;
 	RequestToGetOutofHfp=0;
@@ -483,378 +516,376 @@ void Manager_Task(void *pvParameters)
 
 	while(1)
 	{
-		vTaskDelay(40);
+		//vTaskDelay(40);
+		vTaskDelay(10);
 
-		//Step 0, get app event
-		//to do...
-		//B36932 GenBtnEvt();
-		//B36932 ButtonEventProcess();// should be handled by each app event
+		//-------------------------------step 0, get APP event: button, SPI, sensors, touch, etc---------------------------------------
+		//---beg---
+		#if 1	//folding
+			GenBtnEvt();
+		#endif
+		//---end---
+		//-------------------------------step 0, get APP event: button, SPI, sensors, touch, etc---------------------------------------
+
 
 		//------------------------step 1, check events for switching work state, and change work state----------------------------------
 		//---beg---
-
-		//check app events for switching workstate
 		#if 1	//folding
-			//getting into/out of HFP
-			/*
-			if(RequestToGetIntoHfp)
-			{
-				DeviceWorkStatePre=DeviceWorkStateCur;
-				DeviceWorkStateCur=WorkState_HfpCall;
-				WorkStateIsChanged=1;
-				RequestToGetIntoHfp=0;
-				//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-			}
-
-			if(RequestToGetOutofHfp)
-			{
-				DeviceWorkStateCur=DeviceWorkStatePre;
-				DeviceWorkStatePre=WorkState_HfpCall;
-				WorkStateIsChanged=1;
-				RequestToGetOutofHfp=0;
-				//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-			}
-		 	*/
-
-			#if EnableWorkState_MusicPlayer==1
-				//getting into/out of A2dp
-				if(RequestToGetIntoA2dpPlay)
-				{
-					if(DeviceWorkStateCur!=WorkState_MusicPlayer)
+			//check app events for switching work state
+			#if 1	//folding
+				//getting into/out of HFP
+				#if UseEventToControlBtHfp==1
+					if(RequestToGetIntoHfp)
 					{
 						DeviceWorkStatePre=DeviceWorkStateCur;
-						DeviceWorkStateCur=WorkState_MusicPlayer;
+					DeviceWorkStateCur=WorkState_HfpCall_Pre;
 						WorkStateIsChanged=1;
+						RequestToGetIntoHfp=0;
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
-					RequestToGetIntoA2dpPlay=0;
-					//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-				}
-				if(RequestToGetOutofA2dpPlay)
-				{
-					if(DeviceWorkStateCur==WorkState_MusicPlayer)
+
+					if(RequestToGetOutofHfp)
 					{
-						DeviceWorkStateCur=DeviceWorkStatePre;
-						DeviceWorkStatePre=WorkState_MusicPlayer;
+					DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+						DeviceWorkStatePre=WorkState_HfpCall;
 						WorkStateIsChanged=1;
+						RequestToGetOutofHfp=0;
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
-					RequestToGetOutofA2dpPlay=0;
-					//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-				}
-				#if 0
-					//this part is to check switching when A2dp BT is NOT added
-				if((DeviceWorkStateCur!=WorkState_MusicPlayer)&&(VarBlockSharedByDspAndMcu.CurVoiceMenu==ASR_Menu_MusicPlayer))
-				{
-					DeviceWorkStatePre=DeviceWorkStateCur;
-					DeviceWorkStateCur=WorkState_MusicPlayer;
-					WorkStateIsChanged=1;
+				#endif
+
+				#if EnableWorkState_MusicPlayer==1
+					//getting into/out of A2dp
+					if(RequestToGetIntoA2dpPlay)
+					{
+						if(DeviceWorkStateCur!=WorkState_MusicPlayer)
+						{
+							DeviceWorkStatePre=DeviceWorkStateCur;
+							DeviceWorkStateCur=WorkState_MusicPlayer_Pre;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetIntoA2dpPlay=0;
 						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-				}
-				if((DeviceWorkStateCur==WorkState_MusicPlayer)&&(VarBlockSharedByDspAndMcu.CurVoiceMenu!=ASR_Menu_MusicPlayer))
-				{
-					DeviceWorkStateCur=DeviceWorkStatePre;
-					DeviceWorkStatePre=WorkState_MusicPlayer;
-					WorkStateIsChanged=1;
+					}
+					if(RequestToGetOutofA2dpPlay)
+					{
+						if(DeviceWorkStateCur==WorkState_MusicPlayer)
+						{
+							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStatePre=WorkState_MusicPlayer;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetOutofA2dpPlay=0;
 						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-				}
+					}
+					#if 0
+						//this part is to check switching when A2dp BT is NOT added
+						if((DeviceWorkStateCur!=WorkState_MusicPlayer)&&(VarBlockSharedByDspAndMcu.CurVoiceMenu==ASR_Menu_MusicPlayer))
+						{
+							DeviceWorkStatePre=DeviceWorkStateCur;
+							DeviceWorkStateCur=WorkState_MusicPlayer_Pre;
+							WorkStateIsChanged=1;
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+						}
+						if((DeviceWorkStateCur==WorkState_MusicPlayer)&&(VarBlockSharedByDspAndMcu.CurVoiceMenu!=ASR_Menu_MusicPlayer))
+						{
+							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStatePre=WorkState_MusicPlayer;
+							WorkStateIsChanged=1;
+							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+						}
+					#endif
+				#endif
 			#endif
-		#endif
-		#endif
 
-		//check voice events for switching workstate
-		if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandIntent!=ASR_Menu_None)
-		{
-			//process voice event for switching work state
-			switch(VarBlockSharedByDspAndMcu.CurrentVoiceCommandIntent)
+			//check voice events for switching work state
+			if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandIntent!=ASR_Menu_None)
 			{
-				case ASR_Menu_Home:
-					//go to other workstate from HomeVit
-					#if EnableWorkState_AudioIoDbg==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_OpenMenu)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_AudioIoDbg;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					#if EnableWorkState_VideoRecording==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_StartRecording)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_VideoRecording;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					#if EnableWorkState_MediaPlayer==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoMediaPlayer)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_MediaPlayer;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					#if EnableWorkState_MusicPlayer==1
-						//note: go to music player is not done by voice command
-					#endif
-					#if EnableWorkState_Translation==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_StartTranslation)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_Translation;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					#if EnableWorkState_AiConversation==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_StartAiConversation)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_AiConversation;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					#if EnableWorkState_VideoAi==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_StartVideoAi)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_VideoAi;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					break;
-
-				//go back to HomeVit from other workstates
-				case ASR_Menu_MainMenu:
-					#if EnableWorkState_AudioIoDbg==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeMainMenu)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_HomeVitStandby;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					break;
-				case ASR_Menu_VideoRecording:
-					#if EnableWorkState_VideoRecording==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeVideoRecording)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_HomeVitStandby;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					break;
-				case ASR_Menu_MediaPlayer:
-					#if EnableWorkState_MediaPlayer==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeMediaplayer)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_HomeVitStandby;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					break;
-				case ASR_Menu_MusicPlayer:
-					#if EnableWorkState_MusicPlayer==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeMusicplayer)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_HomeVitStandby;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					break;
-				case ASR_Menu_Translation:
-					#if EnableWorkState_Translation==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeTranslation)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_HomeVitStandby;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					break;
-				case ASR_Menu_AiConversation:
-					#if EnableWorkState_AiConversation==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeAiconversation)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_HomeVitStandby;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					break;
-				case ASR_Menu_VidioAi:
-					#if EnableWorkState_VideoAi==1
-						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeVideoAi)
-						{
-							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_HomeVitStandby;
-							WorkStateIsChanged=1;
-							//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-						}
-					#endif
-					break;
-				default:
-					break;
-			}
-			VarBlockSharedByDspAndMcu.CurrentVoiceCommandIntent=ASR_Menu_None;
-		}
-
-		//workstate change --- init and deinit,
-		if(WorkStateIsChanged)
-		{
-			//wait till it is the proper time to re-init audio interface
-			while(1)
-			{
-				if((AllowAudioInterfaceReInit_PdmI2S)&&(AllowAudioInterfaceReInit_Fc25))
+				//process voice event for switching work state
+				switch(VarBlockSharedByDspAndMcu.CurrentVoiceCommandIntent)
+				{
+					case ASR_Menu_Home:
+						//go to other work state from HomeVit
+						#if EnableWorkState_AudioIoDbg==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_OpenMenu)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_AudioIoDbg_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						#if EnableWorkState_VideoRecording==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_StartRecording)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_VideoRecording_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						#if EnableWorkState_MediaPlayer==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoMediaPlayer)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						#if EnableWorkState_MusicPlayer==1
+							//note: go to music player is not done by voice command
+						#endif
+						#if EnableWorkState_Translation==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_StartTranslation)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_Translation_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						#if EnableWorkState_AiConversation==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_StartAiConversation)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_AiConversation_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						#if EnableWorkState_VideoAi==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_StartVideoAi)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_VideoAi_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
 						break;
+
+					//go back to HomeVit from other workstates
+					case ASR_Menu_MainMenu:
+						#if EnableWorkState_AudioIoDbg==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeMainMenu)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						break;
+					case ASR_Menu_VideoRecording:
+						#if EnableWorkState_VideoRecording==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeVideoRecording)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						break;
+					case ASR_Menu_MediaPlayer:
+						#if EnableWorkState_MediaPlayer==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeMediaplayer)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						break;
+					case ASR_Menu_MusicPlayer:
+						#if EnableWorkState_MusicPlayer==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeMusicplayer)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						break;
+					case ASR_Menu_Translation:
+						#if EnableWorkState_Translation==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeTranslation)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						break;
+					case ASR_Menu_AiConversation:
+						#if EnableWorkState_AiConversation==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeAiconversation)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						break;
+					case ASR_Menu_VidioAi:
+						#if EnableWorkState_VideoAi==1
+							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeVideoAi)
+							{
+								VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+								DeviceWorkStatePre=DeviceWorkStateCur;
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
+								WorkStateIsChanged=1;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+							}
+						#endif
+						break;
+					default:
+						break;
+				}
+				VarBlockSharedByDspAndMcu.CurrentVoiceCommandIntent=ASR_Menu_None;
 			}
-			#if 1
+
+			//work state change --- init and deinit,
+			if(WorkStateIsChanged)
+			{
+				//wait till it is the proper time to re-init audio interface
+				while(1)
+				{
+					if((AllowAudioInterfaceReInit_PdmI2S)&&(AllowAudioInterfaceReInit_Fc25))
+							break;
+				}
+
 				WorkStateDeInit(DeviceWorkStatePre,  0);
-				WorkStateInit  (DeviceWorkStateCur,  0);
-			#else
-				//temp disable some of the workstate switching
-				if(DeviceWorkStateCur==WorkState_AudioIoDbg)
-				{
-					//now, only test going to audio IO debug
-					WorkStateDeInit(DeviceWorkStatePre,  0);
-					WorkStateInit  (DeviceWorkStateCur,  0);
-				}
-				if(DeviceWorkStateCur==WorkState_MusicPlayer)
-				{
-					//now, only test going to audio IO debug
-					WorkStateDeInit(DeviceWorkStatePre,  0);
-					WorkStateInit  (DeviceWorkStateCur,  0);
-				}
-			#endif
-			PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-			WorkStateIsChanged=0;
-		}
+				DeviceWorkStateCur = WorkStateInit  (DeviceWorkStateCur,  0);
+
+				PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+				WorkStateIsChanged=0;
+			}
+		#endif
 		//---end---
 		//----------------------------------------------------------------------------------------------------------------------------
 
 		//------------------------------------step 2, voice event and app event handling----------------------------------------------
 		//---beg---
 		//process app event and voice event for current work state
-		switch(DeviceWorkStateCur)
-		{
-			case WorkState_HfpCall:
-				if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
-				{
-					VocEvtProc_HfpCall(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
-					VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-				}
-				AppEvtProc_HfpCall();
-				break;
-			case WorkState_HomeVitStandby:
-				if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
-				{
-					VocEvtProc_HomeVitStandby(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
-					VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-				}
-				AppEvtProc_HomeVitStandby();
-				break;
-			#if EnableWorkState_AudioIoDbg==1
-				case WorkState_AudioIoDbg:
+		#if 1	//folding
+			if(VarBlockSharedByDspAndMcu.WWIsDetected)
+			{
+				PRINTF_M("VoiceCmd: Hey Quanta is detected!\r\n");
+				VarBlockSharedByDspAndMcu.WWIsDetected=0;
+			}
+
+			switch(DeviceWorkStateCur)
+			{
+				case WorkState_HfpCall:
 					if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
 					{
-						VocEvtProc_AudioIoDbg(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
+						VocEvtProc_HfpCall(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
 						VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
 					}
-					AppEvtProc_AudioIoDbg();
+					AppEvtProc_HfpCall();
 					break;
-			#endif
-			#if EnableWorkState_VideoRecording==1
-				case WorkState_VideoRecording:
+				case WorkState_HomeVitStandby:
 					if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
 					{
-						VocEvtProc_VideoRecording(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
+						VocEvtProc_HomeVitStandby(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
 						VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
 					}
-					AppEvtProc_VideoRecording();
+					AppEvtProc_HomeVitStandby();
 					break;
-			#endif
-			#if EnableWorkState_MediaPlayer==1
-				case WorkState_MediaPlayer:
-					if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
-					{
-						VocEvtProc_MediaPlayer(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
-						VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-					}
-					AppEvtProc_MediaPlayer();
+				#if EnableWorkState_AudioIoDbg==1
+					case WorkState_AudioIoDbg:
+						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
+						{
+							VocEvtProc_AudioIoDbg(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
+							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+						}
+						AppEvtProc_AudioIoDbg();
+						break;
+				#endif
+				#if EnableWorkState_VideoRecording==1
+					case WorkState_VideoRecording:
+						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
+						{
+							VocEvtProc_VideoRecording(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
+							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+						}
+						AppEvtProc_VideoRecording();
+						break;
+				#endif
+				#if EnableWorkState_MediaPlayer==1
+					case WorkState_MediaPlayer:
+						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
+						{
+							VocEvtProc_MediaPlayer(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
+							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+						}
+						AppEvtProc_MediaPlayer();
+						break;
+				#endif
+				#if EnableWorkState_MusicPlayer==1
+					case WorkState_MusicPlayer:
+						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
+						{
+							VocEvtProc_MusicPlayer(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
+							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+						}
+						AppEvtProc_MusicPlayer();
+						break;
+				#endif
+				#if EnableWorkState_Translation==1
+					case WorkState_Translation:
+						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
+						{
+							VocEvtProc_Translation(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
+							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+						}
+						AppEvtProc_Translation();
+						break;
+				#endif
+				#if EnableWorkState_AiConversation==1
+					case WorkState_AiConversation:
+						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
+						{
+							VocEvtProc_AiConversation(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
+							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+						}
+						AppEvtProc_AiConversation();
+						break;
+				#endif
+				#if EnableWorkState_VideoAi==1
+					case WorkState_VideoAi:
+						if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
+						{
+							VocEvtProc_VideoAi(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
+							VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
+						}
+						AppEvtProc_VideoAi();
+						break;
+				#endif
+				default:
 					break;
-			#endif
-			#if EnableWorkState_MusicPlayer==1
-				case WorkState_MusicPlayer:
-					if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
-					{
-						VocEvtProc_MusicPlayer(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
-						VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-					}
-					AppEvtProc_MusicPlayer();
-					break;
-			#endif
-			#if EnableWorkState_Translation==1
-				case WorkState_Translation:
-					if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
-					{
-						VocEvtProc_Translation(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
-						VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-					}
-					AppEvtProc_Translation();
-					break;
-			#endif
-			#if EnableWorkState_AiConversation==1
-				case WorkState_AiConversation:
-					if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
-					{
-						VocEvtProc_AiConversation(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
-						VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-					}
-					AppEvtProc_AiConversation();
-					break;
-			#endif
-			#if EnableWorkState_VideoAi==1
-				case WorkState_VideoAi:
-					if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName!=ASR_VoiceCommand_None)
-					{
-						VocEvtProc_VideoAi(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName);
-						VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName=ASR_VoiceCommand_None;
-					}
-					AppEvtProc_VideoAi();
-					break;
-			#endif
-			default:
-				break;
-		}
+			}
+		#endif
 		//---end---
 		//----------------------------------------------------------------------------------------------------------------------------
-
-
 	}
 }
 

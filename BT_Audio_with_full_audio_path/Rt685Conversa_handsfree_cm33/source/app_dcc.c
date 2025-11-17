@@ -114,7 +114,11 @@ void bt_ready(int err)
     hfp_hf_init();
     app_connect_init();
     bt_conn_auth_cb_register(&auth_cb_display);
-    app_shell_init();
+
+	#if (Using_UART5ToPrint)||(Using_UART2ToPrint)
+		app_shell_init();
+	#endif
+
     	a2dp_sink_register_service();
     hfp_hf_register_service();
     	app_lfs_init();

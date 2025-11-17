@@ -128,6 +128,12 @@ extern XosMutex 		  g_audio_vitBufferMutex;										// VIT buffer mutex for acc
 extern XosMutex			  g_audio_SbcDecoderMutex;
 extern XosMutex			  g_audio_OpusDecoderMutex;						//to really use mutex protecting cir buffer --- should move audio signal flow process to a task --- to be done later
 
+extern T_CircularAudioBuf_S16  VitCircBuff;
+extern T_CircularAudioBuf_S16  VitCircBuff_RawMic;
+extern VIT_DetectionStatus_en 	g_vitDetectionResult;   // VIT detection results
+extern PL_UINT16 				g_vitVcDetectionId;     // VIT voice command detection results ID
+
+extern void CommandToPlayWakeSound(void);
 extern void InitVit(void);
 extern void ConfigAndStartVitTask(void);
 

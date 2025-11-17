@@ -29,15 +29,15 @@
 #include "AudioProc_Conversa.h"
 
 
-//#define POLYPHASE_CUBIC_INTERPOLATION
-//#define ASRC_ENABLE
+#define POLYPHASE_CUBIC_INTERPOLATION
+#define ASRC_ENABLE
 // #define OUTPUT_PING_PONG
 // #define INPUT_PING_PONG
 // #define SCRATCH_TRASH_TEST
 
 #ifdef ASRC_ENABLE
 //#define DISPLAY_MESSAGE_ASRC
-#define ASRC_ENABLE_RUNTIME_DRIFT_TEST
+//#define ASRC_ENABLE_RUNTIME_DRIFT_TEST
 #endif
 
 #ifdef __XCC__
@@ -90,65 +90,24 @@ extern uint8_t domainId;
 VOID xa_testbench_error_handler_init_Asrc(void);
 VOID xa_src_pp_error_handler_init(void);
 
-volatile float AsrcDriftingValueCurrent;
-volatile float AsrcDriftingValueTarget;
-volatile int AsrcFsInCurrent;
-volatile int AsrcFsInTarget;
+//volatile float AsrcDriftingValueCurrent;
+//volatile float AsrcDriftingValueTarget;
+//volatile int AsrcFsInCurrent;
+//volatile int AsrcFsInTarget;
 
 
-//char *binName = NULL;
+TCadenceSRC SRC_ConversaTx1;
+TCadenceSRC SRC_ConversaRx1;
+TCadenceSRC SRC_ConversaRx2;
+TCadenceSRC SRC_DecoderSbc;
+TCadenceSRC SRC_DecoderOpus;
 
-//heap space count for each SRC processor
-WORD  g_w_malloc_count_Ref;
-WORD  g_w_malloc_count_TxOut;
-WORD  g_w_malloc_DecoderOpus;
-WORD  g_w_malloc_DecoderSbc;
-//static heap space for each SRC processor
-pVOID g_pv_arr_alloc_memory_Ref[MAX_MEM_ALLOCS];
-pVOID g_pv_arr_alloc_memory_TxOut[MAX_MEM_ALLOCS];
-pVOID g_pv_arr_alloc_memory_DecoderOpus[MAX_MEM_ALLOCS];
-pVOID g_pv_arr_alloc_memory_DecoderSbc[MAX_MEM_ALLOCS];
-//API obj for each SRC processor
-xa_codec_handle_t SRC_process_Ref_handle;
-xa_codec_handle_t SRC_process_TxOut_handle;
-xa_codec_handle_t DecoderSbc_handle;
-xa_codec_handle_t DecoderOpus_handle;
-
-xa_codec_handle_t SrcHandle_AlgCtnBus1;
-xa_codec_handle_t SrcHandle_AlgCtnBus2;
-xa_codec_handle_t SrcHandle_AlgCtnTx1;
-xa_codec_handle_t SrcHandle_AlgCtnTx2;
-xa_codec_handle_t SrcHandle_AlgCtnRx1;
-xa_codec_handle_t SrcHandle_AlgCtnMic01;
-xa_codec_handle_t SrcHandle_AlgCtnMic23;
-xa_codec_handle_t SrcHandle_AlgCtnMic45;
-
-WORD  g_w_malloc_SrcHandle_AlgCtnBus1;
-WORD  g_w_malloc_SrcHandle_AlgCtnBus2;
-WORD  g_w_malloc_SrcHandle_AlgCtnTx1;
-WORD  g_w_malloc_SrcHandle_AlgCtnTx2;
-WORD  g_w_malloc_SrcHandle_AlgCtnRx1;
-WORD  g_w_malloc_SrcHandle_AlgCtnMic01;
-WORD  g_w_malloc_SrcHandle_AlgCtnMic23;
-WORD  g_w_malloc_SrcHandle_AlgCtnMic45;
-
-pVOID g_pv_arr_alloc_memory_SrcHandle_AlgCtnBus1[MAX_MEM_ALLOCS];
-pVOID g_pv_arr_alloc_memory_SrcHandle_AlgCtnBus2[MAX_MEM_ALLOCS];
-pVOID g_pv_arr_alloc_memory_SrcHandle_AlgTx1[MAX_MEM_ALLOCS];
-pVOID g_pv_arr_alloc_memory_SrcHandle_AlgTx2[MAX_MEM_ALLOCS];
-pVOID g_pv_arr_alloc_memory_SrcHandle_AlgRx1[MAX_MEM_ALLOCS];
-pVOID g_pv_arr_alloc_memory_SrcHandle_AlgMic01[MAX_MEM_ALLOCS];
-pVOID g_pv_arr_alloc_memory_SrcHandle_AlgMic23[MAX_MEM_ALLOCS];
-pVOID g_pv_arr_alloc_memory_SrcHandle_AlgMic45[MAX_MEM_ALLOCS];
-
-
-/*  Pointers to the raw input/output buffers used by the file I/O in the main loop. */
-pVOID ppin_buffer;
-pVOID ppout_buffer;
 
 static xa_error_info_struct *p_proc_err_info;
 /* The process API function */
 static xa_codec_func_t *p_xa_process_api;
+
+int AodHistoryForUpdateDrifting[8];		//this is ONLY for SBC buffer drifting control --- if other ASRC with drifting control is needed, should define more AodHistory variable
 
 /********************************************************************************
  * UserConfig defines a structure for command-line configuration parameters
@@ -195,26 +154,42 @@ const user_config default_config =
 
 };
 
-void DeinitCadenceAsrc(void **pv_arr_alloc_memory, signed int *w_malloc_count)
+void DeinitCadenceAsrc(TCadenceSRC *SRCPtr)
 {
-    for(int i = 0; i < *w_malloc_count; i++)
+    for(int i = 0; i < SRCPtr->MemAllocCnt; i++)
     {
-        if(pv_arr_alloc_memory[i])
+        if(SRCPtr->AllocatedMemPtr[i])
         {
-            free(pv_arr_alloc_memory[i]);
-            pv_arr_alloc_memory[i] = NULL;
+            free(SRCPtr->AllocatedMemPtr[i]);
+            SRCPtr->AllocatedMemPtr[i] = NULL;
         }
     }
-    *w_malloc_count=0;
+    SRCPtr->MemAllocCnt=0;
 }
 
 
-int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInSamples, int inFs, int outFs, int ChNum,  void **pv_arr_alloc_memory, signed int *w_malloc_count, int NeedToDisplay)
+int InitCadenceAsrc (TCadenceSRC *SRCPtr, int InputBlockSizeInSamples, int inFs, int outFs, int ChNum,  int EnableAsrc, int NeedToDisplay)
 {
     /* User Config */
     user_config def_user_config;
     int i;
-    *w_malloc_count = 0;
+
+    SRCPtr->MemAllocCnt=0;
+    SRCPtr->InputBlockSizeInSamples=InputBlockSizeInSamples;
+    SRCPtr->inFs=inFs;
+    SRCPtr->outFs=outFs;
+    SRCPtr->EnableAsrc=EnableAsrc;
+    SRCPtr->AsrcDriftingValueCurrent=0.0f;
+    SRCPtr->AsrcDriftingValueTarget=0.0f;
+
+    if(EnableAsrc)
+    {
+    	SRCPtr->KiAcc=0;
+    }
+
+	for(int i=0;i<8;i++)
+		AodHistoryForUpdateDrifting[i]=0;
+
 
     /* Error code */
     XA_ERRORCODE err_code = XA_NO_ERROR;
@@ -223,8 +198,8 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     UWORD32 ui_proc_mem_tabs_size, pui_api_size;
     WORD32 max_outsize = 0;
 
-    AsrcFsInCurrent=inFs;
-    AsrcFsInTarget=inFs;
+    //AsrcFsInCurrent=inFs;
+    //AsrcFsInTarget=inFs;
 
     /* Memory variables */
     UWORD32 n_mems;
@@ -286,9 +261,9 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     }
 
     /* Allocate memory for API */
-    pv_arr_alloc_memory[*w_malloc_count] = malloc(pui_api_size);
+    SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt] = malloc(pui_api_size);
 
-    if (pv_arr_alloc_memory[*w_malloc_count] == NULL)
+    if (SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt] == NULL)
     {
         _XA_HANDLE_ERROR(&xa_testbench_error_info_Asrc, "API struct alloc", XA_TESTBENCH_MFMAN_FATAL_MEM_ALLOC_FAILED);
     }
@@ -296,16 +271,16 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     /* API object requires 4 bytes (WORD32) alignment;
     * malloc() provides at least 8-byte alignment.
     */
-    assert((((unsigned int) pv_arr_alloc_memory[*w_malloc_count]) & 3) == 0);
+    assert((((unsigned int) SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt]) & 3) == 0);
 
     /* Set API object with the memory allocated */
-    *xa_process_handle = (xa_codec_handle_t) pv_arr_alloc_memory[*w_malloc_count];
-    //was:   *w_malloc_count++; but report warning, and actual running gives bad result to w_malloc_count ???
-    *w_malloc_count=*w_malloc_count+1;
+
+    SRCPtr->xa_process_handle = (xa_codec_handle_t) SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt];
+	SRCPtr->MemAllocCnt=SRCPtr->MemAllocCnt+1;
 
     /* Set the config params to default values */
     err_code = (*p_xa_process_api)(
-    		*xa_process_handle,
+    			   SRCPtr->xa_process_handle,
                    XA_API_CMD_INIT,
                    XA_CMD_TYPE_INIT_API_PRE_CONFIG_PARAMS,
                    NULL);
@@ -315,7 +290,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     /* Initialize Memory info tables                                    */
     /* ******************************************************************/
     /* Get memory info tables size */
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_GET_MEMTABS_SIZE, 0,
                                    &ui_proc_mem_tabs_size);
     _XA_HANDLE_ERROR(p_proc_err_info, "", err_code);
@@ -327,25 +302,25 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 		#endif
     }
 
-    pv_arr_alloc_memory[*w_malloc_count] = malloc(ui_proc_mem_tabs_size);
-    if(pv_arr_alloc_memory[*w_malloc_count] == NULL)
+    SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt] = malloc(ui_proc_mem_tabs_size);
+    if(SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt] == NULL)
     {
         _XA_HANDLE_ERROR(&xa_testbench_error_info_Asrc, "Mem tables alloc", XA_TESTBENCH_MFMAN_FATAL_MEM_ALLOC_FAILED);
     }
 
     /* Memory table requires 4 bytes (WORD32) alignment; malloc()
      * provides at least 8-byte alignment */
-    assert((((unsigned int) pv_arr_alloc_memory[*w_malloc_count]) & 3) == 0);
+    assert((((unsigned int) SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt]) & 3) == 0);
 
     /* Set pointer for process memory tables */
     err_code = (*p_xa_process_api)(
-    		*xa_process_handle,
+    		SRCPtr->xa_process_handle,
                    XA_API_CMD_SET_MEMTABS_PTR, 0,
-                   (void *) pv_arr_alloc_memory[*w_malloc_count]);
+                   (void *) SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt]);
+
     _XA_HANDLE_ERROR(p_proc_err_info, "", err_code);
 
-    //was:   *w_malloc_count++; but report warning, and actual running gives bad result to w_malloc_count ???
-    *w_malloc_count=*w_malloc_count+1;
+    SRCPtr->MemAllocCnt=SRCPtr->MemAllocCnt+1;
 
     /* ******************************************************************/
     /* Read user config, set configs for Sample Rate Converter          */
@@ -358,33 +333,36 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     def_user_config.input_chunk_size=InputBlockSizeInSamples;
     def_user_config.bytes_per_sample=3;
 	#ifdef POLYPHASE_CUBIC_INTERPOLATION
-		def_user_config.enable_cubic=0;
+		def_user_config.enable_cubic=1;
 	#endif
     def_user_config.reset=-1;
 	#ifdef ASRC_ENABLE
-		def_user_config.enable_asrc=0;
+   		def_user_config.drift_asrc= ( long long)( (0.0f)*  ( (long long)1 << 31) );
+		def_user_config.enable_asrc=EnableAsrc;
 	#endif
 
     /*************** Set Configs **************/
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_SET_CONFIG_PARAM,
                                    XA_SRC_PP_CONFIG_PARAM_INPUT_SAMPLE_RATE,
                                    &def_user_config.fs_in);
+
+
     _XA_HANDLE_ERROR(p_proc_err_info, "Set Input Fs Error", err_code);
 
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_SET_CONFIG_PARAM,
                                    XA_SRC_PP_CONFIG_PARAM_OUTPUT_SAMPLE_RATE,
                                    &def_user_config.fs_out);
     _XA_HANDLE_ERROR(p_proc_err_info, "Set Output Fs Error", err_code);
 
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_SET_CONFIG_PARAM,
                                    XA_SRC_PP_CONFIG_PARAM_INPUT_CHANNELS,
                                    &def_user_config.channels);
-    _XA_HANDLE_ERROR(p_proc_err_info, "Set Input Channels Error", err_code);
+	_XA_HANDLE_ERROR(p_proc_err_info, "Set Input Channels Error", err_code);
 
-	err_code = (*p_xa_process_api)(*xa_process_handle,
+	err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_SET_CONFIG_PARAM,
                                    XA_SRC_PP_CONFIG_PARAM_BYTES_PER_SAMPLE,
                                    &def_user_config.bytes_per_sample);
@@ -392,7 +370,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 
 #ifdef POLYPHASE_CUBIC_INTERPOLATION
 
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_SET_CONFIG_PARAM,
                                    XA_SRC_PP_CONFIG_PARAM_ENABLE_CUBIC,
                                    &def_user_config.enable_cubic);
@@ -403,7 +381,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 
 #ifdef ASRC_ENABLE
 
-        err_code = (*p_xa_process_api)(*xa_process_handle,
+        err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_SET_CONFIG_PARAM,
                                    XA_SRC_PP_CONFIG_PARAM_ENABLE_ASRC,
                                    &def_user_config.enable_asrc);
@@ -411,7 +389,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 
         if ( def_user_config.enable_asrc == 1 )
         {
-            err_code = (*p_xa_process_api)(*xa_process_handle,
+            err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                           XA_API_CMD_SET_CONFIG_PARAM,
                                           XA_SRC_PP_CONFIG_PARAM_DRIFT_ASRC,
                                           &def_user_config.drift_asrc);
@@ -421,7 +399,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 
 #endif /* #ifdef ASRC_ENABLE */
     /* Set number of samples in the input buffer */
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_SET_CONFIG_PARAM,
                                    XA_SRC_PP_CONFIG_PARAM_INPUT_CHUNK_SIZE,
                                    &def_user_config.input_chunk_size);
@@ -429,7 +407,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 
     /* initialize the API, post config, fill memory tables */
     err_code = (*p_xa_process_api)(
-    		*xa_process_handle,
+    		SRCPtr->xa_process_handle,
                    XA_API_CMD_INIT,
                    XA_CMD_TYPE_INIT_API_POST_CONFIG_PARAMS,
                    NULL);
@@ -440,7 +418,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     /* ******************************************************************/
 
     /* Get number of memory tables required */
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_GET_N_MEMTABS,
                                    0,
                                    &n_mems);
@@ -449,20 +427,18 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     for (i = 0; i < (WORD32) n_mems; i++)
     {
         int ui_size, ui_alignment, ui_type;
-        pVOID pv_alloc_ptr;
-
 
         WORD32 n_input;
 
         /* Get memory size */
-        err_code = (*p_xa_process_api)(*xa_process_handle,
+        err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                        XA_API_CMD_GET_MEM_INFO_SIZE,
                                        i,
                                        &ui_size);
         _XA_HANDLE_ERROR(p_proc_err_info, "", err_code);
 
         /* Get memory alignment */
-        err_code = (*p_xa_process_api)(*xa_process_handle,
+        err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                        XA_API_CMD_GET_MEM_INFO_ALIGNMENT,
                                        i,
                                        &ui_alignment);
@@ -470,14 +446,14 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 
         /* Get memory type */
         err_code = (*p_xa_process_api)(
-        		*xa_process_handle,
+        		SRCPtr->xa_process_handle,
                        XA_API_CMD_GET_MEM_INFO_TYPE,
                        i,
                        &ui_type);
         _XA_HANDLE_ERROR(p_proc_err_info, "", err_code);
 
-        pv_arr_alloc_memory[*w_malloc_count] = malloc(ui_size);
-        if(pv_arr_alloc_memory[*w_malloc_count] == NULL)
+        SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt] = malloc(ui_size);
+        if(SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt] == NULL)
         {
             _XA_HANDLE_ERROR(&xa_testbench_error_info_Asrc, "Mem tables alloc",
                              XA_TESTBENCH_MFMAN_FATAL_MEM_ALLOC_FAILED);
@@ -487,17 +463,16 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
          * Xtensa always returns memory aligned on at least an 8-byte
          * boundary.
          */
-        assert((((unsigned int) pv_arr_alloc_memory[*w_malloc_count]) % ui_alignment) == 0);
+        assert((((unsigned int) SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt]) % ui_alignment) == 0);
 
-        pv_alloc_ptr = (void *) pv_arr_alloc_memory[*w_malloc_count];
-        *w_malloc_count=*w_malloc_count+1;
+        SRCPtr->MemAllocCnt=SRCPtr->MemAllocCnt+1;
 
         /* Set the buffer pointer */
         err_code = (*p_xa_process_api)(
-        		*xa_process_handle,
+        		SRCPtr->xa_process_handle,
                        XA_API_CMD_SET_MEM_PTR,
                        i,
-                       pv_alloc_ptr);
+					   SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt-1]);
         _XA_HANDLE_ERROR(p_proc_err_info, "", err_code);
 
         switch (ui_type)
@@ -507,24 +482,22 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 
             n_input = def_user_config.input_chunk_size;
 #if SHOW_SIZES
-            fprintf(stdout, "Input buffer size: %u bytes\n", ui_size);
+            //fprintf(stdout, "Input buffer size: %u bytes\n", ui_size);
 #endif /* SHOW_SIZES */
-
-            ppin_buffer = pv_alloc_ptr;
 
 #ifdef INPUT_PING_PONG
             p_input_buffer_ping = (WORD32 *)pv_alloc_ptr;
 
-            pv_arr_alloc_memory[*w_malloc_count] = malloc(ui_size);
-            if(pv_arr_alloc_memory[*w_malloc_count] == NULL) {
+            SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt] = malloc(ui_size);
+            if(SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt] == NULL) {
             _XA_HANDLE_ERROR(&xa_testbench_error_info, "Mem tables alloc",
                              XA_TESTBENCH_MFMAN_FATAL_MEM_ALLOC_FAILED);
             }
 
             /* 8-byte alignment check, should never fail on xtensa */
-            assert((((unsigned int) pv_arr_alloc_memory[*w_malloc_count]) % ui_alignment) == 0);
-            p_input_buffer_pong = (void *) pv_arr_alloc_memory[*w_malloc_count];
-            *w_malloc_count=*w_malloc_count+1;
+            assert((((unsigned int) SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt]) % ui_alignment) == 0);
+            p_input_buffer_pong = (void *) SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt];
+            SRCPtr->MemAllocCnt=SRCPtr->MemAllocCnt+1;
 
             in_idx = i;
 #endif /* INPUT_PING_PONG */
@@ -533,24 +506,23 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 
         case XA_MEMTYPE_OUTPUT:
 
-            ppout_buffer = (WORD32 *)pv_alloc_ptr;
 #if SHOW_SIZES
-            fprintf(stdout, "Output buffer size: %u bytes\n", ui_size);
+            //fprintf(stdout, "Output buffer size: %u bytes\n", ui_size);
 #endif /* SHOW_SIZES */
 
 #ifdef OUTPUT_PING_PONG
             p_output_buffer_ping = (WORD32 *)pv_alloc_ptr;
 
-            pv_arr_alloc_memory[*w_malloc_count] = malloc(ui_size);
-            if(pv_arr_alloc_memory[*w_malloc_count] == NULL) {
+            SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt] = malloc(ui_size);
+            if(SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt] == NULL) {
             _XA_HANDLE_ERROR(&xa_testbench_error_info_Asrc, "Mem tables alloc",
                              XA_TESTBENCH_MFMAN_FATAL_MEM_ALLOC_FAILED);
             }
 
             /* 8-byte alignment check, should never fail on xtensa */
-            assert((((unsigned int) pv_arr_alloc_memory[*w_malloc_count]) % ui_alignment) == 0);
-            p_output_buffer_pong = (void *) pv_arr_alloc_memory[*w_malloc_count];
-            *w_malloc_count=*w_malloc_count+1;
+            assert((((unsigned int) SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt]) % ui_alignment) == 0);
+            p_output_buffer_pong = (void *) SRCPtr->AllocatedMemPtr[SRCPtr->MemAllocCnt];
+            SRCPtr->MemAllocCnt=SRCPtr->MemAllocCnt+1;
 
             out_idx = i;
 #endif /* #ifdef OUTPUT_PING_PONG */
@@ -561,7 +533,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 
         case XA_MEMTYPE_SCRATCH:
 #if SHOW_SIZES
-            fprintf(stdout, "Scratch buffer size: %u bytes\n", ui_size);
+            //fprintf(stdout, "Scratch buffer size: %u bytes\n", ui_size);
 #endif /* SHOW_SIZES */
 
 #ifdef SCRATCH_TRASH_TEST
@@ -573,7 +545,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 
         case XA_MEMTYPE_PERSIST:
 #if SHOW_SIZES
-            fprintf(stdout, "Persistent buffer size: %u bytes\n", ui_size);
+            //fprintf(stdout, "Persistent buffer size: %u bytes\n", ui_size);
 #endif /* SHOW_SIZES */
             break;
 
@@ -587,13 +559,13 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     /* ******************************************************************/
     /* Initialization of the Sample Rate Converter                      */
     /* ******************************************************************/
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_INIT,
                                    XA_CMD_TYPE_INIT_PROCESS,
                                    NULL);
     _XA_HANDLE_ERROR(p_proc_err_info, "Initialization Error", err_code);
 
-    fprintf(stdout, "\n");
+    //fprintf(stdout, "\n");
 
     /* ******************************************************************/
     /* Convey the SRC process details to the user                       */
@@ -602,7 +574,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
         int num_of_stages;
 
         /* Get the number of stages */
-        err_code = (*p_xa_process_api)(*xa_process_handle,
+        err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                        XA_API_CMD_GET_CONFIG_PARAM,
                                        XA_SRC_PP_CONFIG_PARAM_GET_NUM_STAGES,
                                        &num_of_stages);
@@ -624,7 +596,7 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
     if(NeedToDisplay)
     {
 	    //SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
-		PRINTF("malloc_count: %d\n", *w_malloc_count);
+		PRINTF("malloc_count: %d\n", SRCPtr->MemAllocCnt);
 	    //SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
     }
 
@@ -632,26 +604,26 @@ int InitCadenceAsrc (xa_codec_handle_t *xa_process_handle, int InputBlockSizeInS
 }
 //xa_codec_handle_t SRC_process_Mic_handle
 
-int ProcCadenceAsrc(xa_codec_handle_t *xa_process_handle, int *AudioS32DstPtr, int *AudioS32SrcPtr, int InSampleNum, int *OutputSampleNum)
+int ProcCadenceAsrc(TCadenceSRC *SRCPtr, int *AudioS32DstPtr, int *AudioS32SrcPtr, int InSampleNum, int *OutputSampleNum)
 {
     XA_ERRORCODE err_code = XA_NO_ERROR;
 
     /* Set number of samples in the input buffer */
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_SET_CONFIG_PARAM,
                                    XA_SRC_PP_CONFIG_PARAM_INPUT_CHUNK_SIZE,
                                    &InSampleNum);
     _XA_HANDLE_ERROR(p_proc_err_info, "Set Input Chunk Size Error", err_code);
 
     /* Set Input Buffer Pointer */
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_SET_CONFIG_PARAM,
                                    XA_SRC_PP_CONFIG_PARAM_SET_INPUT_BUF_PTR,
 								   AudioS32SrcPtr);
     _XA_HANDLE_ERROR(p_proc_err_info, "Set Input Buffer Pointer Error", err_code);
 
 	/* Set Output Buffer Pointer */
-	err_code = (*p_xa_process_api)(*xa_process_handle,
+	err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
 								   XA_API_CMD_SET_CONFIG_PARAM,
 								   XA_SRC_PP_CONFIG_PARAM_SET_OUTPUT_BUF_PTR,
 								   AudioS32DstPtr);
@@ -659,22 +631,21 @@ int ProcCadenceAsrc(xa_codec_handle_t *xa_process_handle, int *AudioS32DstPtr, i
 
 	#ifdef ASRC_ENABLE
 		//update drifting value
-		if(AsrcDriftingValueCurrent!=AsrcDriftingValueTarget)
+		if(SRCPtr->AsrcDriftingValueCurrent!=SRCPtr->AsrcDriftingValueTarget)
 		{
-			long long DriftValue = ( long long)( (AsrcDriftingValueTarget)*  ( (long long)1 << 31) ); /* converting drift_float to Q31 fixed value */
+			long long DriftValue = ( long long)( (SRCPtr->AsrcDriftingValueTarget)*  ( (long long)1 << 31) ); /* converting drift_float to Q31 fixed value */
 
-			err_code = (*p_xa_process_api)(*xa_process_handle,
+			err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
 										  XA_API_CMD_SET_CONFIG_PARAM,
 										  XA_SRC_PP_CONFIG_PARAM_DRIFT_ASRC,
 										  &DriftValue);
 			_XA_HANDLE_ERROR(p_proc_err_info, "ASRC drift value Error", err_code);
 
-			AsrcDriftingValueCurrent=AsrcDriftingValueTarget;
-			PtrVarBlockSharedByDspAndMcu->CycCnt[2]++;
+			SRCPtr->AsrcDriftingValueCurrent=SRCPtr->AsrcDriftingValueTarget;
 		}
 	#endif
 	//main process
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_EXECUTE,
                                    XA_CMD_TYPE_DO_EXECUTE,
                                    NULL);
@@ -682,12 +653,56 @@ int ProcCadenceAsrc(xa_codec_handle_t *xa_process_handle, int *AudioS32DstPtr, i
 
 
     /* Get the number of samples in the output buffer */
-    err_code = (*p_xa_process_api)(*xa_process_handle,
+    err_code = (*p_xa_process_api)(SRCPtr->xa_process_handle,
                                    XA_API_CMD_GET_CONFIG_PARAM,
                                    XA_SRC_PP_CONFIG_PARAM_OUTPUT_CHUNK_SIZE,
 								   OutputSampleNum);
     _XA_HANDLE_ERROR(p_proc_err_info, "Get Output Chunk Size Error", err_code);
 
 	return XA_NO_ERROR;
+}
+
+
+volatile float AsrcDriftingValueCurrent_SbcDcoder;
+volatile float AsrcDriftingValueTarget_SbcDcoder;
+volatile int AsrcFsInCurrent_SbcDcoder;
+volatile int AsrcFsInTarget_SbcDcoder;
+
+void CadenceSrc_UpdateDrifting(TCadenceSRC *SRCPtr, int CurrentAod, int ForceDriftingTo0)
+{
+	if(ForceDriftingTo0)
+	{
+		SRCPtr->AsrcDriftingValueTarget=0.0f;
+		return;
+	}
+
+	float Err;
+
+	for(int i=0;i<7;i++)
+		AodHistoryForUpdateDrifting[i]=AodHistoryForUpdateDrifting[i+1];
+
+	AodHistoryForUpdateDrifting[7]=CurrentAod;
+
+	CurrentAod=0;
+	for(int i=0;i<8;i++)
+		CurrentAod+=AodHistoryForUpdateDrifting[i];
+
+	CurrentAod>>=3;		//CurrentAod now is the averaged value
+
+	Err=(float)CurrentAod-SRCPtr->AodTgtValue;
+	SRCPtr->KiAcc+=Err;
+
+	if(SRCPtr->KiAcc > SRCPtr->KiAccMax)
+		SRCPtr->KiAcc = SRCPtr->KiAccMax;
+	if(SRCPtr->KiAcc < 0-SRCPtr->KiAccMax)
+		SRCPtr->KiAcc = 0-SRCPtr->KiAccMax;
+
+	//PID calculation, actually only P and I
+	SRCPtr->AsrcDriftingValueTarget = SRCPtr->Kp*Err + SRCPtr->Ki*SRCPtr->KiAcc;
+
+	if(SRCPtr->AsrcDriftingValueTarget> 0.03999f) SRCPtr->AsrcDriftingValueTarget= 0.03999f;
+	if(SRCPtr->AsrcDriftingValueTarget<-0.03999f) SRCPtr->AsrcDriftingValueTarget=-0.03999f;
+
+	//PRINTF("Err Acc, %d %d %d \r\n", (int)Err, (int)(SRCPtr->KiAcc/100.0f), (int)(SRCPtr->AsrcDriftingValueTarget*1000000));
 }
 
