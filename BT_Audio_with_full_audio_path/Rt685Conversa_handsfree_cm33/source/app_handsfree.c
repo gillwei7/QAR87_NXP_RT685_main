@@ -555,7 +555,7 @@ void hfp_hf_a2dp_task(void *pvParameters)
 	assert(pdPASS == result);
 #if UsingQAR87Board == 1
 
-//    if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 500, NULL,
+//    if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 1000, NULL,
 //                    tskIDLE_PRIORITY + 2, NULL) != pdPASS)
 //    {
 //        PRINTF("Task creation failed!.\r\n");
@@ -569,14 +569,14 @@ void hfp_hf_a2dp_task(void *pvParameters)
 //        while (1);
 //    }
 
-//	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 100, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
-//    {
-//        PRINTF(" BUTTON Task creation failed!.\r\n");
-//        while (1);
-//    }
+	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 1000, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
+    {
+        PRINTF(" BUTTON Task creation failed!.\r\n");
+        while (1);
+    }
 
 	if (xTaskCreate(I2C_Task, "I2C_TASK",
-	                configMINIMAL_STACK_SIZE + 256,
+	                configMINIMAL_STACK_SIZE + 1000,
 	                NULL,
 	                tskIDLE_PRIORITY + 3,
 	                &sI2CTaskHandle) != pdPASS)
