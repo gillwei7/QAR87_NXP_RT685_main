@@ -11,6 +11,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#define BATTERY_FULL_VOLTAGE   4450//(mV)
+#define BATTERY_EMPTY_VOLTAGE  3300//(mV)
+
+typedef enum {
+    BATTERY_STATE_NORMAL = 0,       // 一般狀態
+    BATTERY_STATE_LOW,              // 電量過低
+    BATTERY_STATE_FULL              // 已充飽
+} battery_state_t;
+
+
 typedef struct __attribute__((packed)) {
     uint8_t flags;   // byte0: [RSVD3:3][RSVD1:1][MIC:1][BT:1][HA:1][BLE:1]
     uint8_t layer;   // byte1: [Layer:8]

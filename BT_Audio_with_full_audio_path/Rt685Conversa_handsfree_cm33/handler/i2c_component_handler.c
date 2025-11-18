@@ -36,6 +36,25 @@ volatile SystemStatus ss = {0};
 extern volatile uint8_t System_Status ;
 extern uint8_t Novatek_boot_completed;
 
+battery_state_t battery_state = BATTERY_STATE_NORMAL;
+
+static inline uint8_t battery_soc_percent_mv(uint32_t mv)
+{
+    // 邊界保護
+    if (mv <= BATTERY_EMPTY_VOLTAGE) return 0;
+    if (mv >= BATTERY_FULL_VOLTAGE)  return 100;
+
+    // 線性比例： (mv - empty) * 100 / (full - empty)
+    uint32_t range = (uint32_t)(BATTERY_FULL_VOLTAGE - BATTERY_EMPTY_VOLTAGE);
+    uint32_t num   = (uint32_t)(mv - BATTERY_EMPTY_VOLTAGE) * 100u;
+
+    // 四捨五入：+range/2
+    uint8_t soc = (uint8_t)((num + (range / 2u)) / range);
+
+    return soc;   // 0~100
+}
+
+
 static void BatteryReadTimerCb(TimerHandle_t xTimer)
 {
 
@@ -107,6 +126,7 @@ void Init_I2C_Component(void)
 #endif
 #if FG_GLF70302_ENABLE
 	hal_power_gauge_glf70302_get_battery_level(); //Read the battery level after powering on
+	battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
 	ss_set_battery(&ss, battery_info.soc);
 #endif
 #if AMP_AW88166_ENABLE
@@ -309,6 +329,22 @@ void I2C_Task(void *pvParameters)
             {
 #if FG_GLF70302_ENABLE
             	glf70302_read_battery(&battery_info);
+            	battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
+                PRINTF("[Battery] SOC: %d%%\r\n",battery_info.soc);
+                if(battery_info.soc>=99 && ss_is_charging(&ss))
+                {
+                	battery_state = BATTERY_STATE_FULL;
+                	led_post_event(LED_EVT_FULL_CHARGERED);
+                }
+                else if (battery_info.soc<=20)
+                {
+                	battery_state = BATTERY_STATE_LOW;
+                	led_post_event(LED_EVT_LOW_BATTERY);
+                }
+                else
+                {
+                	battery_state = BATTERY_STATE_NORMAL;
+                }
             	ss_set_battery(&ss, battery_info.soc);
 #endif
                 xSemaphoreGive(i2c_mutex);
@@ -410,8 +446,23 @@ void I2C_Task(void *pvParameters)
 #endif
         }
 #if LED_KTD2027_ENABLE && CHG_BQ25618_ENABLE
-        if(ss_is_charging(&ss) && led_status==0)
-        	led_post_event(LED_EVT_CHARGING);
+        //Confirm the final status
+        if(led_status==0) // When other events are executed, causing the LED to turn off
+        {
+        	if(ss_is_charging(&ss))
+        	{
+            	if(battery_state==BATTERY_STATE_FULL)
+            		led_post_event(LED_EVT_FULL_CHARGERED);
+            	else
+                	led_post_event(LED_EVT_CHARGING);
+        	}
+        	else
+        	{
+        		if(battery_state==BATTERY_STATE_LOW)
+        			led_post_event(LED_EVT_LOW_BATTERY);
+        	}
+
+        }
 #endif
 
     }
