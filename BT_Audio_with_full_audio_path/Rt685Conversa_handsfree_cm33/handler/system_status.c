@@ -11,15 +11,15 @@
 
 volatile uint8_t System_Status = 0; //Send system status to Novatek
 
-volatile usage_status_t current_usage_status = USAGE_STATUS_HOME;
+volatile usage_state_t current_usage_state = USAGE_STATE_HOME;
 
 extern QueueHandle_t      spi_request_queue;
 
-void usage_status_change(uint8_t status)
+void usage_state_change(uint8_t state)
 {
-	PRINTF("[System] Usage Status change: %d to %d \r\n",current_usage_status,status);
-	current_usage_status = status;
-	uint8_t v = USAGE_STATUS_HEX_VALUE + current_usage_status;
+	PRINTF("[System] Usage State change: %d to %d \r\n",current_usage_state,state);
+	current_usage_state = state;
+	uint8_t v = USAGE_STATE_HEX_VALUE + current_usage_state;
     (void)xQueueSend(spi_request_queue, &v, 0);
 
 }

@@ -21,16 +21,16 @@ typedef enum {
 } battery_state_t;
 
 typedef enum {
-    USAGE_STATUS_HOME = 0,          // 使用 Home
-    USAGE_STATUS_MENU,              // 使用 Menu
-    USAGE_STATUS_ABOUT,             // 使用 About
-    USAGE_STATUS_MUSIC_PLAYER,      // 使用 Music Player
-    USAGE_STATUS_MEDIA_PLAYER,      // 使用 Media Player
-    USAGE_STATUS_VIDEO_RECORDING,   // 使用 Video Recording
-    USAGE_STATUS_TAKE_PHOTO,        // 使用拍照
-    USAGE_STATUS_VIDEO_AI,          // 使用 Video AI
-    USAGE_STATUS_TRANSLATION        // 使用翻譯
-} usage_status_t;
+	USAGE_STATE_HOME = 0,          // 使用 Home
+	USAGE_STATE_MENU,              // 使用 Menu
+	USAGE_STATE_ABOUT,             // 使用 About
+	USAGE_STATE_MUSIC_PLAYER,      // 使用 Music Player
+	USAGE_STATE_MEDIA_PLAYER,      // 使用 Media Player
+	USAGE_STATE_VIDEO_RECORDING,   // 使用 Video Recording
+	USAGE_STATE_TAKE_PHOTO,        // 使用拍照
+	USAGE_STATE_VIDEO_AI,          // 使用 Video AI
+	USAGE_STATE_TRANSLATION        // 使用翻譯
+} usage_state_t;
 
 typedef struct __attribute__((packed)) {
     uint8_t flags;   // byte0: [RSVD3:3][RSVD1:1][MIC:1][BT:1][HA:1][BLE:1]
@@ -82,7 +82,7 @@ bool ss_is_charging(const SystemStatus* s);
 void ss_set_battery(SystemStatus* s, uint8_t percent);
 uint8_t ss_get_battery(const SystemStatus* s);
 
-void usage_status_change(uint8_t status);
+void usage_state_change(uint8_t status);
 
 /*
 
