@@ -376,7 +376,7 @@ void I2C_Task(void *pvParameters)
                     case LED_EVT_POWER_OFF_PROGRESS:
                     	ktd202x_led_off();
                     	ktd202x_ch2_led_on(LED_ON);
-                    	vTaskDelay(pdMS_TO_TICKS(1000));
+                    	vTaskDelay(pdMS_TO_TICKS(10000));
                     	ktd202x_ch2_led_off();
                     	hal_pmic_pca9422_power_down();
                         break;

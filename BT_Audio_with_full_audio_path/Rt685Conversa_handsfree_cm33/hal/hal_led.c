@@ -24,7 +24,7 @@ void hal_led_ktd2027_power_off_indicator(void)
 {
     ktd202x_led_off();
     ktd202x_ch2_led_on(LED_CURRENT_CH2);
-    vTaskDelay(pdMS_TO_TICKS(1000));
+    vTaskDelay(pdMS_TO_TICKS(10000));
     ktd202x_ch2_led_off();
 }
 
