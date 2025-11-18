@@ -38,6 +38,6 @@
 #define USAGE_STATUS_HEX_VALUE 0x30
 
 void spi_handler_task(void *pvParameters);
-
+void send_spi_request(uint8_t hex_val);
 
 #endif /* SPI_HANDLER_H_ */

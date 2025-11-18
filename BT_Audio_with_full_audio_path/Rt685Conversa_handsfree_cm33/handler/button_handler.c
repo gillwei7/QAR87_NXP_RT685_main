@@ -146,8 +146,7 @@ void button_task(void *pvParameters)
                 PRINTF("[Button] Short Press detected.\r\n");
                 PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
 #if SOC_SPI_ENABLE
-                uint8_t v = SHORT_PRESS_HEX_VALUE;
-                (void)xQueueSend(spi_request_queue, &v, 0);
+                send_spi_request(SHORT_PRESS_HEX_VALUE);
 #endif
                 /* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
             }
@@ -187,8 +186,7 @@ void button_task(void *pvParameters)
                         PRINTF("[Button] Long Press (on-release) detected. Sending 0x%02X\r\n",
                                LONG_PRESS_HEX_VALUE);
 #if SOC_SPI_ENABLE
-                        uint8_t v = LONG_PRESS_HEX_VALUE;
-                        (void)xQueueSend(spi_request_queue, &v, 0);
+                        send_spi_request(LONG_PRESS_HEX_VALUE);
 #endif
                         /* 任何待定的單擊作廢 */
                         btn_dbl_pending = false;

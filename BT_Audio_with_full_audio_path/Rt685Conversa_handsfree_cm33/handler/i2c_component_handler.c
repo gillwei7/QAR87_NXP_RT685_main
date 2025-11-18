@@ -233,15 +233,13 @@ void I2C_Task(void *pvParameters)
                 	if(btn_event==1)
                 	{
 #if SOC_SPI_ENABLE
-                		uint8_t v = ONE_TOUCH_HEX_VALUE;
-                		(void)xQueueSend(spi_request_queue, &v, 0);
+                		send_spi_request(ONE_TOUCH_HEX_VALUE);
 #endif
                 	}
                 	else if(btn_event==2)
                 	{
 #if SOC_SPI_ENABLE
-                		uint8_t v = DOUBLE_TOUCH_HEX_VALUE;
-                		(void)xQueueSend(spi_request_queue, &v, 0);
+                		send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
 #endif
                 	}
 
@@ -250,8 +248,7 @@ void I2C_Task(void *pvParameters)
                 {
                 	PRINTF("[Touch] press \n");
 #if SOC_SPI_ENABLE
-                	uint8_t v = PRESS_TOUCH_HEX_VALUE;
-                	(void)xQueueSend(spi_request_queue, &v, 0);
+                	send_spi_request(PRESS_TOUCH_HEX_VALUE);
 #endif
                 }
                 else if(aw933xx.event.long_press)
@@ -266,16 +263,14 @@ void I2C_Task(void *pvParameters)
                 {
                 	PRINTF("[Touch] slide_right \n");
 #if SOC_SPI_ENABLE
-                	uint8_t v = FORWARD_SLIDE_HEX_VALUE;
-                	(void)xQueueSend(spi_request_queue, &v, 0);
+                	send_spi_request(FORWARD_SLIDE_HEX_VALUE);
 #endif
                 }
                 else if(aw933xx.event.left_wareds)
                 {
                 	PRINTF("[Touch] slide_left \n");
 #if SOC_SPI_ENABLE
-                	uint8_t v = BACK_SLIDE_HEX_VALUE;
-                	(void)xQueueSend(spi_request_queue, &v, 0);
+                	send_spi_request(BACK_SLIDE_HEX_VALUE);
 #endif
                 }
 #endif
@@ -446,8 +441,7 @@ void I2C_Task(void *pvParameters)
         {
         	System_Status=0;
 #if SOC_SPI_ENABLE
-    		uint8_t v = SYSTEM_STATUS_HEX_VALUE;
-    	    (void)xQueueSend(spi_request_queue, &v, 0);
+        	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
         }
 #if LED_KTD2027_ENABLE && CHG_BQ25618_ENABLE

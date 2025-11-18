@@ -587,5 +587,10 @@ void spi_handler_task(void *pvParameters)
     }
 }
 
+void send_spi_request(uint8_t hex_val)
+{
+	(void)xQueueSend(spi_request_queue, &hex_val, 0);
+}
+
 
 
