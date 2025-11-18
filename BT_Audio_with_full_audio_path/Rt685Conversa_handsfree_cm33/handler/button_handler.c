@@ -248,8 +248,9 @@ void button_task(void *pvParameters)
                     {
                         /* 長按（放開才觸發） */
                         PRINTF("[PWR] Long Press (>=%ums) detected.\r\n", (unsigned)PWR_LONG_MS);
-                        uint8_t v = POWER_LONG_PRESS_HEX_VALUE;
-                        (void)xQueueSend(spi_request_queue, &v, 0);
+#if SOC_SPI_ENABLE
+                        send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
+#endif
                         led_post_event(LED_EVT_POWER_OFF_PROGRESS);
                         /* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
                     }
@@ -257,6 +258,9 @@ void button_task(void *pvParameters)
                     {
                         /* 短按 */
                         PRINTF("[PWR] Short Press detected.\r\n");
+#if SOC_SPI_ENABLE
+                        send_spi_request(POWER_SHORT_PRESS_HEX_VALUE);
+#endif
                         /* reg_led++; */
                         /* led_post_event(reg_led); // test led */
                         /* amp_post_event(AMP_EVT_STOP); // test amp */
