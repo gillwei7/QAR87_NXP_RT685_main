@@ -255,6 +255,8 @@ void button_task(void *pvParameters)
                     {
                         /* 短按 */
                         PRINTF("[PWR] Short Press detected.\r\n");
+                        uint8_t v = POWER_SHORT_PRESS_HEX_VALUE;
+                        (void)xQueueSend(spi_request_queue, &v, 0);
                         /* reg_led++; */
                         /* led_post_event(reg_led); // test led */
                         /* amp_post_event(AMP_EVT_STOP); // test amp */
