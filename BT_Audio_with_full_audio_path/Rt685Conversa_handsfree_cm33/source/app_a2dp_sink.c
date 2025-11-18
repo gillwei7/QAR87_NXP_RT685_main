@@ -332,10 +332,10 @@ test						CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(CurrentStreamSbc_
         //g_audioInit = 1;
 
 		cmd_init_ct();
+		PRINTF("after app_avrcap cmd_init_ct()\r\n");
 		ClearAudioCirBuf(0,0,1);
-
 		/*AVRCP Profile level connection*/
-		avrcp_control_connect(conn_rider_phone);
+		//avrcp_control_connect(conn_rider_phone);
         PRINTF("sbc_configured done, Fs: %d\r\n",CurrentStreamSbc_sampleRate_Hz);	//seems to be always 44100Hz Fs
 	}
 	else
