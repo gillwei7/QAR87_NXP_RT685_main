@@ -40,6 +40,24 @@ void hal_pmic_pca9422_enter_ship_mode(void)
 
 void hal_pmic_glf70583_init(void)
 {
+	/*
+	PMIC-1(0x25):
+		SW1: NT98532/ eMMC/ Camera/ C4 Flash
+		SW2: NT98532
+		SW3: NT98532
+		SW4: Camera (for 小板開)
+		LDO1: NT98532/ eMMC
+		LDO2: Camera_雜訊_2.8V
+
+	PMIC-2(0x26):
+		SW1: IW611
+		SW2: NT98532
+		SW3: C4 (for 小板開)
+		SW4: IW611
+		LDO1: C4 (for 小板開)
+		LDO2: C4 (for 小板開)
+	 */
+
     uint8_t top_stat = 0;
     glf70583_i2c_read(GLF70583_A_I2C_ADDR,0x00,&top_stat,1);
 //    PRINTF("[GLF70583]top_stat:%X \n",top_stat);
@@ -59,8 +77,8 @@ void hal_pmic_glf70583_init(void)
     glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x68, 0x00);
     // LDO1 Delay 5ms
     glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x6A, 0x12);
-    // 0x25->BUCK4、LDO2 off
-    glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x26, 0xE8);
+	// 0x25->BUCK4 off、Others on
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x26, 0xEC);
     // 0x26->BUCK1、2、4 ON、Others off
     glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0xD0);
     //glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);//BUCK2 ON、Others off
