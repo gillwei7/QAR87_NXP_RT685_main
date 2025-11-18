@@ -7,8 +7,22 @@
 
 
 #include "system_status.h"
+#include "spi_handler.h"
 
 volatile uint8_t System_Status = 0; //Send system status to Novatek
+
+volatile usage_status_t current_usage_status = USAGE_STATUS_HOME;
+
+extern QueueHandle_t      spi_request_queue;
+
+void usage_status_change(uint8_t status)
+{
+	PRINTF("[System] Usage Status change: %d to %d \r\n",current_usage_status,status);
+	current_usage_status = status;
+	uint8_t v = USAGE_STATUS_HEX_VALUE + current_usage_status;
+    (void)xQueueSend(spi_request_queue, &v, 0);
+
+}
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
   void ss_ble_on(SystemStatus* s)  { s->flags |=  SS_BLE_BIT; System_Status=1; }
