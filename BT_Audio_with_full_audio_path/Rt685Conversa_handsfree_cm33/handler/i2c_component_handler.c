@@ -310,6 +310,11 @@ void I2C_Task(void *pvParameters)
     					led_post_event(LED_EVT_ALL_OFF);
     					ss_set_charging(&ss, false);
     				}
+    				if(charger_status.chg_stat==0x11)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
+    				{
+    					battery_state = BATTERY_STATE_FULL;
+    				}
+
     			} else {
     				PRINTF("[Charger] Failed to read charger status.\n");
     			}
