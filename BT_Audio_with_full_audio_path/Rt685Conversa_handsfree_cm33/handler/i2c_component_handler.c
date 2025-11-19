@@ -15,7 +15,7 @@
 #include "hal_led.h"
 #include "hal_amp.h"
 
-#define BATTERY_READ_PERIOD_MS  (30000U)
+#define BATTERY_READ_PERIOD_MS  (60000U)
 static TimerHandle_t s_battery_timer = NULL;
 
 /* ===== I2C synchronization objects ===== */
