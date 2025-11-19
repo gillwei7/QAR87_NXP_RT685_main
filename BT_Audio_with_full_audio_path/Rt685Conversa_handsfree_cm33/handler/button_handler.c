@@ -8,6 +8,7 @@
 #include "button_handler.h"
 #include "i2c_component_handler.h"
 #include "spi_handler.h"
+#include "WorkStateManager.h"
 
 /* ===== external SPI handlers ===== */
 extern QueueHandle_t      spi_request_queue;
@@ -259,7 +260,12 @@ void button_task(void *pvParameters)
                         /* 短按 */
                         PRINTF("[PWR] Short Press detected.\r\n");
 #if SOC_SPI_ENABLE
+#if 1
                         send_spi_request(POWER_SHORT_PRESS_HEX_VALUE);
+#else // use button to switch state
+//                        RequestToGetIntoMediaPlayer = 1;
+                        RequestToGetIntoTranslation = 1;
+#endif
 #endif
                         /* reg_led++; */
                         /* led_post_event(reg_led); // test led */
