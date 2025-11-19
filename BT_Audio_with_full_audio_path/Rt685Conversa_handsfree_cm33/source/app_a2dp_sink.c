@@ -332,8 +332,8 @@ test						CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(CurrentStreamSbc_
         //g_audioInit = 1;
 
 		cmd_init_ct();
-		PRINTF("after app_avrcap cmd_init_ct()\r\n");
 		ClearAudioCirBuf(0,0,1);
+        // TODO gill avrcp not connect so far
 		/*AVRCP Profile level connection*/
 		//avrcp_control_connect(conn_rider_phone);
         PRINTF("sbc_configured done, Fs: %d\r\n",CurrentStreamSbc_sampleRate_Hz);	//seems to be always 44100Hz Fs
@@ -462,15 +462,17 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 				PRINTF("BT Sbc buf: %d\r\n", CirBuf_SbcRaw_LengthInBytes-FreeAod);
 			SEMA42_Unlock(APP_SEMA42, SEMA42_GATE1);
 			//DbgPin6Dn();
-
-			if(DeviceWorkStateCur!=WorkState_MusicPlayer)
+			// Get into MusicPlayer State Only when current state is HomeVitStandby
+			if(DeviceWorkStateCur==WorkState_HomeVitStandby)
 			{
 				//request to get into WorkState_MusicPlayer after SBC buffer is half full
 				//if(CirAudioBuf_GetUsagePercentage_S8((T_CircularAudioBuf_S8 *)&VarBlockSharedByDspAndMcu.CirBuf_SbcRaw)>60)
 				if(FreeAod<CirBuf_SbcRaw_LengthInBytes*1/2)
 				{
+					// Get into
 					//this is 3/4 full
 					RequestToGetIntoA2dpPlay=1;
+
 					//VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 					//VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
 				}

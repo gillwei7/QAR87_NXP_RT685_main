@@ -110,7 +110,7 @@ typedef signed long long s64;
 
 //should set only 1 of the following 2 to 1, or both to 0
 #define Using_UART5ToPrint		0 // =0 will use FC2 (PIO0_15)
-#define Using_UART2ToPrint		0 // =0 will use FC2 (PIO0_15)
+#define Using_UART2ToPrint		1 // =0 will use FC2 (PIO0_15)
 
 #if(Using_UART5ToPrint)&&(Using_UART2ToPrint)
 	#error can not set Using_UART5ToPrint and Using_UART2ToPrint to 1 at the same time!
@@ -184,6 +184,6 @@ SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);	\
 SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);			\
 } while(0)
 
-
+#define MP_WITH_TL 1
 
 #endif

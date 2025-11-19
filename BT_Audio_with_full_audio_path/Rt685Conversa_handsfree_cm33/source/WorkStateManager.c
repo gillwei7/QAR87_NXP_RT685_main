@@ -646,7 +646,7 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_Translation_Pre;
 								WorkStateIsChanged=1;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+								PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						#if EnableWorkState_AiConversation==1

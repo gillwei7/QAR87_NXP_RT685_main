@@ -171,6 +171,7 @@ SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);	\
 SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);			\
 } while(0)
 
+#define MP_WITH_TL 1
 
 #endif
 
