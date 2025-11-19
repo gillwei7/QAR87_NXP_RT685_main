@@ -4,7 +4,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  */
-
+#if 0
 
 #include <xtensa/config/core.h>
 #include <xtensa/xos.h>
@@ -252,3 +252,4 @@ int ProcAudioContainer(int WorkMode, int FrmLenInSamples, int Fs)
 	return 0;
 }
 
+#endif

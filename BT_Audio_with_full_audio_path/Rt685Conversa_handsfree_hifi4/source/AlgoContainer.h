@@ -8,7 +8,7 @@
 
 #ifndef __AlgoContainer_H___
 #define __AlgoContainer_H___
-
+#if 0
 typedef enum
 {
 	ALGO_Idx_0_None = 0,
@@ -22,6 +22,7 @@ extern int InitAudioContainer(int WorkMode, int FrmLenInSamples, int Fs);
 
 
 
+#endif // #if 0
 
 #endif
 
