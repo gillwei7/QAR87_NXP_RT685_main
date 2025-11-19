@@ -163,7 +163,22 @@ extern int RequestToGetIntoHfp;
 extern int RequestToGetOutofHfp;
 extern int RequestToGetIntoA2dpPlay;
 extern int RequestToGetOutofA2dpPlay;
-
+extern int RequestToGetIntoVideoAI;
+extern int RequestToGetOutofVideoAI;
+extern int RequestToGetIntoTranslation;
+extern int RequestToGetOutofTranslation;
+extern int RequestToGetIntoMediaPlayer;
+extern int RequestToGetOutofMediaPlayer;
+extern int RequestToGetIntoTakePhoto;
+extern int RequestToGetOutofTakePhoto;
+extern int RequestToGetIntoVideoRecording;
+extern int RequestToGetOutofVideoRecording;
+extern int RequestToGetIntoMenu;
+extern int RequestToGetOutofMenu;
+extern int RequestToGetIntoAbout;
+extern int RequestToGetOutofAbout;
+extern int RequestToGetIntoHome;
+extern int RequestToGetOutofHome;
 
 extern volatile int AllowAudioInterfaceReInit_PdmI2S;
 extern volatile int AllowAudioInterfaceReInit_Fc25;

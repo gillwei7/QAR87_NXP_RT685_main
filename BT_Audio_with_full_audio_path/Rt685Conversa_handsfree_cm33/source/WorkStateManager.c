@@ -42,6 +42,24 @@ int RequestToGetIntoHfp=0;
 int RequestToGetOutofHfp=0;
 int RequestToGetIntoA2dpPlay=0;
 int RequestToGetOutofA2dpPlay=0;
+int RequestToGetIntoVideoAI=0;
+int RequestToGetOutofVideoAI=0;
+int RequestToGetIntoTranslation=0;
+int RequestToGetOutofTranslation=0;
+int RequestToGetIntoMediaPlayer=0;
+int RequestToGetOutofMediaPlayer=0;
+int RequestToGetIntoTakePhoto=0;
+int RequestToGetOutofTakePhoto=0;
+int RequestToGetIntoVideoRecording=0;
+int RequestToGetOutofVideoRecording=0;
+int RequestToGetIntoMenu=0;
+int RequestToGetOutofMenu=0;
+int RequestToGetIntoAbout=0;
+int RequestToGetOutofAbout=0;
+int RequestToGetIntoHome=0;
+int RequestToGetOutofHome=0;
+
+
 TDeviceWorkState DeviceWorkStateCur;
 TDeviceWorkState DeviceWorkStatePre;
 
@@ -496,6 +514,24 @@ void Manager_Task(void *pvParameters)
 	RequestToGetIntoA2dpPlay=0;
 	RequestToGetOutofA2dpPlay=0;
 
+	RequestToGetIntoVideoAI=0;
+	RequestToGetOutofVideoAI=0;
+	RequestToGetIntoTranslation=0;
+	RequestToGetOutofTranslation=0;
+
+	RequestToGetIntoMediaPlayer=0;
+	RequestToGetOutofMediaPlayer=0;
+
+	RequestToGetIntoTakePhoto=0;
+	RequestToGetOutofTakePhoto=0;
+	RequestToGetIntoVideoRecording=0;
+	RequestToGetOutofVideoRecording=0;
+
+	RequestToGetIntoMenu=0;
+	RequestToGetOutofMenu=0;
+	RequestToGetIntoAbout=0;
+	RequestToGetOutofAbout=0;
+
 
 	AllowAudioInterfaceReInit_PdmI2S=1;
 	AllowAudioInterfaceReInit_Fc25=1;
@@ -578,6 +614,7 @@ void Manager_Task(void *pvParameters)
 						RequestToGetOutofA2dpPlay=0;
 						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
+
 					#if 0
 						//this part is to check switching when A2dp BT is NOT added
 						if((DeviceWorkStateCur!=WorkState_MusicPlayer)&&(VarBlockSharedByDspAndMcu.CurVoiceMenu==ASR_Menu_MusicPlayer))
@@ -596,6 +633,56 @@ void Manager_Task(void *pvParameters)
 						}
 					#endif
 				#endif
+				#if EnableWorkState_MediaPlayer == 1
+					if(RequestToGetIntoMediaPlayer)
+					{
+						if(DeviceWorkStateCur!=WorkState_MediaPlayer)
+						{
+							DeviceWorkStatePre=DeviceWorkStateCur;
+							DeviceWorkStateCur=WorkState_MediaPlayer_Pre;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetIntoMediaPlayer=0;
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+					if(RequestToGetOutofMediaPlayer)
+					{
+						if(DeviceWorkStateCur==WorkState_MediaPlayer)
+						{
+							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStatePre=WorkState_MediaPlayer;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetOutofMediaPlayer=0;
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+				#endif
+
+				#if EnableWorkState_Translation == 1
+					if(RequestToGetIntoTranslation)
+					{
+						if(DeviceWorkStateCur!=WorkState_Translation)
+						{
+							DeviceWorkStatePre=DeviceWorkStateCur;
+							DeviceWorkStateCur=WorkState_Translation_Pre;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetIntoTranslation=0;
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+					if(RequestToGetOutofTranslation)
+					{
+						if(DeviceWorkStateCur==WorkState_Translation)
+						{
+							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStatePre=WorkState_Translation;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetOutofTranslation=0;
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+				#endif
+
 			#endif
 
 			//check voice events for switching work state
@@ -755,6 +842,7 @@ void Manager_Task(void *pvParameters)
 								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
+
 						break;
 					default:
 						break;
