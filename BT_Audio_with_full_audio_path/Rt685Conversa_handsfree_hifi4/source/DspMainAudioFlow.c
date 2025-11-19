@@ -851,14 +851,9 @@ void DspMainAudioFlowProcOneFrame_Translation(int OptionWord)
 				S32 TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[AudioFrameSizeInSamplePerCh_16KHz*2];
 				float *ConversaRefIn;
 
-#if MP_WITH_TL
 				vec_add16x16(DstPtrS16_I2SAmpL, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedL, AudioFrameSizeInSamplePerCh_48KHz);
 				vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedR, AudioFrameSizeInSamplePerCh_48KHz);
-#else
-				//add OPUS and SBC to DstPtrS16_I2SAmpL and R --- will be streamed to AMP
-				vec_add16x16(DstPtrS16_I2SAmpL, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)SrcPtrS16_I2SNvtL, AudioFrameSizeInSamplePerCh_48KHz);
-				vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)SrcPtrS16_I2SNvtR, AudioFrameSizeInSamplePerCh_48KHz);
-#endif
+
 				//convert to S32 and do SRC, then convert back to float --- to make the 16KHz float input ref in for Conversa
 				for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 				{

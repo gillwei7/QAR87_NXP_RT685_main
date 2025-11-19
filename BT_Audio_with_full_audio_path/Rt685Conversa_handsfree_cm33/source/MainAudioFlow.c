@@ -1487,7 +1487,6 @@ void InitAudioInterface_VideoRecording(int Opt)
 }
 void InitAudioInterface_MediaPlayer(int Opt)
 {
-	//InitAudioInterface_AudioIoDebug(0);		//they are the same
 
 	//if everything is configured, no need to do anything, return
 	if((AudioPortIsActive_I2SToAmp)&&(AudioPortIsActive_I2SToNvt)&&(AudioPortIsActive_Pdm)&&(AmpState>AmpState_UnConfigured))
@@ -1650,6 +1649,7 @@ void InitAudioInterface_MusicPlayer(int Opt)
 }
 void InitAudioInterface_Translation(int Opt)
 {
+
 	//if everything is configured, no need to do anything, return
 	if((AudioPortIsActive_I2SToAmp)&&(AudioPortIsActive_I2SToNvt)&&(AudioPortIsActive_Pdm)&&(AmpState>AmpState_UnConfigured))
 		return;
@@ -1680,11 +1680,9 @@ void InitAudioInterface_Translation(int Opt)
 
 	InitAudioCircularBuf(0,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
-#if MP_WITH_TL
 	if(AmpState==AmpState_UnConfigured){
 		AmpState==AmpState_ConfiguredAndSleep;
 	}
-#endif
 
 	DmaTxRxIsExpected=(
 						AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
@@ -1715,10 +1713,8 @@ void InitAudioInterface_Translation(int Opt)
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
-#if MP_WITH_TL
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
-#endif
 }
 
 void InitAudioInterface_AiConversation(int Opt)
