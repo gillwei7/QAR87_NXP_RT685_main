@@ -82,7 +82,6 @@ post-all:
 --only-section=NonCacheable \
 --only-section=.control_reg_addr.data
 	del ..\..\..\..\Rt685Conversa_handsfree_cm33\Debug\source\incbin.o
-	del ..\..\..\..\Rt685Conversa_handsfree_cm33\Release\source\incbin.o
 
 pre-clean:
 	@echo pre-clean rule
