@@ -656,15 +656,18 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 						PtrVarBlockSharedByDspAndMcu->MonitorInfoArray2[1]=CycCntB-CycCntA;
 
 						//only print error
+						// gill
+						// Now A2DP is connected, but phone may stop play music, and sbc buffer not transfered
+						// disable print log temporarily
 						if(e==123)
 						{
 							//run out of Sbc cir buffer --- if this happens, should wait till sbc cir buffer is half full --- this is to wait about 300us
 							SbcDecodingSkipCnt=10;		//skip 30*10=300ms
-							PRINTF("RT685 DSP: run out of Sbc --- wait 300ms to let sbc buffer half full \r\n");
+							//PRINTF("RT685 DSP: run out of Sbc --- wait 300ms to let sbc buffer half full \r\n");
 						}
 
-						if(e)
-							PRINTF("SbcDecodeProcess err: %d \n", e);
+//						if(e)
+//							PRINTF("SbcDecodeProcess err: %d \n", e);
 						//PRINTF("Cycles: %d \n", CycCntB-CycCntA);			//measured: 2~11 MIPS, the tested 6 Sbc files
 					}
 				}

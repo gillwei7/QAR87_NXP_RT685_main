@@ -1897,7 +1897,7 @@ void DeInitAudioInterface_MusicPlayer(int Opt)
 }
 void DeInitAudioInterface_Translation(int Opt)
 {
-	//May be need it //VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
+	VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
 		Deinit_GeneralAudio(1,1,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
 		ClearAudioCirBuf(0,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
 		return;
