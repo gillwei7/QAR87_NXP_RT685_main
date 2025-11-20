@@ -19,7 +19,6 @@
 #include "fsl_debug_console.h"
 #include "stdio.h"
 
-#if 0
 static void HAL_Delay(unsigned int ms)
 {
 	SDK_DelayAtLeastUs(ms * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk));
@@ -333,15 +332,15 @@ void glf70302_init()
 		if(profileprogram(config_profile_info,profilecrc)==0x00)
 		{
 			glf70302_write_one_byte(GLF70302REG_DFVERSAVE,DFVERSION); //将profile版本号复制一份到GLF70302REG_DFVERSAVE寄存器，避免后续修改GLF70302REG_SOCLOW导致主控重新上电误判需要重新烧录
-			PRINTF("Programmed Successfully\r\n ");
+			PRINTF("[Gauge] Programmed Successfully\r\n ");
 		}
 		else
-			PRINTF("Programmed failed\r\n");
+			PRINTF("[Gauge] Programmed failed\r\n");
 	}
 	else
 	{
 		glf70302_write_one_byte(GLF70302REG_DFVERSAVE,DFVERSION); //将profile版本号复制一份到GLF70302REG_DFVERSAVE寄存器，避免后续修改GLF70302REG_SOCLOW导致主控重新上电误判需要重新烧录
-		PRINTF("The bat profile has been programmed\r\n");
+		PRINTF("[Gauge] The bat profile has been programmed\r\n");
 	}
 
 #ifdef SYLOGENABLE
@@ -361,7 +360,7 @@ void glf70302_init()
 	//HAL_Delay(140);//需要等待延时140mS才能读取第一次BAT/IBAT/Temp/SOC
 	}
 
-void glf70302_polling()
+void glf70302_polling(BatteryInfo *info)
 {
 	int8_t		ntctemp;
 	int8_t 		dietemp;
@@ -377,8 +376,15 @@ void glf70302_polling()
 	dietemp	= glf70302_read_dietemp();
 	cycle	= glf70302_readcyclecount();
 	soh 	= glf70302_read_soh();
-	PRINTF("ntctemp = %dC, dietemp = %dC, vbat = %dmV, ibat = %dmA, soc = %d%%, cycle = %d, soh =%d%%\r\n",ntctemp,dietemp,vbat,ibat,soc,cycle,soh);
-	}
+	PRINTF("[Gauge] ntctemp = %dC, dietemp = %dC, vbat = %dmV, ibat = %dmA, soc = %d%%, cycle = %d, soh =%d%%\r\n",ntctemp,dietemp,vbat,ibat,soc,cycle,soh);
+
+	memset(info, 0, sizeof(BatteryInfo));
+	info->soc = soc;
+	info->current = ibat;
+	info->temperature = dietemp;
+	info->voltage = vbat;
+
+}
 
 void glf70302_shutdown_withsave()
 {
@@ -421,4 +427,3 @@ void glf70302_wake_withload(uint8_t sochost,uint16_t ocvhost,uint8_t socthd)
 	else
 		PRINTF("use new soc \r\n");
 	}
-#endif

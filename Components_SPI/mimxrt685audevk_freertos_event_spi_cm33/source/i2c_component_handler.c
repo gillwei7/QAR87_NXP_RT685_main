@@ -185,7 +185,8 @@ void Init_I2C_Component(void)
 	Init_bq25618_charger();
 	ktd202x_ch4_led_on(LED_ON); //White light turns on first
 	awinic_single_enter(); //Touch Init
-	glf70302_read_battery(&battery); //Read the battery level after powering on
+	glf70302_init();//Gauge Init
+	glf70302_polling(&battery); //Read the battery level after powering on
 	battery.soc = battery_soc_percent_mv(battery.voltage);
 	ss_set_battery(&ss, battery.soc);
 	init_aw88166(); // Init AMP
@@ -416,7 +417,7 @@ void I2C_Task(void *pvParameters)
         {
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
-            	glf70302_read_battery(&battery);
+            	glf70302_polling(&battery);
             	battery.soc = battery_soc_percent_mv(battery.voltage);
                 PRINTF("[Battery] SOC: %d%%\r\n",battery.soc);
                 if(battery.soc>=99 && ss_is_charging(&ss))

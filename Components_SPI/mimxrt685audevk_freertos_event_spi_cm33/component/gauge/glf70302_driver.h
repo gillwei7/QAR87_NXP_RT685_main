@@ -61,6 +61,13 @@
 //#define SYHOSTTEMP
 //#define I2CPROCONT
 
+typedef struct {
+    uint8_t soc;         // 電量百分比 (%)
+    uint16_t voltage;    // 電壓 (mV)
+    int16_t current;     // 電流 (mA)
+    int8_t temperature;  // 溫度 (°C)
+} BatteryInfo;
+
 static uint16_t ibatgaintrimed = 3015;
 static int8_t 	ibatoffsettrimed = 3;
 
@@ -80,36 +87,34 @@ static uint8_t config_profile_info[GLF70302_PFOFILESIZE] = {
 static uint16_t profilecrc = 0xC86A;
 
 /***********************************/
-#if 0
-  uint8_t 		glf70302_read_one_byte(uint8_t regaddr);
-  uint16_t 	glf70302_read_two_bytes(uint8_t regaddr);
-  void 		glf70302_write_one_byte(uint8_t regaddr,uint8_t regdata);
-  void 		glf70302_write_two_byte(uint8_t regaddr,uint16_t regdata);
-  void 		glf70302_write_one_byte_clken(uint8_t regaddr,uint8_t regdata);
-  void 		glf70301_write_page(uint16_t addr,uint8_t *pData,uint8_t size);
-  int8_t 		glf70302_read_ntctemp();
-  int8_t 		glf70302_read_dietemp();
-  uint8_t 		glf70302_read_soc_();
-  uint8_t 		glf70302_read_soh();
-  uint16_t 	glf70302_read_vbat();
-  int16_t 		glf70302_read_ibat();
-  uint16_t 	glf70302_readcyclecount();
-  uint16_t 	glf70302_readid();
-  void 		glf70302_enter_shutdown();
-  void 		glf70302_exit_shutdown();
-  void 		glf70302_regclken();
-  void			glf70302_regclkdis();
-  void 		glf70302_unseal();
-  void 		glf70302_reset();
-  void 		glf70302_writetemp(int8_t hosttemperature);
-  void 		glf70302_write_flhword(uint16_t flashaddr,uint32_t flashdata);
-  uint32_t 	glf70302_read_flhword(uint16_t flashaddr);
-  uint32_t 	profileprogram(uint8_t *pData,uint16_t crcresult);
-  uint32_t 	glf70302_ibatcal(uint16_t ibatgain,int8_t ibatoffset);
-  void 		glf70302_init();
-  void 		glf70302_polling();
-  void 		glf70302_shutdown_withsave();
-  void 		glf70302_wake_withload(uint8_t sochost,uint16_t ocvhost,uint8_t socthd);
+uint8_t 		glf70302_read_one_byte(uint8_t regaddr);
+uint16_t 	glf70302_read_two_bytes(uint8_t regaddr);
+void 		glf70302_write_one_byte(uint8_t regaddr,uint8_t regdata);
+void 		glf70302_write_two_byte(uint8_t regaddr,uint16_t regdata);
+void 		glf70302_write_one_byte_clken(uint8_t regaddr,uint8_t regdata);
+void 		glf70301_write_page(uint16_t addr,uint8_t *pData,uint8_t size);
+int8_t 		glf70302_read_ntctemp();
+int8_t 		glf70302_read_dietemp();
+uint8_t 		glf70302_read_soc_();
+uint8_t 		glf70302_read_soh();
+uint16_t 	glf70302_read_vbat();
+int16_t 		glf70302_read_ibat();
+uint16_t 	glf70302_readcyclecount();
+uint16_t 	glf70302_readid();
+void 		glf70302_enter_shutdown();
+void 		glf70302_exit_shutdown();
+void 		glf70302_regclken();
+void			glf70302_regclkdis();
+void 		glf70302_unseal();
+void 		glf70302_reset();
+void 		glf70302_writetemp(int8_t hosttemperature);
+void 		glf70302_write_flhword(uint16_t flashaddr,uint32_t flashdata);
+uint32_t 	glf70302_read_flhword(uint16_t flashaddr);
+uint32_t 	profileprogram(uint8_t *pData,uint16_t crcresult);
+uint32_t 	glf70302_ibatcal(uint16_t ibatgain,int8_t ibatoffset);
+void 		glf70302_init();
+void 		glf70302_polling(BatteryInfo *info);
+void 		glf70302_shutdown_withsave();
+void 		glf70302_wake_withload(uint8_t sochost,uint16_t ocvhost,uint8_t socthd);
 
-#endif
 #endif
