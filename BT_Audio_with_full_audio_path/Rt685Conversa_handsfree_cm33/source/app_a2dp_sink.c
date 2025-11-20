@@ -40,6 +40,11 @@
 #include "CircularBuf.h"
 #include "SubFunc.h"
 
+#if UsingQAR87Board == 1
+#include "system_status.h"
+
+#endif
+
 #if 1
 
 #define A2DP_CLASS_OF_DEVICE (0x200404U)

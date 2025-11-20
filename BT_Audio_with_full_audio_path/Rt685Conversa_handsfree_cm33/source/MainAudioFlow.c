@@ -55,6 +55,8 @@
 
 #if UsingQAR87Board == 1
 #include "hal_amp.h"
+#include "system_status.h"
+
 
 #endif
 

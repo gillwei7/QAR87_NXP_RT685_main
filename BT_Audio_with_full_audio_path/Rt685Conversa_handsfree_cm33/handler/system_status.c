@@ -16,7 +16,7 @@ volatile usage_state_t current_usage_state = USAGE_STATE_HOME;
 
 extern QueueHandle_t      spi_request_queue;
 
-void ss_get_state(void)
+uint8_t ss_get_state(void)
 {
 	return current_usage_state;
 }
@@ -139,7 +139,6 @@ void ss_set_state(uint8_t state)
 
 void send_state_to_spi(void) // send state to soc if both audio path and state are ready
 {
-	PRINTF("[System] Usage State change: %d to %d \r\n",current_usage_state,state);
 	uint8_t v = USAGE_STATE_HEX_VALUE + current_usage_state;
 	(void)xQueueSend(spi_request_queue, &v, 0);
 }
