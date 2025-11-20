@@ -352,7 +352,9 @@ void sbc_deinit()
 		HAL_AudioTxDeinit((hal_audio_handle_t)&audio_tx_handle[0]);
 		(void)BOARD_SwitchAudioFreq(0U);
 	#endif
-    RequestToGetOutofA2dpPlay=1;
+//    RequestToGetOutofA2dpPlay=1;
+    ss_set_state(USAGE_STATE_HOME);
+
 	PRINTF("sbc_deinit done\r\n");
 }
 void sbc_deconfigured(int err)
@@ -369,7 +371,8 @@ void sbc_deconfigured(int err)
 			(void)BOARD_SwitchAudioFreq(0U);
 		#endif
         g_audioInit=0;
-		RequestToGetOutofA2dpPlay=1;
+//		RequestToGetOutofA2dpPlay=1;
+		ss_set_state(USAGE_STATE_HOME);
     	PRINTF("sbc_deconfigured done\r\n");
 	}
 	else
@@ -401,8 +404,8 @@ void sbc_stop_play(int err)
 		#ifdef A2DP_SINK_AUDIO
 			//HAL_AudioTransferAbortSend((hal_audio_handle_t)&audio_tx_handle[0]);
 		#endif
-	    RequestToGetOutofA2dpPlay=1;
-
+//	    RequestToGetOutofA2dpPlay=1;
+	    ss_set_state(USAGE_STATE_HOME);
 		PRINTF("sbc_stop_play done\r\n");
 	}
 	else
@@ -471,8 +474,8 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 				{
 					// Get into
 					//this is 3/4 full
-					RequestToGetIntoA2dpPlay=1;
-
+//					RequestToGetIntoA2dpPlay=1;
+					ss_set_state(USAGE_STATE_MUSIC_PLAYER);
 					//VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 					//VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
 				}

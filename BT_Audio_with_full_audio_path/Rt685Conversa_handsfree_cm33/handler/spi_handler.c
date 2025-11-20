@@ -157,7 +157,7 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 			break;
         case 0x40: //Novatek update usage state
 				PRINTF("[Passive] ACK:[40 %02X] Update Usage State \r\n",val);
-				usage_state_change(val);
+				ss_set_state(val);
 			break;
         case 0x50: //Update Layer
 				PRINTF("[Passive] ACK:[50 %02X] Update Layer \r\n",val);

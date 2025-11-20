@@ -592,7 +592,7 @@ void Manager_Task(void *pvParameters)
 
 				#if EnableWorkState_MusicPlayer==1
 					//getting into/out of A2dp
-					if(RequestToGetIntoA2dpPlay)
+					if(RequestToGetIntoA2dpPlay && !RequestToGetOutofMenu)
 					{
 						if(DeviceWorkStateCur!=WorkState_MusicPlayer)
 						{
@@ -634,7 +634,7 @@ void Manager_Task(void *pvParameters)
 					#endif
 				#endif
 				#if EnableWorkState_MediaPlayer == 1
-					if(RequestToGetIntoMediaPlayer)
+					if(RequestToGetIntoMediaPlayer && !RequestToGetOutofMenu)
 					{
 						if(DeviceWorkStateCur!=WorkState_MediaPlayer)
 						{
@@ -659,7 +659,7 @@ void Manager_Task(void *pvParameters)
 				#endif
 
 				#if EnableWorkState_Translation == 1
-					if(RequestToGetIntoTranslation)
+					if(RequestToGetIntoTranslation && !RequestToGetOutofMenu)
 					{
 						if(DeviceWorkStateCur!=WorkState_Translation)
 						{
@@ -682,6 +682,30 @@ void Manager_Task(void *pvParameters)
 						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 				#endif
+
+					if(RequestToGetIntoMenu)
+					{
+						if(DeviceWorkStateCur!=WorkState_Menu)
+						{
+							DeviceWorkStatePre=DeviceWorkStateCur;
+							DeviceWorkStateCur=WorkState_Menu_Pre;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetIntoMenu=0;
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+					if(RequestToGetOutofMenu)
+					{
+						if(DeviceWorkStateCur==WorkState_Menu)
+						{
+							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStatePre=WorkState_Menu;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetOutofMenu=0;
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+
 
 			#endif
 

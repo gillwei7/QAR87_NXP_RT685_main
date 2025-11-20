@@ -82,8 +82,9 @@ bool ss_is_charging(const SystemStatus* s);
 void ss_set_battery(SystemStatus* s, uint8_t percent);
 uint8_t ss_get_battery(const SystemStatus* s);
 
-void usage_state_change(uint8_t state);//Change the usage state and send a notification back to Novatek.
-
+void ss_get_state(void);
+void ss_set_state(uint8_t state);//Change the usage state and send a notification back to Novatek.
+void send_state_to_spi(void);
 /*
 
 SystemStatus ss = {0};
