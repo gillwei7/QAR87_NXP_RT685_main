@@ -61,6 +61,14 @@
 //#define SYHOSTTEMP
 //#define I2CPROCONT
 
+typedef struct {
+    uint8_t soc;         // 電量百分比 (%)
+    uint16_t voltage;    // 電壓 (mV)
+    int16_t current;     // 電流 (mA)
+    int8_t temperature;  // 溫度 (°C)
+} BatteryInfo;
+
+
 static uint16_t ibatgaintrimed = 3015;
 static int8_t 	ibatoffsettrimed = 3;
 
@@ -80,7 +88,7 @@ static uint8_t config_profile_info[GLF70302_PFOFILESIZE] = {
 static uint16_t profilecrc = 0xC86A;
 
 /***********************************/
-#if 0
+
   uint8_t 		glf70302_read_one_byte(uint8_t regaddr);
   uint16_t 	glf70302_read_two_bytes(uint8_t regaddr);
   void 		glf70302_write_one_byte(uint8_t regaddr,uint8_t regdata);
@@ -107,9 +115,9 @@ static uint16_t profilecrc = 0xC86A;
   uint32_t 	profileprogram(uint8_t *pData,uint16_t crcresult);
   uint32_t 	glf70302_ibatcal(uint16_t ibatgain,int8_t ibatoffset);
   void 		glf70302_init();
-  void 		glf70302_polling();
+  void 		glf70302_polling(BatteryInfo *info);
   void 		glf70302_shutdown_withsave();
   void 		glf70302_wake_withload(uint8_t sochost,uint16_t ocvhost,uint8_t socthd);
 
 #endif
-#endif
+

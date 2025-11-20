@@ -24,7 +24,7 @@
 #include "aw933xx.h"
 #include "aw93305.h"
 #include "bq256xx_charger.h"
-#include "glf70302.h"
+#include "glf70302_driver.h"
 #include "ktd202x_leds.h"
 #include "aw88166.h"
 

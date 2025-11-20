@@ -125,6 +125,7 @@ void Init_I2C_Component(void)
 	hal_touch_aw93305_init(); //Touch Init
 #endif
 #if FG_GLF70302_ENABLE
+	glf70302_init();//Gauge Init
 	hal_power_gauge_glf70302_get_battery_level(); //Read the battery level after powering on
 	battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
 	ss_set_battery(&ss, battery_info.soc);
@@ -328,7 +329,7 @@ void I2C_Task(void *pvParameters)
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
 #if FG_GLF70302_ENABLE
-            	glf70302_read_battery(&battery_info);
+            	glf70302_polling(&battery_info);
             	battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
                 PRINTF("[Battery] SOC: %d%%\r\n",battery_info.soc);
                 if(battery_info.soc>=99 && ss_is_charging(&ss))

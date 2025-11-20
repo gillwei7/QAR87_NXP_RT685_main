@@ -7,7 +7,7 @@
 #if UsingQAR87Board == 1
 #include "hal_power.h"
 #include "bq256xx_charger.h"
-#include "glf70302.h"
+#include "glf70302_driver.h"
 
 volatile bq256xx_status_t charger_status;
 volatile BatteryInfo battery_info;
@@ -49,7 +49,7 @@ void hal_power_charger_bq25618_get_charging_status(void)
 void hal_power_gauge_glf70302_get_battery_level(void)
 {
 #if FG_GLF70302_ENABLE
-	glf70302_read_battery(&battery_info); //Read the battery level after powering on
+	glf70302_polling(&battery_info); //Read the battery level after powering on
 #endif
 }
 
