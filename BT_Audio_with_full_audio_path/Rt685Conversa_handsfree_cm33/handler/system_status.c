@@ -14,6 +14,12 @@ volatile uint8_t System_Status = 0; //Send system status to Novatek
 
 volatile usage_state_t current_usage_state = USAGE_STATE_HOME;
 volatile uint8_t music_status = 0; // 0: off, 1: on
+volatile uint8_t is_turning_on_camera = 0;
+volatile uint8_t capture_start = 0;
+volatile uint8_t capture_finished = 0;
+volatile uint8_t recording_start = 0;
+volatile uint8_t recording_finished = 0;
+
 
 extern QueueHandle_t      spi_request_queue;
 
@@ -123,7 +129,7 @@ void ss_set_state(uint8_t state)
 
 }
 
-void send_state_to_spi(void) // send state to soc if both audio path and state are ready
+void send_state_to_soc(void) // send state to soc if both audio path and state are ready
 {
 	uint8_t v = USAGE_STATE_HEX_VALUE + current_usage_state;
 	(void)xQueueSend(spi_request_queue, &v, 0);
@@ -132,13 +138,45 @@ void send_state_to_spi(void) // send state to soc if both audio path and state a
 void ss_set_music_status(uint8_t status)
 {
 	music_status = status;
-	send_music_status_to_spi();
+	send_music_status_to_soc();
 }
 
-void send_music_status_to_spi(void)
+void send_music_status_to_soc(void)
 {
 	// Todo
 	// To make novatek open music ui or open home ui
+}
+
+void ss_set_camera_status(uint8_t status)
+{
+	if (status == COMPONENT_ON)
+	{
+		is_turning_on_camera = 1;
+	}
+}
+
+void ss_set_capture_status(uint8_t status)
+{
+	if (status == COMPONENT_START)
+	{
+		capture_start = 1;
+	}
+	else if (status == COMPONENT_END)
+	{
+		capture_finished = 1;
+	}
+}
+
+void ss_set_recording_status(uint8_t status)
+{
+	if (status == COMPONENT_START)
+	{
+		recording_start = 1;
+	}
+	else if (status == COMPONENT_END)
+	{
+		recording_finished = 1;
+	}
 }
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
