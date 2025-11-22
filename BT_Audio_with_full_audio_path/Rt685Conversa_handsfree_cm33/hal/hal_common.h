@@ -31,12 +31,21 @@
 #define hal_log_debug(has_file, has_func, message,...) hal_log_message(LOG_DEBUG,__FILE__,__func__,has_file,has_func,message,## __VA_ARGS__)
 #define hal_log_error(has_file, has_func, message,...) hal_log_message(LOG_ERROR,__FILE__,__func__,has_file,has_func,message,## __VA_ARGS__)
 
-// SW Version
+// SW Version (Git Tag)
+/*******************************************************************************
+ * Release/Test: [R/T][Version]
+ * Project Name: [QAR87/QAR88n]
+ * SKU ID: 01: Dev Board, 02: Actual Board, 03: xMEMS(Actual Board)
+ * User/UserDebug Build: 01: UserDebug, 02: User
+ * Build Date: YYMMDD
+ * Purposes: Power / Demo
+ *
+ * Example:
+ *   R01.QAR87.01.01.251122
+ *   T01.QAR87.01.01.251122.Power
+ ******************************************************************************/
 #define HAL_MCU_APP_RELEASE        0
 #define HAL_MCU_APP_VERSION        sw_version
-#define HAL_MCU_APP_VERSION_TIME   version_time
-#define HAL_MCU_APP_VERSION_SUB    version_sub
-
 
 
 
@@ -46,13 +55,11 @@
 
 // SW Version
 /* Rule of Version: [based version]_[commit_date]_[commit_time]_[sub_item] */
-static uint8_t sw_version[20] = "0.06";
 #if HAL_MCU_APP_RELEASE
-static uint8_t version_time[15] = "";
+static uint8_t sw_version[40] = "R00.QAR87.01.01.251122";
 #else
-static uint8_t version_time[15] = "_251021_1800";
+static uint8_t sw_version[40] = "T00.QAR87.01.01.251122.Demo";
 #endif
-static uint8_t version_sub[15] = "";
 
 
 

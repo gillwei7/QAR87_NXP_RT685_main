@@ -275,6 +275,7 @@ void hal_soc_enable(void)
 
 void hal_board_init(void)
 {
+	PRINTF("[System] Version= %s \n", HAL_MCU_APP_VERSION);
 	hal_gpio_init();
 	hal_i3c_init();
 	hal_spi_init();
