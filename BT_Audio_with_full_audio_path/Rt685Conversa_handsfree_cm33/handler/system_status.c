@@ -13,6 +13,7 @@
 volatile uint8_t System_Status = 0; //Send system status to Novatek
 
 volatile usage_state_t current_usage_state = USAGE_STATE_HOME;
+volatile uint8_t music_status = 0; // 0: off, 1: on
 
 extern QueueHandle_t      spi_request_queue;
 
@@ -33,49 +34,41 @@ void ss_set_state(uint8_t state)
 		if (current_usage_state == USAGE_STATE_MUSIC_PLAYER) {
 			RequestToGetOutofA2dpPlay = 1;
 			current_usage_state = state;
-			send_state_to_spi();
+
 
 		} else if (current_usage_state == USAGE_STATE_MEDIA_PLAYER) {
 			RequestToGetOutofMediaPlayer = 1;
 			current_usage_state = state;
-			send_state_to_spi();
 
 		} else if (current_usage_state == USAGE_STATE_VIDEO_RECORDING) {
 			RequestToGetOutofVideoRecording = 1;
 			current_usage_state = state;
-			send_state_to_spi();
 
 		} else if (current_usage_state == USAGE_STATE_VIDEO_AI) {
 			RequestToGetOutofVideoAI = 1;
 			current_usage_state = state;
-			send_state_to_spi();
 
 		} else if (current_usage_state == USAGE_STATE_TRANSLATION) {
 			RequestToGetOutofTranslation = 1;
 			current_usage_state = state;
-			send_state_to_spi();
 
 		} else if (current_usage_state == USAGE_STATE_TAKE_PHOTO) {
 			RequestToGetOutofTakePhoto = 1;
 			current_usage_state = state;
-			send_state_to_spi();
 
 		} else if (current_usage_state == USAGE_STATE_ABOUT) {
 			RequestToGetOutofAbout = 1;
 			current_usage_state = state;
-			send_state_to_spi();
 
 		} else if (current_usage_state == USAGE_STATE_MENU) {
 			RequestToGetOutofMenu = 1;
 			current_usage_state = state;
-			send_state_to_spi();
 
 		}
 
 	} else if (state == USAGE_STATE_MENU && current_usage_state == USAGE_STATE_HOME) {
 		RequestToGetIntoMenu = 1;
 		current_usage_state = state;
-		send_state_to_spi();
 
 	} else if (state == USAGE_STATE_ABOUT && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
@@ -83,7 +76,6 @@ void ss_set_state(uint8_t state)
 		}
 		RequestToGetIntoAbout = 1;
 		current_usage_state = state;
-		send_state_to_spi();
 
 	} else if (state == USAGE_STATE_MUSIC_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
@@ -91,7 +83,6 @@ void ss_set_state(uint8_t state)
 		}
 		RequestToGetIntoA2dpPlay = 1;
 		current_usage_state = state;
-		send_state_to_spi();
 
 	} else if (state == USAGE_STATE_MEDIA_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
@@ -99,7 +90,6 @@ void ss_set_state(uint8_t state)
 		}
 		RequestToGetIntoMediaPlayer = 1;
 		current_usage_state = state;
-		send_state_to_spi();
 
 	} else if (state == USAGE_STATE_VIDEO_RECORDING && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
@@ -107,7 +97,6 @@ void ss_set_state(uint8_t state)
 		}
 		RequestToGetIntoVideoRecording = 1;
 		current_usage_state = state;
-		send_state_to_spi();
 
 	} else if (state == USAGE_STATE_TAKE_PHOTO && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
@@ -115,7 +104,6 @@ void ss_set_state(uint8_t state)
 		}
 		RequestToGetIntoTakePhoto = 1;
 		current_usage_state = state;
-		send_state_to_spi();
 
 	} else if (state == USAGE_STATE_VIDEO_AI && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
@@ -123,7 +111,6 @@ void ss_set_state(uint8_t state)
 		}
 		RequestToGetIntoVideoAI = 1;
 		current_usage_state = state;
-		send_state_to_spi();
 
 	} else if (state == USAGE_STATE_TRANSLATION && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
@@ -131,7 +118,6 @@ void ss_set_state(uint8_t state)
 		}
 		RequestToGetIntoTranslation = 1;
 		current_usage_state = state;
-		send_state_to_spi();
 
 	}
 
@@ -141,6 +127,18 @@ void send_state_to_spi(void) // send state to soc if both audio path and state a
 {
 	uint8_t v = USAGE_STATE_HEX_VALUE + current_usage_state;
 	(void)xQueueSend(spi_request_queue, &v, 0);
+}
+
+void ss_set_music_status(uint8_t status)
+{
+	music_status = status;
+	send_music_status_to_spi();
+}
+
+void send_music_status_to_spi(void)
+{
+	// Todo
+	// To make novatek open music ui or open home ui
 }
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */

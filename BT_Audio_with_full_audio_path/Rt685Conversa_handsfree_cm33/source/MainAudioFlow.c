@@ -1549,7 +1549,6 @@ void InitAudioInterface_MediaPlayer(int Opt)
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
-	send_state_to_spi();
 }
 void InitAudioInterface_MusicPlayer(int Opt)
 {
@@ -1649,7 +1648,6 @@ void InitAudioInterface_MusicPlayer(int Opt)
 
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
-	send_state_to_spi();
 }
 void InitAudioInterface_Translation(int Opt)
 {
@@ -1719,7 +1717,6 @@ void InitAudioInterface_Translation(int Opt)
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
-	send_state_to_spi();
 }
 
 void InitAudioInterface_AiConversation(int Opt)

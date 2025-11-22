@@ -27,7 +27,9 @@
 #include "MainAudioFlow.h"
 #include "WorkStateManager.h"
 #include "SubFunc.h"
-
+#if UsingQAR87Board == 1
+#include "system_status.h"
+#endif
 
 int AudioPortIsActive_I2SToAmp;
 int AudioPortIsActive_I2SToNvt;
@@ -599,6 +601,8 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_MusicPlayer_Pre;
 							WorkStateIsChanged=1;
+							ss_set_music_status(1);
+
 						}
 						RequestToGetIntoA2dpPlay=0;
 						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
@@ -610,6 +614,8 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
 							DeviceWorkStatePre=WorkState_MusicPlayer;
 							WorkStateIsChanged=1;
+							ss_set_music_status(0);
+
 						}
 						RequestToGetOutofA2dpPlay=0;
 						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
