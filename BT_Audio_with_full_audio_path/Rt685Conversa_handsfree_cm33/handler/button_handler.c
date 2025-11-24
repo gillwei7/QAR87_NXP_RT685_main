@@ -265,7 +265,8 @@ void button_task(void *pvParameters)
 #else // use button to switch state
 //                        RequestToGetIntoMediaPlayer = 1;
                         //RequestToGetIntoTranslation = 1;
-                        RequestToGetIntoVideoAI = 1;
+                        //RequestToGetIntoVideoAI = 1;
+                        RequestToGetIntoVideoRecording = 1;
 #endif
 #endif
                         /* reg_led++; */

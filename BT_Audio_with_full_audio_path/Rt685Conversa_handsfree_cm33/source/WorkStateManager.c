@@ -663,7 +663,7 @@ void Manager_Task(void *pvParameters)
 						RequestToGetOutofMediaPlayer=0;
 						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
-				#endif
+				#endif // #if EnableWorkState_MediaPlayer == 1
 
 				#if EnableWorkState_Translation == 1
 					if(RequestToGetIntoTranslation && !RequestToGetOutofMenu)
@@ -688,7 +688,8 @@ void Manager_Task(void *pvParameters)
 						RequestToGetOutofTranslation=0;
 						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
-				#endif
+				#endif // #if EnableWorkState_Translation == 1
+
 				#if EnableWorkState_VideoAi == 1
 					if(RequestToGetIntoVideoAI && !RequestToGetOutofMenu)
 					{
@@ -712,7 +713,32 @@ void Manager_Task(void *pvParameters)
 						RequestToGetOutofVideoAI=0;
 						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
-				#endif
+				#endif // #if EnableWorkState_VideoAi == 1
+
+				#if EnableWorkState_VideoRecording == 1
+					if(RequestToGetIntoVideoRecording && !RequestToGetOutofMenu)
+					{
+						if(DeviceWorkStateCur!=WorkState_VideoRecording)
+						{
+							DeviceWorkStatePre=DeviceWorkStateCur;
+							DeviceWorkStateCur=WorkState_VideoRecording_Pre;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetIntoVideoRecording=0;
+						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+					if(RequestToGetOutofVideoRecording)
+					{
+						if(DeviceWorkStateCur==WorkState_VideoRecording)
+						{
+							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStatePre=WorkState_VideoRecording;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetOutofVideoRecording=0;
+						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+				#endif // #if EnableWorkState_VideoRecording == 1
 
 					if(RequestToGetIntoMenu)
 					{
