@@ -91,6 +91,7 @@ const char *WorkStateName[]=
 	"WorkState_Void",
 	"WorkState_HfpCall",
 	"WorkState_HomeVitStandby",
+	"WorkState_Menu",
 	"WorkState_AudioIoDbg",
 	"WorkState_VideoRecording",
 	"WorkState_MediaPlayer",
@@ -674,7 +675,7 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetIntoTranslation=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 					if(RequestToGetOutofTranslation)
 					{
@@ -685,7 +686,31 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetOutofTranslation=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+				#endif
+				#if EnableWorkState_VideoAi == 1
+					if(RequestToGetIntoVideoAI && !RequestToGetOutofMenu)
+					{
+						if(DeviceWorkStateCur!=WorkState_VideoAi)
+						{
+							DeviceWorkStatePre=DeviceWorkStateCur;
+							DeviceWorkStateCur=WorkState_VideoAi_Pre;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetIntoVideoAI=0;
+						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+					if(RequestToGetOutofTranslation)
+					{
+						if(DeviceWorkStateCur==WorkState_VideoAi)
+						{
+							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStatePre=WorkState_VideoAi;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetOutofVideoAI=0;
+						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 				#endif
 

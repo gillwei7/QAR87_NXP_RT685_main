@@ -264,7 +264,8 @@ void button_task(void *pvParameters)
                         send_spi_request(POWER_SHORT_PRESS_HEX_VALUE);
 #else // use button to switch state
 //                        RequestToGetIntoMediaPlayer = 1;
-                        RequestToGetIntoTranslation = 1;
+                        //RequestToGetIntoTranslation = 1;
+                        RequestToGetIntoVideoAI = 1;
 #endif
 #endif
                         /* reg_led++; */
