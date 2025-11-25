@@ -95,13 +95,15 @@ static void Determine_pca9422_enter_ship_mode(void)
 			{
 				/* 沒達到 2 秒長按 → 進入 ship mode */
 				PRINTF("[PCA9422] Power key (press < %u ms)\r\n", LONG_PRESS_MS);
-				hal_pmic_pca9422_enter_ship_mode();
+				//hal_pmic_pca9422_enter_ship_mode();
+				hal_pmic_pca9422_power_down();
 			}
 		}
 		else
 		{
 			/* 沒有按住按鍵（高電位）→ 直接進入 ship mode */
-			hal_pmic_pca9422_enter_ship_mode();
+			//hal_pmic_pca9422_enter_ship_mode();
+			hal_pmic_pca9422_power_down();
 		}
 }
 
@@ -110,7 +112,8 @@ void Init_I2C_Component(void)
 #if PMIC_PCA9422_ENABLE
 	hal_pmic_pca9422_init();
 #endif
-//	Determine_pca9422_enter_ship_mode();
+	//power_off_charging();
+	//Determine_pca9422_enter_ship_mode();
 #if PMIC_GLF70583_ENABLE
 	hal_pmic_glf70583_init();
 #endif
@@ -466,4 +469,54 @@ void I2C_Task(void *pvParameters)
 #endif
 
     }
+}
+void power_off_charging(void)
+{
+	uint8_t LED_state=0; //1->charging； 2->full-charge
+
+
+	glf70302_init();//Gauge Init
+	ktd202x_probe();
+	hal_power_charger_bq25618_init();
+
+	hal_power_charger_bq25618_get_charging_status();
+	if(charger_status.vbus_good)
+	{
+		PRINTF("[System] power off charging \r\n");
+		while(1)
+		{
+
+			hal_power_charger_bq25618_get_charging_status();
+			hal_power_gauge_glf70302_get_battery_level();
+			battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
+			if(charger_status.vbus_good)
+			{
+				switch (LED_state) {
+					case 0:
+							ktd202x_led_off();
+							ktd202x_ch2_led_blink(500, 500, TIM_1);
+							LED_state++;
+							break;
+					case 1:
+							if(battery_info.soc>=99)
+							{
+								ktd202x_led_off();
+								ktd202x_ch3_led_on(LED_ON);
+								LED_state++;
+							}
+							break;
+                    default:
+                        	break;
+									}
+			}
+			else
+			{
+				ktd202x_led_off();
+				PRINTF("[System] power off charging -> power down \r\n");
+				hal_pmic_pca9422_power_down();
+			}
+
+			SDK_DelayAtLeastUs(1000 * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 1s
+		}
+	}
 }
