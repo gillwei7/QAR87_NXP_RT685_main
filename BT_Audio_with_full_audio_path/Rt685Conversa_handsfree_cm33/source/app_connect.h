@@ -44,7 +44,7 @@ extern paired_device_t paired_devices[MAX_PAIRED_DEVICES];
  ******************************************************************************/
 
 void app_connect_init(void);
-void app_connect(uint8_t profile,uint8_t *addr);
+void app_connect(uint8_t *addr);
 void app_disconnect(uint8_t profile);
 void app_a2dp_hf_auto_connect(void);
 
@@ -55,6 +55,7 @@ int app_save_paired_device(const uint8_t addr[6], const char *name, uint8_t devi
 int app_save_paired_devices();
 int app_clear_paired_devices();
 int app_auto_connect_save_addr(bt_addr_t const *addr);
+void app_auto_connect_paired_devices(void);
 #endif
 
 #endif /* __APP_CONNECT_H__ */

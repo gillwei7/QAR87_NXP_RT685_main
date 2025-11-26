@@ -43,9 +43,12 @@
 #include "button_handler.h"
 #include "i2c_component_handler.h"
 #include "hal_common.h"
+#include "app_connect.h"
 #endif
 
 #define Manager_TASK_PRIORITY				2			//this is low
+#define CONNECTION_TIMER_TASK_DELAY              10
+#define CONNECTION_TIMER_TIMEOUT_MILLISECOND     20000
 
 #define APP_HFP_HF_INITIAL_VGS_GAIN 12
 #define APP_HFP_HF_INITIAL_VGM_GAIN 12
@@ -53,6 +56,7 @@
 struct bt_conn *conn_rider_phone = NULL;
 static volatile uint8_t s_call_status = 0;
 static  uint8_t s_call_setup_status = 0;
+static uint16_t connection_timer_count = 0;
 
 #if UsingQAR87Board == 1
 extern TaskHandle_t       sI2CTaskHandle  ;
@@ -582,5 +586,19 @@ void hfp_hf_a2dp_task(void *pvParameters)
 	}
 #endif
 
-    vTaskDelete(NULL);
+	while(1){
+		if(connection_timer_count < (CONNECTION_TIMER_TIMEOUT_MILLISECOND/CONNECTION_TIMER_TASK_DELAY) && (conn_rider_phone == NULL)){
+			connection_timer_count++;
+		}else{
+			connection_timer_count = 0;
+			if((g_pairedDeviceCount > 0) && (conn_rider_phone == NULL)){
+#if AUTO_CONNECT_ENABLE
+				PRINTF("Connection timeout. Connect previous paired device\r\n");
+				app_auto_connect_paired_devices();
+#endif
+			}
+		}
+		vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
+	}
+    //vTaskDelete(NULL);
 }

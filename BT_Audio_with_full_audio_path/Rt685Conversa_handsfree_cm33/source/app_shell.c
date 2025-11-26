@@ -235,27 +235,7 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
         	return kStatus_SHELL_Error;
         }
 
-        //Automatically connect if it's a Mobile Phone or Headset
-        if (device_type == PHONE)
-        {
-        	app_connect(RIDER_PHONE,addr);
-
-        }else if (device_type == HEADSET)
-        {
-        	if((strcmp(argv[3], "PH") == 0) || (strcmp(argv[3], "ph") == 0))
-        	{
-        		PRINTF("Connecting PASSENGER_HEADSET \n");
-        		app_connect(PASSENGER_HEADSET, addr);
-
-        	}else
-        	{
-        		app_connect(RIDER_HEADSET, addr);
-        	}
-
-        }else
-        {
-        	PRINTF("Device is not a Mobile Phone or Headset.\n");
-        }
+        app_connect(addr);
     }
     else if (strcmp(argv[1], "connect_paired") == 0)
     {
@@ -291,6 +271,7 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
     				"H or h to disconnect rider headset\n"
     				"PH or ph to disconnect passenger headset\n");
     	}
+
     }
 //**************AVRCP commands start ***************
     else if (strcmp(argv[1], "play") == 0)

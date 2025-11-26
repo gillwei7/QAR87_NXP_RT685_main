@@ -171,6 +171,9 @@ SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);	\
 SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);			\
 } while(0)
 
+//gill
+#define AUTO_CONNECT_ENABLE 0
+
 
 #endif
 

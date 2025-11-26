@@ -257,42 +257,38 @@ static void security_changed(struct bt_conn *conn, bt_security_t level, enum bt_
     }
 }
 
-void app_connect(uint8_t device_type,uint8_t *addr)
+void app_connect(uint8_t *addr)
 {
     uint8_t corrected_addr[6] = {0};
 
-	if(device_type == RIDER_PHONE)
+
+	if(conn_rider_phone == NULL )
 	{
-		if(conn_rider_phone == NULL )
+		g_connectInitRiderPhone = 1U;
+		memcpy(&g_riderPhoneAddr, addr, 6U);
+
+
+		conn_rider_phone = bt_conn_create_br(&g_riderPhoneAddr, BT_BR_CONN_PARAM_DEFAULT);
+		if (!conn_rider_phone)
 		{
-			g_connectInitRiderPhone = 1U;
-			memcpy(&g_riderPhoneAddr, addr, 6U);
+			g_connectInitRiderPhone = 0U;
+			PRINTF("ACL connection failed\r\n");
 
-
-			conn_rider_phone = bt_conn_create_br(&g_riderPhoneAddr, BT_BR_CONN_PARAM_DEFAULT);
-			if (!conn_rider_phone)
-			{
-				g_connectInitRiderPhone = 0U;
-				PRINTF("ACL connection failed\r\n");
-
-			}
-			else
-			{
-				/* unref connection obj in advance as app user */
-				bt_conn_unref(conn_rider_phone);
-
-				if(conn_rider_phone == NULL )
-				{
-					PRINTF("Debug NULL Connecting Rider Phone\r\n");
-				}
-				PRINTF("Connecting Rider Phone\r\n");
-			}
-		} else
+		}
+		else
 		{
+			/* unref connection obj in advance as app user */
+			bt_conn_unref(conn_rider_phone);
 
-			PRINTF(" Rider Phone connection already exists !! \r\n");
-    }
-
+			if(conn_rider_phone == NULL )
+			{
+				PRINTF("Debug NULL Connecting Phone\r\n");
+			}
+			PRINTF("Connecting Phone\r\n");
+		}
+	} else
+	{
+		PRINTF(" Phone connection already exists !! \r\n");
 	}
 
 }
