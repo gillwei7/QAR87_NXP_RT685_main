@@ -109,7 +109,7 @@
 									<listOptionValue builtIn="false" value="SDK_DEBUGCONSOLE_UART"/>
 									<listOptionValue builtIn="false" value="SDK_OS_FREE_RTOS"/>
 									<listOptionValue builtIn="false" value="SHELL_TASK_PRIORITY=configMAX_PRIORITIES-2"/>
-									<listOptionValue builtIn="false" value="SHELL_TASK_STACK_SIZE=2048"/>
+									<listOptionValue builtIn="false" value="SHELL_TASK_STACK_SIZE=3500"/>
 									<listOptionValue builtIn="false" value="SHELL_USE_COMMON_TASK=0"/>
 									<listOptionValue builtIn="false" value="USE_RTOS=1"/>
 									<listOptionValue builtIn="false" value="APPL_USE_STANDARD_IO"/>
