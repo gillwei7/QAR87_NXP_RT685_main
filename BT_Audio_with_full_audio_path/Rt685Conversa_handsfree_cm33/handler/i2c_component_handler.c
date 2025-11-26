@@ -237,13 +237,17 @@ void I2C_Task(void *pvParameters)
                 	if(btn_event==1)
                 	{
 #if SOC_SPI_ENABLE
-                		send_spi_request(ONE_TOUCH_HEX_VALUE);
+                        if (ss_get_state() != USAGE_STATE_MUSIC_PLAYER && ss_get_state() != USAGE_STATE_MEDIA_PLAYER) {
+                	        send_spi_request(ONE_TOUCH_HEX_VALUE);
+                        }
 #endif
                 	}
                 	else if(btn_event==2)
                 	{
 #if SOC_SPI_ENABLE
-                		send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
+                        if (ss_get_state() != USAGE_STATE_MUSIC_PLAYER) {
+                            send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
+                        }
 #endif
                 	}
 
@@ -252,7 +256,9 @@ void I2C_Task(void *pvParameters)
                 {
                 	PRINTF("[Touch] press \n");
 #if SOC_SPI_ENABLE
-                	send_spi_request(PRESS_TOUCH_HEX_VALUE);
+                    if (ss_get_state() != USAGE_STATE_MUSIC_PLAYER) {
+                        send_spi_request(PRESS_TOUCH_HEX_VALUE);
+                    }
 #endif
                 }
                 else if(aw933xx.event.long_press)
@@ -267,15 +273,27 @@ void I2C_Task(void *pvParameters)
                 {
                 	PRINTF("[Touch] slide_right \n");
 #if SOC_SPI_ENABLE
-                	send_spi_request(FORWARD_SLIDE_HEX_VALUE);
+                    if (ss_get_state() != USAGE_STATE_MUSIC_PLAYER && ss_get_state() != USAGE_STATE_MEDIA_PLAYER) {
+                        send_spi_request(FORWARD_SLIDE_HEX_VALUE);
+                    }
 #endif
+                    if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+                        // Volume up
+                        PRINTF("[Touch] Volume up \n");
+                    }
                 }
                 else if(aw933xx.event.left_wareds)
                 {
                 	PRINTF("[Touch] slide_left \n");
 #if SOC_SPI_ENABLE
-                	send_spi_request(BACK_SLIDE_HEX_VALUE);
+                    if (ss_get_state() != USAGE_STATE_MUSIC_PLAYER && ss_get_state() != USAGE_STATE_MEDIA_PLAYER) {
+                        send_spi_request(BACK_SLIDE_HEX_VALUE);
+                    }
 #endif
+                    if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+                        // Volume down
+                        PRINTF("[Touch] Volume down \n");
+                    }
                 }
 #endif
 
