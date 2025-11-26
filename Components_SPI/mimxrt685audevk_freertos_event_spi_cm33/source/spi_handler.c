@@ -133,20 +133,37 @@ static void handle_passive_ack_frame(const uint8_t *frame)
     }
 
     switch (cmd) {
-        case 0x00:
-        	if (val == 0x00) {
-				PRINTF("[Passive] ACK:[00 00] Nova do nothing \r\n");
+		case 0x00:
+			if (val == 0x00) {
+				PRINTF("[Passive] ACK:[00 %02X] Nova do nothing \r\n",val);
 				led_post_event(LED_EVT_ALL_OFF);
 			}
-
-        	else if (val == 0x01) {
-                PRINTF("[Passive] ACK:[00 01] Nova take photo success \r\n");
-                led_post_event(LED_EVT_PHOTO_CAPTURE);
-            }
-
-            else if (val == 0x03) {
-				PRINTF("[Passive] ACK:[00 03] Nova record video success \r\n");
-				led_post_event(LED_EVT_VIDEO_CAPTURE);
+			else if (val == 0x01) {
+				PRINTF("[Passive] ACK:[00 %02X] Capture Start \r\n",val);
+				led_post_event(LED_EVT_POWER_ON_PROGRESS);//While LED ON
+				// ToDo:使NXP發出 "滴～喀嚓 "聲音
+			}
+			else if (val == 0x03) {
+				PRINTF("[Passive] ACK:[00 %02X] Capture Completed \r\n",val);
+				led_post_event(LED_EVT_ALL_OFF);
+			}
+			else if (val == 0x04) {
+				PRINTF("[Passive] ACK:[00 %02X] Recording Start \r\n",val);
+				led_post_event(LED_EVT_POWER_ON_PROGRESS);//While LED ON
+				// ToDo:使NXP發出 "登登"聲音
+			}
+			else if (val == 0x05) {
+				PRINTF("[Passive] ACK:[00 %02X] Recording Completed \r\n",val);
+				led_post_event(LED_EVT_ALL_OFF);
+				// ToDo:使NXP發出 "等登"聲音
+			}
+			else if (val == 0x08) {
+				PRINTF("[Passive] ACK:[00 %02X] Wi-Fi connection \r\n",val);
+				// ToDo:手機Wi-Fi連線時，發出提示聲音
+			}
+			else if (val == 0x09) {
+				PRINTF("[Passive] ACK:[00 %02X] WiFi disconnection \r\n",val);
+				// ToDo:手機Wi-Fi斷線時，發出提示聲音
 			}
 			break;
 
