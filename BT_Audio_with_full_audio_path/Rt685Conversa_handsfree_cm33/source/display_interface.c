@@ -169,6 +169,8 @@ void print_paired_devices(void)
 void save_new_paired_device(struct bt_conn *conn, uint8_t isRiderHeadset)
 {
 	struct bt_conn_info conn_info;
+	uint8_t current_paired_device_count = 0;
+
 	if (bt_conn_get_info(conn, &conn_info) != 0)
 	{
 		PRINTF("Failed to get connection info.\n");
@@ -241,14 +243,25 @@ void save_new_paired_device(struct bt_conn *conn, uint8_t isRiderHeadset)
 			device_type = PASSENGER_HEADSET;
 		}
 	}
+	PRINTF("Saving new paired device: Address: %02X:%02X:%02X:%02X:%02X:%02X, Name: %s, Type: %d\n",
+				addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], name, device_type);
 
-	//PRINTF("Saving new paired device: Address: %02X:%02X:%02X:%02X:%02X:%02X, Name: %s, Type: %d\n",
-	//			addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], name, device_type);
+
 
 	#if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
 		app_save_paired_device(device_addr, name, device_type);
 	#endif
 	PRINTF("Updated Paired Devices list !!\n\n");
+
+	//gill only keep one paired device in list
+	current_paired_device_count = g_pairedDeviceCount;
+
+	if(g_pairedDeviceCount > 1){
+		PRINTF("Delete previous paired device %d times\r\n", current_paired_device_count-1);
+		for(int i = 1;i < current_paired_device_count;i++){
+			delete_device(1);
+		}
+	}
 
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
 	app_read_paired_devices();
