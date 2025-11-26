@@ -1659,6 +1659,7 @@ void InitAudioInterface_VideoRecording(int Opt)
 	// gill no A2DP on video recording, maybe need other code
 //	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 //	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
+	send_state_to_soc();
 }
 
 void InitAudioInterface_MediaPlayer(int Opt)
@@ -1723,6 +1724,7 @@ void InitAudioInterface_MediaPlayer(int Opt)
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
+	send_state_to_soc();
 }
 void InitAudioInterface_MusicPlayer(int Opt)
 {
@@ -1822,6 +1824,7 @@ void InitAudioInterface_MusicPlayer(int Opt)
 
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
+	send_state_to_soc();
 }
 void InitAudioInterface_Translation(int Opt)
 {
@@ -1890,6 +1893,7 @@ void InitAudioInterface_Translation(int Opt)
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
+	send_state_to_soc();
 }
 
 void InitAudioInterface_AiConversation(int Opt)
@@ -1963,6 +1967,7 @@ void InitAudioInterface_VideoAi(int Opt)
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
+	send_state_to_soc();
 }
 #endif
 
@@ -2094,6 +2099,7 @@ void DeInitAudioInterface_VideoRecording(int Opt)
 	//VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
 	Deinit_GeneralAudio(1,1,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
 	ClearAudioCirBuf(0,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+	send_state_to_soc();
 	return;
 }
 void DeInitAudioInterface_MediaPlayer(int Opt)
@@ -2101,6 +2107,7 @@ void DeInitAudioInterface_MediaPlayer(int Opt)
     //May be need it //VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
 	Deinit_GeneralAudio(1,1,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
 	ClearAudioCirBuf(0,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+	send_state_to_soc();
 	return;
 
 }
@@ -2139,12 +2146,14 @@ void DeInitAudioInterface_MusicPlayer(int Opt)
 
     CirUacUpAudioBuf_ClearAllSamples_MultiCh(&UacUpAudioBuf_MCh);
     CirUacDnAudioBuf_ClearAllSamples_MultiCh(&UacDnAudioBuf_MCh);
+	send_state_to_soc();
 }
 void DeInitAudioInterface_Translation(int Opt)
 {
 	VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
 		Deinit_GeneralAudio(1,1,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
 		ClearAudioCirBuf(0,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+		send_state_to_soc();
 		return;
 }
 void DeInitAudioInterface_AiConversation(int Opt)
@@ -2155,6 +2164,7 @@ void DeInitAudioInterface_VideoAi(int Opt)
 	VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
 	Deinit_GeneralAudio(1,1,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
 	ClearAudioCirBuf(0,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+	send_state_to_soc();
 	return;
 }
 #endif
