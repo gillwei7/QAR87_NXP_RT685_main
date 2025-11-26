@@ -421,9 +421,11 @@ void BOARD_InitDEBUG_UARTPins(void)
                                         IOPCTL_PIO_PSEDRAIN_DI |
                                         /* Input function is not inverted */
                                         IOPCTL_PIO_INV_DI);
-    /* PORT0 PIN1 (coords: G2) is configured as FC0_TXD_SCL_MISO_WS */
+
     IOPCTL_PinMuxSet(IOPCTL, 0U, 15U, port0_pin15_config);
+
 #endif
+
 #else
     const uint32_t port0_pin1_config = (/* Pin is configured as FC0_TXD_SCL_MISO_WS */
                                         IOPCTL_PIO_FUNC1 |
@@ -4050,6 +4052,27 @@ void BOARD_InitDevDebugUartFC2Pins(void)
                                          IOPCTL_PIO_INV_DI);
     /* PORT0 PIN15 (coords: J6) is configured as FC2_TXD_SCL_MISO_WS */
     IOPCTL_PinMuxSet(IOPCTL, 0U, 15U, port0_pin15_config);
+
+    const uint32_t port0_pin16_config = (/* Pin is configured as FC2_RXD_SDA_MOSI_DATA */
+                                         IOPCTL_PIO_FUNC1 |
+                                         /* Disable pull-up / pull-down function */
+                                         IOPCTL_PIO_PUPD_DI |
+                                         /* Enable pull-down function */
+                                         IOPCTL_PIO_PULLDOWN_EN |
+                                         /* Enables input buffer function */
+                                         IOPCTL_PIO_INBUF_EN |
+                                         /* Normal mode */
+                                         IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                         /* Full drive enable */
+                                         IOPCTL_PIO_FULLDRIVE_EN |
+                                         /* Analog mux is disabled */
+                                         IOPCTL_PIO_ANAMUX_DI |
+                                         /* Pseudo Output Drain is disabled */
+                                         IOPCTL_PIO_PSEDRAIN_DI |
+                                         /* Input function is not inverted */
+                                         IOPCTL_PIO_INV_DI);
+    /* PORT0 PIN16 (coords: K5) is configured as FC2_RXD_SDA_MOSI_DATA */
+    IOPCTL_PinMuxSet(IOPCTL, 0U, 16U, port0_pin16_config);
 }
 
 /* clang-format off */
