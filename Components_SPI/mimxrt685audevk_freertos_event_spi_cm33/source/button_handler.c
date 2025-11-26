@@ -18,10 +18,16 @@ extern SemaphoreHandle_t  spi_semaphore;
 #define FUNK_NOTIFY_EDGE  (1UL << 0)  /* FunKey edge from PINT ISR */
 #define FUNK_NOTIFY_DBL   (1UL << 1)  /* FunKey double-click timer expiry */
 #define PWR_NOTIFY_EDGE   (1UL << 2)  /* PowerKey edge from PINT ISR */
+/* [Funkey Hold] FunKey 長按「按住不放 1 秒」到期事件 */
+#define FUNK_NOTIFY_HOLD (1UL << 3)
+
 
 /* === 單一任務的 handle 與 FunKey 的軟體定時器 === */
 static TaskHandle_t  sKeysTaskHandle = NULL;   /* unified task handle (button_key) */
 static TimerHandle_t sBtnDblTimer    = NULL;   /* FunKey only */
+/* [Funkey Hold] FunKey 按住不放 1 秒觸發的單次定時器 */
+static TimerHandle_t sBtnHoldTimer = NULL;
+
 
 /* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
 static inline void delay_ms(uint32_t ms)
@@ -84,6 +90,15 @@ static void vBtnDblTimerCb(TimerHandle_t xTimer)
     }
 }
 
+/* [Funkey Hold] FunKey 長按「按住不放 1 秒」計時器回呼：只通知 unified 任務 */
+static void vBtnHoldTimerCb(TimerHandle_t xTimer)
+{
+    if (sKeysTaskHandle)
+    {
+        (void)xTaskNotify(sKeysTaskHandle, FUNK_NOTIFY_HOLD, eSetBits);
+    }
+}
+
 /**
  * @brief Unified button_key task (FunKey + PowerKey)
  * @details 按鍵處理任務（生產者）：
@@ -96,6 +111,9 @@ void button_task(void *pvParameters)
     /* -------- FunKey thresholds -------- */
     const TickType_t btn_debounceTicks = pdMS_TO_TICKS(BTN_DEBOUNCE_MS);
     const TickType_t btn_longTicks     = pdMS_TO_TICKS(BTN_LONG_MS);
+    /* [Funkey Hold] 「按住版」長按門檻（預設 1000ms） */
+    const TickType_t btn_holdTicks     = pdMS_TO_TICKS(BTN_HOLD_MS);
+
 
     sKeysTaskHandle = xTaskGetCurrentTaskHandle();
 
@@ -107,11 +125,23 @@ void button_task(void *pvParameters)
                                 vBtnDblTimerCb);
     configASSERT(sBtnDblTimer);
 
+    /* [Funkey Hold] FunKey 的「按住不放 1 秒即觸發」單次定時器 */
+    sBtnHoldTimer = xTimerCreate("btn_hold",
+                                 btn_holdTicks, /* 一次性 1 秒（或外部定義） */
+                                 pdFALSE,
+                                 NULL,
+                                 vBtnHoldTimerCb);
+    configASSERT(sBtnHoldTimer);
+
     /* -------- FunKey state -------- */
     uint8_t    btn_stable_level      = btn_raw_read();
     bool       btn_is_pressed        = (btn_stable_level == BTN_ACTIVE_LEVEL);
     bool       btn_dbl_pending       = false; /* 是否正在等待第二次短按 */
     TickType_t btn_press_start_tick  = 0;
+
+    /* [Funkey Hold] 是否已在按住期間觸發過（避免與放開版重複觸發） */
+    bool btn_hold_fired = false;
+
     if (btn_is_pressed)
     {
         /* 上電時剛好按住：當作剛按下 */
@@ -153,6 +183,28 @@ void button_task(void *pvParameters)
              * 等放開時再判斷是雙擊或長按（第二次按壓可能超過長按門檻）。 */
         }
 
+        /* [Funkey Hold] A+) FunKey 按住 1 秒事件：仍在按住且尚未觸發過 → 立即視為長按（按住版） */
+        if (notifyBits & FUNK_NOTIFY_HOLD)
+        {
+            if (btn_is_pressed && !btn_hold_fired)
+            {
+                btn_hold_fired = true;
+                /* 既已長按觸發，取消任何待定的短按/雙擊 */
+                btn_dbl_pending = false;
+                (void)xTimerStop(sBtnDblTimer, 0);
+
+                /* 回報 FunKey 長按（按住版），沿用既有 LONG_PRESS_HEX_VALUE */
+                PRINTF("[Button] Long Press (hold >=%ums) detected.\r\n", (unsigned)BTN_HOLD_MS);
+                PRINTF("[Button] Long Press (hold) detected. Sending 0x%02X\r\n",
+                       LONG_PRESS_HEX_VALUE);
+                uint8_t v = LONG_PRESS_HEX_VALUE;
+                (void)xQueueSend(spi_request_queue, &v, 0);
+
+                /* 如需持續按住的重複事件，可改為週期性 Timer；目前為單次觸發。 */
+            }
+            /* 若已放開或已觸發過，忽略此通知 */
+        }
+
         /* B) FunKey 邊緣事件：去抖後判斷按下/放開 */
         if (notifyBits & FUNK_NOTIFY_EDGE)
         {
@@ -165,12 +217,18 @@ void button_task(void *pvParameters)
                 bool       now_pressed = (btn_stable_level == BTN_ACTIVE_LEVEL);
                 TickType_t now         = xTaskGetTickCount();
 
+
                 if (now_pressed && !btn_is_pressed)
                 {
                     /* 放開 -> 按下：記錄開始時間 */
-                    btn_is_pressed       = true;
+                    btn_is_pressed = true;
                     btn_press_start_tick = now;
                     /* 不動 btn_dbl_pending，讓第二次按壓可以覆蓋成雙擊或長按 */
+
+                    /* [Funkey Hold] 啟動「按住 1 秒」定時器；重置觸發旗標 */
+                    btn_hold_fired = false;
+                    (void)xTimerStop(sBtnHoldTimer, 0);
+                    (void)xTimerStart(sBtnHoldTimer, 0);
                 }
                 else if (!now_pressed && btn_is_pressed)
                 {
@@ -178,14 +236,21 @@ void button_task(void *pvParameters)
                     btn_is_pressed = false;
                     TickType_t press_dur = now - btn_press_start_tick;
 
+                    /* [Funkey Hold] 放開時先停掉「按住 1 秒」定時器，避免誤觸發 */
+                    (void)xTimerStop(sBtnHoldTimer, 0);
+
                     if (press_dur >= btn_longTicks)
                     {
-                        /* 長按（放開才觸發）→ 最高優先權 */
-                        PRINTF("[Button] Long Press (on-release) detected. \r\n");
-                        PRINTF("[Button] Long Press (on-release) detected. Sending 0x%02X\r\n",
-                               LONG_PRESS_HEX_VALUE);
-                        uint8_t v = LONG_PRESS_HEX_VALUE;
-                        (void)xQueueSend(spi_request_queue, &v, 0);
+                        /* [Funkey Hold] 若已在按住期間觸發過，則不重複回報放開版長按 */
+                        if (!btn_hold_fired)
+                        {
+                            /* 長按（放開版）→ 最高優先權 */
+                            PRINTF("[Button] Long Press (on-release) detected. \r\n");
+                            //PRINTF("[Button] Long Press (on-release) detected. Sending 0x%02X\r\n",
+                            //       LONG_PRESS_HEX_VALUE);
+                            //uint8_t v = LONG_PRESS_HEX_VALUE;
+                            //(void)xQueueSend(spi_request_queue, &v, 0);
+                        }
                         /* 任何待定的單擊作廢 */
                         btn_dbl_pending = false;
                         (void)xTimerStop(sBtnDblTimer, 0);
@@ -193,7 +258,12 @@ void button_task(void *pvParameters)
                     else
                     {
                         /* 未達長按：處理短按/雙擊 */
-                        if (btn_dbl_pending)
+                        /* [Funkey Hold] 若已在按住期間觸發過長按，則不再判定短按/雙擊 */
+                        if (btn_hold_fired)
+                        {
+                            /* no-op */
+                        }
+                        else if (btn_dbl_pending)
                         {
                             /* 第二次在時間窗內完成 → 雙擊 */
                             btn_dbl_pending = false;
@@ -217,6 +287,7 @@ void button_task(void *pvParameters)
                 }
             }
         } /* FunKey EDGE */
+
 
         /* C) PowerKey 邊緣事件：去抖後判斷按下/放開 */
         if (notifyBits & PWR_NOTIFY_EDGE)
