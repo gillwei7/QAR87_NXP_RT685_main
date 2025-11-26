@@ -612,7 +612,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_MusicPlayer)
 						{
-							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_MusicPlayer;
 							WorkStateIsChanged=1;
 							ss_set_music_status(0);
@@ -656,7 +656,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_MediaPlayer)
 						{
-							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_MediaPlayer;
 							WorkStateIsChanged=1;
 						}
@@ -681,7 +681,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_Translation)
 						{
-							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_Translation;
 							WorkStateIsChanged=1;
 						}
@@ -706,7 +706,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_VideoAi)
 						{
-							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_VideoAi;
 							WorkStateIsChanged=1;
 						}
@@ -731,7 +731,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_VideoRecording)
 						{
-							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_VideoRecording;
 							WorkStateIsChanged=1;
 						}
