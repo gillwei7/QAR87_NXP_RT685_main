@@ -61,33 +61,34 @@ enum {
 
 };
 
+
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
-void ss_ble_on(SystemStatus* s);
-void ss_ble_off(SystemStatus* s);
-bool ss_ble_is_on(const SystemStatus* s);
+void ss_ble_on();
+void ss_ble_off();
+bool ss_ble_is_on();
 
-void ss_ha_on(SystemStatus* s);
-void ss_ha_off(SystemStatus* s);
-bool ss_ha_is_on(const SystemStatus* s);
+void ss_ha_on();
+void ss_ha_off();
+bool ss_ha_is_on();
 
-void ss_bt_on(SystemStatus* s);
-void ss_bt_off(SystemStatus* s);
-bool ss_bt_is_on(const SystemStatus* s);
+void ss_bt_on();
+void ss_bt_off();
+bool ss_bt_is_on();
 
-void ss_mic_on(SystemStatus* s);
-void ss_mic_off(SystemStatus* s);
-bool ss_mic_is_on(const SystemStatus* s);
+void ss_mic_on();
+void ss_mic_off();
+bool ss_mic_is_on();
 
 
 /* ====== Layer：設定與讀取 ====== */
-void     ss_set_layer(SystemStatus* s, uint8_t layer);
-uint8_t  ss_get_layer(const SystemStatus* s);
+void     ss_set_layer(uint8_t layer);
+uint8_t  ss_get_layer();
 
 /* ====== 充電與電量：設定與讀取 ====== */
-void ss_set_charging(SystemStatus* s, bool on);
-bool ss_is_charging(const SystemStatus* s);
-void ss_set_battery(SystemStatus* s, uint8_t percent);
-uint8_t ss_get_battery(const SystemStatus* s);
+void ss_set_charging(bool on);
+bool ss_is_charging();
+void ss_set_battery(uint8_t percent);
+uint8_t ss_get_battery();
 
 uint8_t ss_get_state(void);
 void ss_set_state(uint8_t state);//Change the usage state and send a notification back to Novatek.

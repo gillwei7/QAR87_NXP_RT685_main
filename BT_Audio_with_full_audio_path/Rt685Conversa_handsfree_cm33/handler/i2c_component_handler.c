@@ -32,7 +32,6 @@ volatile amp_event_t g_amp_event = AMP_EVT_NONE;
 extern volatile struct aw933xx_dev aw933xx;
 
 extern uint8_t led_status;
-volatile SystemStatus ss = {0};
 extern volatile uint8_t System_Status ;
 extern uint8_t Novatek_boot_completed;
 
@@ -131,7 +130,7 @@ void Init_I2C_Component(void)
 	glf70302_init();//Gauge Init
 	hal_power_gauge_glf70302_get_battery_level(); //Read the battery level after powering on
 	battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
-	ss_set_battery(&ss, battery_info.soc);
+	ss_set_battery(battery_info.soc);
 #endif
 #if AMP_AW88166_ENABLE
 	hal_amp_aw88166_init(); // Init AMP
@@ -141,7 +140,7 @@ void Init_I2C_Component(void)
 	hal_power_charger_bq25618_get_charging_status();
 	if(charger_status.vbus_good)
 	{
-		ss_set_charging(&ss, true);
+		ss_set_charging(true);
 	}
 #endif
 
@@ -320,12 +319,12 @@ void I2C_Task(void *pvParameters)
     				if(charger_status.vbus_good)
     				{
     					led_post_event(LED_EVT_CHARGING);
-    					ss_set_charging(&ss, true);
+    					ss_set_charging(true);
     				}
     				else
     				{
     					led_post_event(LED_EVT_ALL_OFF);
-    					ss_set_charging(&ss, false);
+    					ss_set_charging(false);
     				}
     				if(charger_status.chg_stat==0x11)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
     				{
@@ -353,7 +352,7 @@ void I2C_Task(void *pvParameters)
             	glf70302_polling(&battery_info);
             	battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
                 PRINTF("[Battery] SOC: %d%%\r\n",battery_info.soc);
-                if(battery_info.soc>=99 && ss_is_charging(&ss))
+                if(battery_info.soc>=99 && ss_is_charging())
                 {
                 	battery_state = BATTERY_STATE_FULL;
                 	led_post_event(LED_EVT_FULL_CHARGERED);
@@ -367,7 +366,7 @@ void I2C_Task(void *pvParameters)
                 {
                 	battery_state = BATTERY_STATE_NORMAL;
                 }
-            	ss_set_battery(&ss, battery_info.soc);
+            	ss_set_battery(battery_info.soc);
 #endif
                 xSemaphoreGive(i2c_mutex);
             }
@@ -470,7 +469,7 @@ void I2C_Task(void *pvParameters)
         //Confirm the final status
         if(led_status==0) // When other events are executed, causing the LED to turn off
         {
-        	if(ss_is_charging(&ss))
+        	if(ss_is_charging())
         	{
             	if(battery_state==BATTERY_STATE_FULL)
             		led_post_event(LED_EVT_FULL_CHARGERED);
