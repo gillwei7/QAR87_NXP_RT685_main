@@ -35,9 +35,6 @@ static uint8_t       sChg5Clicks = 0;         /* 視窗內的短按次數 */
 static TickType_t    sChg5WindowStart = 0;    /* 視窗開始 Tick */
 
 
-
-extern volatile SystemStatus ss;
-
 /* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
 static inline void delay_ms(uint32_t ms)
 {
@@ -201,7 +198,7 @@ void button_task(void *pvParameters)
             {
             	btn_dbl_pending = false;
 				PRINTF("[Button] Short Press detected.\r\n");
-				if(!ss_is_charging(&ss))
+				if(!ss_is_charging())
 				{
 					PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
 					uint8_t v = SHORT_PRESS_HEX_VALUE;
@@ -256,7 +253,7 @@ void button_task(void *pvParameters)
 
                 /* 回報 FunKey 長按（按住版），沿用既有 LONG_PRESS_HEX_VALUE */
                 PRINTF("[Button] Long Press (hold >=%ums) detected.\r\n", (unsigned)BTN_HOLD_MS);
-				if(!ss_is_charging(&ss))
+				if(!ss_is_charging())
 				{
 					PRINTF("[Button] Long Press (hold) detected. Sending 0x%02X\r\n",
 						   LONG_PRESS_HEX_VALUE);
