@@ -8,6 +8,7 @@
 #include "button_handler.h"
 #include "i2c_component_handler.h"
 #include "spi_handler.h"
+#include "system_status.h"
 
 /* ===== external SPI handlers ===== */
 extern QueueHandle_t      spi_request_queue;
@@ -28,6 +29,14 @@ static TimerHandle_t sBtnDblTimer    = NULL;   /* FunKey only */
 /* [Funkey Hold] FunKey 按住不放 1 秒觸發的單次定時器 */
 static TimerHandle_t sBtnHoldTimer = NULL;
 
+/* === [Funkey charging 5clicks] 充電模式 6 秒內 5 下的狀態 === */
+static TimerHandle_t sChg5Timer = NULL;      /* 6 秒視窗定時器（單次） */
+static uint8_t       sChg5Clicks = 0;         /* 視窗內的短按次數 */
+static TickType_t    sChg5WindowStart = 0;    /* 視窗開始 Tick */
+
+
+
+extern volatile SystemStatus ss;
 
 /* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
 static inline void delay_ms(uint32_t ms)
@@ -99,6 +108,14 @@ static void vBtnHoldTimerCb(TimerHandle_t xTimer)
     }
 }
 
+/* === [Funkey charging 5clicks] 視窗到期回呼：重置狀態，避免「卡住」 === */
+static void vChg5TimerCb(TimerHandle_t xTimer)
+{
+    sChg5Clicks = 0;
+    sChg5WindowStart = 0;
+    PRINTF("[Button] Charging mode: 5-click 6s window expired -> reset.\r\n");
+}
+
 /**
  * @brief Unified button_key task (FunKey + PowerKey)
  * @details 按鍵處理任務（生產者）：
@@ -132,6 +149,16 @@ void button_task(void *pvParameters)
                                  NULL,
                                  vBtnHoldTimerCb);
     configASSERT(sBtnHoldTimer);
+
+
+    /* === [Funkey charging 5clicks] 充電模式 6 秒視窗定時器 === */
+    sChg5Timer = xTimerCreate("chg_5click_window",
+                              pdMS_TO_TICKS(BTN_5TIMES_IN_LIMIT), /* 6 秒 */
+                              pdFALSE,
+                              NULL,
+                              vChg5TimerCb);
+    configASSERT(sChg5Timer);
+
 
     /* -------- FunKey state -------- */
     uint8_t    btn_stable_level      = btn_raw_read();
@@ -172,12 +199,46 @@ void button_task(void *pvParameters)
         {
             if (btn_dbl_pending && !btn_is_pressed)
             {
-                btn_dbl_pending = false;
-                PRINTF("[Button] Short Press detected.\r\n");
-                PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
-                uint8_t v = SHORT_PRESS_HEX_VALUE;
-                (void)xQueueSend(spi_request_queue, &v, 0);
-                /* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
+            	btn_dbl_pending = false;
+				PRINTF("[Button] Short Press detected.\r\n");
+				if(!ss_is_charging(&ss))
+				{
+					PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
+					uint8_t v = SHORT_PRESS_HEX_VALUE;
+					(void)xQueueSend(spi_request_queue, &v, 0);
+				}
+				else
+				{
+		            /* === [Funkey charging 5clicks] 充電模式下的「6 秒內按五下」計數（只在此區塊處理） === */
+		            TickType_t now = xTaskGetTickCount();
+		            const TickType_t windowTicks = pdMS_TO_TICKS(BTN_5TIMES_IN_LIMIT);
+
+		            /* 若尚未開窗或視窗已過期，重新開窗並清零計數 */
+		            if (sChg5WindowStart == 0 || (now - sChg5WindowStart) > windowTicks)
+		            {
+		                sChg5WindowStart = now;
+		                sChg5Clicks = 0;
+		                PRINTF("[Button] Charging mode: 5-click window started (6s).\r\n");
+		            }
+
+		            /* 視窗內累計這次短按 */
+		            sChg5Clicks++;
+		            PRINTF("[Button] Charging mode: short press count = %u within 6s.\r\n",
+		                   (unsigned)sChg5Clicks);
+
+		            if (sChg5Clicks >= 5)
+		            {
+		                /* === [Funkey charging 5clicks] 達標（6 秒內 5 下） -> 觸發事件，且不送 SPI === */
+		                PRINTF("[Button] Charging mode: 5 clicks within 6s detected -> trigger event.\r\n");
+
+		                /* ToDo: BT Discover*/
+
+		                /* 觸發後重置視窗與計數，避免卡住 */
+		                sChg5Clicks = 0;
+		                sChg5WindowStart = 0;
+		            }
+				}
+				/* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
             }
             /* 若此時已經在第二次按壓中（btn_is_pressed==true），不回報短按，
              * 等放開時再判斷是雙擊或長按（第二次按壓可能超過長按門檻）。 */
@@ -195,10 +256,13 @@ void button_task(void *pvParameters)
 
                 /* 回報 FunKey 長按（按住版），沿用既有 LONG_PRESS_HEX_VALUE */
                 PRINTF("[Button] Long Press (hold >=%ums) detected.\r\n", (unsigned)BTN_HOLD_MS);
-                PRINTF("[Button] Long Press (hold) detected. Sending 0x%02X\r\n",
-                       LONG_PRESS_HEX_VALUE);
-                uint8_t v = LONG_PRESS_HEX_VALUE;
-                (void)xQueueSend(spi_request_queue, &v, 0);
+				if(!ss_is_charging(&ss))
+				{
+					PRINTF("[Button] Long Press (hold) detected. Sending 0x%02X\r\n",
+						   LONG_PRESS_HEX_VALUE);
+					uint8_t v = LONG_PRESS_HEX_VALUE;
+					(void)xQueueSend(spi_request_queue, &v, 0);
+				}
 
                 /* 如需持續按住的重複事件，可改為週期性 Timer；目前為單次觸發。 */
             }
