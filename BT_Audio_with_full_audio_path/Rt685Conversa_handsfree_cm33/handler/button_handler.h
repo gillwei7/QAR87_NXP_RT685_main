@@ -25,6 +25,7 @@
 
 /* === Button behavior parameters === */
 #define BTN_5TIMES_IN_LIMIT   6000U   //Click five times within a time limit
+#define BTN_HOLD_MS 		  1000U
 #define BTN_ACTIVE_LEVEL          0   // active-low: pressed = 0, released = 1; if the opposite is true, it will be 1
 #define BTN_DEBOUNCE_MS          30
 #define BTN_LONG_MS            1000
