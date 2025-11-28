@@ -447,7 +447,7 @@ static void execute_active_spi_transmission(uint8_t hex_value)
 
         // NEW: 用 Queue 等待 ISR 通知「一個 frame 傳完」
         transfer_evt_t tevt;
-        if (xQueueReceive(transfer_evt_queue, &tevt, portMAX_DELAY) != pdPASS) {
+        if (xQueueReceive(transfer_evt_queue, &tevt, 500) != pdPASS) {
             // 若 queue 接收失敗，直接跳出（防守性處理）
             break;
         }
