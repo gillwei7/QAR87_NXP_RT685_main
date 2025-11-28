@@ -944,6 +944,9 @@ void Manager_Task(void *pvParameters)
 				WorkStateDeInit(DeviceWorkStatePre,  0);
 				DeviceWorkStateCur = WorkStateInit  (DeviceWorkStateCur,  0);
 
+				// Send SPI command to SoC
+				send_state_to_soc();
+
 				PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 				WorkStateIsChanged=0;
 			}
