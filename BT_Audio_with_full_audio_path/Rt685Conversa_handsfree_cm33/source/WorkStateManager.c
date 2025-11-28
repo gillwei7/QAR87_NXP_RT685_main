@@ -702,7 +702,7 @@ void Manager_Task(void *pvParameters)
 						RequestToGetIntoVideoAI=0;
 						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
-					if(RequestToGetOutofTranslation)
+					if(RequestToGetOutofVideoAI)
 					{
 						if(DeviceWorkStateCur==WorkState_VideoAi)
 						{
