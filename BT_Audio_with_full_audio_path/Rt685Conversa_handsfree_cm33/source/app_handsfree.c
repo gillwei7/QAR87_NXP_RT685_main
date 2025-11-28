@@ -44,6 +44,7 @@
 #include "i2c_component_handler.h"
 #include "hal_common.h"
 #include "app_connect.h"
+#include "system_status.h"
 #endif
 
 #define Manager_TASK_PRIORITY				2			//this is low
@@ -61,6 +62,7 @@ static uint16_t connection_timer_count = 0;
 #if UsingQAR87Board == 1
 extern TaskHandle_t       sI2CTaskHandle  ;
 #endif
+
 
 hfp_hf_get_config hfp_hf_config = {
     .bt_hfp_hf_vgs             = APP_HFP_HF_INITIAL_VGS_GAIN,
@@ -182,6 +184,9 @@ static void connected(struct bt_conn *conn, int err)
         return;
     }
     conn_rider_phone = conn;
+
+//    ss_bt_on();
+    
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
     bt_conn_get_info(conn, &info);
    // app_auto_connect_save_addr(info.br.dst);
@@ -196,6 +201,7 @@ static void disconnected(struct bt_conn *conn)
     {
         conn_rider_phone = NULL;
     }
+//    ss_bt_off();
 }
 
 static void service(struct bt_conn *conn, uint32_t value)
