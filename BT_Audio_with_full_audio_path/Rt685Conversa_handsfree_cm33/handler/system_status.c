@@ -169,6 +169,9 @@ void send_music_status_to_soc(void)
 {
 	// Todo
 	// To make novatek open music ui or open home ui
+
+	//send_spi_request(MUSIC_START_HEX_VALUE); //music start
+	//send_spi_request(MUSIC_STOP_HEX_VALUE); //music stop
 }
 
 void ss_set_camera_status(uint8_t status)

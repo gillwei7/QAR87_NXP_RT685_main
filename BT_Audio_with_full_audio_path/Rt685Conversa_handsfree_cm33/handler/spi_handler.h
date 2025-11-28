@@ -37,6 +37,8 @@
 #define FORWARD_SLIDE_HEX_VALUE 0x14
 #define BACK_SLIDE_HEX_VALUE 0x15
 #define USAGE_STATE_HEX_VALUE 0x30
+#define MUSIC_START_HEX_VALUE 0x40
+#define MUSIC_STOP_HEX_VALUE  0x41
 
 void spi_handler_task(void *pvParameters);
 void send_spi_request(uint8_t hex_val);
