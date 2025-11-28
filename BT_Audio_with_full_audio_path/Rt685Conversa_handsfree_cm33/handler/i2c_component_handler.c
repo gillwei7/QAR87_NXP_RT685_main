@@ -37,6 +37,8 @@ extern uint8_t Novatek_boot_completed;
 
 battery_state_t battery_state = BATTERY_STATE_NORMAL;
 
+extern uint32_t s_bq256xx_iindpm_target_ua;
+
 static inline uint8_t battery_soc_percent_mv(uint32_t mv)
 {
     // 邊界保護
@@ -309,6 +311,7 @@ void I2C_Task(void *pvParameters)
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
 #if CHG_BQ25618_ENABLE
+            	(void)bq256xx_set_iindpm(s_bq256xx_iindpm_target_ua);
     			if (bq256xx_poll_status(&charger_status) == kStatus_Success) {
     				PRINTF("[Charger] Power Good: %s\n", charger_status.power_good ? "Yes" : "No");
     				PRINTF("[Charger] VBUS Status: 0x%02X\n", charger_status.vbus_stat);
@@ -330,7 +333,14 @@ void I2C_Task(void *pvParameters)
     				{
     					battery_state = BATTERY_STATE_FULL;
     				}
-
+    				/*
+    			    uint8_t val;
+    			    for (uint8_t reg = 0x00; reg <= 0x0A; reg++)
+    			    {
+    			    	(void)bq256xx_read_reg(reg, &val, 1);
+    			    	 PRINTF("[Debug][bq256xx] REG %u = 0x%02X\r\n", reg, val);
+    			    }
+    				 */
     			} else {
     				PRINTF("[Charger] Failed to read charger status.\n");
     			}

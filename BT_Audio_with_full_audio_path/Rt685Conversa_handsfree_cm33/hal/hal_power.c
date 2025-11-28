@@ -12,6 +12,8 @@
 volatile bq256xx_status_t charger_status;
 volatile BatteryInfo battery_info;
 
+uint32_t s_bq256xx_iindpm_target_ua = 0;
+
 void hal_power_charger_bq25618_init(void)
 {
 #if CHG_BQ25618_ENABLE
@@ -34,6 +36,15 @@ void hal_power_charger_bq25618_init(void)
 			PRINTF("[Charger] bq256xx initialized.OK \n");
 		}
 		bq256xx_write_reg(0x03, 0x31); // IPRECHG = 60mA, ITERM = 20mA
+		s_bq256xx_iindpm_target_ua = charger_cfg.iindpm_ua;
+		/*
+	    uint8_t val;
+	    for (uint8_t reg = 0x00; reg <= 0x0A; reg++)
+	    {
+	    	(void)bq256xx_read_reg(reg, &val, 1);
+	    	 PRINTF("[Debug][bq256xx] REG %u = 0x%02X\r\n", reg, val);
+	    }
+	    */
 	/* ============== Charger Init End==============*/
 #endif
 }
