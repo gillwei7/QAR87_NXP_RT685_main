@@ -945,6 +945,7 @@ void Manager_Task(void *pvParameters)
 				DeviceWorkStateCur = WorkStateInit  (DeviceWorkStateCur,  0);
 
 				// Send SPI command to SoC
+				// If it is placed between deinit and init , it will cause SPI failure
 				send_state_to_soc();
 
 				PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);

@@ -2027,6 +2027,9 @@ void Deinit_GeneralAudio(int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm
 		}
 
 	(void)BOARD_SwitchAudioFreq(0U,0);
+
+	// During the deinit process, the SPI IRQ is disabled and needs to be re-enable
+	EnableIRQ(SOC_SPI_SLAVE_IRQ);
 }
 
 void DeInitAudioInterface_AudioIoDebug(int Opt)
