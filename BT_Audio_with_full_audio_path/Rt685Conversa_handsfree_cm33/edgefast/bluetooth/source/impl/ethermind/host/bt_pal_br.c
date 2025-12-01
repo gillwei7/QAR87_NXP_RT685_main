@@ -915,8 +915,20 @@ int bt_br_init(void)
 		return -ENOBUFS;
 	}
 
+	//B36932, change local BT device Name to QAR88 + Local BT device Address
+ 	//bt_addr_t bt_addr_temp[6];
+	bt_addr_le_t bt_addr_temp[6];
+	size_t count_temp = 4;
+	uint8_t BTName[200];
+	bt_id_get(bt_addr_temp, &count_temp);
+	snprintf(BTName, sizeof(BTName), "QAR87_88n_%02X%02X",bt_addr_temp[0].a.val[1],bt_addr_temp[0].a.val[0] );
+
 	name_cp = net_buf_add(buf, sizeof(*name_cp));
-	strncpy((char *)name_cp->local_name, CONFIG_BT_DEVICE_NAME, sizeof(name_cp->local_name));
+	strncpy((char *)name_cp->local_name, BTName, sizeof(name_cp->local_name));
+
+
+	//name_cp = net_buf_add(buf, sizeof(*name_cp));
+	//strncpy((char *)name_cp->local_name, CONFIG_BT_DEVICE_NAME, sizeof(name_cp->local_name));
 
 	err = bt_hci_cmd_send_sync(BT_HCI_OP_WRITE_LOCAL_NAME, buf, NULL);
 	if (err) {
