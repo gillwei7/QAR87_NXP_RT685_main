@@ -59,6 +59,7 @@ extern S16 AudioOneFrameBuf_48KHz_14 [AudioFrameSizeInSamplePerCh_48KHz];
 extern S16 AudioOneFrameBuf_48KHz_15 [AudioFrameSizeInSamplePerCh_48KHz];
 extern S16 AudioOneFrameBuf_48KHz_16 [AudioFrameSizeInSamplePerCh_48KHz];
 
+extern ConversaTuningCfg_t CurrentConversaTuningCfg;
 
 extern void DspMainAudioFlowProcOneFrame_AudioIoDbg(int OptionWord);
 extern void DspMainAudioFlowProcOneFrame_VideoRecording(int OptionWord);

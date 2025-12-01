@@ -50,6 +50,12 @@
 
 //tuning parameter file
 #include "conversaParam7_3_1_q1bcMic034_Fb128_16kHz.h"
+#include "conversaParam7_5_0_q2bcMic034_Fb128_fbfFront_16kHz.h"
+
+#include "conversaParam_virtual2Dmic32k_smh.h"	//this one is included only as an example that shows more tuning cfg files can be added --- later to be removed
+#include "conversaParam_virtual4Dmic32k_smh.h"	//this one is included only as an example that shows more tuning cfg files can be added --- later to be removed
+
+
 
 // Se model small for 16k
 #include "ml_i16xi8_GDFT128-128-768_16kHz.h"			// Conversa Speech enhancement Model small at 16Khz
@@ -244,8 +250,15 @@ void InitConversaBufPtr(void)
 	NlpOut32BitBuf=		  AudioOneFrameBuf_48KHz_08;
 }
 
+void DeInitConversa(void)
+{
+	if (conversaPluginParams.memory_base_address != PL_NULL)
+	{
+		free(conversaPluginParams.memory_base_address);
+	}
+}
 //status_t initCreateConversa( AUDIO_conversa_st* p_definitionConversa )
-void InitConversa(void)
+void InitConversa(ConversaTuningCfg_t TuningCfg, int NeedToPrintInfo)
 {
 
 	NXP_STATUS retStatusConversa = OK;
@@ -259,6 +272,7 @@ void InitConversa(void)
 
 	conversa_memory_req_t conversaMemReq; // Memory size (Cache and non cached) required by conversa in bytes
 
+	if(NeedToPrintInfo)
 	PRINTF("\n    Conversa library:\r\n");
 
 	/*
@@ -275,8 +289,11 @@ void InitConversa(void)
 	conversaPluginParams.memory_size_bytes 		  = conversaMemReq.NonCritical_mem;		// set required memory that can be cached or non cached
 	conversaPluginParams.critical_memory_size_bytes = conversaMemReq.Critical_mem;    // set required non cached memory
 
+	if(NeedToPrintInfo)
+	{
 	PRINTF("\t-Conversa memory size required: %i bytes\r\n", conversaMemReq.NonCritical_mem);
 	PRINTF("\t-Conversa critical memory size required: %i bytes\r\n", conversaMemReq.Critical_mem);
+	}
 
 	/* Reserved required memory for Conversa instance */
 	conversaPluginParams.memory_base_address = malloc(conversaPluginParams.memory_size_bytes);   // Get Conversa memory base address from malloc function
@@ -284,6 +301,7 @@ void InitConversa(void)
 	/* Check Convera instance memory allocation pass */
 	if (conversaPluginParams.memory_base_address != PL_NULL)				// if Conversa memory allocation pass
 	{
+		if(NeedToPrintInfo)
 		PRINTF("\t-Conversa memory allocation: PASS, structure at adr 0x%8.8X\r\n", conversaPluginParams.memory_base_address);
 	}
 	else																						// else if Conversa memory allocation fail
@@ -293,6 +311,7 @@ void InitConversa(void)
 		return;
 	}
 
+	if(NeedToPrintInfo)
 	PRINTF("\t-Conversa critical memory size required: %i bytes\r\n", conversaPluginParams.critical_memory_size_bytes);
 
 	/* Reserved required memory for Conversa instance */
@@ -301,6 +320,7 @@ void InitConversa(void)
 	/* Check Convera instance memory allocation pass */
 	if (conversaPluginParams.critical_memory_base_address != PL_NULL)				// if Conversa memory allocation pass
 	{
+		if(NeedToPrintInfo)
 		PRINTF("\t-Conversa critical memory allocation: PASS, structure at adr 0x%8.8X\r\n", conversaPluginParams.critical_memory_base_address);
 	}
 	else																						// else if Conversa memory allocation fail
@@ -333,6 +353,7 @@ void InitConversa(void)
 	}
 	else
 	{
+		if(NeedToPrintInfo)
 		PRINTF("\t-Conversa version: %i.%i.%i \r\n",conversaVersionMajor,conversaVersionMinor,conversaVersionPatch);
 	}
 
@@ -353,18 +374,33 @@ void InitConversa(void)
 
 	s_conversaControlBlockAddress = (PL_UINT32) NxpConversa_Plugin_GetControlDataAddress( &conversaPluginParams );	// Get the the Conversa parameter structure address. This address must be in non cacheable aera
 
+	if(NeedToPrintInfo)
 	PRINTF("\t-Conversa control data address ( to be used for the tuning tool 'Control Addr. (hex)' ) = 0x%x\r\n", &s_conversaControlBlockAddress);
 	if (s_conversaControlBlockAddress < RT600_CACHE_MEM_START_ADR)
 	{
 		PRINTF("\t-FAIL - DSP process init: True Conversa control data address = 0x%x is located in a memory cached section\r\n", s_conversaControlBlockAddress); // ensure to provide a section called "NonCacheable" memory section in the linker script. Conversa library is using it.
-		//return;
+		return;
 	}
 
 	/******************************/
 	/* UPDATE CONVERSA PARAMETERS */
 	/* 	 Load conversa parameters from .c configuration file
 	 */
-	const conversa_parameter_config_t* 		p_address=&conversaParam7_3_1_q1bcMic034_Fb128_16kHz;
+	const conversa_parameter_config_t* 		p_address;
+	switch((int)TuningCfg)
+	{
+		case (int)ConversaTuningCfg_HfpVoiceCall:
+			p_address=&conversaParam7_3_1_q1bcMic034_Fb128_16kHz;
+		break;
+		case (int)ConversaTuningCfg_NearEnd:
+			p_address=&conversaParam7_3_1_q1bcMic034_Fb128_16kHz;
+			//just for example //p_address=&conversaParam_virtual2Dmic32k_smh;
+		break;
+		case (int)ConversaTuningCfg_FarEnd:
+			p_address=&conversaParam7_5_0_q2bcMic034_Fb128_fbfFront_16kHz;
+		break;
+	}
+
 	retStatusConversa = NxpConversa_Plugin_SetParameters( &conversaPluginParams,
 														  (const char*)      p_address->info_str,	   	// string information associated to the tuning file
 														  sizeof            (p_address->info_str),	   				// size of the string information
@@ -375,13 +411,9 @@ void InitConversa(void)
 		PRINTF("\tFAIL - DSP process init: Conversa failed to set parameter files (error code = %i)\r\n", retStatusConversa);
 		return;
 	}
-	#if 0
-		PRINTF("\DMIC Interface:\r\n");
-		PRINTF("DMIC0 - PDM_DATA01(PIO2_20)- DMIC SEL = low\r\n");
-		PRINTF("DMIC1 - PDM_DATA01(PIO2_20)- DMIC SEL = high\r\n");
-		PRINTF("DMIC2 - PDM_DATA23(PIO2_21)- DMIC SEL = low\r\n");
-		PRINTF("DMIC3 - PDM_DATA23(PIO2_21)- DMIC SEL = high\r\n");
-	#endif
+
+	CurrentConversaTuningCfg=TuningCfg;
+
 	/* At this step Conversa instance is created */
 	InitConversaBufPtr();
 }
@@ -477,18 +509,18 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 				#if UsePrimitiveSimpleSRC==1
 					for(int i=0;i<AudioFrameSizeInSamplePerCh_16KHz/2;i++)
 					{
-						BtRxInBuf[2*i+0]=PtrVarBlockSharedByDspAndMcu->BTRxInAudio[i];
-						BtRxInBuf[2*i+1]=PtrVarBlockSharedByDspAndMcu->BTRxInAudio[i];
+						BtRxInBuf[2*i+0]=PtrVarBlockSharedByDspAndMcu->AudioBufInFrBt[i];
+						BtRxInBuf[2*i+1]=PtrVarBlockSharedByDspAndMcu->AudioBufInFrBt[i];
 					}
 				#else
 					//int ProcCadenceAsrc(TCadenceSRC *SRCPtr, int *AudioS32DstPtr, int *AudioS32SrcPtr, int InSampleNum, int *OutputSampleNum)
-					ProcCadenceAsrc(&SRC_ConversaRx1,    BtRxInBuf, (S32 *)PtrVarBlockSharedByDspAndMcu->BTRxInAudio,  AudioFrameSizeInSamplePerCh_16KHz/2,    &OutSampleNum  );
+					ProcCadenceAsrc(&SRC_ConversaRx1,    BtRxInBuf, (S32 *)PtrVarBlockSharedByDspAndMcu->AudioBufInFrBt,  AudioFrameSizeInSamplePerCh_16KHz/2,    &OutSampleNum  );
 				#endif
 
 				vec_int2float((float *)BtRxInBuf, (const int *)BtRxInBuf,	                            -31,  AudioFrameSizeInSamplePerCh_16KHz);
 			}else if(PtrVarBlockSharedByDspAndMcu->BtHfpFs==16000)
 			{
-				vec_int2float((float *)BtRxInBuf, (const int *)PtrVarBlockSharedByDspAndMcu->BTRxInAudio,	-31,  AudioFrameSizeInSamplePerCh_16KHz);
+				vec_int2float((float *)BtRxInBuf, (const int *)PtrVarBlockSharedByDspAndMcu->AudioBufInFrBt,	-31,  AudioFrameSizeInSamplePerCh_16KHz);
 			}else
 			{
 				//should never come here
@@ -677,17 +709,17 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 		#endif
 	#endif
 
-	#if 1	//folding --- step 4: put samples to BT Up cir buffer, and convert tx samples from float to int, and SpkOtBufL/R to PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL/R
+	#if 1	//folding --- step 4: put samples to BT Up cir buffer, and convert tx samples from float to int, and SpkOtBufL/R to PtrVarBlockSharedByDspAndMcu->I2SBufOtToAmpL/R
 
 		//stream out AMP I2S audio
 		//use BtRxInBuf as a temp --- content in BtRxInBuf is already useless after calling conversa main processing
 		vec_float2int((int *)BtRxInBuf, (const float *)SpkOtBufL,	-31,  AudioFrameSizeInSamplePerCh_16KHz);
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
-			PtrVarBlockSharedByDspAndMcu->I2SLineOtBufL[i]=((BtRxInBuf[i])>>16);
+			PtrVarBlockSharedByDspAndMcu->I2SBufOtToAmpL[i]=((BtRxInBuf[i])>>16);
 
 		vec_float2int((int *)BtRxInBuf, (const float *)SpkOtBufR,	-31,  AudioFrameSizeInSamplePerCh_16KHz);
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
-			PtrVarBlockSharedByDspAndMcu->I2SLineOtBufR[i]=((BtRxInBuf[i])>>16);
+			PtrVarBlockSharedByDspAndMcu->I2SBufOtToAmpR[i]=((BtRxInBuf[i])>>16);
 
 
 		if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HfpCall)
@@ -700,15 +732,15 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 				#if UsePrimitiveSimpleSRC==1
 					for(int i=0;i<AudioFrameSizeInSamplePerCh_16KHz/2;i++)
 					{
-						PtrVarBlockSharedByDspAndMcu->BTTxOtAudio[i]=BtTxOtBuf[2*i+0];
+						PtrVarBlockSharedByDspAndMcu->AudioBufOtToBt[i]=BtTxOtBuf[2*i+0];
 					}
 				#else
 					//int ProcCadenceAsrc(TCadenceSRC *SRCPtr, int *AudioS32DstPtr, int *AudioS32SrcPtr, int InSampleNum, int *OutputSampleNum)
-					ProcCadenceAsrc( &SRC_ConversaTx1,  (S32 *)PtrVarBlockSharedByDspAndMcu->BTTxOtAudio, BtRxInBuf,  AudioFrameSizeInSamplePerCh_16KHz,  &OutSampleNum);
+					ProcCadenceAsrc( &SRC_ConversaTx1,  (S32 *)PtrVarBlockSharedByDspAndMcu->AudioBufOtToBt, BtRxInBuf,  AudioFrameSizeInSamplePerCh_16KHz,  &OutSampleNum);
 				#endif
 			}else if(PtrVarBlockSharedByDspAndMcu->BtHfpFs==16000)
 			{
-				vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->BTTxOtAudio, (const float *)BtTxOtBuf,	-31,  AudioFrameSizeInSamplePerCh_16KHz);
+				vec_float2int((int *)PtrVarBlockSharedByDspAndMcu->AudioBufOtToBt, (const float *)BtTxOtBuf,	-31,  AudioFrameSizeInSamplePerCh_16KHz);
 			}else
 			{
 				//should never come here
@@ -717,7 +749,7 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 		}else if(OptionWord==MuEvtMcuToDsp_AudioFrmIsReady_HomeVitStandBy)
 		{
 			//in this case, only conversa Tx for VIT is really working, no need to put audio to BT, set Tx audio to 0
-			memset((S32 *)PtrVarBlockSharedByDspAndMcu->BTTxOtAudio,0,sizeof(PtrVarBlockSharedByDspAndMcu->BTTxOtAudio));
+			memset((S32 *)PtrVarBlockSharedByDspAndMcu->AudioBufOtToBt,0,sizeof(PtrVarBlockSharedByDspAndMcu->AudioBufOtToBt));
 		}else
 		{
 			//should never come here
@@ -739,7 +771,7 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 
 		vec_float2int((int *)TmpBuf_PromptSound,    (const float *)TmpBuf_PromptSound,	   -31,  AudioFrameSizeInSamplePerCh_16KHz);
 
-
+		#if 1	//later to be closed
 		if(ASR_WavPulse==ASR_WavPulse_WakeWordDetected)
 		{
 			ConversaTxOut32BitBuf[0]=0x7fff0000;
@@ -749,6 +781,7 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 			AecOut32BitBuf[0]=0x7fff0000;
 			ASR_WavPulse=ASR_WavPulse_NothingDetected;
 		}
+		#endif
 
 		//fill USB up streaming buffer --- 8 channels, all 16KHz, 32bit
 		for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)

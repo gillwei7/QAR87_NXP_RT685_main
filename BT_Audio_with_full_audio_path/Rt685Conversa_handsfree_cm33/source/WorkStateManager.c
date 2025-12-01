@@ -65,9 +65,7 @@ int RequestToGetOutofHome=0;
 TDeviceWorkState DeviceWorkStateCur;
 TDeviceWorkState DeviceWorkStatePre;
 
-#if UseEventToControlBtHfp==1
 TBtHfpRequest BtHfpRequest;
-#endif
 
 
 int BtA2dpFs_ProvidedFromBtStack;
@@ -164,22 +162,18 @@ int WorkStateInit(int WhichState, U32 Opt)
 	switch(WhichState)
 	{
 		case WorkState_HfpCall_Pre:
-			InitAudioInterface_HfpCall(0, 16000, 16);
+			InitAudioInterface_HfpCall(0);
 			PRINTF_M("    Mcu: WorkState_HfpCall Init is done\r\n");
 			return(WorkState_HfpCall);
 			break;
 		case WorkState_HomeVitStandby_Pre:
-			InitAudioInterface_HomeVitStandby(AmpFc1Fc3);//in case PDM and Smart amp are required only in HomeStandby mode
+			InitAudioInterface_HomeVitStandby(0);
 			PRINTF_M("    Mcu: WorkState_HomeVitStandby Init is done\r\n");
 			return(WorkState_HomeVitStandby);
 			break;
 		#if EnableWorkState_AudioIoDbg==1
 			case WorkState_AudioIoDbg_Pre:
-				#if UsingQAR87Board == 1
-					InitAudioInterface_AudioIoDebug(BtPcmFc2Fc4_AmpFc1Fc3);//to enable FC5,6 to connect with NT98532
-				#else	
-					InitAudioInterface_AudioIoDebug(BtPcmFc5Fc2_CodecFc1Fc3);
-				#endif
+				InitAudioInterface_AudioIoDebug(0);
 				PRINTF_M("    Mcu: WorkState_AudioIoDbg Init is done\r\n");
 				return(WorkState_AudioIoDbg);
 				break;
@@ -245,6 +239,7 @@ void VocEvtProc_HfpCall(U32 VoiceCmd)
 		case ASR_VoiceCommand_HangUpThePhone:
 			break;
 		case ASR_VoiceCommand_TakePhoto:
+			PRINTF_M("VoiceCmd: take photo\r\n");
 			break;
 		default:
 			break;
@@ -252,14 +247,13 @@ void VocEvtProc_HfpCall(U32 VoiceCmd)
 }
 void AppEvtProc_HfpCall()
 {
-	#if UseEventToControlBtHfp==1
 		BaseType_t	PriorityTaskWoken = pdFALSE;
 		switch(BtHfpRequest)
 		{
 			case HfpRequest_AudioSetup:
 				break;
 			case HfpRequest_AudioStart:
-				//do nothing, here is actually to make hfp side wait till hfp audio init is done
+			sco_audio_start();
 				xEventGroupSetBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_AudioStart);
 				break;
 			case HfpRequest_AudioStop:
@@ -274,7 +268,6 @@ void AppEvtProc_HfpCall()
 				break;
 		}
 		BtHfpRequest=HfpRequest_None;
-	#endif
 }
 void VocEvtProc_HomeVitStandby(U32 VoiceCmd)
 {
@@ -390,7 +383,8 @@ void VocEvtProc_MediaPlayer(U32 VoiceCmd)
 }
 void AppEvtProc_MediaPlayer()
 {
-
+	//if a change volume event is detected, change master volume here, then DSP side will follow
+	VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;
 }
 void VocEvtProc_MusicPlayer(U32 VoiceCmd)
 {
@@ -427,6 +421,21 @@ void VocEvtProc_MusicPlayer(U32 VoiceCmd)
 }
 void AppEvtProc_MusicPlayer()
 {
+	//if a change volume event is detected, change master volume here, then DSP side will follow
+
+	static int TstCnt=0;
+
+	//close this ++ to have stable master volume
+	TstCnt++;		//this is just a test to watch mater volume changes have effect (on the UAC up streaming channel 1 2)
+
+	if(TstCnt%600 ==1)
+	{
+		VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.199f;
+	}
+	if(TstCnt%600 ==301)
+	{
+		VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;
+	}
 
 }
 void VocEvtProc_Translation(U32 VoiceCmd)
@@ -545,6 +554,8 @@ void Manager_Task(void *pvParameters)
 	AudioPortIsActive_PcmToBt=0;
 	AmpState=AmpState_UnConfigured;
 
+	VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;		//must set an initial value
+
 	while(1)
 	{
 		vTaskDelay(40);
@@ -573,8 +584,7 @@ void Manager_Task(void *pvParameters)
 			//check app events for switching work state
 			#if 1	//folding
 				//getting into/out of HFP
-				#if UseEventToControlBtHfp==1
-					if(RequestToGetIntoHfp)
+				if((RequestToGetIntoHfp)&&(DeviceWorkStateCur!=WorkState_HfpCall))
 					{
 						DeviceWorkStatePre=DeviceWorkStateCur;
 					DeviceWorkStateCur=WorkState_HfpCall_Pre;
@@ -583,6 +593,7 @@ void Manager_Task(void *pvParameters)
 						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 
+				//if((RequestToGetOutofHfp)&&(DeviceWorkStateCur==WorkState_HfpCall))
 					if(RequestToGetOutofHfp)
 					{
 					DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
@@ -591,7 +602,6 @@ void Manager_Task(void *pvParameters)
 						RequestToGetOutofHfp=0;
 						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
-				#endif
 
 				#if EnableWorkState_MusicPlayer==1
 					//getting into/out of A2dp
@@ -621,7 +631,7 @@ void Manager_Task(void *pvParameters)
 					}
 
 					#if 0
-						//this part is to check switching when A2dp BT is NOT added
+						//this part is to check switching according to the request from DSP side --- evk board button press makes the request
 						if((DeviceWorkStateCur!=WorkState_MusicPlayer)&&(VarBlockSharedByDspAndMcu.CurVoiceMenu==ASR_Menu_MusicPlayer))
 						{
 							DeviceWorkStatePre=DeviceWorkStateCur;

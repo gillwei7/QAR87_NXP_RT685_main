@@ -66,21 +66,58 @@ int main(void)
 
 /*
 
-shell commands:
+shell commands: ---- in UART
 
 bt connect_paired 1
 
+bt playopus 0
+bt playopus 1
 bt playopus 2
+bt playsbc 0
 bt playsbc 1
+bt playsbc 2
+
+
+
+shell commands: ---- in USB com
+
+//--- to play opus file ---
+a 0
+a 1
+a 2
+
+//--- to play sbc file ---
+b 0
+b 1
+b 2
 
 */
 
 /*
 
+Fc ports in this project:
 
 ToAMp: fc1 ToAmp, fc3 FrAMP  (fc1 clk share to fc3), fc1 is master, AMP is slave
-ToBt:  fc4 toBT, fc2 FrBT //B36932 seems incorrect, should be fc4 frBT, fc toBT//  (fc2 clk share to fc4), fc2 is slave, BT is master
+ToBt:  fc4 FrBT,  fc2 ToBT   (fc2 clk share to fc4), fc2 is slave, BT is master
 ToNvt: fc5 toNvt, fc6 FrNvt  (fc5 clk share to fc6), fc5 is master, NVT is slave
+
+*/
+
+
+
+
+/*
+
+know bug:
+
+play a2dp
+make a tel incoming call.
+Reject the call
+it goes back to a2dp play.
+but, the playing is broken. The printing info shows the sbc buffer goes less and less, while 1000 frame period is good --> DSP side is eating sbc too quickly????????  Later to find time to fix !!!
+
+
+
 
 
 */

@@ -305,37 +305,37 @@ void SetI2SBufferABSelect(int ToSetI2SAmp, int ToSetI2SNvt)
 
 		if(I2S1DmaTransferringIsUsingBufA)
 		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
-			I2SDmaInCh01Ptr=I2S1Rx0BufCh0And1Mixed_B;
+			I2SDmaInCh01Ptr=I2SRxFrAmpCh0And1Mixed_B;
 		}else
 		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
-			I2SDmaInCh01Ptr=I2S1Rx0BufCh0And1Mixed_A;
+			I2SDmaInCh01Ptr=I2SRxFrAmpCh0And1Mixed_A;
 		}
 		if(I2S3DmaTransferringIsUsingBufA)
 		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
-			I2SDmaOtCh01Ptr=I2S3Tx0BufCh0And1Mixed_B;
+			I2SDmaOtCh01Ptr=I2STxToAmpCh0And1Mixed_B;
 		}else
 		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
-			I2SDmaOtCh01Ptr=I2S3Tx0BufCh0And1Mixed_A;
+			I2SDmaOtCh01Ptr=I2STxToAmpCh0And1Mixed_A;
 		}
 	}
 	if(ToSetI2SNvt)
 	{
-		I2STxToNtDmaTransferringIsUsingBufA=GetI2STxToNtDmaTransferringIsUsingBufAOrB();
-		I2SRxFrNtDmaTransferringIsUsingBufA=GetI2SRxFrNtDmaTransferringIsUsingBufAOrB();
+		I2STxToNvtDmaTransferringIsUsingBufA=GetI2STxToNvtDmaTransferringIsUsingBufAOrB();
+		I2SRxFrNvtDmaTransferringIsUsingBufA=GetI2SRxFrNvtDmaTransferringIsUsingBufAOrB();
 
-		if(!I2STxToNtDmaTransferringIsUsingBufA)
+		if(I2STxToNvtDmaTransferringIsUsingBufA)
 		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
-			I2SDmaOtCh23Ptr=I2STxToNtCh0And1Mixed_A;
+			I2SDmaOtCh23Ptr=I2STxToNvtCh0And1Mixed_B;
 		}else
 		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
-			I2SDmaOtCh23Ptr=I2STxToNtCh0And1Mixed_B;
+			I2SDmaOtCh23Ptr=I2STxToNvtCh0And1Mixed_A;
 		}
-		if(!I2SRxFrNtDmaTransferringIsUsingBufA)
+		if(I2SRxFrNvtDmaTransferringIsUsingBufA)
 		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
-			I2SDmaInCh23Ptr=I2SRxFrNtCh0And1Mixed_A;
+			I2SDmaInCh23Ptr=I2SRxFrNvtCh0And1Mixed_B;
 		}else
 		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
-			I2SDmaInCh23Ptr=I2SRxFrNtCh0And1Mixed_B;
+			I2SDmaInCh23Ptr=I2SRxFrNvtCh0And1Mixed_A;
 		}
 	}
 }
@@ -539,8 +539,8 @@ void ProcessAudio_AfterAudioInputBufIsReady_HfpCall(void)
 		//actually, now we are not using the signal from AMP loopback
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
 		{
-			VarBlockSharedByDspAndMcu.I2SLineInBufL[i]=*I2SDmaInCh01Ptr++;
-			VarBlockSharedByDspAndMcu.I2SLineInBufR[i]=*I2SDmaInCh01Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrAmpL[i]=*I2SDmaInCh01Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrAmpR[i]=*I2SDmaInCh01Ptr++;
 		}
 	#endif
 
@@ -549,13 +549,13 @@ void ProcessAudio_AfterAudioInputBufIsReady_HfpCall(void)
 		{
 			#if 1
 				OSA_ENTER_CRITICAL();
-				//take audio samples out from BT Dn buffer --- put to BTRxInAudio, and then DSP side will take in and process
+				//take audio samples out from BT Dn buffer --- put to AudioBufInFrBt, and then DSP side will take in and process
 				if(CirAudioBuf_SpaceOccupiedInSamples_S16(&BTDnAudioBuf_S16)>=(AudioFrameSizeInSamplePerCh_16KHz/2))
 				{
 					//there are enough audio sample from BT down streaming
 					CirAudioBuf_ReadSamples_S16(&BTDnAudioBuf_S16, AudioFrameSizeInSamplePerCh_16KHz/2, TmpAudioS16Buf);
 					for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz/2;i++)
-						VarBlockSharedByDspAndMcu.BTRxInAudio[i]=(TmpAudioS16Buf[i]<<16);
+						VarBlockSharedByDspAndMcu.AudioBufInFrBt[i]=(TmpAudioS16Buf[i]<<16);
 				}else
 				{
 					//not enough audio samples from BT down streaming
@@ -563,7 +563,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_HfpCall(void)
 					#if EnableBtCirBufUnderflowOverFlowPrint==1
 						PRINTF_M("BT Up CirBuf is F \r\n");
 					#endif
-					memset((void *)VarBlockSharedByDspAndMcu.BTRxInAudio,0,sizeof(VarBlockSharedByDspAndMcu.BTRxInAudio)/2);
+					memset((void *)VarBlockSharedByDspAndMcu.AudioBufInFrBt,0,sizeof(VarBlockSharedByDspAndMcu.AudioBufInFrBt)/2);
 				}
 				OSA_EXIT_CRITICAL();
 			#endif
@@ -572,13 +572,13 @@ void ProcessAudio_AfterAudioInputBufIsReady_HfpCall(void)
 		{
 			#if 1
 				OSA_ENTER_CRITICAL();
-				//take audio samples out from BT Dn buffer --- put to BTRxInAudio, and then DSP side will take in and process
+				//take audio samples out from BT Dn buffer --- put to AudioBufInFrBt, and then DSP side will take in and process
 				if(CirAudioBuf_SpaceOccupiedInSamples_S16(&BTDnAudioBuf_S16)>=(AudioFrameSizeInSamplePerCh_16KHz/1))
 				{
 					//there are enough audio sample from BT down streaming
 					CirAudioBuf_ReadSamples_S16(&BTDnAudioBuf_S16, AudioFrameSizeInSamplePerCh_16KHz/1, TmpAudioS16Buf);
 					for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz/1;i++)
-						VarBlockSharedByDspAndMcu.BTRxInAudio[i]=(TmpAudioS16Buf[i]<<16);
+						VarBlockSharedByDspAndMcu.AudioBufInFrBt[i]=(TmpAudioS16Buf[i]<<16);
 				}else
 				{
 					//not enough audio samples from BT down streaming
@@ -586,7 +586,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_HfpCall(void)
 					#if EnableBtCirBufUnderflowOverFlowPrint==1
 						PRINTF_M("BT Dn CirBuf is E \r\n");
 					#endif
-					memset((void *)VarBlockSharedByDspAndMcu.BTRxInAudio,0,sizeof(VarBlockSharedByDspAndMcu.BTRxInAudio));
+					memset((void *)VarBlockSharedByDspAndMcu.AudioBufInFrBt,0,sizeof(VarBlockSharedByDspAndMcu.AudioBufInFrBt));
 				}
 				OSA_EXIT_CRITICAL();
 			#endif
@@ -640,7 +640,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy(void)
 		CopyMicAudioDataFromDmaBufferToSharedVarMicBuf(AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23,AudioFrameSizeInSamplePerCh_16KHz,1);
 		SetI2SBufferABSelect(1,0);		//(int ToSetI2SAmp, int ToSetI2SNvt)
 		//in this mode, no ref signal to conversa is needed, clear it
-		memset((void *)VarBlockSharedByDspAndMcu.BTRxInAudio,0,sizeof(VarBlockSharedByDspAndMcu.BTRxInAudio));
+		memset((void *)VarBlockSharedByDspAndMcu.AudioBufInFrBt,0,sizeof(VarBlockSharedByDspAndMcu.AudioBufInFrBt));
 	#endif
 
 	#if EnableUsbComAndAudio==1
@@ -686,21 +686,21 @@ void ProcessAudio_AfterAudioInputBufIsReady_AudioIoDbg(void)
 		//copy I2S input (line in ADC) to shared memory from DMA buffer, for DSP later use
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
 		{
-			VarBlockSharedByDspAndMcu.I2SLineInBufL[i]=*I2SDmaInCh01Ptr++;
-			VarBlockSharedByDspAndMcu.I2SLineInBufR[i]=*I2SDmaInCh01Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrAmpL[i]=*I2SDmaInCh01Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrAmpR[i]=*I2SDmaInCh01Ptr++;
 		}
 
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 		{
 			#if 1
-				VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=((*(S16 *)I2SDmaInCh23Ptr++)<<16);
-				VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=((*(S16 *)I2SDmaInCh23Ptr++)<<16);
+				VarBlockSharedByDspAndMcu.I2SBufInFrNvtL[i]=((*(S16 *)I2SDmaInCh23Ptr++)<<16);
+				VarBlockSharedByDspAndMcu.I2SBufInFrNvtR[i]=((*(S16 *)I2SDmaInCh23Ptr++)<<16);
 				#if NvtI2SFs_48KHz==48000
 					I2SDmaInCh23Ptr+=2;
 				#endif
 			#else
-					VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=0x20000*i;
-					VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=-0x20000*i;
+					VarBlockSharedByDspAndMcu.I2SBufInFrNvtL[i]=0x20000*i;
+					VarBlockSharedByDspAndMcu.I2SBufInFrNvtR[i]=-0x20000*i;
 			#endif
 		}
 	#endif
@@ -749,14 +749,14 @@ void ProcessAudio_AfterAudioInputBufIsReady_VideoRecording(void)
 		//copy I2S input (line in ADC) to shared memory from DMA buffer, for DSP later use
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 		{
-			VarBlockSharedByDspAndMcu.I2SLineInBufL[i]=*I2SDmaInCh01Ptr++;
-			VarBlockSharedByDspAndMcu.I2SLineInBufR[i]=*I2SDmaInCh01Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrAmpL[i]=*I2SDmaInCh01Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrAmpR[i]=*I2SDmaInCh01Ptr++;
 		}
 
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 		{
-			VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=*I2SDmaInCh23Ptr++;
-			VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=*I2SDmaInCh23Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrNvtL[i]=*I2SDmaInCh23Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrNvtR[i]=*I2SDmaInCh23Ptr++;
 		}
 	#endif
 
@@ -794,26 +794,14 @@ void ProcessAudio_AfterAudioInputBufIsReady_MediaPlayer(void)
 		//copy I2S input (line in ADC) to shared memory from DMA buffer, for DSP later use
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 		{
-			VarBlockSharedByDspAndMcu.I2SLineInBufL[i]=*I2SDmaInCh01Ptr++;
-			VarBlockSharedByDspAndMcu.I2SLineInBufR[i]=*I2SDmaInCh01Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrAmpL[i]=*I2SDmaInCh01Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrAmpR[i]=*I2SDmaInCh01Ptr++;
 		}
 
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 		{
-			VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=*I2SDmaInCh23Ptr++;
-			VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=*I2SDmaInCh23Ptr++;
-#if 0 //B36932
-			#if 1
-				VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=((*(S16 *)I2SDmaInCh23Ptr++)<<16);
-				VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=((*(S16 *)I2SDmaInCh23Ptr++)<<16);
-				#if NvtI2SFs_48KHz==48000
-					I2SDmaInCh23Ptr+=2; //48KHz to 16KHz,//why B36932
-				#endif
-			#else
-					VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=0x20000*i;
-					VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=-0x20000*i;
-			#endif
-#endif
+			VarBlockSharedByDspAndMcu.I2SBufInFrNvtL[i]=*I2SDmaInCh23Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrNvtR[i]=*I2SDmaInCh23Ptr++;
 		}
 	#endif
 
@@ -899,14 +887,14 @@ void ProcessAudio_AfterAudioInputBufIsReady_Translation(void)
 			//copy I2S input (line in ADC) to shared memory from DMA buffer, for DSP later use
 			for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 			{
-				VarBlockSharedByDspAndMcu.I2SLineInBufL[i]=*I2SDmaInCh01Ptr++;
-				VarBlockSharedByDspAndMcu.I2SLineInBufR[i]=*I2SDmaInCh01Ptr++;
+				VarBlockSharedByDspAndMcu.I2SBufInFrAmpL[i]=*I2SDmaInCh01Ptr++;
+				VarBlockSharedByDspAndMcu.I2SBufInFrAmpR[i]=*I2SDmaInCh01Ptr++;
 			}
 
 			for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 			{
-				VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=*I2SDmaInCh23Ptr++;
-				VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=*I2SDmaInCh23Ptr++;
+				VarBlockSharedByDspAndMcu.I2SBufInFrNvtL[i]=*I2SDmaInCh23Ptr++;
+				VarBlockSharedByDspAndMcu.I2SBufInFrNvtR[i]=*I2SDmaInCh23Ptr++;
 			}
 		#endif
 
@@ -946,14 +934,14 @@ void ProcessAudio_AfterAudioInputBufIsReady_VideoAi(void)
 		//copy I2S input (line in ADC) to shared memory from DMA buffer, for DSP later use
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 		{
-			VarBlockSharedByDspAndMcu.I2SLineInBufL[i]=*I2SDmaInCh01Ptr++;
-			VarBlockSharedByDspAndMcu.I2SLineInBufR[i]=*I2SDmaInCh01Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrAmpL[i]=*I2SDmaInCh01Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrAmpR[i]=*I2SDmaInCh01Ptr++;
 		}
 
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 		{
-			VarBlockSharedByDspAndMcu.I2SInNvtBufL[i]=*I2SDmaInCh23Ptr++;
-			VarBlockSharedByDspAndMcu.I2SInNvtBufR[i]=*I2SDmaInCh23Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrNvtL[i]=*I2SDmaInCh23Ptr++;
+			VarBlockSharedByDspAndMcu.I2SBufInFrNvtR[i]=*I2SDmaInCh23Ptr++;
 		}
 	#endif
 
@@ -975,7 +963,6 @@ void ProcessAudio_AfterAudioInputBufIsReady_VideoAi(void)
 
 #if 1	//folding --- audioflow finalization
 extern volatile uint8_t NowInIncomingCallRingTone;
-extern uint8_t codec_inited;
 
 int LocalToneGainControlCnt=0;
 float LocalToneGainCurrent=0.0f;
@@ -1071,9 +1058,9 @@ void MoveAudioDataFromDspToI2SDmaBufAmp(int FrmSize, int ToUseStartingMute)
 	{
 		for(int i=0;i<FrmSize;i++)
 		{
-			*I2SDmaOtCh01Ptr++=VarBlockSharedByDspAndMcu.I2SLineOtBufL[i];	//stream out the audio of conversa Rx output --- L
+			*I2SDmaOtCh01Ptr++=VarBlockSharedByDspAndMcu.I2SBufOtToAmpL[i];	//stream out the audio of conversa Rx output --- L
 			//*I2SDmaOtCh01Ptr=0x10*i;
-			*I2SDmaOtCh01Ptr++=VarBlockSharedByDspAndMcu.I2SLineOtBufR[i];	//stream out the audio of conversa output
+			*I2SDmaOtCh01Ptr++=VarBlockSharedByDspAndMcu.I2SBufOtToAmpR[i];	//stream out the audio of conversa output
 			//*I2SDmaOtCh01Ptr=0-0x10*i;
 		}
 	}
@@ -1101,9 +1088,9 @@ void MoveAudioDataFromDspToI2SDmaBufNvt(int FrmSize, int ToUseStartingMute)
 	{
 		for(int i=0;i<FrmSize;i++)
 		{
-			*I2SDmaOtCh23Ptr++=VarBlockSharedByDspAndMcu.I2SOtNvtBufL[i];	//stream out the audio of conversa Rx output --- L
+			*I2SDmaOtCh23Ptr++=VarBlockSharedByDspAndMcu.I2SBufOtToNvtL[i];	//stream out the audio of conversa Rx output --- L
 			//*I2SDmaOtCh23Ptr=0x10*i;
-			*I2SDmaOtCh23Ptr++=VarBlockSharedByDspAndMcu.I2SOtNvtBufR[i];	//stream out the audio of conversa output
+			*I2SDmaOtCh23Ptr++=VarBlockSharedByDspAndMcu.I2SBufOtToNvtL[i];	//stream out the audio of conversa output
 			//*I2SDmaOtCh23Ptr=0-0x10*i;
 		}
 	}
@@ -1122,16 +1109,16 @@ void McuMainAudioFlowFinalize_HfpCall(void)
 		{
 			#if 1
 				OSA_ENTER_CRITICAL();
-				//put audio samples into BT Up buffer --- BTTxOtAudio has the processed audio of the previous frame
+				//put audio samples into BT Up buffer --- AudioBufOtToBt has the processed audio of the previous frame
 				if(CirAudioBuf_SpaceAvailableInSamples_S16(&BTUpAudioBuf_S16)>=(AudioFrameSizeInSamplePerCh_16KHz/2))
 				{
 					//there are enough free space from BT up streaming
 					for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz/2;i++)
-						TmpAudioS16Buf[i]=(VarBlockSharedByDspAndMcu.BTTxOtAudio[i]>>16);
+						TmpAudioS16Buf[i]=(VarBlockSharedByDspAndMcu.AudioBufOtToBt[i]>>16);
 					CirAudioBuf_WriteSamples_S16(&BTUpAudioBuf_S16, AudioFrameSizeInSamplePerCh_16KHz/2, TmpAudioS16Buf);
 				}else
 				{
-					//not enough free space for BT UP streaming --- abandon the current frame of BTTxOtAudio
+					//not enough free space for BT UP streaming --- abandon the current frame of AudioBufOtToBt
 					//this should not happen when audio PLL sync is doing well
 					#if EnableBtCirBufUnderflowOverFlowPrint==1
 						PRINTF_M("BT Up CirBuf is F \r\n");
@@ -1144,16 +1131,16 @@ void McuMainAudioFlowFinalize_HfpCall(void)
 		{
 			#if 1
 				OSA_ENTER_CRITICAL();
-				//put audio samples into BT Up buffer --- BTTxOtAudio has the processed audio of the previous frame
+				//put audio samples into BT Up buffer --- AudioBufOtToBt has the processed audio of the previous frame
 				if(CirAudioBuf_SpaceAvailableInSamples_S16(&BTUpAudioBuf_S16)>=(AudioFrameSizeInSamplePerCh_16KHz/1))
 				{
 					//there are enough free space from BT up streaming
 					for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz/1;i++)
-						TmpAudioS16Buf[i]=(VarBlockSharedByDspAndMcu.BTTxOtAudio[i]>>16);
+						TmpAudioS16Buf[i]=(VarBlockSharedByDspAndMcu.AudioBufOtToBt[i]>>16);
 					CirAudioBuf_WriteSamples_S16(&BTUpAudioBuf_S16, AudioFrameSizeInSamplePerCh_16KHz/1, TmpAudioS16Buf);
 				}else
 				{
-					//not enough free space for BT UP streaming --- abandon the current frame of BTTxOtAudio
+					//not enough free space for BT UP streaming --- abandon the current frame of AudioBufOtToBt
 					//this should not happen when audio PLL sync is doing well
 					#if EnableBtCirBufUnderflowOverFlowPrint==1
 						PRINTF_M("BT Up CirBuf is F \r\n");
@@ -1221,7 +1208,7 @@ void McuMainAudioFlowFinalize_HfpCall(void)
 																//check the beyerdynamic speaker, it is the same!!!
 																//so, we keep the logic of checking button in App call or Hfp call as it is.
 		{
-			if(codec_inited)  //this means: in ring tone or in the call
+			//if(codec_inited)  //this means: in ring tone or in the call
 			//if(RingToneIsInitialized)
 			{
 				//check if button 1 is pressed --- answer the call
@@ -1292,8 +1279,7 @@ void McuMainAudioFlowFinalize_VideoRecording(void)
 __attribute__((section("CodeQuickAccess")))
 void McuMainAudioFlowFinalize_MediaPlayer(void)
 {
-	//McuMainAudioFlowFinalize_HomeVitStandBy();	//they are the same
-
+	//McuMainAudioFlowFinalize_AudioIoDbg();	//they are the same
 #if EnableUsbComAndAudio==1//folding --- write conversa Tx output audio to UAC up streaming buffer
 	OSA_SR_ALLOC();
 	OSA_ENTER_CRITICAL();
@@ -1384,16 +1370,16 @@ void InitAmpI2S(int FrmSize, int Fs, int bits)
 {
 	if(!AudioPortIsActive_I2SToAmp)
 	{
-		BOARD_Init_DMA_I2S_Fc1();
-		BOARD_Init_DMA_I2S_Fc3();
-			BOARD_Init_I2S_Fc1(Fs,bits);
-			BOARD_Init_I2S_Fc3(Fs,bits);
-				ClearDmaBuf_I2S1Rx0();
-				ClearDmaBuf_I2S3Tx0();
-					ConfigI2S1ChainedDma(FrmSize,bits);
-					ConfigI2S3ChainedDma(FrmSize,bits);
-						EnableI2S1Rx0DmaChannel();
-						EnableI2S3Tx0DmaChannel();
+		BOARD_Init_DMA_I2S_FcTxToAmp();
+		BOARD_Init_DMA_I2S_FcRxFrAmp();
+			BOARD_Init_I2S_FcTxToAmp(Fs,bits);
+			BOARD_Init_I2S_FcRxFrAmp(Fs,bits);
+				ClearDmaBuf_I2SToAmp();
+				ClearDmaBuf_I2SFrAmp();
+					ConfigI2STxToAmpChainedDma(FrmSize,bits);
+					ConfigI2SRxFrAmpChainedDma(FrmSize,bits);
+						EnableI2SToAmpDmaChannel();
+						EnableI2SFrAmpDmaChannel();
 		AudioPortIsActive_I2SToAmp=1;
 		I2SOutputMuteCntAmp=25;	//200ms
 	}
@@ -1402,16 +1388,16 @@ void InitNvtI2S(int FrmSize, int Fs, int bits)
 {
 	if(!AudioPortIsActive_I2SToNvt)
 	{
-		BOARD_Init_DMA_I2S_FcTxToNt();
-		BOARD_Init_DMA_I2S_FcRxFrNt();
-			BOARD_Init_I2S_FcTxToNt(Fs,bits);
-			BOARD_Init_I2S_FcRxFrNt(Fs,bits);
-				ClearDmaBuf_I2STxToNt();
-				ClearDmaBuf_I2SRxFrNt();
-					ConfigI2STxToNtChainedDma(FrmSize,bits);
-					ConfigI2SRxFrNtChainedDma(FrmSize,bits);
-						EnableI2STxToNtDmaChannel();
-						EnableI2SRxFrNtDmaChannel();
+		BOARD_Init_DMA_I2S_FcTxToNvt();
+		BOARD_Init_DMA_I2S_FcRxFrNvt();
+			BOARD_Init_I2S_FcTxToNvt(Fs,bits);
+			BOARD_Init_I2S_FcRxFrNvt(Fs,bits);
+				ClearDmaBuf_I2STxToNvt();
+				ClearDmaBuf_I2SRxFrNvt();
+					ConfigI2STxToNvtChainedDma(FrmSize,bits);
+					ConfigI2SRxFrNvtChainedDma(FrmSize,bits);
+						EnableI2STxToNvtDmaChannel();
+						EnableI2SRxFrNvtDmaChannel();
 		AudioPortIsActive_I2SToNvt=1;
 		I2SOutputMuteCntNvt=25;	//200ms
 	}
@@ -1449,8 +1435,8 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 	InitAudioCircularBuf(0,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
 	DmaTxRxIsExpected=(
-						AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
-						AudioI2sPortsBitMapFlag_FcTxToNt|AudioI2sPortsBitMapFlag_FcRxFrNt|
+						AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
+						AudioI2sPortsBitMapFlag_FcTxToNvt|AudioI2sPortsBitMapFlag_FcRxFrNvt|
 						//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
 						#if EnableMic01==1
 							AudioPdmPortsBitMapFlag_Mic01
@@ -1478,22 +1464,22 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	return;
 }
-void InitAudioInterface_HfpCall(int Opt, U32 samplingRate, U32 bitWidth)
+void InitAudioInterface_HfpCall(int Opt)
 {
 	int MclkFreq,src_clk_hz;
 
 	PRINTF_M("InitAudioInterface_HfpCall BT Side Fs: %d  BT Side BitWidth: %d \r\n", BtHfpAudioFs, BtHfpAudioBitWidth);
 
 
-	if((samplingRate!=8000)&&(samplingRate!=16000))
+	if((BtHfpAudioFs!=8000)&&(BtHfpAudioFs!=16000))
 	{
 		PRINTF_M("InitAudioInterface_HfpCall failed, Hfp audio can not be started --- BT Side bit Fs is NOT 8kHz or 16kHz \r\n");
 		return;
 	}
 
-	BtHfpAudioBitWidth=bitWidth;
-	BtHfpAudioFs=samplingRate;
 	VarBlockSharedByDspAndMcu.BtHfpFs=BtHfpAudioFs;
 
 	/* Enable clock */
@@ -1504,7 +1490,7 @@ void InitAudioInterface_HfpCall(int Opt, U32 samplingRate, U32 bitWidth)
 		src_clk_hz = BOARD_SwitchAudioFreq(16000,BtPcmFc5Fc2_CodecFc1Fc3);
 	#endif
 
-	InitHfpAudioIntfToBT(MclkFreq, samplingRate);
+	InitHfpAudioIntfToBT(MclkFreq, BtHfpAudioFs);
 
 
 	InitPdm(0xff, AudioFrameSizeInSamplePerCh_16KHz, 16000);
@@ -1513,7 +1499,7 @@ void InitAudioInterface_HfpCall(int Opt, U32 samplingRate, U32 bitWidth)
 	InitAudioCircularBuf(1,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
 
-	DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
+	DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
 			#if EnableMic01==1
 				AudioPdmPortsBitMapFlag_Mic01
 			#endif
@@ -1528,8 +1514,6 @@ void InitAudioInterface_HfpCall(int Opt, U32 samplingRate, U32 bitWidth)
 			#endif
 					  );
 
-	codec_inited = 1;
-
 	VarBlockSharedByDspAndMcu.I2SFs_Amp=16000;
 	VarBlockSharedByDspAndMcu.PdmFs    =16000;
 	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
@@ -1537,7 +1521,7 @@ void InitAudioInterface_HfpCall(int Opt, U32 samplingRate, U32 bitWidth)
 
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples    =AudioFrameSizeInSamplePerCh_16KHz;
-
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
 	return;
 }
 void InitAudioInterface_HomeVitStandby(int Opt)
@@ -1565,7 +1549,7 @@ void InitAudioInterface_HomeVitStandby(int Opt)
 	InitAudioCircularBuf(0,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
 	DmaTxRxIsExpected=(
-					AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3
+					AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp
 					#if EnableMic01==1
 						|AudioPdmPortsBitMapFlag_Mic01
 					#endif
@@ -1589,6 +1573,8 @@ void InitAudioInterface_HomeVitStandby(int Opt)
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
 	VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	return;
 }
 
 void InitAudioInterface_VideoRecording(int Opt)
@@ -1628,8 +1614,8 @@ void InitAudioInterface_VideoRecording(int Opt)
 	}
 
 	DmaTxRxIsExpected=(
-						AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
-						AudioI2sPortsBitMapFlag_FcTxToNt|AudioI2sPortsBitMapFlag_FcRxFrNt|
+						AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
+						AudioI2sPortsBitMapFlag_FcTxToNvt|AudioI2sPortsBitMapFlag_FcRxFrNvt|
 						#if EnableMic01==1
 							AudioPdmPortsBitMapFlag_Mic01
 						#endif
@@ -1663,7 +1649,7 @@ void InitAudioInterface_VideoRecording(int Opt)
 
 void InitAudioInterface_MediaPlayer(int Opt)
 {
-
+	//InitAudioInterface_AudioIoDebug(0);		//they are the same
 	//if everything is configured, no need to do anything, return
 	if((AudioPortIsActive_I2SToAmp)&&(AudioPortIsActive_I2SToNvt)&&(AudioPortIsActive_Pdm)&&(AmpState>AmpState_UnConfigured))
 		return;
@@ -1695,8 +1681,9 @@ void InitAudioInterface_MediaPlayer(int Opt)
 	InitAudioCircularBuf(0,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
 	DmaTxRxIsExpected=(
-						AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
-						AudioI2sPortsBitMapFlag_FcTxToNt|AudioI2sPortsBitMapFlag_FcRxFrNt|
+						AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
+						AudioI2sPortsBitMapFlag_FcTxToNvt|AudioI2sPortsBitMapFlag_FcRxFrNvt|
+						//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
 						#if EnableMic01==1
 							AudioPdmPortsBitMapFlag_Mic01
 						#endif
@@ -1723,6 +1710,8 @@ void InitAudioInterface_MediaPlayer(int Opt)
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	return;
 }
 void InitAudioInterface_MusicPlayer(int Opt)
 {
@@ -1796,8 +1785,8 @@ void InitAudioInterface_MusicPlayer(int Opt)
 	}
 
 	DmaTxRxIsExpected=(
-						AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
-	//B36932 TxToNT maybe need to enabled //AudioI2sPortsBitMapFlag_FcTxToNt|AudioI2sPortsBitMapFlag_FcRxFrNt|
+						AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
+	//B36932 TxToNT maybe need to enabled //AudioI2sPortsBitMapFlag_FcTxToNvt|AudioI2sPortsBitMapFlag_FcRxFrNvt|
 						#if EnableMic01==1
 							AudioPdmPortsBitMapFlag_Mic01
 						#endif
@@ -1822,9 +1811,12 @@ void InitAudioInterface_MusicPlayer(int Opt)
 
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	return;
 }
 void InitAudioInterface_Translation(int Opt)
 {
+	
 	//if everything is configured, no need to do anything, return
 	if((AudioPortIsActive_I2SToAmp)&&(AudioPortIsActive_I2SToNvt)&&(AudioPortIsActive_Pdm)&&(AmpState>AmpState_UnConfigured))
 		return;
@@ -1860,8 +1852,8 @@ void InitAudioInterface_Translation(int Opt)
 	}
 
 	DmaTxRxIsExpected=(
-						AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
-						AudioI2sPortsBitMapFlag_FcTxToNt|AudioI2sPortsBitMapFlag_FcRxFrNt|
+						AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
+						AudioI2sPortsBitMapFlag_FcTxToNvt|AudioI2sPortsBitMapFlag_FcRxFrNvt|
 						#if EnableMic01==1
 							AudioPdmPortsBitMapFlag_Mic01
 						#endif
@@ -1890,10 +1882,12 @@ void InitAudioInterface_Translation(int Opt)
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_FarEnd;
 }
 
 void InitAudioInterface_AiConversation(int Opt)
 {
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_NearEnd;
 }
 
 void InitAudioInterface_VideoAi(int Opt)
@@ -1933,8 +1927,8 @@ void InitAudioInterface_VideoAi(int Opt)
 	}
 
 	DmaTxRxIsExpected=(
-						AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
-						AudioI2sPortsBitMapFlag_FcTxToNt|AudioI2sPortsBitMapFlag_FcRxFrNt|
+						AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
+						AudioI2sPortsBitMapFlag_FcTxToNvt|AudioI2sPortsBitMapFlag_FcRxFrNvt|
 						#if EnableMic01==1
 							AudioPdmPortsBitMapFlag_Mic01
 						#endif
@@ -1963,6 +1957,7 @@ void InitAudioInterface_VideoAi(int Opt)
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_NearEnd;
 }
 #endif
 
@@ -1972,11 +1967,7 @@ void Deinit_GeneralAudio(int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm
 {
 	#if UsingQAR87Board == 1
 		//deinit code (amplifier)
-		#if 0
-			if (codec_inited == 0)
-			{
-				return ;
-			}
+		#if 0//B36932 should be 0 and do it in DeInitCodec, 1 
 			hal_amp_aw88166_left_stop();
 			hal_amp_aw88166_right_stop();
 		#endif
@@ -2001,20 +1992,20 @@ void Deinit_GeneralAudio(int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm
 			CloseI2sDma((I2S_Type *)DEMO_I2STxToAmp);
 				CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2SRxFrAmp);
 				CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2STxToAmp);
-					ClearDmaBuf_I2S1Rx0();
-					ClearDmaBuf_I2S3Tx0();
+					ClearDmaBuf_I2SToAmp();
+					ClearDmaBuf_I2SFrAmp();
 			AudioPortIsActive_I2SToAmp=0;
 		}
 
 	if(ToDeinitNvtI2S)
 		if(AudioPortIsActive_I2SToNvt)
 		{
-			CloseI2sDma((I2S_Type *)I2STxToNtInstance);
-			CloseI2sDma((I2S_Type *)I2SRxFrNtInstance);
-				CloseI2sAndI2sIntr((I2S_Type *)I2STxToNtInstance);
-				CloseI2sAndI2sIntr((I2S_Type *)I2SRxFrNtInstance);
-					ClearDmaBuf_I2STxToNt();
-					ClearDmaBuf_I2SRxFrNt();
+			CloseI2sDma((I2S_Type *)I2STxToNvtInstance);
+			CloseI2sDma((I2S_Type *)I2SRxFrNvtInstance);
+				CloseI2sAndI2sIntr((I2S_Type *)I2STxToNvtInstance);
+				CloseI2sAndI2sIntr((I2S_Type *)I2SRxFrNvtInstance);
+					ClearDmaBuf_I2STxToNvt();
+					ClearDmaBuf_I2SRxFrNvt();
 			AudioPortIsActive_I2SToNvt=0;
 		}
 
@@ -2054,19 +2045,19 @@ void DeInitAudioInterface_AudioIoDebug(int Opt)
 		CloseI2sDma((I2S_Type *)DEMO_I2STxToAmp);
 			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2SRxFrAmp);
 			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2STxToAmp);
-				ClearDmaBuf_I2S1Rx0();
-				ClearDmaBuf_I2S3Tx0();
+				ClearDmaBuf_I2SToAmp();
+				ClearDmaBuf_I2SFrAmp();
 		AudioPortIsActive_I2SToAmp=0;
 	}
 
 	if(AudioPortIsActive_I2SToNvt)
 	{
-		CloseI2sDma((I2S_Type *)I2STxToNtInstance);
-		CloseI2sDma((I2S_Type *)I2SRxFrNtInstance);
-			CloseI2sAndI2sIntr((I2S_Type *)I2STxToNtInstance);
-			CloseI2sAndI2sIntr((I2S_Type *)I2SRxFrNtInstance);
-				ClearDmaBuf_I2STxToNt();
-				ClearDmaBuf_I2SRxFrNt();
+		CloseI2sDma((I2S_Type *)I2STxToNvtInstance);
+		CloseI2sDma((I2S_Type *)I2SRxFrNvtInstance);
+			CloseI2sAndI2sIntr((I2S_Type *)I2STxToNvtInstance);
+			CloseI2sAndI2sIntr((I2S_Type *)I2SRxFrNvtInstance);
+				ClearDmaBuf_I2STxToNvt();
+				ClearDmaBuf_I2SRxFrNvt();
 		AudioPortIsActive_I2SToNvt=0;
 	}
 
@@ -2127,8 +2118,8 @@ void DeInitAudioInterface_MusicPlayer(int Opt)
 		CloseI2sDma((I2S_Type *)DEMO_I2STxToAmp);
 			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2SRxFrAmp);
 			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2STxToAmp);
-				ClearDmaBuf_I2S1Rx0();
-				ClearDmaBuf_I2S3Tx0();
+				ClearDmaBuf_I2SToAmp();
+				ClearDmaBuf_I2SFrAmp();
 		AudioPortIsActive_I2SToAmp=0;
 	}
 

@@ -48,10 +48,10 @@ T_MCh32BitUacUpAudioSample UacUpAudioBuf_MCh_DataArea
 
 #if Rt685I2SToNvtIsI2SMaster==0
 	//only when NT is I2S master, we use cir buffer
-	T_CircularAudioBuf_S32 I2SRxFrNt_CirBuf;
-	S32 I2SRxFrNt_CirBuf_S32_DataArea[I2SNt_CirBuf_LenInSamples + AudioFrameSizeInSamplePerCh_16KHz];	//read to this buffer is from i2s1,3, read size is AudioFrameSizeInSamplePerCh_16KHz
-	T_CircularAudioBuf_S32 I2STxToNt_CirBuf;
-	S32 I2STxToNt_CirBuf_S32_DataArea[I2SNt_CirBuf_LenInSamples + AudioFrameSizeInSamplePerCh_I2SToNvt];	//read to this buffer is from i2sTxToNt, read size is AudioFrameSizeInSamplePerCh_I2SToNvt
+	T_CircularAudioBuf_S32 I2SRxFrNvt_CirBuf;
+	S32 I2SRxFrNvt_CirBuf_S32_DataArea[I2SNvt_CirBuf_LenInSamples + AudioFrameSizeInSamplePerCh_16KHz];	//read to this buffer is from i2s1,3, read size is AudioFrameSizeInSamplePerCh_16KHz
+	T_CircularAudioBuf_S32 I2STxToNvt_CirBuf;
+	S32 I2STxToNvt_CirBuf_S32_DataArea[I2SNvt_CirBuf_LenInSamples + AudioFrameSizeInSamplePerCh_I2SToNvt];	//read to this buffer is from i2sTxToNvt, read size is AudioFrameSizeInSamplePerCh_I2SToNvt
 #endif
 
 
@@ -130,11 +130,11 @@ void InitAudioCircularBuf(int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir)
 
 	#if Rt685I2SToNvtIsI2SMaster==0
 		//only when NT is I2S master, we use cir buffer
-		InitCirAudioBuf_S32(&I2SRxFrNt_CirBuf,
-				I2SRxFrNt_CirBuf_S32_DataArea,I2SNt_CirBuf_LenInSamples
+		InitCirAudioBuf_S32(&I2SRxFrNvt_CirBuf,
+				I2SRxFrNvt_CirBuf_S32_DataArea,I2SNvt_CirBuf_LenInSamples
 				);
-		InitCirAudioBuf_S32(&I2STxToNt_CirBuf,
-				I2STxToNt_CirBuf_S32_DataArea,I2SNt_CirBuf_LenInSamples
+		InitCirAudioBuf_S32(&I2STxToNvt_CirBuf,
+				I2STxToNvt_CirBuf_S32_DataArea,I2SNvt_CirBuf_LenInSamples
 				);
 	#endif
 }

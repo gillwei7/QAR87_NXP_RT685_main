@@ -23,10 +23,10 @@
 #define AudioPdmPortsBitMapFlag_Mic67			0x08
 #endif
 
-#define AudioI2sPortsBitMapFlag_Fc1				0x10
-#define AudioI2sPortsBitMapFlag_Fc3				0x20
-#define AudioI2sPortsBitMapFlag_FcTxToNt		0x40
-#define AudioI2sPortsBitMapFlag_FcRxFrNt		0x80
+#define AudioI2sPortsBitMapFlag_FcTxToAmp		0x10
+#define AudioI2sPortsBitMapFlag_FcRxFrAmp		0x20
+#define AudioI2sPortsBitMapFlag_FcTxToNvt		0x40
+#define AudioI2sPortsBitMapFlag_FcRxFrNvt		0x80
 
 extern int BtHfpAudioVolume;
 extern int BtHfpAudioFs;
@@ -104,7 +104,7 @@ extern void McuMainAudioFlowFinalize_VideoAi(void);
 
 extern void InitAudioInterface_AudioIoDebug(int Opt);
 extern void DeInitAudioInterface_AudioIoDebug(int Opt);
-extern void InitAudioInterface_HfpCall(int Opt, U32 samplingRate, U32 bitWidth);
+extern void InitAudioInterface_HfpCall(int Opt);
 extern void DeInitAudioInterface_HfpCall(int Opt);
 extern void InitAudioInterface_HomeVitStandby(int Opt);
 extern void DeInitAudioInterface_HomeVitStandby(int Opt);

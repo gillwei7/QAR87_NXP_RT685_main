@@ -65,7 +65,7 @@ typedef signed long long s64;
 
 //If UsingQAR87Board == 1, the program can run on the QAR87 development board.
 #define UsingQAR87Board		1
-#define UsingDbgPin			0
+#define UsingDbgPin			0			//set to 1, may hurt NVT ???
 
 #define     LedGrnPinPort               0
 #define     LedBluPinPort               0

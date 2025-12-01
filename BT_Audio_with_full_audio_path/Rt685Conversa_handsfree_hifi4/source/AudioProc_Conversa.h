@@ -149,8 +149,8 @@ extern S32 *AecOut32BitBuf;
 extern S32 *BfOut32BitBuf;
 extern S32 *NlpOut32BitBuf;
 
-
-extern void InitConversa(void);
+extern void DeInitConversa(void);
+extern void InitConversa(ConversaTuningCfg_t TuningCfg, int NeedToPrintInfo);
 
 extern void DspMainAudioFlowProcOneFrame_HfpCall_(int OptionWord);
 extern void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord);

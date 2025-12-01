@@ -13,8 +13,6 @@
 //------------------------settings can be changed ----------------------
 //sub working modes (work state) enable or disable --- go to WorkStateManager.h to setup
 
-#define UseEventToControlBtHfp								0		//set to 1 to have hfp event processed in workstate manager ---- not realized yet, don't set it to 1 !!!
-
 #define EnableUsbComAndAudio								1		//0 or 1 can be selected
 #define LetComConnectTuningTool								1		//0 or 1 can be selected
 #if LetComConnectTuningTool==1
@@ -51,7 +49,7 @@
 //-------------------------------------------------------------------------------------
 #if 1	//folding --- general defines --- should not be changed
 
-#define I2SToNtIntrRecoverWaitTime					100
+#define I2SToNvtIntrRecoverWaitTime					100
 
 
 #if EnableUsbComAndAudio==0

@@ -71,8 +71,7 @@
 extern codec_config_t boardCodecScoConfig;
 extern codec_config_t boardCodecScoConfig1;
 
-extern hal_audio_config_t txSpeakerConfig;
-extern hal_audio_config_t rxMicConfig;
+
 extern hal_audio_config_t txMicConfig;
 extern hal_audio_config_t rxSpeakerConfig;
 
@@ -80,9 +79,8 @@ extern hal_audio_config_t rxSpeakerConfig;
 
 /* --------------------------------------------- Static Global Variables */
 
-#if UseEventToControlBtHfp==1
+
 	EventGroupHandle_t EvtGrpHdl_StateMangerTaskToBtStack;
-#endif
 extern uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx);
 
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(tx_speaker_handle), 4);
@@ -91,28 +89,22 @@ AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(rx_mic_handle), 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(tx_mic_handle), 4);
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(rx_speaker_handle), 4);
 static codec_handle_t codec_handle;
-uint8_t codec_inited = 0;
 
-//AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t MicBuffer    [BUFFER_NUMBER * BUFFER_SIZE], 4);
 AT_NONCACHEABLE_SECTION_ALIGN(uint8_t RxAudioBufFromBt[BUFFER_NUMBER * BUFFER_SIZE], 4);
-//AT_NONCACHEABLE_SECTION(uint32_t g_AudioTxDummyBuffer[AUDIO_DUMMY_SIZE / 4U]);
 
-OSA_SEMAPHORE_HANDLE_DEFINE(xSemaphoreScoAudio);
 OSA_SEMAPHORE_HANDLE_DEFINE(xSemaphoreDmaAudioDataReady);
 
 //static volatile uint8_t RingToneIsInitialized=0;
 static volatile uint8_t NowInHfpTelCall=0;
 static volatile uint8_t NowInHfpAppCall=0;
-static volatile uint8_t WasInRingTone=0;
-static volatile uint8_t saiEnable= 0;
+static volatile uint8_t WasInInComingRingTone=0;
 static uint32_t txMic_index = 0U, rxMic_index = 0U;
 atomic_t emptyMicBlock = BUFFER_NUMBER;
 static uint32_t txSpeaker_index = 0U, rxSpeaker_index = 0U;
 atomic_t emptySpeakerBlock = BUFFER_NUMBER;
-//static uint32_t rxSpeaker_test = 0U, rxMic_test = 0U;
+
 volatile uint8_t NowInIncomingCallRingTone = 0;
-static uint32_t cpy_index = 0U, tx_index = 0U;
-static volatile uint8_t sco_audio_setup = 0;
+
 static SCO_AUDIO_EP_INFO s_ep_info;
 static API_RESULT audio_setup_pl_ext(uint8_t isRing, SCO_AUDIO_EP_INFO *ep_info);
 API_RESULT sco_audio_start_pl_ext(void);
@@ -139,14 +131,8 @@ AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t OneBlockTxBufToBT    [BUFFER_SIZE],
 S16 TmpDbgSigalBuf[BUFFER_SIZE/2];
 void SCO_AudioFlow_SemaphorePost(void)
 {
-	if((NowInHfpTelCall)||(NowInHfpAppCall)||(NowInIncomingCallRingTone))
-	{
-		OSA_SemaphorePost(xSemaphoreScoAudio);
-	}else
-	{
 		OSA_SemaphorePost(xSemaphoreDmaAudioDataReady);
 	}
-}
 
 static void txMicCallback(hal_audio_handle_t handle, hal_audio_status_t completionStatus, void *callbackParam)
 {
@@ -274,7 +260,7 @@ void DeinitHfpVariables(void)
 	NowInHfpTelCall=0;
 	NowInHfpAppCall=0;
 	NowInIncomingCallRingTone=0;
-	WasInRingTone=0;
+	WasInInComingRingTone=0;
 
 	CirAudioBuf_ClearAllSamples_S16(&BTUpAudioBuf_S16);
 	CirAudioBuf_ClearAllSamples_S16(&BTDnAudioBuf_S16);
@@ -306,7 +292,6 @@ void DeInitCodec(void)
 	AmpState=AmpState_UnConfigured;
 }
 void InitAndStartCodec(int fs, int bits, int Mfreq)
-//InitAndStartAmp
 {
 	int r;
 
@@ -325,8 +310,6 @@ void InitAndStartCodec(int fs, int bits, int Mfreq)
 		hal_amp_aw88166_left_start ("Receiver");
 		hal_amp_aw88166_right_start("Receiver");
 	}
-	codec_inited = 1;
-
 	AmpState=AmpState_ConfiguredAndActive;
 }
 
@@ -370,7 +353,6 @@ void InitAndStartCodec(int fs, int bits, int Mfreq)
 		CODEC_SetVolume(&codec_handle, kCODEC_VolumeDAC, HFP_CODEC_DAC_VOLUME);
 		CODEC_SetVolume(&codec_handle, kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight, HFP_CODEC_HP_VOLUME);
 		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
-		codec_inited = 1;
 	}
 	DbgPin8Dn();
 	AmpState=AmpState_ConfiguredAndActive;
@@ -391,356 +373,6 @@ void InitHfpAudioIntfToBT(int MclkFreq, int Fs)
 	HAL_AudioRxInit((hal_audio_handle_t)&rx_speaker_handle[0], &rxSpeakerConfig);
 	HAL_AudioRxInstallCallback((hal_audio_handle_t)&rx_speaker_handle[0], rxSpeakerCallback, NULL);
 }
-
-extern void Deinit_GeneralAudio(int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec);
-void Deinit_Board_Audio(void)
-{
-#if 1
-	Deinit_GeneralAudio(1,0,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
-	ClearAudioCirBuf(1,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
-	DeinitHfpVariables();
-	return;
-#else
-
-
-
-#if UsingQAR87Board == 1
-	//deinit code (amplifier)
-	if (codec_inited == 0)
-	{
-		return ;
-	}
-	hal_amp_aw88166_left_stop();
-	hal_amp_aw88166_right_stop();
-	//to do .... codec mute
-#else
-	if (codec_inited == 0)
-	{
-		return ;
-	}
-	CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
-#endif
-	//close all I2S and related DMA --- if need to just close the wanted, just call one of the 3 grouped functions
-	CloseI2sDma((I2S_Type *)DEMO_I2SRxFrAmp);
-	CloseI2sDma((I2S_Type *)DEMO_I2STxToAmp);
-		CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2SRxFrAmp);
-		CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2STxToAmp);
-			ClearDmaBuf_I2S1Rx0();
-			ClearDmaBuf_I2S3Tx0();
-	//close PDM all channels
-	BOARD_DeInit_DMA_PDM(0xff);
-
-	HAL_AudioTxDeinit((hal_audio_handle_t)&tx_mic_handle[0]);
-	HAL_AudioRxDeinit((hal_audio_handle_t)&rx_speaker_handle[0]);
-
-	(void)BOARD_SwitchAudioFreq(0U,0);
-	codec_inited = 0;
-	NowInHfpTelCall=0;
-	NowInHfpAppCall=0;
-	NowInIncomingCallRingTone=0;
-	RequestToGetOutofHfp=1;
-
-
-	CirAudioBuf_ClearAllSamples_S16(&BTUpAudioBuf_S16);
-	CirAudioBuf_ClearAllSamples_S16(&BTDnAudioBuf_S16);
-	//ClearBTUpDnAudioBufDataArea();
-
-	//this is necessary, or there is extra sound in the beginning of the next call
-	memset(RxAudioBufFromBt, 0, sizeof(RxAudioBufFromBt));
-	#if 0
-		ClearDmaBuf_I2S3Tx0();
-		ClearDmaBuf_I2S1Rx0();
-		memset(VarBlockSharedByDspAndMcu.PdmInAudioBuf, 0, sizeof(VarBlockSharedByDspAndMcu.PdmInAudioBuf));
-		memset(VarBlockSharedByDspAndMcu.UacUpAudioBuf, 0, sizeof(VarBlockSharedByDspAndMcu.UacUpAudioBuf));
-		memset(VarBlockSharedByDspAndMcu.I2SLineInBufL, 0, sizeof(VarBlockSharedByDspAndMcu.I2SLineInBufL));
-		memset(VarBlockSharedByDspAndMcu.I2SLineInBufR, 0, sizeof(VarBlockSharedByDspAndMcu.I2SLineInBufR));
-		memset(VarBlockSharedByDspAndMcu.I2SLineOtBufL, 0, sizeof(VarBlockSharedByDspAndMcu.I2SLineOtBufL));
-		memset(VarBlockSharedByDspAndMcu.I2SLineOtBufR, 0, sizeof(VarBlockSharedByDspAndMcu.I2SLineOtBufR));
-		memset(VarBlockSharedByDspAndMcu.BTRxInAudio, 0, sizeof(VarBlockSharedByDspAndMcu.BTRxInAudio));
-		memset(VarBlockSharedByDspAndMcu.BTTxOtAudio, 0, sizeof(VarBlockSharedByDspAndMcu.BTTxOtAudio));
-	#endif
-#endif
-	PRINTF("Deinit_Board_Audio is done \r\n");
-}
-
-/*Initialize sco audio interface and codec.*/
-static void Init_Board_Sco_Audio(uint32_t samplingRate, UCHAR bitWidth)
-{
-    uint32_t src_clk_hz;
-
-#if 1
-    AudioPortIsActive_Pdm=0;
-    AudioPortIsActive_I2SToAmp=0;
-    AmpState==AmpState_UnConfigured;
-    InitAudioInterface_HfpCall(0, samplingRate, bitWidth);
-    return;
-#else
-
-	//configure PDM, Fc1,Fc3, CODEC, and configure Fc2 Fc5
-	if (samplingRate > 0U)
-	{
-		PRINTF("Init Audio SCO SAI and CODEC samplingRate :%d  bitWidth:%d \r\n", samplingRate, bitWidth);
-
-		/* Enable clock */
-		//no matter BT side is 16KHz or 8KHz, CODEC is always 16KHz
-		#if UsingQAR87Board == 1
-			src_clk_hz = BOARD_SwitchAudioFreq(16000,BtPcmFc2Fc4_AmpFc1Fc3);
-		#else
-			src_clk_hz = BOARD_SwitchAudioFreq(16000,BtPcmFc5Fc2_CodecFc1Fc3);
-		#endif
-		//enalbe PDM clk
-		/* DMIC source from audio pll, divider 8, 24.576M/8=3.072MHZ */
-		CLOCK_AttachClk(kAUDIO_PLL_to_DMIC_CLK);
-		//no matter BT side is 16KHz or 8KHz, DMIC is always 16KHz
-		CLOCK_SetClkDiv(kCLOCK_DivDmicClk, 8);		//PDM clk is: 24.576/8 =3.072MHz --- OSR to be 48, PDM stream after CIC is: 3072k/48=64K --> then half down to 32KHz --> then half down to 16KHz (don't use 2Fs)
-
-		BtHfpAudioBitWidth=bitWidth;
-		if(BtHfpAudioBitWidth!=16)
-		{
-			PRINTF("Init_Board_Sco_Audio error --- BT bit width is NOT 16 \r\n");
-		}
-		BtHfpAudioFs=samplingRate;
-		if((BtHfpAudioFs!=8000)&&(BtHfpAudioFs!=16000))
-		{
-			PRINTF("Init_Board_Sco_Audio error --- BT bit Fs is NOT 8kHz or 16kHz \r\n");
-		}
-		VarBlockSharedByDspAndMcu.BtHfpFs=BtHfpAudioFs;
-
-		//this part keeps the same as the original demo setup
-		txMicConfig.srcClock_Hz   = src_clk_hz;
-		txMicConfig.sampleRate_Hz = samplingRate;
-		HAL_AudioTxInit((hal_audio_handle_t)&tx_mic_handle[0], &txMicConfig);
-		HAL_AudioTxInstallCallback((hal_audio_handle_t)&tx_mic_handle[0], txMicCallback, NULL);
-
-		//this part keeps the same as the original demo setup
-		rxSpeakerConfig.srcClock_Hz   = src_clk_hz;
-		rxSpeakerConfig.sampleRate_Hz = samplingRate;
-		HAL_AudioRxInit((hal_audio_handle_t)&rx_speaker_handle[0], &rxSpeakerConfig);
-		HAL_AudioRxInstallCallback((hal_audio_handle_t)&rx_speaker_handle[0], rxSpeakerCallback, NULL);
-
-#if UsingQAR87Board == 1
-		//initial codec/amplifier
-		//B36932, to do....
-
-		//initial audio buffer and dmic and I2S
-
-		InitAudioCircularBuf(1,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
-
-		//PDM, fc3, fc1 and chained DMA configuring
-		//we open pdm ports here
-		Init_MicDmaCfgCh(0xff,AudioFrameSizeInSamplePerCh_16KHz,32);	//mic0,1,2,3,4,5
-		BOARD_Init_DMA_PDM(0xff);
-		BOARD_Init_DMIC(0xff,0,16000); //0: no skip general Dmic init. If not the first mic init, then should skip.
-		ConfigDmicChainedDma(0xff);
-
-		BOARD_Init_DMA_I2S_Fc1();
-		BOARD_Init_DMA_I2S_Fc3();
-		BOARD_Init_I2S_Fc1(16000,16);
-		BOARD_Init_I2S_Fc3(16000,16);
-		ClearDmaBuf_I2S1Rx0();
-		ClearDmaBuf_I2S3Tx0();
-		ConfigI2S1ChainedDma(AudioFrameSizeInSamplePerCh_16KHz,16);
-		ConfigI2S3ChainedDma(AudioFrameSizeInSamplePerCh_16KHz,16);
-		EnableI2S1Rx0DmaChannel();
-		EnableI2S3Tx0DmaChannel();
-		DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
-				//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
-				#if EnableMic01==1
-					AudioPdmPortsBitMapFlag_Mic01
-				#endif
-				#if EnableMic23==1
-					|AudioPdmPortsBitMapFlag_Mic23
-				#endif
-				#if EnableMic45==1
-					|AudioPdmPortsBitMapFlag_Mic45
-				#endif
-				#if EnableMic67==1
-					|AudioPdmPortsBitMapFlag_Mic67
-				#endif
-		);
-		hal_amp_aw88166_left_start("Receiver");
-		hal_amp_aw88166_right_start("Receiver");
-		codec_inited = 1;
-		PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
-
-
-#else
-		/* Codec */
-		if (CODEC_Init(&codec_handle, &boardCodecScoConfig) != kStatus_Success)
-		{
-			DbgPin8Dn();
-			PRINTF("Init_Board_Sco_Audio is failed --- CODEC init failure \r\n");
-		}else
-		{
-			DbgPin8Dn();
-			CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
-			//CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, txSpeakerConfig.sampleRate_Hz, txSpeakerConfig.bitWidth);
-			CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, 16000, 32);
-			CODEC_SetVolume(&codec_handle, kCODEC_VolumeDAC, HFP_CODEC_DAC_VOLUME);
-			CODEC_SetVolume(&codec_handle, kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight, HFP_CODEC_HP_VOLUME);
-			CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
-			codec_inited = 1;
-
-			InitAudioCircularBuf(1,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
-
-			//PDM, fc3, fc1 and chained DMA configuring
-			//we open pdm ports here
-			Init_MicDmaCfgCh(0xff,AudioFrameSizeInSamplePerCh_16KHz,32);	//mic0,1,2,3,4,5
-			BOARD_Init_DMA_PDM(0xff);
-			BOARD_Init_DMIC(0xff,0,16000); //0: no skip general Dmic init. If not the first mic init, then should skip.
-			ConfigDmicChainedDma(0xff);
-
-
-			BOARD_Init_DMA_I2S_Fc1();
-			BOARD_Init_DMA_I2S_Fc3();
-				BOARD_Init_I2S_Fc1(16000,32);
-				BOARD_Init_I2S_Fc3(16000,32);
-					ClearDmaBuf_I2S1Rx0();
-					ClearDmaBuf_I2S3Tx0();
-						ConfigI2S1ChainedDma(AudioFrameSizeInSamplePerCh_16KHz,32);
-						ConfigI2S3ChainedDma(AudioFrameSizeInSamplePerCh_16KHz,32);
-							EnableI2S1Rx0DmaChannel();
-							EnableI2S3Tx0DmaChannel();
-			DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3|
-					//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
-					#if EnableMic01==1
-						AudioPdmPortsBitMapFlag_Mic01
-					#endif
-					#if EnableMic23==1
-						|AudioPdmPortsBitMapFlag_Mic23
-					#endif
-					#if EnableMic45==1
-						|AudioPdmPortsBitMapFlag_Mic45
-					#endif
-					#if EnableMic67==1
-						|AudioPdmPortsBitMapFlag_Mic67
-					#endif
-							  );
-
-			PRINTF("Init_Board_Sco_Audio is successful and finished \r\n");
-		}
-#endif
-	}
-#endif
-
-}
-static void Init_Board_RingTone_Audio(uint32_t samplingRate, UCHAR bitWidth)	//never be called
-{
-    uint32_t src_clk_hz;
-	//configure Fc1,Fc3, CODEC
-	if (samplingRate > 0U)
-	{
-		PRINTF("Init Audio RingTone SAI and CODEC samplingRate :%d  bitWidth:%d \r\n", samplingRate, bitWidth);
-
-		/* Enable clock */
-		//no matter BT side is 16KHz or 8KHz, CODEC is always 16KHz
-		#if UsingQAR87Board == 1
-			src_clk_hz = BOARD_SwitchAudioFreq(16000,BtPcmFc2Fc4_AmpFc1Fc3);
-		#else
-			src_clk_hz = BOARD_SwitchAudioFreq(16000,BtPcmFc5Fc2_CodecFc1Fc3);
-		#endif
-		
-		BtHfpAudioBitWidth=bitWidth;
-		if(BtHfpAudioBitWidth!=16)
-		{
-			PRINTF("Init_Board_Sco_Audio error --- BT bit width is NOT 16 \r\n");
-		}
-		BtHfpAudioFs=samplingRate;
-		if((BtHfpAudioFs!=8000)&&(BtHfpAudioFs!=16000))
-		{
-			PRINTF("Init_Board_Sco_Audio error --- BT bit Fs is NOT 8kHz or 16kHz \r\n");
-		}
-		VarBlockSharedByDspAndMcu.BtHfpFs=BtHfpAudioFs;
-
-		//DbgPin8Up();
-
-#if UsingQAR87Board == 1
-		//initial codec/amplifier
-		//B36932, to do....
-
-		//initial audio buffer and dmic and I2S
-		InitAudioCircularBuf(1,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
-
-		//fc3, fc1 and chained DMA configuring
-		BOARD_Init_DMA_I2S_Fc1();
-		BOARD_Init_DMA_I2S_Fc3();
-			BOARD_Init_I2S_Fc1(16000,32);
-			BOARD_Init_I2S_Fc3(16000,32);
-				ClearDmaBuf_I2S1Rx0();
-				ClearDmaBuf_I2S3Tx0();
-					ConfigI2S1ChainedDma(AudioFrameSizeInSamplePerCh_16KHz,32);
-					ConfigI2S3ChainedDma(AudioFrameSizeInSamplePerCh_16KHz,32);
-						EnableI2S1Rx0DmaChannel();
-						EnableI2S3Tx0DmaChannel();
-		DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3);
-		hal_amp_aw88166_left_start("Receiver");
-		hal_amp_aw88166_right_start("Receiver");
-		codec_inited = 1;
-		PRINTF("Init_Board_RingTone_Audio is successful and finished \r\n");
-
-#else
-		/* Codec */
-		if (CODEC_Init(&codec_handle, &boardCodecScoConfig) != kStatus_Success)
-		{
-			DbgPin8Dn();
-			PRINTF("Init_Board_Sco_Audio is failed --- CODEC init failure \r\n");
-		}else
-		{
-			DbgPin8Dn();
-			CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
-			//CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, txSpeakerConfig.sampleRate_Hz, txSpeakerConfig.bitWidth);
-			CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, 16000, 32);
-			CODEC_SetVolume(&codec_handle, kCODEC_VolumeDAC, HFP_CODEC_DAC_VOLUME);
-			CODEC_SetVolume(&codec_handle, kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight, HFP_CODEC_HP_VOLUME);
-			CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
-			codec_inited = 1;
-
-			InitAudioCircularBuf(1,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
-
-			//fc3, fc1 and chained DMA configuring
-			BOARD_Init_DMA_I2S_Fc1();
-			BOARD_Init_DMA_I2S_Fc3();
-				BOARD_Init_I2S_Fc1(16000,32);
-				BOARD_Init_I2S_Fc3(16000,32);
-					ClearDmaBuf_I2S1Rx0();
-					ClearDmaBuf_I2S3Tx0();
-						ConfigI2S1ChainedDma(AudioFrameSizeInSamplePerCh_16KHz,32);
-						ConfigI2S3ChainedDma(AudioFrameSizeInSamplePerCh_16KHz,32);
-							EnableI2S1Rx0DmaChannel();
-							EnableI2S3Tx0DmaChannel();
-			DmaTxRxIsExpected=(AudioI2sPortsBitMapFlag_Fc1|AudioI2sPortsBitMapFlag_Fc3);
-			PRINTF("Init_Board_RingTone_Audio is successful and finished \r\n");
-		}
-#endif
-	}
-}
-
-static API_RESULT audio_setup_pl_ext(uint8_t isRing, SCO_AUDIO_EP_INFO *ep_info)
-{
-    txMic_index     = 0U;
-    rxMic_index     = 0U;
-    txSpeaker_index = 0U, rxSpeaker_index = 0U;
-    (void)atomic_set(&emptySpeakerBlock, BUFFER_NUMBER);
-    (void)atomic_set(&emptyMicBlock, BUFFER_NUMBER);
-
-    //in fact, always call Init_Board_Sco_Audio.
-    if (isRing)
-    {
-    	//never comes here
-        Init_Board_RingTone_Audio(ep_info->sampl_freq, ep_info->sample_len);
-    	//RingToneIsInitialized=1;
-    }
-    else
-    {
-        Init_Board_Sco_Audio(ep_info->sampl_freq, ep_info->sample_len);
-    	//RingToneIsInitialized=1;
-    }
-
-    I2SOutputMuteCntAmp=25;		//this is to mute I2S output for several frames after a call is started --- because from DSP, could have bad audio data coming (from Conversa/SRC)
-    saiEnable = 1;
-    return API_SUCCESS;
-}
-
 extern U32 AudioIoFrameCnt;
 extern U16 UsbUpStreamingIsStarted;
 extern U16 UsbDnStreamingIsStarted;
@@ -814,15 +446,15 @@ void ButtonEventProcess(void)
     	bt_br_set_connectable(false);
         if (bt_br_set_connectable(true))
         {
-            PRINTF("BR/EDR set/reset connectable failed\n");
+            PRINTF_M("BR/EDR set/reset connectable failed\n");
             return;
         }
         if (bt_br_set_discoverable(true))
         {
-            PRINTF("BR/EDR set discoverable failed\n");
+        	PRINTF_M("BR/EDR set discoverable failed\n");
             return;
         }
-        PRINTF("BR/EDR set connectable and discoverable done\n");
+        PRINTF_M("BR/EDR set connectable and discoverable done\n");
 
 		BtnEvtVarGroup[0].BtnEvt1=0;
 	}
@@ -833,15 +465,15 @@ void ButtonEventProcess(void)
     	bt_br_set_connectable(false);
         if (bt_br_set_connectable(true))
         {
-            PRINTF("BR/EDR set/reset connectable failed\n");
+        	PRINTF_M("BR/EDR set/reset connectable failed\n");
             return;
         }
         if (bt_br_set_discoverable(true))
         {
-            PRINTF("BR/EDR set discoverable failed\n");
+        	PRINTF_M("BR/EDR set discoverable failed\n");
             return;
         }
-        PRINTF("BR/EDR set connectable and discoverable done\n");
+        PRINTF_M("BR/EDR set connectable and discoverable done\n");
 
 		BtnEvtVarGroup[1].BtnEvt1=0;
 	}
@@ -875,82 +507,25 @@ void ButtonEventProcess(void)
 	}
 #endif
 }
-
-///*
-void InitAndStartPdm(void)
-{
-	#if 0
-		//init basic clk and PDM
-		InitAudioPLLForAllAudioPeripherals();
-		InitBaseAudioClkForPdm();
-
-		DMA_Init(DMA0);
-		//we open pdm ports here
-		Init_MicDmaCfgCh(0xff,AudioFrameSizeInSamplePerCh_16KHz,32);	//mic0,1,2,3,4,5
-		BOARD_Init_DMA_PDM(0xff);
-		BOARD_Init_DMIC(0xff,0,16000); //0: no skip general Dmic init. If not the first mic init, then should skip.
-		ConfigDmicChainedDma(0xff);
-		VarBlockSharedByDspAndMcu.BtHfpFs=8000;	//dsp may check this value, need to set it to either 8000 or 16000
-
-		InitAudioCircularBuf(1,1,1);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
-		PdmInputMuteCnt=12;			//96ms
-
-		//note: DmaTxRxIsExpected is not or ed with AudioI2sPortsBitMapFlag_Fc1 AudioI2sPortsBitMapFlag_Fc3, so after start PDM, fc1 fc3 will not be started
-		DmaTxRxIsExpected=(
-				//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
-						#if EnableMic01==1
-							AudioPdmPortsBitMapFlag_Mic01
-						#endif
-						#if EnableMic23==1
-							|AudioPdmPortsBitMapFlag_Mic23
-						#endif
-						#if EnableMic45==1
-							|AudioPdmPortsBitMapFlag_Mic45
-						#endif
-						#if EnableMic67==1
-							|AudioPdmPortsBitMapFlag_Mic67
-						#endif
-				);
-
-		//start dmic immediately --- but no need to start fc1 fc3 in the PDM callback
-		ImmediatelyStartDmicDmaChannels(0xff);	//mic0,1,2,3, after calling this, dmic dma intr occurs one frame later!
-		PRINTF("For VitStandby, PDM ports are configured and started. \r\n");
-	#else
-		InitAudioInterface_HomeVitStandby(0);
-	#endif
-}
-//*/
 __attribute__((section("CodeQuickAccess")))
 void VitStandBy_Task(void *handle)
 {
     OSA_SR_ALLOC();
 
 	SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-	PRINTF("RT685 MCU: enter task VitStandBy_Task \r\n");
+	PRINTF_M("RT685 MCU: enter task VitStandBy_Task \r\n");
 	SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
 
     while (1)
     {
         OSA_SemaphoreWait(xSemaphoreDmaAudioDataReady, osaWaitForever_c);
-#if 1
+
         DbgPin5Up();
 		switch(DeviceWorkStateCur)
 		{
-			#if 0
 				case WorkState_HfpCall:
-					if(saiEnable == 0)
-					{
-						DbgPin8Up();
-						Deinit_Board_Audio();
-						DbgPin8Dn();
-						//DbgPin7Dn();
-
-						InitAndStartPdm();
-						continue;
-					}
 					ProcessAudio_AfterAudioInputBufIsReady_HfpCall();
 					break;
-			#endif
 			case WorkState_HomeVitStandby:
 				ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy();
 				break;
@@ -985,92 +560,9 @@ void VitStandBy_Task(void *handle)
 		#if EnableUsbComAndAudio==1
 			USB_DeviceCdcVcomTask();	//can be placed to other place if here is not good (when other new task is needed and created)
 		#endif
-		//ButtonEventProcess();			//moved to WorkStateManager
-#endif
     }
 }
 
-
-__attribute__((section("CodeQuickAccess")))
-void SCO_Edma_Task(void *handle)
-{
-    hal_audio_transfer_t xfer;
-    OSA_SR_ALLOC();
-
-	SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-	PRINTF("RT685 MCU: enter task SCO_Edma_Task \r\n");
-	SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
-
-    while (1)
-    {
-        OSA_SemaphoreWait(xSemaphoreScoAudio, osaWaitForever_c);
-
-    	//DbgPin7Up();
-
-        if(saiEnable == 0)
-        {
-        	DbgPin8Up();
-            Deinit_Board_Audio();
-        	DbgPin8Dn();
-        	//DbgPin7Dn();
-
-			InitAndStartPdm();
-            continue;
-        }
-
-		ProcessAudio_AfterAudioInputBufIsReady_HfpCall();
-		AudioIoFrameCnt++;
-		AllowAudioInterfaceReInit_PdmI2S=1;
-
-		#ifdef SCO_DEBUG_MSG
-			i f (count % 300 == 0)
-			{
-				PRINTF("@(%d  %d)", emptyMicBlock, emptySpeakerBlock);
-				PRINTF("#( %d %d)", rxSpeaker_test, rxMic_test);
-			}
-		#endif
-
-
-		#if EnableUsbComAndAudio==1
-			USB_DeviceCdcVcomTask();	//can be placed to other place if here is not good (when other new task is needed and created)
-		#endif
-		#if UsingQAR87Board == 1
-			//ButtonEventProcess..... //B36932
-		#else
-			ButtonEventProcess();		//this button process can be placed to other place if here is not good (when other new task is needed and created)
-			//DbgPin7Dn();
-		#endif
-    }
-}
-void sco_audio_init_pl_ext(void)
-{
-    return;
-}
-void sco_audio_shutdown_pl_ext(void)
-{
-	return;
-}
-
-API_RESULT sco_audio_setup_pl_ext(SCO_AUDIO_EP_INFO *ep_info)
-{
-	SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-	PRINTF("RT685 MCU: sco_audio_setup_pl_ext, ringtone=%d \r\n", NowInIncomingCallRingTone);
-	SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
-
-    sco_audio_setup = 1;
-    if (NowInIncomingCallRingTone == 0U)
-    {
-        audio_setup_pl_ext(false, ep_info);
-    }else
-    {
-        //audio_setup_pl_ext(true, ep_info);
-        audio_setup_pl_ext(false, ep_info);
-        WasInRingTone=1;
-    }
-    memcpy(&s_ep_info, ep_info, sizeof(SCO_AUDIO_EP_INFO));
-    RequestToGetIntoHfp=1;
-    return API_SUCCESS;
-}
 
 static uint32_t taskCreated = 0;
 void StartAudioTask(void)
@@ -1088,6 +580,7 @@ void StartAudioTask(void)
 
 	InitAudioCircularBuf(1,1,1);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 	//InitAndStartPdm();		//if use this , it init dma again, cause BT firmware downloading fail
+	
 #if UsingQAR87Board == 1
 	//Initial Smart Amplifier
     hal_amp_aw88166_power_on();
@@ -1098,35 +591,51 @@ void StartAudioTask(void)
 	if (taskCreated == 0)
 	{
 
-		OSA_SemaphoreCreate(xSemaphoreScoAudio, 0);
-		result = xTaskCreate(SCO_Edma_Task,   "SCO_Edma",   1024, NULL, HFP_STREAMER_TASK_PRIORITY, NULL);
-		assert(pdPASS == result);
+		EvtGrpHdl_StateMangerTaskToBtStack=xEventGroupCreate();
 		OSA_SemaphoreCreate(xSemaphoreDmaAudioDataReady, 0);
-		result = xTaskCreate(VitStandBy_Task, "VitStandBy", 1024, NULL, HFP_STREAMER_TASK_PRIORITY, NULL);
+		result = xTaskCreate(VitStandBy_Task, "VitStandBy", 1024*10, NULL, HFP_STREAMER_TASK_PRIORITY, NULL);
 		assert(pdPASS == result);
 
 		taskCreated = 1U;
 	}
 }
 
-API_RESULT sco_audio_start_pl_ext(void)
+void sco_audio_init_pl_ext(void)
 {
-	#if UseEventToControlBtHfp==1
-		PRINTF_M("RT685 MCU: sco_audio_start_pl_ext \r\n");
+	PRINTF_M("sco_audio_init_pl_ext\r\n");
+    return;
+}
+void sco_audio_shutdown_pl_ext(void)
+{
+	PRINTF_M("sco_audio_shutdown_pl_ext\r\n");
+	return;
+}
 
-		BtHfpRequest=HfpRequest_AudioStart;
-		//block till workstate is WorkState_HfpCall and after HfpRequest_AudioStart is done (audio interface is running)
-		xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_AudioStart, pdTRUE, pdFALSE, portMAX_DELAY);
-		xEventGroupClearBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_AudioStart);
+API_RESULT sco_audio_setup_pl_ext(SCO_AUDIO_EP_INFO *ep_info)
+{
+	PRINTF_M("RT685 MCU: sco_audio_setup_pl_ext, ringtone=%d \r\n", NowInIncomingCallRingTone);
+	
+    txMic_index     = 0U;
+    rxMic_index     = 0U;
+    txSpeaker_index = 0U, rxSpeaker_index = 0U;
+    (void)atomic_set(&emptySpeakerBlock, BUFFER_NUMBER);
+    (void)atomic_set(&emptyMicBlock, BUFFER_NUMBER);
+
+	BtHfpAudioFs      =ep_info->sampl_freq;
+	BtHfpAudioBitWidth=ep_info->sample_len;
+    WasInInComingRingTone=NowInIncomingCallRingTone;
+    RequestToGetIntoHfp=1;
 
 		return API_SUCCESS;
-	#endif
+}
+
+
+void sco_audio_start(void)
+{
 	hal_audio_transfer_t xfer;
 	BaseType_t result = 0;
 
-	SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-	PRINTF("RT685 MCU: sco_audio_start_pl_ext \r\n");
-	SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
+	PRINTF_M("RT685 MCU: sco_audio_start_pl_ext \r\n");
 
 	(void)atomic_set(&emptySpeakerBlock, 0);
 	for (uint8_t index = 0; index < BUFFER_NUMBER; ++index)
@@ -1151,18 +660,17 @@ API_RESULT sco_audio_start_pl_ext(void)
 
 	CirAudioBuf_ClearAllSamples_S16(&BTUpAudioBuf_S16);
 	CirAudioBuf_ClearAllSamples_S16(&BTDnAudioBuf_S16);
-	//ClearBTUpDnAudioBufDataArea();
 
 	//start dmic immediately, then in dmic intr, fc1,fc3 will be started
 	ImmediatelyStartDmicDmaChannels(0xff);	//mic0,1,2,3, after calling this, dmic dma intr occurs one frame later!
-	PRINTF("sco_audio_start_pl_ext, SCO audio ports are all started \r\n");
+	PRINTF_M("sco_audio_start_pl_ext, SCO audio ports are all started \r\n");
 
 	if (NowInIncomingCallRingTone == 0U)
 	{
-		if(WasInRingTone)
+		if(WasInInComingRingTone)
 		{
 			NowInHfpTelCall=1;
-			PRINTF("NowInHfpTelCall \r\n");
+			PRINTF_M("NowInHfpTelCall \r\n");
 		}
 		else
 		{
@@ -1171,28 +679,35 @@ API_RESULT sco_audio_start_pl_ext(void)
 							//check the beyerdynamic speaker, it is the same!!!
 							//so, we keep the logic of checking button in App call or Hfp call as it is.
 
-			PRINTF("NowInHfpAppCall \r\n");
+			PRINTF_M("Now either InHfpAppCall or InHfpTelCall \r\n");
 		}
 	}
 	else
 	{
-		//NowInHfpTelCall=1;
-		PRINTF("NowInRingTone \r\n");
+		NowInHfpTelCall=0;
+		NowInHfpAppCall=0;
+		PRINTF_M("NowInRingTone \r\n");
 	}
+	return;
+}
+API_RESULT sco_audio_start_pl_ext(void)
+{
+	PRINTF_M("RT685 MCU: sco_audio_start_pl_ext \r\n");
+
+	BtHfpRequest=HfpRequest_AudioStart;
+	//block till workstate is WorkState_HfpCall and after HfpRequest_AudioStart is done (audio interface is running)
+	xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_AudioStart, pdTRUE, pdFALSE, portMAX_DELAY);
+	xEventGroupClearBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_AudioStart);
 
 	return API_SUCCESS;
 }
 
 API_RESULT sco_audio_stop_pl_ext(void)
 {
-	SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-	PRINTF("RT685 MCU: sco_audio_stop_pl_ext \r\n");
-	SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
+	PRINTF_M("RT685 MCU: sco_audio_stop_pl_ext \r\n");
 
-	sco_audio_setup = 0;
-	saiEnable = 0;
-	//RingToneIsInitialized=0;
-	WasInRingTone=0;
+	WasInInComingRingTone=0;
+	RequestToGetOutofHfp=1;
 	return API_SUCCESS;
 }
 
@@ -1202,79 +717,49 @@ void sco_audio_spkr_play_pl_ext(UCHAR *m_data, UINT16 m_datalen)
     /* Write to Codec */
 }
 #endif /* HCI_SCO */
-API_RESULT platform_audio_play_ringtone()
-{
-	cpy_index = 0;
-	tx_index  = 0U;
-	hal_audio_transfer_t xfer;
-	if (sco_audio_setup)
-	{
-		return API_SUCCESS;
-	}
-	(void)atomic_set(&emptySpeakerBlock, BUFFER_NUMBER);
-	if (NowInIncomingCallRingTone == 0)
-	{
-		if (sco_audio_setup == 1)
-		{
-			Deinit_Board_Audio();
-		}
-
-		SCO_AUDIO_EP_INFO ep_info;
-		ep_info.sampl_freq = 16000U;
-		ep_info.sample_len = 16U;
-		//audio_setup_pl_ext(true, &ep_info);
-		audio_setup_pl_ext(false, &ep_info);
-		NowInIncomingCallRingTone = 1;
-	}
-
-	return API_SUCCESS;
-}
-
 API_RESULT sco_audio_set_speaker_volume_ext(UCHAR volume)
 {
-	#if UseEventToControlBtHfp==1
-		PRINTF_M("RT685 MCU: sco_audio_set_speaker_volume_ext \r\n");
+	PRINTF_M("RT685 MCU: sco_audio_set_speaker_volume_ext \r\n");
+
+	if(DeviceWorkStateCur!=WorkState_HfpCall)
+	{
+		return API_FAILURE;
+		}
 
 		BtHfpRequest=HfpRequest_SetCodecAmpVolume;
+	BtHfpAudioVolume=volume;
 		//block till workstate is WorkState_HfpCall and after HfpRequest_AudioStart is done (audio interface is running)
 		xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_SetCodecAmpVolume, pdTRUE, pdFALSE, portMAX_DELAY);
 		xEventGroupClearBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_SetCodecAmpVolume);
 
 		return API_SUCCESS;
-	#endif
-    if (sco_audio_setup == 0)
-    {
-        return API_FAILURE;
-    }
-    /* HFP support 0- 15, codec support 0-100*/
-	#if UsingQAR87Board == 1
-	//Codec or Amplifier configuration
-	//to do ....
-	#else
-    if (kStatus_Success == CODEC_SetVolume(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, ((volume * 6U) + 9U)))
-    {
-        return API_SUCCESS;
-    }
-	#endif
-    return API_FAILURE;
 }
 void sco_audio_play_ringtone_pl_ext(void)
-{
-    platform_audio_play_ringtone();
-	PRINTF("platform_audio_play_ringtone, ring tone playing is started \r\n");
+    {
+if (NowInIncomingCallRingTone == 0)
+    {
+	BtHfpAudioFs=16000;
+	BtHfpAudioBitWidth=16;
+	NowInIncomingCallRingTone = 1;
+	RequestToGetIntoHfp=1;
+    }
+
+PRINTF_M("sco_audio_play_ringtone_pl_ext, NowInIncomingCallRingTone=%d\r\n",NowInIncomingCallRingTone);
+return;
 }
 void sco_audio_play_ringtone_exit_pl_ext(void)
 {
+	PRINTF_M("sco_audio_play_ringtone_exit_pl_ext\r\n");
     if (NowInIncomingCallRingTone == 1)
     {
-        Deinit_Board_Audio();
-        //memset(RxAudioBufFromBt, 0x0, BUFFER_NUMBER * BUFFER_SIZE);
+        sco_audio_start_pl_ext();
         NowInIncomingCallRingTone = 0U;
-        if (sco_audio_setup == 1)
+    }else
+    {
+    	if(WasInInComingRingTone)
         {
-        	PRINTF("sco_audio_play_ringtone_exit_pl_ext, ring tone playing is finished \r\n");
-            audio_setup_pl_ext(false, &s_ep_info);
-            sco_audio_start_pl_ext();
+    		RequestToGetOutofHfp=1;
+    		PRINTF_M("sco_audio_play_ringtone_exit_pl_ext RequestToGetOutofHfp=1\r\n");
         }
     }
 }

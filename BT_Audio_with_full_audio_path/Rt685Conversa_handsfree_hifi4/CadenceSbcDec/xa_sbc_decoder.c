@@ -885,13 +885,13 @@ int SbcDecodeProcess(int SbcFileIdx)
 	int loopTime=0;
 
 	if(i_samp_freq==16000)
-		loopTime=4*2;		//4*8ms=32ms, this is > 30ms	*2 to double sure call the decoding enough times
+		loopTime=4;		//2*8ms=10mss, this is   > 10ms	--- calling this decoding functions is once every 10ms
 
 	if(i_samp_freq==48000)
-		loopTime=12*2;	//12*2.666ms=32ms, this is > 30ms	*2 to double sure call the decoding enough times
+		loopTime=6;	//6*2.666ms=15.96ms, this is > 10ms	--- calling this decoding functions is once every 10ms
 
 	if(i_samp_freq==44100)
-		loopTime=11*2;	//11*2.902ms=31.9ms, this is > 30ms	*2 to double sure call the decoding enough times
+		loopTime=5;	//5*2.902ms=14.51ms, this is > 10ms	--- calling this decoding functions is once every 10ms
 
 	int FreeAod_Audio;
 	int AodSbc;

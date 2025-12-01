@@ -38,8 +38,8 @@ extern U8 UpStreamingIsStarted;
 
 #if Rt685I2SToNvtIsI2SMaster==0
 	//only when NT is I2S master, we use cir buffer
-	extern T_CircularAudioBuf_S32 I2SRxFrNt_CirBuf;
-	extern T_CircularAudioBuf_S32 I2STxToNt_CirBuf;
+	extern T_CircularAudioBuf_S32 I2SRxFrNvt_CirBuf;
+	extern T_CircularAudioBuf_S32 I2STxToNvt_CirBuf;
 #endif
 
 extern T_CircularAudioBuf_S16 BTDnAudioBuf_S16;

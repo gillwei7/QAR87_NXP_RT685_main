@@ -134,7 +134,7 @@
 
 #if Rt685I2SToNvtIsI2SMaster==0
 #define AudioFrameSizeInSamplePerCh_I2SToNvt		48
-#define I2SNt_CirBuf_LenInSamples					(48*6+AudioFrameSizeInSamplePerCh_16KHz)			//this is 8.66ms
+#define I2SNvt_CirBuf_LenInSamples					(48*6+AudioFrameSizeInSamplePerCh_16KHz)			//this is 8.66ms
 #endif
 
 
@@ -203,6 +203,16 @@ typedef enum _VoiceCommandItem
 } VoiceCommandItem_t;
 
 
+typedef enum _ConversaTuningCfg
+{
+	ConversaTuningCfg_NoChange=0,
+	ConversaTuningCfg_HfpVoiceCall,
+	ConversaTuningCfg_NearEnd,
+	ConversaTuningCfg_FarEnd,
+	ConversaTuningCfg_XXX,
+} ConversaTuningCfg_t;
+
+
 #define CirBuf_SbcRaw_LengthInBytes 20000				//this value was checked by printing MCU writing and DSP reading rd/wr pointers --- at the beginning, MCU will write 8000 bytes in, so 20K byte size is a proper size
 #define CirBuf_SbcRaw_MaxReadSizeLengthInBytes 512		//using 512 because Cadence Sbc decoder uses 512 bytes as input buffer size, this is the maximum size reading from this cir buffer
 
@@ -215,18 +225,18 @@ typedef struct
 	__attribute__((aligned(32))) S32 UacUpAudioBuf[AudioFrameSizeInSamplePerCh_16KHz*8];		//this buffer is channel mixed, and to be used as cir buffer data source
 	__attribute__((aligned(32))) S32 UacDnAudioBufL[AudioFrameSizeInSamplePerCh_48KHz*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh_16KHz space
 	__attribute__((aligned(32))) S32 UacDnAudioBufR[AudioFrameSizeInSamplePerCh_48KHz*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh_16KHz space
-	__attribute__((aligned(32))) S16 I2SLineInBufL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		// from amp, for AEC, not use now
-	__attribute__((aligned(32))) S16 I2SLineInBufR[AudioFrameSizeInSamplePerChMaxForDMABuf];
-	__attribute__((aligned(32))) S16 I2SInNvtBufL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		//from nvt, cm33 write in, DSP conversa process
-	__attribute__((aligned(32))) S16 I2SInNvtBufR[AudioFrameSizeInSamplePerChMaxForDMABuf];
+	__attribute__((aligned(32))) S16 I2SBufInFrAmpL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		// from amp, for AEC, not use now
+	__attribute__((aligned(32))) S16 I2SBufInFrAmpR[AudioFrameSizeInSamplePerChMaxForDMABuf];
+	__attribute__((aligned(32))) S16 I2SBufInFrNvtL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		//from nvt, cm33 write in, DSP conversa process
+	__attribute__((aligned(32))) S16 I2SBufInFrNvtR[AudioFrameSizeInSamplePerChMaxForDMABuf];
 
-	__attribute__((aligned(32))) S16 I2SLineOtBufL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		//tx to amp, ex. Conversa RX output
-	__attribute__((aligned(32))) S16 I2SLineOtBufR[AudioFrameSizeInSamplePerChMaxForDMABuf];
-	__attribute__((aligned(32))) S16 I2SOtNvtBufL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		//out to nvt, DSP write, cm33 deliver to nvt
-	__attribute__((aligned(32))) S16 I2SOtNvtBufR[AudioFrameSizeInSamplePerChMaxForDMABuf];
+	__attribute__((aligned(32))) S16 I2SBufOtToAmpL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		//tx to amp, ex. Conversa RX output
+	__attribute__((aligned(32))) S16 I2SBufOtToAmpR[AudioFrameSizeInSamplePerChMaxForDMABuf];
+	__attribute__((aligned(32))) S16 I2SBufOtToNvtL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		//out to nvt, DSP write, cm33 deliver to nvt
+	__attribute__((aligned(32))) S16 I2SBufOtToNvtR[AudioFrameSizeInSamplePerChMaxForDMABuf];
 
-	__attribute__((aligned(32))) S32 BTRxInAudio[AudioFrameSizeInSamplePerCh_16KHz];	//MCU side writes in the full frame if BT is at 16KHz, writes in half if BT is at 8KHz
-	__attribute__((aligned(32))) S32 BTTxOtAudio[AudioFrameSizeInSamplePerCh_16KHz];	//MCU side takes out the full frame if BT is at 16KHz, takes out half if BT is at 8KHz
+	__attribute__((aligned(32))) S32 AudioBufInFrBt[AudioFrameSizeInSamplePerCh_16KHz];	//MCU side writes in the full frame if BT is at 16KHz, writes in half if BT is at 8KHz
+	__attribute__((aligned(32))) S32 AudioBufOtToBt[AudioFrameSizeInSamplePerCh_16KHz];	//MCU side takes out the full frame if BT is at 16KHz, takes out half if BT is at 8KHz
 
 
 	//part 2 --- others
@@ -247,11 +257,15 @@ typedef struct
 	U32 FileAddrTable_Opus	[20];
 	U32 FileAddrTable_Sbc	[10];
 
+	U32 NeedToSwitchConversaTuningCfg;		//MCU writes this to command DSP side to re-init conversa with the selected tuning cfg
+
 	U32 NeedToStartPlayOpus;
 	U32 PlayOpusFileIdx;
 	U32 NeedToStartPlaySbc;
 	U32 PlaySbcFileIdx;
 	U32 NeedToStopA2dpSbc;
+
+	float MasterVolumeGain0To1;				//this value must be between 0.0 ~ 1.0
 
 	#if 0
 		//if using this type, command info can not be passed to MCU ???

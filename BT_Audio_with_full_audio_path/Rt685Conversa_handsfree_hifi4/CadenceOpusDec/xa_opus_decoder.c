@@ -969,7 +969,7 @@ int OpusDecodeProcess(void)
 	while( 1 )
 	{
 	#else
-	for(int ii=0;ii<2;ii++)	//to run the decoding twice to generate 40ms --- cause each time call this processing function, is 24~32ms interval
+	//for(int ii=0;ii<2;ii++)	//to run the decoding twice to generate 40ms --- cause each time call this processing function, is 24~32ms interval ---- later changed to 10ms calling , so once call is enough
 	{
 		int FreeAod;
 

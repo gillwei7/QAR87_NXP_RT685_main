@@ -177,76 +177,7 @@ wm8904_config_t wm8904ScoConfig = {
 };
 codec_config_t boardCodecScoConfig = {.codecDevType = kCODEC_WM8904, .codecDevConfig = &wm8904ScoConfig};
 
-#if 0
-//boardCodecScoConfig1 and wm8904ScoConfig1 is for local ring tone audio --- actually not used ???
-wm8904_config_t wm8904ScoConfig1 = {
-    .i2cConfig          = {.codecI2CInstance = BOARD_CODEC_I2C_INSTANCE, .codecI2CSourceClock = 25010526},
-    .recordSource       = kWM8904_RecordSourceLineInput,
-    .recordChannelLeft  = kWM8904_RecordChannelLeft2,
-    .recordChannelRight = kWM8904_RecordChannelRight2,
-    .playSource         = kWM8904_PlaySourceDAC,
-    .slaveAddress       = WM8904_I2C_ADDRESS,
-    .protocol           = kWM8904_ProtocolI2S,
-    .format             = {.sampleRate = kWM8904_SampleRate8kHz, .bitWidth = kWM8904_BitWidth16},
-    .mclk_HZ            = 24576000,
-    .master             = true,
-};
-codec_config_t boardCodecScoConfig1 = {.codecDevType = kCODEC_WM8904, .codecDevConfig = &wm8904ScoConfig1};
-#endif
 
-hal_audio_dma_config_t txSpeakerDmaConfig = {
-    .instance             = EXAMPLE_DMA_INSTANCE,
-    .channel              = EXAMPLE_SPKBUF_TX_CHANNEL,
-    .enablePreemption     = false,
-    .enablePreemptAbility = false,
-    .priority             = kHAL_AudioDmaChannelPriorityDefault,
-    .dmaMuxConfig         = NULL,
-    .dmaChannelMuxConfig  = NULL,
-};
-
-hal_audio_config_t txSpeakerConfig = {
-    .dmaConfig         = &txSpeakerDmaConfig,
-    .ipConfig          = NULL,
-    .srcClock_Hz       = 24576000,
-    .sampleRate_Hz     = (uint32_t)kHAL_AudioSampleRate8KHz,
-    .frameLength       = 32,
-    .fifoWatermark     = 0,
-    .masterSlave       = kHAL_AudioSlave,
-    .bclkPolarity      = kHAL_AudioSampleOnRisingEdge,
-    .frameSyncWidth    = kHAL_AudioFrameSyncWidthHalfFrame,
-    .frameSyncPolarity = kHAL_AudioBeginAtRisingEdge,
-    .lineChannels      = DEMO_SPKBUF_TX_CHANNEL,
-    .dataFormat        = kHAL_AudioDataFormatDspModeB,
-    .bitWidth          = (uint8_t)kHAL_AudioWordWidth16bits,
-    .instance          = DEMO_SPKBUF_TX_INSTANCE,
-};
-
-hal_audio_dma_config_t rxMicDmaConfig = {
-    .instance             = EXAMPLE_DMA_INSTANCE,
-    .channel              = EXAMPLE_MICBUF_RX_CHANNEL,
-    .enablePreemption     = false,
-    .enablePreemptAbility = false,
-    .priority             = kHAL_AudioDmaChannelPriorityDefault,
-    .dmaMuxConfig         = NULL,
-    .dmaChannelMuxConfig  = NULL,
-};
-
-hal_audio_config_t rxMicConfig = {
-    .dmaConfig         = &rxMicDmaConfig,
-    .ipConfig          = NULL,
-    .srcClock_Hz       = 24576000,
-    .sampleRate_Hz     = (uint32_t)kHAL_AudioSampleRate8KHz,
-    .frameLength       = 32,
-    .fifoWatermark     = 0,
-    .masterSlave       = kHAL_AudioSlave,
-    .bclkPolarity      = kHAL_AudioSampleOnRisingEdge,
-    .frameSyncWidth    = kHAL_AudioFrameSyncWidthHalfFrame,
-    .frameSyncPolarity = kHAL_AudioBeginAtRisingEdge,
-    .lineChannels      = DEMO_MICBUF_RX_CHANNEL,
-    .dataFormat        = kHAL_AudioDataFormatDspModeB,
-    .bitWidth          = (uint8_t)kHAL_AudioWordWidth16bits,
-    .instance          = DEMO_MICBUF_RX_INSTANCE,
-};
 
 hal_audio_dma_config_t txMicDmaConfig = {
     .instance             = EXAMPLE_DMA_INSTANCE,
@@ -715,7 +646,7 @@ void BOARD_InitHardware(void)
 
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: ----IW611 BT HFP A2DP with Conversa--- \r\n");
-	PRINTF("RT685 MCU: ------------ McuVer 1.6.0 ------------ \r\n");
+	PRINTF("RT685 MCU: ------------ McuVer 1.6.1 ------------ \r\n");
 	PRINTF("RT685 MCU: ----IW611 BT HFP A2DP with Conversa--- \r\n");
 
 	PRINTF("\r\n");

@@ -337,7 +337,7 @@ test						CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(CurrentStreamSbc_
         //g_audioInit = 1;
 
 		cmd_init_ct();
-		ClearAudioCirBuf(0,0,1);
+		//ClearAudioCirBuf(0,0,1);			//???
         // TODO gill avrcp not connect so far
 		/*AVRCP Profile level connection*/
 		//avrcp_control_connect(conn_rider_phone);
@@ -437,7 +437,7 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 			//xfer.data           = data;
 
 
-			//DbgPin6Up();
+			//DbgPin6Up();DbgPin5Up();
 			SEMA42_Lock(APP_SEMA42, SEMA42_GATE1, domainId);
 				int FreeAod;
 				FreeAod=CirAudioBuf_SpaceAvailableInSamples_S8((volatile T_CircularAudioBuf_S8 *)&VarBlockSharedByDspAndMcu.CirBuf_SbcRaw);
@@ -469,7 +469,7 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 
 				PRINTF("BT Sbc buf: %d\r\n", CirBuf_SbcRaw_LengthInBytes-FreeAod);
 			SEMA42_Unlock(APP_SEMA42, SEMA42_GATE1);
-			//DbgPin6Dn();
+			//DbgPin6Dn();DbgPin5Dn();
 			// Get into MusicPlayer State Only when current state is HomeVitStandby
 			if(DeviceWorkStateCur==WorkState_HomeVitStandby)
 			{

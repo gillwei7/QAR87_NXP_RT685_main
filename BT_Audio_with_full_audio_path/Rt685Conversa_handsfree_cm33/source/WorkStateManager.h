@@ -75,7 +75,6 @@ extern int BtA2dpFs_ProvidedFromBtStack;
 
 //---------------------------------defines for HFP stack request and events-----------------------------------------
 //---beg---
-#if UseEventToControlBtHfp==1
 typedef enum
 {
 	HfpRequest_None  = 0,
@@ -90,7 +89,6 @@ typedef enum
 extern TBtHfpRequest BtHfpRequest;
 extern EventGroupHandle_t EvtGrpHdl_StateMangerTaskToBtStack;
 
-#endif
 //---end---
 //---------------------------------defines for HFP stack request and events-----------------------------------------
 
@@ -182,6 +180,7 @@ extern int RequestToGetOutofAbout;
 extern int RequestToGetIntoHome;
 extern int RequestToGetOutofHome;
 
+extern void sco_audio_start(void);
 extern volatile int AllowAudioInterfaceReInit_PdmI2S;
 extern volatile int AllowAudioInterfaceReInit_Fc25;
 

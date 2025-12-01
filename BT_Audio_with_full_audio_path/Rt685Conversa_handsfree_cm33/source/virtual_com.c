@@ -592,11 +592,11 @@ usb_status_t USB_DeviceCdcVcomInit(usb_device_composite_struct_t *deviceComposit
 
 const char *ComPrintInfo_Info1[]=
 {
-"command a is pressed.\r\n",
+"to start an OPUS file play\r\n",
 };
 const char *ComPrintInfo_Info2[]=
 {
-"command b is pressed.\r\n",
+"to start an SBC file play\r\n",
 };
 const char *ComPrintInfo_Info3[]=
 {
@@ -643,10 +643,21 @@ void USB_DeviceCdcVcomTask(void)
             //source select
             case 'A':
             case 'a':
+            	VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
+            	VarBlockSharedByDspAndMcu.PlayOpusFileIdx=s_currRecvBuf[0]-'0';
+            	//for now, only 3  opus files are included
+            	if(VarBlockSharedByDspAndMcu.PlayOpusFileIdx > 2)
+            		VarBlockSharedByDspAndMcu.PlayOpusFileIdx = 2;
            		ComPrintInfoPtr=ComPrintInfo_Info1[0];
             	break;
             case 'B':
             case 'b':
+            	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
+            	VarBlockSharedByDspAndMcu.PlayOpusFileIdx=s_currRecvBuf[0]-'0';
+            	//for now, only 3  opus files are included
+            	if(VarBlockSharedByDspAndMcu.PlaySbcFileIdx > 2)
+            		VarBlockSharedByDspAndMcu.PlaySbcFileIdx = 2;
+
            		ComPrintInfoPtr=ComPrintInfo_Info2[0];
             	break;
             case 'C':

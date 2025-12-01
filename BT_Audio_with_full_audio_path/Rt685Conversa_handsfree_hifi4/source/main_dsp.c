@@ -56,6 +56,7 @@ int ToTempSkipVitPorcess=0;
 U32 VComTestDataSpace[200];
 U32 AudioFrameCnt=0;
 uint8_t domainId;
+ConversaTuningCfg_t CurrentConversaTuningCfg;
 
 uint8_t APP_GetDSPCoreDomainID(void)
 {
@@ -292,7 +293,7 @@ int main(void)
 
     SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
 		PRINTF("RT685 DSP: Started ---IW611 BT HFP A2DP with Conversa---- \r\n");
-		PRINTF("RT685 DSP: started ----------- DspVer 1.6.0 ------------- \r\n");
+		PRINTF("RT685 DSP: started ----------- DspVer 1.6.1 ------------- \r\n");
     	PRINTF("RT685 DSP: Started ---IW611 BT HFP A2DP with Conversa---- \r\n");
     	PRINTF("RT685 DSP: DSP freq: %d Hz\r\n",CLOCK_GetFreq(kCLOCK_DspCpuClk));
 		InitMeterAndCompressor();
@@ -302,7 +303,9 @@ int main(void)
 	SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
 		HeapPtr=GetCurrentHeapTail(32);
 		PRINTF("RT685 DSP: heap base address, %x\r\n", (U32)HeapPtr);
-		InitConversa();
+
+		InitConversa(ConversaTuningCfg_HfpVoiceCall,1);		//to print
+
 		HeapPtr=GetCurrentHeapTail(32);
 		PRINTF("RT685 DSP: heap base address, %x\r\n", (U32)HeapPtr);
 		StackPtr=GetCurrentStackHead();
@@ -479,68 +482,14 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 		 *      - wait until g_audioTask_mainSemaphore > 0
 		 */
 		//retStatusXos = xos_sem_get( &g_audioTask_audioVitProcessSemaphore );   	// Wait until the audio vit task semaphore can be decremented
-		retStatusXos = xos_sem_tryget( &g_audioTask_audioVitProcessSemaphore );   	// Wait until the audio vit task semaphore can be decremented
-		//retStatusXos=xos_sem_get_timeout(&g_audioTask_audioVitProcessSemaphore, xos_msecs_to_cycles(10-2));		//time out: 4ms
+		//retStatusXos = xos_sem_tryget( &g_audioTask_audioVitProcessSemaphore );   	// Wait until the audio vit task semaphore can be decremented
+		retStatusXos=xos_sem_get_timeout(&g_audioTask_audioVitProcessSemaphore, xos_msecs_to_cycles(10-2));		//time out: 4ms
 
-		if ( retStatusXos != XOS_OK )
+		if ( XOS_ERR_TIMEOUT == retStatusXos )
 		{
 			//PRINTF("FAIL - [DSP audioProcessTask]: Semaphore mechanism (error = %d)\r\n",retStatusXos);
 			//time out --- to do decoding
-		}else
-		{
-			#if 1	//VIT process
-				if(ToTempSkipVitPorcess)
-				{
-					g_vitFramecount++;
-				}else
-				{
-					xos_mutex_lock(&g_audio_vitBufferMutex);	//--- the other side, can NOT call xos_mutex_lock from intr, but now, algo processing is moved to task(thread), CAN call this now
-						p_conversaToVitBuff_16b = CirAudioBuf_ReadSamples_GetRdPtr_S16(&VitCircBuff, p_swIpVIT_handle->vitConfig.framesize);
-						p_conversaToVitBuff_16b_RawMic= CirAudioBuf_ReadSamples_GetRdPtr_S16(&VitCircBuff_RawMic, p_swIpVIT_handle->vitConfig.framesize);
-					xos_mutex_unlock(&g_audio_vitBufferMutex); //--- the other side, can NOT call xos_mutex_lock from intr, but now, algo processing is moved to task(thread), CAN call this now
-
-					/********************************************************************
-					 * VIT PROCESS
-					 *		- Copy current samples from source
-					 *		- Check if there are enogugh samples to run VIT
-					 *		- Run VIT process
-					 *		- Send message to MCU to indicate VIT process finished
-					 *******************************************************************/
 					DbgPin6Up();
-					VIT_Status = swProcessVIT( p_swIpVIT_handle,
-											   p_conversaToVitBuff_16b,
-											   p_conversaToVitBuff_16b_RawMic,
-											   p_swIpVIT_handle->vitConfig.framesize,
-											   &g_vitDetectionResult,
-											   &g_vitVcDetectionId
-											 );
-
-					DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();
-					DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();
-					DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();DbgPin6Dn();
-
-					if (VIT_Status != VIT_SUCCESS)
-					{
-						PRINTF("  VIT_Process error : %d\n", VIT_Status);
-						retStatusFunc = kStatus_Fail;
-					}
-				}
-			#endif
-
-			#if 0	//print something to show DSP is active
-				if(!(g_vitFramecount%20))
-				{
-					SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-					DbgPin8Up();
-						PRINTF("RT685 DSP: active \r\n");
-					DbgPin8Dn();
-					SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
-				}
-			#endif
-
-
-			DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();
-			DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();DbgPin6Up();
 
 			#if EnableOpusDec==1
 				//OPUS decoding temp place here --- later may move to a new task
@@ -723,6 +672,59 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 			#endif
 
 			DbgPin6Dn();
+
+		}else
+		{
+			#if 1	//VIT process
+				if(ToTempSkipVitPorcess)
+				{
+					g_vitFramecount++;
+				}else
+				{
+					xos_mutex_lock(&g_audio_vitBufferMutex);	//--- the other side, can NOT call xos_mutex_lock from intr, but now, algo processing is moved to task(thread), CAN call this now
+						p_conversaToVitBuff_16b = CirAudioBuf_ReadSamples_GetRdPtr_S16(&VitCircBuff, p_swIpVIT_handle->vitConfig.framesize);
+						p_conversaToVitBuff_16b_RawMic= CirAudioBuf_ReadSamples_GetRdPtr_S16(&VitCircBuff_RawMic, p_swIpVIT_handle->vitConfig.framesize);
+					xos_mutex_unlock(&g_audio_vitBufferMutex); //--- the other side, can NOT call xos_mutex_lock from intr, but now, algo processing is moved to task(thread), CAN call this now
+
+					/********************************************************************
+					 * VIT PROCESS
+					 *		- Copy current samples from source
+					 *		- Check if there are enogugh samples to run VIT
+					 *		- Run VIT process
+					 *		- Send message to MCU to indicate VIT process finished
+					 *******************************************************************/
+					DbgPin6Up();
+					VIT_Status = swProcessVIT( p_swIpVIT_handle,
+											   p_conversaToVitBuff_16b,
+											   p_conversaToVitBuff_16b_RawMic,
+											   p_swIpVIT_handle->vitConfig.framesize,
+											   &g_vitDetectionResult,
+											   &g_vitVcDetectionId
+											 );
+					DbgPin6Dn();
+
+
+					if (VIT_Status != VIT_SUCCESS)
+					{
+						PRINTF("  VIT_Process error : %d\n", VIT_Status);
+						retStatusFunc = kStatus_Fail;
+					}
+				}
+			#endif
+
+			#if 0	//print something to show DSP is active
+				if(!(g_vitFramecount%20))
+				{
+					SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
+					DbgPin8Up();
+						PRINTF("RT685 DSP: active \r\n");
+					DbgPin8Dn();
+					SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
+				}
+			#endif
+
+
+
 		}
 	}
 	return 0;

@@ -943,16 +943,16 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DbgPin7Up();
 
 	AllowAudioInterfaceReInit_PdmI2S=0;
-	if(DmaTxRxIsExpected & AudioI2sPortsBitMapFlag_Fc1)	//fc1 and fc3 are to be on/off together
+	if(DmaTxRxIsExpected & AudioI2sPortsBitMapFlag_FcTxToAmp)	//fc1 and fc3 are to be on/off together
 	{
 		StartI2SToAmpAudioDmaFromDmicDmaIntr_Cnt++;
 		if(StartI2SToAmpAudioDmaFromDmicDmaIntr_Cnt>2)
 		{
 			//start Rx0 after edge
-			#if __OPTIMIZE__==0
-				WaitForRx0LRCKFallingEdge_Fc1();
+			#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
+				WaitForLRCKFallingEdge_FcTxToAmp();
 			#else
-				WaitForRx0LRCKRisingEdge_Fc1();
+				WaitForLRCKRisingEdge_FcTxToAmp();
 			#endif
 
 					((I2S_Type *)DEMO_I2SRxFrAmp)->FIFOCFG |= (1<<16);	//empty fifo
@@ -967,10 +967,10 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 					ImmediatelyStartI2S1Dma();	//after calling this, I2S dma intr occurs one frame later!
 
 			//start tx0 after edge
-			#if __OPTIMIZE__==0
-				WaitForRx0LRCKRisingEdge_Fc1();
+			#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
+				WaitForLRCKRisingEdge_FcTxToAmp();
 			#else
-				WaitForRx0LRCKFallingEdge_Fc1();
+				WaitForLRCKFallingEdge_FcTxToAmp();
 			#endif
 					((I2S_Type *)DEMO_I2STxToAmp)->FIFOCFG |= (1<<16);	//empty fifo
 					#if 1
@@ -988,45 +988,45 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 		}
 	}
 
-	if(DmaTxRxIsExpected & AudioI2sPortsBitMapFlag_FcTxToNt)	//fc1 and fc3 are to be on/off together
+	if(DmaTxRxIsExpected & AudioI2sPortsBitMapFlag_FcTxToNvt)	//fc1 and fc3 are to be on/off together
 	{
 		StartI2SToNvtAudioDmaFromDmicDmaIntr_Cnt++;
 		if(StartI2SToNvtAudioDmaFromDmicDmaIntr_Cnt>2)
 		{
 			//start Rx0 after edge
-			#if __OPTIMIZE__==0
-				WaitForLRCKFallingEdge_FcRxFrNt();
+			#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
+				WaitForLRCKFallingEdge_FcRxFrNvt();
 			#else
-				WaitForLRCKRisingEdge_FcRxFrNt();
+				WaitForLRCKRisingEdge_FcRxFrNvt();
 			#endif
 
-					((I2S_Type *)I2SRxFrNtInstance)->FIFOCFG |= (1<<16);	//empty fifo
+					((I2S_Type *)I2SRxFrNvtInstance)->FIFOCFG |= (1<<16);	//empty fifo
 					#if 1
 						//this is to ensure rx intr comes after dmic intr --- don't close this part
 						for(int i=0;i<8;i++)
 						{
 							volatile U32 t;
-							t=((I2S_Type *)I2SRxFrNtInstance)->FIFORD;
+							t=((I2S_Type *)I2SRxFrNvtInstance)->FIFORD;
 						}
 					#endif
-					ImmediatelyStartI2SRxToNtDma();	//after calling this, I2S dma intr occurs one frame later!
+					ImmediatelyStartI2SRxFrNvtDma();	//after calling this, I2S dma intr occurs one frame later!
 
 			//start tx0 after edge
-			#if __OPTIMIZE__==0
-					WaitForLRCKRisingEdge_FcRxFrNt();
+			#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
+					WaitForLRCKRisingEdge_FcRxFrNvt();
 			#else
-					WaitForLRCKFallingEdge_FcRxFrNt();
+					WaitForLRCKFallingEdge_FcRxFrNvt();
 			#endif
-					((I2S_Type *)I2STxToNtInstance)->FIFOCFG |= (1<<16);	//empty fifo
+					((I2S_Type *)I2STxToNvtInstance)->FIFOCFG |= (1<<16);	//empty fifo
 					#if 1
 						//this is to ensure tx intr comes after dmic intr --- don't close this part
 						for(int i=0;i<8;i++)
 						{
-							((I2S_Type *)I2STxToNtInstance)->FIFOWR=0;
+							((I2S_Type *)I2STxToNvtInstance)->FIFOWR=0;
 							//((I2S_Type *)DEMO_I2S4_TX1)->FIFOWR=i*0x20000;		//full the fifo tx buffer, so that tx intr can be aligned with rx and dmic
 						}
 					#endif
-					ImmediatelyStartI2STxToNtDma();	//after calling this, I2S dma intr occurs one frame later!
+					ImmediatelyStartI2STxToNvtDma();	//after calling this, I2S dma intr occurs one frame later!
 
 			//set the flag variables to initial value
 			StartI2SToNvtAudioDmaFromDmicDmaIntr_Cnt=0;
@@ -1102,167 +1102,6 @@ void DMicRx_Callback6(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	DbgPin7Dn();
 	return;
 }
-#endif
-#if 0
-#if EnableMic01==1
-U32 ToUpdateActivedI2sPorts=0;
-void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
-{
-	//DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();
-	LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();
-
-	if(ToUpdateActivedI2sPorts)
-	{
-		ActivedI2sPorts=ToUpdateActivedI2sPorts;
-		ToUpdateActivedI2sPorts=0;
-	}
-
-	if(RequestToStartI2sInPdmIntr)
-	{
-		//LedPin1Up();
-
-		//start I2S1,4 Tx
-		WaitForRx0LRCKRisingEdge_Fc1();		//this is to make sure I2S intr comes after DMIC			//start tx0 after rising edge
-		//start Tx after rising edge
-			((I2S_Type *)DEMO_I2SRxFrAmp)->FIFOCFG |= (1<<16);	//empty fifo
-			//((I2S_Type *)DEMO_I2S4_TX1)->FIFOCFG |= (1<<16);	//empty fifo
-			#if 1
-			//this is to ensure tx intr comes after dmic intr --- don't close this part
-				for(int i=0;i<8;i++)
-				{
-					((I2S_Type *)DEMO_I2SRxFrAmp)->FIFOWR=0;
-					//((I2S_Type *)DEMO_I2S4_TX1)->FIFOWR=0;
-					//((I2S_Type *)DEMO_I2S_TX1)->FIFOWR=i*0x20000;		//fpll the fifo tx buffer, so that tx intr can be aligned with rx and dmic --- using special values for debug checking
-				}
-			#endif
-				ImmediatelyStartI2S1Dma();	//after calling this, I2S dma intr occurs one frame later!
-				//ImmediatelyStartI2S4Dma();	//after calling this, I2S dma intr occurs one frame later!
-
-
-		//start I2S2,3 Rx
-		WaitForRx0LRCKFallingEdge_Fc1();
-		//start Rx0 after falling edge
-			//((I2S_Type *)DEMO_I2S2_RX0)->FIFOCFG |= (1<<16);	//empty fifo
-			((I2S_Type *)DEMO_I2STxToAmp)->FIFOCFG |= (1<<16);	//empty fifo
-			#if 1
-				//this is to ensure rx intr comes after dmic intr --- don't close this part
-				for(int i=0;i<8;i++)
-				{
-					volatile U32 t;
-					//t=((I2S_Type *)DEMO_I2S2_RX0)->FIFORD;
-					t=((I2S_Type *)DEMO_I2STxToAmp)->FIFORD;
-					t++;	//just to remove a warning
-				}
-			#endif
-				//ImmediatelyStartI2S2Dma();
-				ImmediatelyStartI2S3Dma();
-
-		//ActivedI2sPorts=RequestToOpenI2sPortsBitMap;
-		ToUpdateActivedI2sPorts=RequestToOpenI2sPortsBitMap;			//one intr later to update ActivedI2sPorts
-		RequestToOpenI2sPortsBitMap=0;
-//		UsbDnStreamingStopMonitorCnt=0;
-		I2sIsStarted=1;
-
-		RequestToStartI2sInPdmIntr=0;
-
-		//LedPin1Dn();
-	}
-
-	if(CheckTimePoint_CurrentIntrIsAStartingOne())
-	{
-		DmaDonePdmPorts=0;
-		DmaDoneI2sPorts=0;
-	}
-	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic01;
-	LedPin4Dn();
-}
-void DMicRx_Callback1(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
-{
-	DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();
-	if(CheckTimePoint_CurrentIntrIsAStartingOne())
-	{
-		DmaDonePdmPorts=0;
-		DmaDoneI2sPorts=0;
-	}
-	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic01;
-	DbgPin1Dn();
-}
-#endif
-#if EnableMic23==1
-void DMicRx_Callback2(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
-{
-	//DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();
-	LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();
-	if(CheckTimePoint_CurrentIntrIsAStartingOne())
-	{
-		DmaDonePdmPorts=0;
-		DmaDoneI2sPorts=0;
-	}
-	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic23;
-	LedPin4Dn();
-}
-void DMicRx_Callback3(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
-{
-	DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();
-	if(CheckTimePoint_CurrentIntrIsAStartingOne())
-	{
-		DmaDonePdmPorts=0;
-		DmaDoneI2sPorts=0;
-	}
-	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic23;
-	DbgPin1Dn();
-}
-#endif
-#if EnableMic45==1
-void DMicRx_Callback4(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
-{
-	//DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();
-	LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();
-	if(CheckTimePoint_CurrentIntrIsAStartingOne())
-	{
-		DmaDonePdmPorts=0;
-		DmaDoneI2sPorts=0;
-	}
-	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic45;
-	LedPin4Dn();
-}
-void DMicRx_Callback5(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
-{
-	DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();
-	if(CheckTimePoint_CurrentIntrIsAStartingOne())
-	{
-		DmaDonePdmPorts=0;
-		DmaDoneI2sPorts=0;
-	}
-	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic45;
-	DbgPin1Dn();
-}
-#endif
-#if EnableMic67==1
-void DMicRx_Callback6(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
-{
-	//DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();DbgPin2Up();
-	LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();LedPin4Up();
-	if(CheckTimePoint_CurrentIntrIsAStartingOne())
-	{
-		DmaDonePdmPorts=0;
-		DmaDoneI2sPorts=0;
-	}
-	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic67;
-	LedPin4Dn();
-}
-void DMicRx_Callback7(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
-{
-	DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();DbgPin1Up();
-	if(CheckTimePoint_CurrentIntrIsAStartingOne())
-	{
-		DmaDonePdmPorts=0;
-		DmaDoneI2sPorts=0;
-	}
-	DmaDonePdmPorts|=AudioPdmPortsBitMapFlag_Mic67;
-	DbgPin1Dn();
-}
-#endif
 #endif
 #endif
 

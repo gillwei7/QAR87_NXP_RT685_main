@@ -37,7 +37,8 @@ TSoftMixer2To1 SoftMixer2To1_6;
 TSoftMixer2To1 SoftMixer2To1_7;
 TSoftMixer2To1 SoftMixer2To1_8;
 
-TSoftGain SoftGainControl1;
+TSoftGain SoftGainControl_MasterLAndR;
+/*
 TSoftGain SoftGainControl2;
 TSoftGain SoftGainControl3;
 TSoftGain SoftGainControl4;
@@ -45,7 +46,33 @@ TSoftGain SoftGainControl5;
 TSoftGain SoftGainControl6;
 TSoftGain SoftGainControl7;
 TSoftGain SoftGainControl8;
+*/
 
+__attribute__((__section__(".iram.text")))
+void AudioProcOneFrameS32_Gain(TSoftGain *Gain, S32 *Dst, S32 *Src, int l)
+{
+    if(Gain->EnableGainFading)
+    {
+        //soft gain
+        //step 1: create gain array
+        for(int i=0;i<l;i++)
+        {
+            Gain->GainArray[i]=Gain->TargetGain*Gain->SmoothingCoefBeta + Gain->PrevGain*Gain->SmoothingCoefAlfa;
+            Gain->PrevGain=Gain->GainArray[i];
+        }
+
+        //step 2: use gain array to gain and mix
+		//vec_addf(0,0,0,10);
+		for(int i=0;i<l;i++)
+			*Dst++= *Src++ * Gain->GainArray[i];
+
+    }else
+    {
+        //hard gain
+        for(int i=0;i<l;i++)
+            *Dst++= *Src++ * Gain->TargetGain;
+    }
+}
 
 __attribute__((__section__(".iram.text")))
 void AudioProcOneFrame_Gain(TSoftGain *Gain, float *Dst, float *Src, int l)
@@ -120,7 +147,8 @@ void Init_SoftMixer2To1(TSoftMixer2To1 *p, float TgtGain_In1,  float TgtGain_In2
 
 void InitGainAndMixing(void)
 {
-	Init_SoftGain(&SoftGainControl1, 0.9999f);
+	Init_SoftGain(&SoftGainControl_MasterLAndR, 0.9999f);
+	/*
 	Init_SoftGain(&SoftGainControl2, 0.9999f);
 	Init_SoftGain(&SoftGainControl3, 0.9999f);
 	Init_SoftGain(&SoftGainControl4, 0.9999f);
@@ -128,6 +156,7 @@ void InitGainAndMixing(void)
 	Init_SoftGain(&SoftGainControl6, 0.9999f);
 	Init_SoftGain(&SoftGainControl7, 0.9999f);
 	Init_SoftGain(&SoftGainControl8, 0.9999f);
+	*/
 
 	Init_SoftMixer2To1(&SoftMixer2To1_1,0.9999f,0.9999f);
 	Init_SoftMixer2To1(&SoftMixer2To1_2,0.9999f,0.9999f);
