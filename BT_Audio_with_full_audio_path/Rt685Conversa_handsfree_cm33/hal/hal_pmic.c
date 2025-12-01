@@ -79,11 +79,20 @@ void hal_pmic_glf70583_init(void)
     glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x6A, 0x12);
 
 #if 1 //for QAR87Board
+
+#if 0 //for test only 0x25->SW1 output
+	// 0x25->SW1 on、Others off
+	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x26, 0x80);
+    // 0x26->All off
+    glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x00);
+
+#else
 	// 0x25->BUCK4 off、Others on
 	glf70583_i2c_write(GLF70583_A_I2C_ADDR, 0x26, 0xEC);
     // 0x26->BUCK1、2、4 ON、Others off
     glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0xD0);
     //glf70583_i2c_write(GLF70583_B_I2C_ADDR, 0x26, 0x40);//BUCK2 ON、Others off
+#endif
 #else
     //TODO: C4 (0x26:SW3、LDO1、LDO2) power sequence
 	// 0x25->All on
