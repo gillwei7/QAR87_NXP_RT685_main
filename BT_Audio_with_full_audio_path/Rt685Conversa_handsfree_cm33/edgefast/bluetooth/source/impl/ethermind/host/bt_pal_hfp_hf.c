@@ -2136,7 +2136,6 @@ int bt_hfp_hf_send_cmd(struct bt_conn *conn, enum bt_hfp_hf_at_cmd cmd)
     {
         case BT_HFP_HF_ATA:
             api_retval = BT_hfp_unit_callaccept(hf->handle);
-
             if (api_retval < 0)
             {
                 LOG_ERR("Failed ATA api_retval : %d", api_retval);

@@ -592,19 +592,19 @@ void hfp_hf_a2dp_task(void *pvParameters)
 	}
 #endif
 
-	while(1){
-		if(connection_timer_count < (CONNECTION_TIMER_TIMEOUT_MILLISECOND/CONNECTION_TIMER_TASK_DELAY) && (conn_rider_phone == NULL)){
-			connection_timer_count++;
-		}else{
-			connection_timer_count = 0;
-			if((g_pairedDeviceCount > 0) && (conn_rider_phone == NULL)){
-#if AUTO_CONNECT_ENABLE
-				PRINTF("Connection timeout. Connect previous paired device\r\n");
-				app_auto_connect_paired_devices();
-#endif
-			}
-		}
-		vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
-	}
-    //vTaskDelete(NULL);
+//	while(1){
+//		if(connection_timer_count < (CONNECTION_TIMER_TIMEOUT_MILLISECOND/CONNECTION_TIMER_TASK_DELAY) && (conn_rider_phone == NULL)){
+//			connection_timer_count++;
+//		}else{
+//			connection_timer_count = 0;
+//			if((g_pairedDeviceCount > 0) && (conn_rider_phone == NULL)){
+//#if AUTO_CONNECT_ENABLE
+//				PRINTF("Connection timeout. Connect previous paired device\r\n");
+//				app_auto_connect_paired_devices();
+//#endif
+//			}
+//		}
+//		vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
+//	}
+    vTaskDelete(NULL);
 }

@@ -253,15 +253,15 @@ void save_new_paired_device(struct bt_conn *conn, uint8_t isRiderHeadset)
 	#endif
 	PRINTF("Updated Paired Devices list !!\n\n");
 
-	//gill only keep one paired device in list
-	current_paired_device_count = g_pairedDeviceCount;
-
-	if(g_pairedDeviceCount > 1){
-		PRINTF("Delete previous paired device %d times\r\n", current_paired_device_count-1);
-		for(int i = 1;i < current_paired_device_count;i++){
-			delete_device(1);
-		}
-	}
+//	//gill only keep one paired device in list
+//	current_paired_device_count = g_pairedDeviceCount;
+//
+//	if(g_pairedDeviceCount > 1){
+//		PRINTF("Delete previous paired device %d times\r\n", current_paired_device_count-1);
+//		for(int i = 1;i < current_paired_device_count;i++){
+//			delete_device(1);
+//		}
+//	}
 
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
 	app_read_paired_devices();
@@ -401,7 +401,23 @@ void connect_paired_device(uint8_t device_index)
 		device_addr[i] = addr[5 - i];
 	}
 
-	app_connect(device_addr);
+	//Call the correct connection function based on device type
+	if (paired_devices[device_index - 1].device_type == RIDER_PHONE)
+	{
+		app_connect(RIDER_PHONE, device_addr);
+	}
+	else if (paired_devices[device_index - 1].device_type == RIDER_HEADSET)
+	{
+		app_connect(RIDER_HEADSET, device_addr);
+
+	}else if (paired_devices[device_index - 1].device_type == PASSENGER_HEADSET)
+	{
+		app_connect(PASSENGER_HEADSET, device_addr);
+
+	} else
+	{
+		PRINTF("Failed, Invalid device type !\n");
+	}
 }
 
 bool is_valid_device(uint8_t *addr)

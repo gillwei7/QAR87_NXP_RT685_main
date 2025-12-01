@@ -108,17 +108,17 @@ void sdp_discover_for_hfp_hf(struct bt_conn_info *info)
 	 * required device
 	 */
 	if (0 == memcmp(info->br.dst, &g_riderPhoneAddr, 6U))
-    {
+	{
 		int res;
 		res = bt_hfp_hf_discover(conn_rider_phone, &app_hfp_hf_discover);
 		if (res)
-        {
+		{
 #ifdef APP_DEBUG_EN
 			PRINTF("DUT as HFP-Dev SDP discovery failed (err %d)\n",res);
 #endif
-    }
-    else
-    {
+		}
+		else
+		{
 #ifdef APP_DEBUG_EN
 			PRINTF("DUT as HFP-Dev SDP discovery started\n");
 #endif
@@ -127,8 +127,8 @@ void sdp_discover_for_hfp_hf(struct bt_conn_info *info)
 }
 
 static void connected(struct bt_conn *conn, uint8_t err)
-        {
-            struct bt_conn_info info;
+{
+	struct bt_conn_info info;
 	if (err)
 	{
 		PRINTF("ACL Connection Failed (err %d)\n",err);
@@ -149,11 +149,11 @@ static void connected(struct bt_conn *conn, uint8_t err)
 		return;
 	}
 
-            bt_conn_get_info(conn, &info);
-            if (info.type == BT_CONN_TYPE_LE)
-            {
-                return;
-            }
+	bt_conn_get_info(conn, &info);
+	if (info.type == BT_CONN_TYPE_LE)
+	{
+		return;
+	}
 
 	 if (g_connectInitRiderPhone)
 	{
@@ -175,24 +175,24 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
 
 static void disconnected(struct bt_conn *conn, uint8_t reason)
-            {
+{
     PRINTF("ACL Disconnection (reason %d)\n", reason);
 
    if(conn_rider_phone == conn)
-                {
+    {
 
     	conn_rider_phone = NULL;
 		g_connectInitRiderPhone = 0U;
 		//app_hf_set_connectable();
-                }
-                else
-                {
+    }
+	else
+	{
 #ifdef APP_DEBUG_EN
     	PRINTF("Disconnection event from unknown device !!\n");
 #endif
 		return;
-            }
-        }
+	}
+}
 
 static void reverse_order(uint8_t dest[6], const uint8_t src[6])
 {
@@ -203,7 +203,7 @@ static void reverse_order(uint8_t dest[6], const uint8_t src[6])
 }
 
 
-static void security_changed(struct bt_conn *conn, bt_security_t level, enum bt_security_err err)
+static void security_changed(struct bt_conn *conn, bt_security_t level,  enum bt_security_err err)
 {
     char addr[BT_ADDR_LE_STR_LEN];
 
@@ -257,38 +257,42 @@ static void security_changed(struct bt_conn *conn, bt_security_t level, enum bt_
     }
 }
 
-void app_connect(uint8_t *addr)
+void app_connect(uint8_t device_type,uint8_t *addr)
 {
     uint8_t corrected_addr[6] = {0};
 
-
-	if(conn_rider_phone == NULL )
+	if(device_type == RIDER_PHONE)
 	{
-		g_connectInitRiderPhone = 1U;
-		memcpy(&g_riderPhoneAddr, addr, 6U);
-
-
-		conn_rider_phone = bt_conn_create_br(&g_riderPhoneAddr, BT_BR_CONN_PARAM_DEFAULT);
-		if (!conn_rider_phone)
+		if(conn_rider_phone == NULL )
 		{
-			g_connectInitRiderPhone = 0U;
-			PRINTF("ACL connection failed\r\n");
+			g_connectInitRiderPhone = 1U;
+			memcpy(&g_riderPhoneAddr, addr, 6U);
 
-		}
-		else
-		{
-			/* unref connection obj in advance as app user */
-			bt_conn_unref(conn_rider_phone);
 
-			if(conn_rider_phone == NULL )
+			conn_rider_phone = bt_conn_create_br(&g_riderPhoneAddr, BT_BR_CONN_PARAM_DEFAULT);
+			if (!conn_rider_phone)
 			{
-				PRINTF("Debug NULL Connecting Phone\r\n");
+				g_connectInitRiderPhone = 0U;
+				PRINTF("ACL connection failed\r\n");
+
 			}
-			PRINTF("Connecting Phone\r\n");
+			else
+			{
+				/* unref connection obj in advance as app user */
+				bt_conn_unref(conn_rider_phone);
+
+				if(conn_rider_phone == NULL )
+				{
+					PRINTF("Debug NULL Connecting Rider Phone\r\n");
+				}
+				PRINTF("Connecting Rider Phone\r\n");
+			}
+		} else
+		{
+
+			PRINTF(" Rider Phone connection already exists !! \r\n");
 		}
-	} else
-	{
-		PRINTF(" Phone connection already exists !! \r\n");
+
 	}
 
 }

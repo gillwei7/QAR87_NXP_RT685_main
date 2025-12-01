@@ -235,7 +235,27 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
         	return kStatus_SHELL_Error;
         }
 
-        app_connect(addr);
+        //Automatically connect if it's a Mobile Phone or Headset
+        if (device_type == PHONE)
+        {
+        	app_connect(RIDER_PHONE,addr);
+
+        }else if (device_type == HEADSET)
+        {
+        	if((strcmp(argv[3], "PH") == 0) || (strcmp(argv[3], "ph") == 0))
+        	{
+        		PRINTF("Connecting PASSENGER_HEADSET \n");
+        		app_connect(PASSENGER_HEADSET, addr);
+
+        	}else
+        	{
+        		app_connect(RIDER_HEADSET, addr);
+        	}
+
+        }else
+        {
+        	PRINTF("Device is not a Mobile Phone or Headset.\n");
+        }
     }
     else if (strcmp(argv[1], "connect_paired") == 0)
     {
