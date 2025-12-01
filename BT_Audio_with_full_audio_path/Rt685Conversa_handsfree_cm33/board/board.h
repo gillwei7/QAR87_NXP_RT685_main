@@ -330,11 +330,11 @@
 #define NXP_TOUCH_INT_PIN             8U      //TOUCH_INT_PIN
 
 /* Charger */
-#if UsingQAR87BoardHwVersion1 == 1 // Actual Board
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
 #define CHG_INT_N_R_PORT              0U      //CHARG_INT_PORT
 #define CHG_INT_N_R_PIN               21U     //CHARG_INT_PIN
 #endif
-#if UsingQAR87BoardHwVersion1 == 0 // Dev Board
+#if UsingQAR87BoardHwVersion == 0 // Dev Board
 #define CHG_INT_N_R_PORT              1U      //CHARG_INT_PORT
 #define CHG_INT_N_R_PIN               15U     //CHARG_INT_PIN
 #endif
@@ -363,13 +363,13 @@
 #define FUN_KEY_PIN                   26U     //FUN_KEY1_N_PIN
 
 /* Proximity */
-#if UsingQAR87BoardHwVersion1 == 1 // Actual Board
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
 #define PROX1_INT_N_PORT              2U
 #define PROX1_INT_N_PIN               14U
 #endif
 
 /* USB Switch */
-#if UsingQAR87BoardHwVersion1 == 1 // Actual Board
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
 #define NXP_532_USB_SWITCH_PORT       0U
 #define NXP_532_USB_SWITCH_PIN        10U
 #define USB_SWDIO_SWITCH_PORT         2U
@@ -382,13 +382,13 @@
 #define OVP_FAULT_N_PIN               20U
 
 /* BT / Wi-Fi */
-#if UsingQAR87BoardHwVersion1 == 1 // Actual Board
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
 #define BT_RST_PORT                   0U
 #define BT_RST_PIN                    11U
 #define NXP_PDN_RF_PORT               3U
 #define NXP_PDN_RF_PIN                26U
 #endif
-#if UsingQAR87BoardHwVersion1 == 0 // Dev Board
+#if UsingQAR87BoardHwVersion == 0 // Dev Board
 #define PWR_EN_IW611_PORT             3U
 #define PWR_EN_IW611_PIN              26U
 #endif
@@ -414,7 +414,7 @@
 #define PCA9422_685_DVS_CTR2_PIN      31U
 
 /* HW config */
-#if UsingQAR87BoardHwVersion1 == 0 // Dev Board
+#if UsingQAR87BoardHwVersion == 0 // Dev Board
 #define HW_CONFIG_01_PORT             0U
 #define HW_CONFIG_01_PIN              10U
 #define HW_CONFIG_02_PORT             0U

@@ -95,6 +95,7 @@
 								<option id="com.crt.advproject.gcc.hdrlib.560018517" name="Library headers" superClass="com.crt.advproject.gcc.hdrlib" useByScannerDiscovery="false" value="com.crt.advproject.gcc.hdrlib.newlibnano" valueType="enumerated"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.361539840" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="CPU_MIMXRT685SFVKB"/>
+									<listOptionValue builtIn="false" value="UsingQAR87BoardHwVersion=0"/>
 									<listOptionValue builtIn="false" value="UsingDbgPins=0"/>
 									<listOptionValue builtIn="false" value="UsingQAR87Board=1"/>
 									<listOptionValue builtIn="false" value="MX25U12843G=1"/>
@@ -745,6 +746,7 @@
 								<option id="gnu.c.compiler.option.preprocessor.preprocess.975097757" name="Preprocess only (-E)" superClass="gnu.c.compiler.option.preprocessor.preprocess" useByScannerDiscovery="false"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="gnu.c.compiler.option.preprocessor.def.symbols.23640748" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="CPU_MIMXRT685SFVKB"/>
+									<listOptionValue builtIn="false" value="UsingQAR87BoardHwVersion=0"/>
 									<listOptionValue builtIn="false" value="UsingDbgPins=1"/>
 									<listOptionValue builtIn="false" value="UsingQAR87Board=1"/>
 									<listOptionValue builtIn="false" value="MX25U12843G=1"/>
