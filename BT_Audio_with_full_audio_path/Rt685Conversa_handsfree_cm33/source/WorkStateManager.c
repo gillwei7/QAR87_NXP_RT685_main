@@ -602,7 +602,6 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_MusicPlayer_Pre;
 							WorkStateIsChanged=1;
-							ss_set_music_status(1);
 
 						}
 						RequestToGetIntoA2dpPlay=0;
@@ -615,7 +614,6 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_MusicPlayer;
 							WorkStateIsChanged=1;
-							ss_set_music_status(0);
 
 						}
 						RequestToGetOutofA2dpPlay=0;

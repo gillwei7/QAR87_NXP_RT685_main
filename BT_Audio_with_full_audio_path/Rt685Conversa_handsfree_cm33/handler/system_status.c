@@ -21,6 +21,7 @@ volatile uint8_t capture_finished = 0;
 volatile uint8_t recording_start = 0;
 volatile uint8_t recording_finished = 0;
 volatile uint8_t need_send_state = 0;
+volatile uint8_t need_send_music_status = 0;
 
 uint8_t current_state_value = 0;
 
@@ -42,7 +43,8 @@ void ss_set_state(uint8_t state)
 		if (current_usage_state == USAGE_STATE_MUSIC_PLAYER) {
 			RequestToGetOutofA2dpPlay = 1;
 			current_usage_state = state;
-			need_send_state = 1;
+			need_send_music_status = 1;
+			music_status = 0;
 
 		} else if (current_usage_state == USAGE_STATE_MEDIA_PLAYER) {
 			RequestToGetOutofMediaPlayer = 1;
@@ -100,7 +102,8 @@ void ss_set_state(uint8_t state)
 		}
 		RequestToGetIntoA2dpPlay = 1;
 		current_usage_state = state;
-		need_send_state = 1;
+		need_send_music_status = 1;
+		music_status = 1;
 
 	} else if (state == USAGE_STATE_MEDIA_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
@@ -154,22 +157,24 @@ void send_state_to_soc(void) // send state to soc if both audio path and state a
 		PRINTF("[System] send_state_to_soc (%d) \r\n", current_usage_state);
 		current_state_value = USAGE_STATE_HEX_VALUE + current_usage_state;
 		(void)xQueueSend(spi_request_queue, &current_state_value, 0);
-
 		need_send_state = 0;
-	}
-}
 
-void ss_set_music_status(uint8_t status)
-{
-	music_status = status;
-	send_music_status_to_soc();
+	} else if (need_send_music_status) {
+		PRINTF("[System] send_music_status_to_soc (%d) \r\n", music_status);
+		send_music_status_to_soc();
+		need_send_music_status = 0;
+	}
 }
 
 void send_music_status_to_soc(void)
 {
 	// Todo
 	// To make novatek open music ui or open home ui
-
+	if (music_status) {
+		send_spi_request(MUSIC_START_HEX_VALUE); //music start
+	} else {
+		send_spi_request(MUSIC_STOP_HEX_VALUE); //music stop
+	}
 	//send_spi_request(MUSIC_START_HEX_VALUE); //music start
 	//send_spi_request(MUSIC_STOP_HEX_VALUE); //music stop
 }
