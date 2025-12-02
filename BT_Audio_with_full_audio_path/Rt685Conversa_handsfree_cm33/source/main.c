@@ -26,6 +26,9 @@
 #if UsingQAR87Board == 1
 #include "hal_common.h"
 #endif
+
+#include "version.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -47,6 +50,7 @@ int main(void)
 {
     BOARD_InitHardware();
     hal_board_init();
+    PRINTF("[System] SW version: %s%s%s\r\n", MCU_APP_VERSION, MCU_APP_VERSION_TIME, MCU_APP_VERSION_SUB);
 
     if (xTaskCreate(hfp_hf_a2dp_task, "hfp_hf_a2dp_task", configMINIMAL_STACK_SIZE * 8, NULL,		//was configMINIMAL_STACK_SIZE * 8
                     tskIDLE_PRIORITY + 1, NULL) != pdPASS)
