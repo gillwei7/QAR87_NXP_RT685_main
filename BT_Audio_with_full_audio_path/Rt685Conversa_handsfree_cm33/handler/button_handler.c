@@ -338,6 +338,7 @@ void button_task(void *pvParameters)
                             btn_dbl_pending = false;
                             (void)xTimerStop(sBtnDblTimer, 0);
                             PRINTF("[Button] Double Click detected.\r\n");
+                            ss_print_bt_addr();
 #if UsingQAR87BoardHwVersion == 1 // Actual Board
                             if (current_usb_output == 0) {
                                 PRINTF("[USB] Novatek USB.\r\n");

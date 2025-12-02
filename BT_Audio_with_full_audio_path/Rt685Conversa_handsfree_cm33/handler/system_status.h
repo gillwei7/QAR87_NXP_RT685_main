@@ -61,6 +61,13 @@ enum {
 
 };
 
+void ss_set_bt_addr_0 (uint8_t addr);
+void ss_set_bt_addr_1 (uint8_t addr);
+void ss_set_bt_addr_2 (uint8_t addr);
+void ss_set_bt_addr_3 (uint8_t addr);
+void ss_set_bt_addr_4 (uint8_t addr);
+void ss_set_bt_addr_5 (uint8_t addr);
+void ss_print_bt_addr (void);
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
 void ss_ble_on();

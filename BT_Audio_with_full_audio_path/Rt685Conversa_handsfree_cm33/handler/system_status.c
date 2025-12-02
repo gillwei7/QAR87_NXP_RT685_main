@@ -23,7 +23,14 @@ volatile uint8_t recording_finished = 0;
 volatile uint8_t need_send_state = 0;
 volatile uint8_t need_send_music_status = 0;
 
-uint8_t current_state_value = 0;
+static uint8_t current_state_value = 0;
+
+static uint8_t bt_addr_0 = 0;
+static uint8_t bt_addr_1 = 0;
+static uint8_t bt_addr_2 = 0;
+static uint8_t bt_addr_3 = 0;
+static uint8_t bt_addr_4 = 0;
+static uint8_t bt_addr_5 = 0;
 
 extern QueueHandle_t      spi_request_queue;
 
@@ -211,6 +218,41 @@ void ss_set_recording_status(uint8_t status)
 	}
 }
 
+void ss_set_bt_addr_0 (uint8_t addr)
+{
+	bt_addr_0 = addr;
+}
+
+void ss_set_bt_addr_1 (uint8_t addr)
+{
+	bt_addr_1 = addr;
+}
+
+void ss_set_bt_addr_2 (uint8_t addr)
+{
+	bt_addr_2 = addr;
+}
+
+void ss_set_bt_addr_3 (uint8_t addr)
+{
+	bt_addr_3 = addr;
+}
+
+void ss_set_bt_addr_4 (uint8_t addr)
+{
+	bt_addr_4 = addr;
+}
+
+void ss_set_bt_addr_5 (uint8_t addr)
+{
+	bt_addr_5 = addr;
+}
+
+void ss_print_bt_addr (void)
+{
+	PRINTF("BT Address: %02X:%02X:%02X:%02X:%02X:%02X\r\n", bt_addr_5, bt_addr_4, bt_addr_3, bt_addr_2, bt_addr_1, bt_addr_0);
+
+}
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
   void ss_ble_on()  { ss.flags |=  SS_BLE_BIT; System_Status=1; }

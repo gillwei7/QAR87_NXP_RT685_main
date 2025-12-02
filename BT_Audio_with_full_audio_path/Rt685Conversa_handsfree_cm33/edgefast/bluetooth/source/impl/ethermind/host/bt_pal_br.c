@@ -27,6 +27,10 @@ LOG_MODULE_DEFINE(LOG_MODULE_NAME, kLOG_LevelTrace);
 #include "BT_common.h"
 #include "sco_audio_pl.h"
 
+#if UsingQAR87Board == 1
+#include "system_status.h"
+#endif
+
 enum __packed resolve_name_state {
 	RESOLVE_REMOTE_NAME_PENDING,
 	RESOLVE_REMOTE_NAME_RESOLVING,
@@ -922,6 +926,7 @@ int bt_br_init(void)
 	uint8_t BTName[200];
 	bt_id_get(bt_addr_temp, &count_temp);
 	snprintf(BTName, sizeof(BTName), "QAR87_88n_%02X%02X",bt_addr_temp[0].a.val[1],bt_addr_temp[0].a.val[0] );
+	PRINTF("Device name: %s\r\n",BTName);
 
 	name_cp = net_buf_add(buf, sizeof(*name_cp));
 	strncpy((char *)name_cp->local_name, BTName, sizeof(name_cp->local_name));
@@ -978,6 +983,12 @@ int bt_br_init(void)
 			return err;
 		}
 	}
+	ss_set_bt_addr_0(bt_addr_temp[0].a.val[0]);
+	ss_set_bt_addr_1(bt_addr_temp[0].a.val[1]);
+	ss_set_bt_addr_2(bt_addr_temp[0].a.val[2]);
+	ss_set_bt_addr_3(bt_addr_temp[0].a.val[3]);
+	ss_set_bt_addr_4(bt_addr_temp[0].a.val[4]);
+	ss_set_bt_addr_5(bt_addr_temp[0].a.val[5]);
 
 	return 0;
 }
