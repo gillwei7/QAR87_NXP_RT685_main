@@ -39,6 +39,7 @@
 #include "CircularBufManagement.h"
 #include "CircularBuf.h"
 #include "SubFunc.h"
+#include "WorkStateManager.h"
 
 /*******************************************************************************
  * Definitions
@@ -555,11 +556,11 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
     		VarBlockSharedByDspAndMcu.PlayOpusFileIdx=0;
     	}
     	if(strcmp(argv[2], "2") == 0)
-    {
+    	{
     		//play the second opus file
     		VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
     		VarBlockSharedByDspAndMcu.PlayOpusFileIdx=1;
-    }
+    	}
     	if(strcmp(argv[2], "3") == 0)
     	{
     		//play the second opus file
@@ -571,24 +572,38 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
     {
     	//start sbc play
     	if(strcmp(argv[2], "1") == 0)
-    	{
+        {
     		//play the first sbc file
     		VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
     		VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0;
-    	}
+        }
     	if(strcmp(argv[2], "2") == 0)
-    	{
+        {
     		//play the second sbc file
     		VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
     		VarBlockSharedByDspAndMcu.PlaySbcFileIdx=1;
-    	}
+        }
     	if(strcmp(argv[2], "3") == 0)
-    {
+        {
     		//play the second sbc file
     		VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
     		VarBlockSharedByDspAndMcu.PlaySbcFileIdx=2;
+        }
     }
-    }else
+    else if(strcmp(argv[1], "mvol") == 0)
+	{
+    	int level = atoi(argv[2]);   // convert string to int
+
+		if(level >= 0 && level <= 15)
+		{
+			ChangeMasterVolumeLevel16(level);
+		}
+		else
+		{
+			PRINTF("Invalid volume level. Use: 0 ~ 15\r\n");
+		}
+	}
+    else
     {
     	PRINTF("invalid parameter\n");
     }

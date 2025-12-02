@@ -98,6 +98,23 @@ const char *WorkStateName[]=
 	"WorkState_AiConversation",
 	"WorkState_VideoAi",
 };
+
+void ChangeMasterVolumeLevel16(int level16)
+{
+    int index = level16 - 1;  // level 1~16 → index 0~15
+
+    // Clamp
+    if(index < 0) index = 0;
+    if(index > 15) index = 15;
+
+    float set_MasterVolumeGain0To1 = MasterVolumeGainTable16[index];
+
+    VarBlockSharedByDspAndMcu.MasterVolumeGain0To1 = set_MasterVolumeGain0To1;
+
+    PRINTF("Volume Change to Level %d : %f\r\n",
+            level16, set_MasterVolumeGain0To1);
+}
+
 #if 1	//folding --- all work states init and deinit
 void WorkStateDeInit(int WhichState, U32 Opt)
 {
@@ -384,7 +401,7 @@ void VocEvtProc_MediaPlayer(U32 VoiceCmd)
 void AppEvtProc_MediaPlayer()
 {
 	//if a change volume event is detected, change master volume here, then DSP side will follow
-	VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;
+	//VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;
 }
 void VocEvtProc_MusicPlayer(U32 VoiceCmd)
 {
@@ -421,8 +438,8 @@ void VocEvtProc_MusicPlayer(U32 VoiceCmd)
 }
 void AppEvtProc_MusicPlayer()
 {
+#if 0
 	//if a change volume event is detected, change master volume here, then DSP side will follow
-
 	static int TstCnt=0;
 
 	//close this ++ to have stable master volume
@@ -430,12 +447,15 @@ void AppEvtProc_MusicPlayer()
 
 	if(TstCnt%600 ==1)
 	{
-		VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.199f;
+		PRINTF("MasterVolumeGain0To1=0.1f\r\n");
+		VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.1f;
 	}
 	if(TstCnt%600 ==301)
 	{
+		PRINTF("MasterVolumeGain0To1=0.999f\r\n");
 		VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;
 	}
+#endif
 
 }
 void VocEvtProc_Translation(U32 VoiceCmd)

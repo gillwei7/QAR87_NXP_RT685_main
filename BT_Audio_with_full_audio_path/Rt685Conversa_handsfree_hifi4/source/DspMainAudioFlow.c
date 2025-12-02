@@ -662,7 +662,8 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 
 			//add OPUS and SBC to DstPtrS16_I2SAmpL and R --- will be streamed to AMP
 			vec_add16x16(DstPtrS16_I2SAmpL, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)SrcPtrS16_I2SNvtL, AudioFrameSizeInSamplePerCh_48KHz);
-			vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)SrcPtrS16_I2SNvtR, AudioFrameSizeInSamplePerCh_48KHz);
+			//vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)SrcPtrS16_I2SNvtR, AudioFrameSizeInSamplePerCh_48KHz);
+			vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedR, (const short int*)SrcPtrS16_I2SNvtR, AudioFrameSizeInSamplePerCh_48KHz);
 
 			//convert to S32 and do SRC, then convert back to float --- to make the 16KHz float input ref in for Conversa
 			for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
@@ -674,6 +675,12 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 			//master volume control ---  in and out are both S32 --- change PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1 in MCU side to set new volume target
 			SoftGainControl_MasterLAndR.TargetGain=PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1;
 			AudioProcOneFrameS32_Gain(&SoftGainControl_MasterLAndR, TmpS32Buf_LRMixed_SrcInput, S32Ptr_Tmp1L, AudioFrameSizeInSamplePerCh_48KHz*2);	//FltPtr_Tmp1L together with FltPtr_Tmp1R is used as LRMixed buffer
+
+			for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+			{
+				DstPtrS16_I2SAmpL[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+0]>>16);	//48KHz/ 32bit ==> 48KHz/ 16bit
+				DstPtrS16_I2SAmpR[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+1]>>16);
+			}
 
 			//SSRC process
 			ProcCadenceAsrc(&SRC_ConversaRx2, TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput, TmpS32Buf_LRMixed_SrcInput,  AudioFrameSizeInSamplePerCh_48KHz,    &OutSampleNum);
@@ -845,7 +852,8 @@ void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
 
 			//add OPUS and SBC to DstPtrS16_I2SAmpL and R --- will be streamed to AMP
 			vec_add16x16(DstPtrS16_I2SAmpL, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedL, AudioFrameSizeInSamplePerCh_48KHz);
-			vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedR, AudioFrameSizeInSamplePerCh_48KHz);
+			//vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedR, AudioFrameSizeInSamplePerCh_48KHz);
+			vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedR, (const short int*)AudioOneFrameBuf_SbcDecodedR, AudioFrameSizeInSamplePerCh_48KHz);
 
 			//convert to S32 and do SRC, then convert back to float --- to make the 16KHz float input ref in for Conversa
 			for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
@@ -857,6 +865,12 @@ void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
 			//master volume control ---  in and out are both S32 --- change PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1 in MCU side to set new volume target
 			SoftGainControl_MasterLAndR.TargetGain=PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1;
 			AudioProcOneFrameS32_Gain(&SoftGainControl_MasterLAndR, TmpS32Buf_LRMixed_SrcInput, S32Ptr_Tmp1L, AudioFrameSizeInSamplePerCh_48KHz*2);	//FltPtr_Tmp1L together with FltPtr_Tmp1R is used as LRMixed buffer
+
+			for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+			{
+				DstPtrS16_I2SAmpL[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+0]>>16);	//48KHz/ 32bit ==> 48KHz/ 16bit
+				DstPtrS16_I2SAmpR[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+1]>>16);
+			}
 
 			//SSRC process
 			ProcCadenceAsrc(&SRC_ConversaRx2, TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput, TmpS32Buf_LRMixed_SrcInput,  AudioFrameSizeInSamplePerCh_48KHz,    &OutSampleNum);
@@ -899,14 +913,22 @@ void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
 		vec_float2int(S32Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], -31,  AudioFrameSizeInSamplePerCh_16KHz);	//conversa TxOut
 		vec_float2int(S32Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], -31,  AudioFrameSizeInSamplePerCh_16KHz);	//conversa BfOut
 
+		for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
+		{
+			S32Ptr_Tmp2L[i]=(DstPtrS16_I2SAmpL[i*3]<<16);	//48KHz/ 16bit ==> 16KHz/ 32bit
+			S32Ptr_Tmp2R[i]=(DstPtrS16_I2SAmpR[i*3]<<16);
+		}
+
 		//fill USB up streaming buffer --- 8 channels, all 16KHz, 32bit
 		for(i=0;i<FrmSizeInSamples/3;i++)
 		{
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+0];
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+1];
 
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp1L[i];	//conversa Tx out
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
+		//	PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp1L[i];	//conversa Tx out
+		//	PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp2L[i];	//Output to AMP L
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp2R[i]; //Output to AMP R
 
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=SrcPtrS32_Mic0[i];
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic0[i];

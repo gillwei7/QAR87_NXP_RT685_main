@@ -147,6 +147,27 @@ typedef enum
 
 } TDeviceWorkState;
 
+// 16-level volume gain table (0.001f → 0.999f, equal-dB spacing)
+static const float MasterVolumeGainTable16[16] =
+{
+    0.001000f,
+    0.001585f,
+    0.002512f,
+    0.003980f,
+    0.006308f,
+    0.009997f,
+    0.015843f,
+    0.025107f,
+    0.039789f,
+    0.063058f,
+    0.099933f,
+    0.158373f,
+    0.250988f,
+    0.397762f,
+    0.630368f,
+    0.999000f
+};
+
 extern uint8_t domainId;
 
 extern TDeviceWorkState DeviceWorkStateCur;
@@ -185,5 +206,6 @@ extern volatile int AllowAudioInterfaceReInit_PdmI2S;
 extern volatile int AllowAudioInterfaceReInit_Fc25;
 
 extern void Manager_Task(void *pvParameters);
+void ChangeMasterVolumeLevel16(int level16);
 
 #endif
