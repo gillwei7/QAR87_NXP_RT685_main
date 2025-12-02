@@ -36,7 +36,9 @@ static uint8_t       sChg5Clicks = 0;         /* 視窗內的短按次數 */
 static TickType_t    sChg5WindowStart = 0;    /* 視窗開始 Tick */
 
 extern volatile SystemStatus ss;
-
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
+static uint8_t current_usb_output = 0;
+#endif
 
 /* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
 static inline void delay_ms(uint32_t ms)
@@ -336,6 +338,27 @@ void button_task(void *pvParameters)
                             btn_dbl_pending = false;
                             (void)xTimerStop(sBtnDblTimer, 0);
                             PRINTF("[Button] Double Click detected.\r\n");
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
+                            if (current_usb_output == 0) {
+                                PRINTF("[USB] Novatek USB.\r\n");
+                                current_usb_output++;
+                                GPIO_PinWrite(GPIO, NXP_532_USB_SWITCH_PORT, NXP_532_USB_SWITCH_PIN, 1U);
+                                GPIO_PinWrite(GPIO, USB_SWDIO_SWITCH_PORT, USB_SWDIO_SWITCH_PIN, 1U);
+
+                            } else if (current_usb_output == 1) {
+                                PRINTF("[USB] NXP USB.\r\n");
+                                current_usb_output++;
+                                GPIO_PinWrite(GPIO, NXP_532_USB_SWITCH_PORT, NXP_532_USB_SWITCH_PIN, 1U);
+                                GPIO_PinWrite(GPIO, USB_SWDIO_SWITCH_PORT, USB_SWDIO_SWITCH_PIN, 0U);
+
+                            } else if (current_usb_output == 2) {
+                                PRINTF("[USB] NXP SWD.\r\n");
+                                current_usb_output = 0;
+                                GPIO_PinWrite(GPIO, NXP_532_USB_SWITCH_PORT, NXP_532_USB_SWITCH_PIN, 0U);
+                                GPIO_PinWrite(GPIO, USB_SWDIO_SWITCH_PORT, USB_SWDIO_SWITCH_PIN, 0U);
+                            }
+#endif
+
                             /* 如需送 SPI：解開下面三行
                              * PRINTF("[Button] Double Click detected. Sending 0x%02X\r\n", DOUBLE_CLICK_HEX_VALUE);
                              * uint8_t vv = DOUBLE_CLICK_HEX_VALUE;

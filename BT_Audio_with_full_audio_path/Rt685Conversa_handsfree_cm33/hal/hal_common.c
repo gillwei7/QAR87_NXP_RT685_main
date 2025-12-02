@@ -107,6 +107,13 @@ static void hal_gpio_pin_init(void)
     GPIO_PinInit(GPIO, AP533_WAKEUP_N_PORT, AP533_WAKEUP_N_PIN, &output_low_pin_config);
     /* AMP GPIO */
     GPIO_PinInit(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, &output_low_pin_config);
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
+    /* USB Switch GPIO */
+    GPIO_PinInit(GPIO, NXP_532_USB_SWITCH_PORT, NXP_532_USB_SWITCH_PIN, &output_low_pin_config);
+    GPIO_PinInit(GPIO, USB_SWDIO_SWITCH_PORT, USB_SWDIO_SWITCH_PIN, &output_low_pin_config);
+    /* BT Reset GPIO */
+    GPIO_PinInit(GPIO, BT_RST_PORT, BT_RST_PIN, &output_high_pin_config);
+#endif
     /* Touch INT GPIO*/
     GPIO_PinInit(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, &input_pin_config);
     GPIO_SetPinInterruptConfig(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, &interrupt_config);
