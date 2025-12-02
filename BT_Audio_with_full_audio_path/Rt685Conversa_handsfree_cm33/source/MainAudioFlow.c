@@ -903,20 +903,8 @@ void ProcessAudio_AfterAudioInputBufIsReady_Translation(void)
     #endif
 
     #if 1   //folding --- final process --- send event to dsp, and set values for COM printing, and read button IO pin to generate button event
-        #if 1
             //no need to skip the first several frame
             MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtMcuToDsp_AudioFrmIsReady_Translation);       //send event to DSP, to trigger DSP MU interrupt --- after 300ms delay
-        #else
-            if(!AudioIoFrameCntForMuteMicInputAtStartingUp)
-            {
-                //mow mic input is ready, DSP needs to process
-                MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtMcuToDsp_AudioFrmIsReady_AudioIoDbg);        //send event to DSP, to trigger DSP MU interrupt --- after 300ms delay
-
-            }else
-            {
-                //no need to trigger dsp processing
-            }
-        #endif
 
         PrintWatchToUartComAndUsbCom(AudioIoFrameCnt,10);
     #endif
@@ -933,44 +921,44 @@ void ProcessAudio_AfterAudioInputBufIsReady_AiConversation(void)
 __attribute__((section("CodeQuickAccess")))
 void ProcessAudio_AfterAudioInputBufIsReady_VideoAi(void)
 {
-	DbgPin5Up();
+    DbgPin5Up();
 
-	OSA_SR_ALLOC();
+    OSA_SR_ALLOC();
 
-	#if 1	//folding --- prepare mic input pointers, and get int type of mic signal data
-		//take real mic audio input as incoming data
-		CopyMicAudioDataFromDmaBufferToSharedVarMicBuf(AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23,AudioFrameSizeInSamplePerCh_16KHz,1);
-		SetI2SBufferABSelect(1,1);//(int ToSetI2SAmp, int ToSetI2SNvt)
-	#endif
+    #if 1   //folding --- prepare mic input pointers, and get int type of mic signal data
+        //take real mic audio input as incoming data
+        CopyMicAudioDataFromDmaBufferToSharedVarMicBuf(AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23,AudioFrameSizeInSamplePerCh_16KHz,1);
+        SetI2SBufferABSelect(1,1);//(int ToSetI2SAmp, int ToSetI2SNvt)
+    #endif
 
-	#if 1	//folding --- get I2S input from AMP and from Nvt, and put to shared var buffer
-		//copy I2S input (line in ADC) to shared memory from DMA buffer, for DSP later use
-		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
-		{
-			VarBlockSharedByDspAndMcu.I2SBufInFrAmpL[i]=*I2SDmaInCh01Ptr++;
-			VarBlockSharedByDspAndMcu.I2SBufInFrAmpR[i]=*I2SDmaInCh01Ptr++;
-		}
+    #if 1   //folding --- get I2S input from AMP and from Nvt, and put to shared var buffer
+        //copy I2S input (line in ADC) to shared memory from DMA buffer, for DSP later use
+        for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+        {
+            VarBlockSharedByDspAndMcu.I2SBufInFrAmpL[i]=*I2SDmaInCh01Ptr++;
+            VarBlockSharedByDspAndMcu.I2SBufInFrAmpR[i]=*I2SDmaInCh01Ptr++;
+        }
 
-		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
-		{
-			VarBlockSharedByDspAndMcu.I2SBufInFrNvtL[i]=*I2SDmaInCh23Ptr++;
-			VarBlockSharedByDspAndMcu.I2SBufInFrNvtR[i]=*I2SDmaInCh23Ptr++;
-		}
-	#endif
+        for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+        {
+            VarBlockSharedByDspAndMcu.I2SBufInFrNvtL[i]=*I2SDmaInCh23Ptr++;
+            VarBlockSharedByDspAndMcu.I2SBufInFrNvtR[i]=*I2SDmaInCh23Ptr++;
+        }
+    #endif
 
-	#if EnableUsbComAndAudio==1
-		MoveUacAudioToDspSharedUacDnBuf(AudioFrameSizeInSamplePerCh_48KHz, 0);
-	#endif
+    #if EnableUsbComAndAudio==1
+        MoveUacAudioToDspSharedUacDnBuf(AudioFrameSizeInSamplePerCh_48KHz, 0);
+    #endif
 
-	#if 1	//folding --- final process --- send event to dsp, and set values for COM printing, and read button IO pin to generate button event
-			//no need to skip the first several frame
-			MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtMcuToDsp_AudioFrmIsReady_VideoAi);		//send event to DSP, to trigger DSP MU interrupt --- after 300ms delay
+    #if 1   //folding --- final process --- send event to dsp, and set values for COM printing, and read button IO pin to generate button event
+            //no need to skip the first several frame
+            MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, MuEvtMcuToDsp_AudioFrmIsReady_VideoAi);       //send event to DSP, to trigger DSP MU interrupt --- after 300ms delay
 
-		PrintWatchToUartComAndUsbCom(AudioIoFrameCnt,10);
-	#endif
+        PrintWatchToUartComAndUsbCom(AudioIoFrameCnt,10);
+    #endif
 
-	DmaTxRxIsDone=0;
-	DbgPin5Dn();
+    DmaTxRxIsDone=0;
+    DbgPin5Dn();
 }
 #endif
 
@@ -1345,16 +1333,16 @@ __attribute__((section("CodeQuickAccess")))
 void McuMainAudioFlowFinalize_VideoAi(void)
 {
 #if EnableUsbComAndAudio==1//folding --- write conversa Tx output audio to UAC up streaming buffer
-	OSA_SR_ALLOC();
-	OSA_ENTER_CRITICAL();
-		//put audio data from DSP side to UacUp cir buffer
-		PutAudioDataFromDspToUacUpCirBuffer(AudioFrameSizeInSamplePerCh_16KHz);
-	OSA_EXIT_CRITICAL();
+    OSA_SR_ALLOC();
+    OSA_ENTER_CRITICAL();
+        //put audio data from DSP side to UacUp cir buffer
+        PutAudioDataFromDspToUacUpCirBuffer(AudioFrameSizeInSamplePerCh_16KHz);
+    OSA_EXIT_CRITICAL();
 #endif
 
-#if 1	//folding --- write Dsp out audio to I2S to AMP and I2S to NVT
-	MoveAudioDataFromDspToI2SDmaBufNvt(AudioFrameSizeInSamplePerCh_48KHz,1);
-	MoveAudioDataFromDspToI2SDmaBufAmp(AudioFrameSizeInSamplePerCh_48KHz,1);
+#if 1   //folding --- write Dsp out audio to I2S to AMP and I2S to NVT
+    MoveAudioDataFromDspToI2SDmaBufNvt(AudioFrameSizeInSamplePerCh_48KHz,1);
+    MoveAudioDataFromDspToI2SDmaBufAmp(AudioFrameSizeInSamplePerCh_48KHz,1);
 #endif
 }
 #endif
@@ -1859,15 +1847,9 @@ void InitAudioInterface_Translation(int Opt)
 
     InitAudioCircularBuf(0,1,0);    //int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
+    // May not needed
     if(AmpState==AmpState_UnConfigured)
     {
-        //configure AMP
-        //...
-        //...
-        //...
-        //start smart amp
-        //hal_amp_aw88166_left_start("Music");
-        //hal_amp_aw88166_right_start("Music");
         AmpState==AmpState_ConfiguredAndSleep;
     }
 
@@ -1917,72 +1899,79 @@ void InitAudioInterface_AiConversation(int Opt)
 
 void InitAudioInterface_VideoAi(int Opt)
 {
-	//if everything is configured, no need to do anything, return
-	if((AudioPortIsActive_I2SToAmp)&&(AudioPortIsActive_I2SToNvt)&&(AudioPortIsActive_Pdm)&&(AmpState>AmpState_UnConfigured))
-		return;
+    //if everything is configured, no need to do anything, return
+    if((AudioPortIsActive_I2SToAmp)&&(AudioPortIsActive_I2SToNvt)&&(AudioPortIsActive_Pdm)&&(AmpState>AmpState_UnConfigured))
+        return;
 
-	int MclkFreq;
-	/* Enable clock */
-	//if any audio port is NOT configured, set the clk.
-	//no matter BT side is 16KHz or 8KHz, no matter A2dp source is 44.1KHz or whatever, CODEC is always 16KHz or 48KHz
-	if((!AudioPortIsActive_I2SToAmp)||(!AudioPortIsActive_I2SToNvt)||!(AudioPortIsActive_Pdm))
-	{
-		#if UsingQAR87Board == 1
-			MclkFreq=BOARD_SwitchAudioFreq(48000,NvtFc5Fc6_AmpFc1Fc3);
-		#else
-			MclkFreq=BOARD_SwitchAudioFreq(16000,BtPcmFc5Fc2_CodecFc1Fc3);
-		#endif
-	}
+    int MclkFreq;
+    /* Enable clock */
+    //if any audio port is NOT configured, set the clk.
+    //no matter BT side is 16KHz or 8KHz, no matter A2dp source is 44.1KHz or whatever, CODEC is always 16KHz or 48KHz
+    if((!AudioPortIsActive_I2SToAmp)||(!AudioPortIsActive_I2SToNvt)||!(AudioPortIsActive_Pdm))
+    {
+        #if UsingQAR87Board == 1
+            MclkFreq=BOARD_SwitchAudioFreq(48000,NvtFc5Fc6_AmpFc1Fc3);
+        #else
+            MclkFreq=BOARD_SwitchAudioFreq(16000,BtPcmFc5Fc2_CodecFc1Fc3);
+        #endif
+    }
 
-	InitPdm(0xff, AudioFrameSizeInSamplePerCh_16KHz, 16000);
-	InitAmpI2S(AudioFrameSizeInSamplePerCh_48KHz, 48000, 16);
-	#if Rt685I2SToNvtIsI2SMaster==1
-		InitNvtI2S(AudioFrameSizeInSamplePerCh_48KHz, NvtI2SFs_48KHz, 16);
-	#else
-		InitNvtI2S(AudioFrameSizeInSamplePerCh_I2SToNvt, NvtI2SFs_48KHz, 16);
-	#endif
+    InitPdm(0xff, AudioFrameSizeInSamplePerCh_16KHz, 16000);
+    InitAmpI2S(AudioFrameSizeInSamplePerCh_48KHz, 48000, 16);
+    #if Rt685I2SToNvtIsI2SMaster==1
+        InitNvtI2S(AudioFrameSizeInSamplePerCh_48KHz, NvtI2SFs_48KHz, 16);
+    #else
+        InitNvtI2S(AudioFrameSizeInSamplePerCh_I2SToNvt, NvtI2SFs_48KHz, 16);
+    #endif
 
-	//configure AMP
-	InitAndStartCodec(48000, 16, MclkFreq);
+    //configure AMP
+    InitAndStartCodec(48000, 16, MclkFreq);
 
-	InitAudioCircularBuf(0,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
+    InitAudioCircularBuf(0,1,0);    //int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
-	if(AmpState==AmpState_UnConfigured){
-		AmpState==AmpState_ConfiguredAndSleep;
-	}
+    // May not needed
+    if(AmpState==AmpState_UnConfigured)
+    {
+        AmpState==AmpState_ConfiguredAndSleep;
+    }
 
-	DmaTxRxIsExpected=(
-						AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
-						AudioI2sPortsBitMapFlag_FcTxToNvt|AudioI2sPortsBitMapFlag_FcRxFrNvt|
-						#if EnableMic01==1
-							AudioPdmPortsBitMapFlag_Mic01
-						#endif
-						#if EnableMic23==1
-							|AudioPdmPortsBitMapFlag_Mic23
-						#endif
-						#if EnableMic45==1
-							|AudioPdmPortsBitMapFlag_Mic45
-						#endif
-						#if EnableMic67==1
-							|AudioPdmPortsBitMapFlag_Mic67
-						#endif
+    DmaTxRxIsExpected=(
+                        AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
+                        AudioI2sPortsBitMapFlag_FcTxToNvt|AudioI2sPortsBitMapFlag_FcRxFrNvt|
+                        //AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
+                        #if EnableMic01==1
+                            AudioPdmPortsBitMapFlag_Mic01
+                        #endif
+                        #if EnableMic23==1
+                            |AudioPdmPortsBitMapFlag_Mic23
+                        #endif
+                        #if EnableMic45==1
+                            |AudioPdmPortsBitMapFlag_Mic45
+                        #endif
+                        #if EnableMic67==1
+                            |AudioPdmPortsBitMapFlag_Mic67
+                        #endif
 
-					  );
+                      );
 
-	ImmediatelyStartDmicDmaChannels(0xff);	//mic0,1,2,3, after calling this, dmic dma intr occurs one frame later!
+    ImmediatelyStartDmicDmaChannels(0xff);  //mic0,1,2,3, after calling this, dmic dma intr occurs one frame later!
 
-	VarBlockSharedByDspAndMcu.I2SFs_Nvt=NvtI2SFs_48KHz;
-	VarBlockSharedByDspAndMcu.I2SFs_Amp=48000;
-	VarBlockSharedByDspAndMcu.PdmFs=16000;
-	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
-	VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
+    VarBlockSharedByDspAndMcu.I2SFs_Nvt=NvtI2SFs_48KHz;
+    VarBlockSharedByDspAndMcu.I2SFs_Amp=48000;
+    VarBlockSharedByDspAndMcu.PdmFs=16000;
+    VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
+    VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
 
-	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
-	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
-	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
-	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
-	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
-	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_NearEnd;
+    VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
+    VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
+    VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
+    VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+
+    // Add for SBC
+    VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
+    VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;        //0xffff stands for a2dp sbc stream
+
+    return;
 }
 #endif
 
@@ -2171,10 +2160,10 @@ void DeInitAudioInterface_AiConversation(int Opt)
 }
 void DeInitAudioInterface_VideoAi(int Opt)
 {
-	VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
-	Deinit_GeneralAudio(1,1,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
-	ClearAudioCirBuf(0,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
-	return;
+    VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
+    Deinit_GeneralAudio(1,1,1,1);   //int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
+    ClearAudioCirBuf(0,1,0);        //int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+    return;
 }
 #endif
 
