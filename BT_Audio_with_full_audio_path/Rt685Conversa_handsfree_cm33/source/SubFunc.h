@@ -149,14 +149,26 @@ extern int OpusFileBeg2;
 extern int OpusFileEnd2;
 extern int OpusFileBeg3;
 extern int OpusFileEnd3;
-/*
 extern int OpusFileBeg4;
 extern int OpusFileEnd4;
 extern int OpusFileBeg5;
 extern int OpusFileEnd5;
 extern int OpusFileBeg6;
 extern int OpusFileEnd6;
-*/
+extern int OpusFileBeg7;
+extern int OpusFileEnd7;
+extern int OpusFileBeg8;
+extern int OpusFileEnd8;
+extern int OpusFileBeg9;
+extern int OpusFileEnd9;
+extern int OpusFileBeg10;
+extern int OpusFileEnd10;
+extern int OpusFileBeg11;
+extern int OpusFileEnd11;
+extern int OpusFileBeg12;
+extern int OpusFileEnd12;
+extern int OpusFileBeg13;
+extern int OpusFileEnd13;
 
 #endif
 

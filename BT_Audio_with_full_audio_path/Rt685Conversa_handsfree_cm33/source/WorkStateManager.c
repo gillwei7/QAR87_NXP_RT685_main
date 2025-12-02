@@ -234,6 +234,8 @@ int WorkStateInit(int WhichState, U32 Opt)
 			case WorkState_VideoAi_Pre:
 				InitAudioInterface_VideoAi(0);
 				PRINTF_M("    Mcu: WorkState_VideoAi Init is done\r\n");
+				VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
+				VarBlockSharedByDspAndMcu.PlayOpusFileIdx=5;
 				return(WorkState_VideoAi);
 				break;
 		#endif

@@ -733,14 +733,26 @@ void BOARD_InitHardware(void)
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 3]=(unsigned int)&OpusFileEnd2;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 4]=(unsigned int)&OpusFileBeg3;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 5]=(unsigned int)&OpusFileEnd3;
-		/*
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 6]=(unsigned int)&OpusFileBeg4;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 7]=(unsigned int)&OpusFileEnd4;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 8]=(unsigned int)&OpusFileBeg5;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 9]=(unsigned int)&OpusFileEnd5;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[10]=(unsigned int)&OpusFileBeg6;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[11]=(unsigned int)&OpusFileEnd6;
-		*/
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[12]=(unsigned int)&OpusFileBeg7;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[13]=(unsigned int)&OpusFileEnd7;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[14]=(unsigned int)&OpusFileBeg8;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[15]=(unsigned int)&OpusFileEnd8;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[16]=(unsigned int)&OpusFileBeg9;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[17]=(unsigned int)&OpusFileEnd9;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[18]=(unsigned int)&OpusFileBeg10;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[19]=(unsigned int)&OpusFileEnd10;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[20]=(unsigned int)&OpusFileBeg11;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[21]=(unsigned int)&OpusFileEnd11;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[22]=(unsigned int)&OpusFileBeg12;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[23]=(unsigned int)&OpusFileEnd12;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[24]=(unsigned int)&OpusFileBeg13;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[25]=(unsigned int)&OpusFileEnd13;
 
 		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[0]=(unsigned int)&SbcFileBeg1;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[1]=(unsigned int)&SbcFileEnd1;

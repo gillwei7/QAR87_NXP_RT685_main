@@ -254,7 +254,7 @@ typedef struct
 	U32 MonitorInfoArray1	[20];
 	U32 MonitorInfoArray2	[20];
 	U32 U32ControlPara		[40];
-	U32 FileAddrTable_Opus	[20];
+	U32 FileAddrTable_Opus	[26];
 	U32 FileAddrTable_Sbc	[10];
 
 	U32 NeedToSwitchConversaTuningCfg;		//MCU writes this to command DSP side to re-init conversa with the selected tuning cfg
