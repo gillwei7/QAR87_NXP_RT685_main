@@ -626,7 +626,10 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 			memcpy(SpkOtBufL,pp_OutputAudioSignals[CONVERSA_OutSignalIdx_RxOut],sizeof(float)*AudioFrameSizeInSamplePerCh_16KHz);
 
 			//raw mic1 signal --> to spk out R --- can be changed to other interested audio source
-			memcpy(SpkOtBufR,RawMic32BitBuf0,sizeof(float)*AudioFrameSizeInSamplePerCh_16KHz);
+			//memcpy(SpkOtBufR,RawMic32BitBuf0,sizeof(float)*AudioFrameSizeInSamplePerCh_16KHz);
+
+			// gill Do not pass Raw Mic audio into Speaker, will generate echo
+			memcpy(SpkOtBufR,SpkOtBufL,sizeof(float)*AudioFrameSizeInSamplePerCh_16KHz);
 
 			//real conversa tx out --> to BT tx out
 			memcpy(BtTxOtBuf,pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut],sizeof(float)*AudioFrameSizeInSamplePerCh_16KHz);
