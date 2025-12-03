@@ -519,6 +519,14 @@ static AW_S32 aw933xx_read_chipid(void)
 		AWLOGD("AW93312QNR detected, 0x%08x", reg_val);
 		ret = AW_OK;
 		break;
+	case AW93305BFOR_CHIP_ID:
+		AWLOGD("AW93305BFOR detected, 0x%08x", reg_val);
+		ret = AW_OK;
+		break;
+	case AW93303BFOR_CHIP_ID:
+		AWLOGD("AW93303BFOR detected, 0x%08x", reg_val);
+		ret = AW_OK;
+		break;
 	default:
 		AWLOGD("chip id error, 0x%08x", reg_val);
 		ret =  -AW_ERR;
