@@ -254,14 +254,14 @@ void save_new_paired_device(struct bt_conn *conn, uint8_t isRiderHeadset)
 	PRINTF("Updated Paired Devices list !!\n\n");
 
 //	//gill only keep one paired device in list
-//	current_paired_device_count = g_pairedDeviceCount;
-//
-//	if(g_pairedDeviceCount > 1){
-//		PRINTF("Delete previous paired device %d times\r\n", current_paired_device_count-1);
-//		for(int i = 1;i < current_paired_device_count;i++){
-//			delete_device(1);
-//		}
-//	}
+	current_paired_device_count = g_pairedDeviceCount;
+
+	if(g_pairedDeviceCount > 1){
+		PRINTF("Delete previous paired device %d times\r\n", current_paired_device_count-1);
+		for(int i = 1;i < current_paired_device_count;i++){
+			delete_device(1);
+		}
+	}
 
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
 	app_read_paired_devices();
