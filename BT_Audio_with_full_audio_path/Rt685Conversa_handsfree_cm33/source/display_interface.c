@@ -401,23 +401,25 @@ void connect_paired_device(uint8_t device_index)
 		device_addr[i] = addr[5 - i];
 	}
 
-	//Call the correct connection function based on device type
-	if (paired_devices[device_index - 1].device_type == RIDER_PHONE)
-	{
-		app_connect(RIDER_PHONE, device_addr);
-	}
-	else if (paired_devices[device_index - 1].device_type == RIDER_HEADSET)
-	{
-		app_connect(RIDER_HEADSET, device_addr);
+	app_connect(RIDER_PHONE, device_addr);
 
-	}else if (paired_devices[device_index - 1].device_type == PASSENGER_HEADSET)
-	{
-		app_connect(PASSENGER_HEADSET, device_addr);
-
-	} else
-	{
-		PRINTF("Failed, Invalid device type !\n");
-	}
+//	//Call the correct connection function based on device type
+//	if (paired_devices[device_index - 1].device_type == RIDER_PHONE)
+//	{
+//		app_connect(RIDER_PHONE, device_addr);
+//	}
+//	else if (paired_devices[device_index - 1].device_type == RIDER_HEADSET)
+//	{
+//		app_connect(RIDER_HEADSET, device_addr);
+//
+//	}else if (paired_devices[device_index - 1].device_type == PASSENGER_HEADSET)
+//	{
+//		app_connect(PASSENGER_HEADSET, device_addr);
+//
+//	} else
+//	{
+//		PRINTF("Failed, Invalid device type !\n");
+//	}
 }
 
 bool is_valid_device(uint8_t *addr)

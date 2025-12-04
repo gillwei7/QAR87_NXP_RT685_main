@@ -63,6 +63,7 @@ static uint16_t connection_timer_count = 0;
 extern TaskHandle_t       sI2CTaskHandle  ;
 #endif
 
+static TaskHandle_t       appTaskHandle  = NULL;
 
 hfp_hf_get_config hfp_hf_config = {
     .bt_hfp_hf_vgs             = APP_HFP_HF_INITIAL_VGS_GAIN,
@@ -524,6 +525,24 @@ extern void StartMicSpkTest(void);
 extern void Manager_Task(void *pvParameters);
 extern void connect_paired_device(uint8_t device_index);
 
+static void app_task(void *pvParameters)
+{
+    while(1){
+        if(connection_timer_count < (CONNECTION_TIMER_TIMEOUT_MILLISECOND/CONNECTION_TIMER_TASK_DELAY) && (conn_rider_phone == NULL)){
+            connection_timer_count++;
+        }else{
+            connection_timer_count = 0;
+            if((g_pairedDeviceCount > 0) && (conn_rider_phone == NULL)){
+#if AUTO_CONNECT_ENABLE
+                PRINTF("Connection timeout. Connect previous paired device\r\n");
+                app_auto_connect_paired_devices();
+#endif
+            }
+        }
+        vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
+    }
+}
+
 void hfp_hf_a2dp_task(void *pvParameters)
 {
     int err = 0;
@@ -590,21 +609,22 @@ void hfp_hf_a2dp_task(void *pvParameters)
 	    PRINTF("I2C_TASK creation failed!\r\n");
 	    while (1) { ; }
 	}
+
+	if (xTaskCreate(app_task, "APP_TASK",
+	                    configMINIMAL_STACK_SIZE + 1000,
+	                    NULL,
+	                    tskIDLE_PRIORITY + 2,
+	                    &appTaskHandle) != pdPASS)
+    {
+        PRINTF("app_task creation failed!\r\n");
+        while (1) { ; }
+    }
 #endif
 
-//	while(1){
-//		if(connection_timer_count < (CONNECTION_TIMER_TIMEOUT_MILLISECOND/CONNECTION_TIMER_TASK_DELAY) && (conn_rider_phone == NULL)){
-//			connection_timer_count++;
-//		}else{
-//			connection_timer_count = 0;
-//			if((g_pairedDeviceCount > 0) && (conn_rider_phone == NULL)){
-//#if AUTO_CONNECT_ENABLE
-//				PRINTF("Connection timeout. Connect previous paired device\r\n");
-//				app_auto_connect_paired_devices();
-//#endif
-//			}
-//		}
-//		vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
-//	}
+	// gill
+	// If add while loop on here and not delete task, Can not connect BT
+	// May cause by Bluetooth stack init bt_enable() not finished, or bt_ready() not finished
+	// Only see log "ACL Disconnected"
+
     vTaskDelete(NULL);
 }
