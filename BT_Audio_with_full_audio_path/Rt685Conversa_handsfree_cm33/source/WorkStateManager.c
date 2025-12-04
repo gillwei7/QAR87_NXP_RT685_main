@@ -585,6 +585,9 @@ void Manager_Task(void *pvParameters)
 
 	VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;		//must set an initial value
 
+	//gill change Ringtone before Home state init
+	general_RingtoneState = Ringtone_PowerON;
+
 	while(1)
 	{
 		vTaskDelay(40);
@@ -851,7 +854,8 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_Translation_Pre;
 								WorkStateIsChanged=1;
-								PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+								general_RingtoneState = Ringtone_StartTranslation;
+								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						#if EnableWorkState_AiConversation==1
@@ -871,6 +875,7 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_VideoAi_Pre;
 								WorkStateIsChanged=1;
+								general_RingtoneState == Ringtone_StartVideoAI;
 								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
@@ -933,6 +938,7 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
+								general_RingtoneState = Ringtone_StopTranslation;
 								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
@@ -949,7 +955,7 @@ void Manager_Task(void *pvParameters)
 							}
 						#endif
 						break;
-					case ASR_Menu_VidioAi:
+					case ASR_Menu_VideoAi:
 						#if EnableWorkState_VideoAi==1
 							if(VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeVideoAi)
 							{
@@ -957,6 +963,7 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
+								general_RingtoneState = Ringtone_StopVideoAI;
 								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
@@ -965,6 +972,8 @@ void Manager_Task(void *pvParameters)
 					default:
 						break;
 				}
+				PRINTF_M("Voice events for switching work state\r\n");
+				PRINTF_M("Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 				VarBlockSharedByDspAndMcu.CurrentVoiceCommandIntent=ASR_Menu_None;
 			}
 

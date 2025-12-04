@@ -581,6 +581,17 @@ static void app_task(void *pvParameters)
             startOpusPlayIndex(11);
         }
 
+        if(general_RingtoneState == Ringtone_PowerON && DeviceWorkStateCur == WorkState_HomeVitStandby){
+            general_RingtoneState = Ringtone_No;
+            startOpusPlayIndex(0);
+        }
+
+        // TODO No matter on what state, need to play Power Off ringtone
+        if(general_RingtoneState == Ringtone_PowerOFF){
+                general_RingtoneState = Ringtone_No;
+                startOpusPlayIndex(1);
+        }
+
         vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
     }
 }

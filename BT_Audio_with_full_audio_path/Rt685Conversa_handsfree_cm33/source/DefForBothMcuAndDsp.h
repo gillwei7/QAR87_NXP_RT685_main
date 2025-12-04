@@ -147,7 +147,7 @@ typedef enum _VoiceCommandMenu
 {
 	ASR_Menu_None=0,
     ASR_Menu_Home,
-	ASR_Menu_VidioAi,
+	ASR_Menu_VideoAi,
 	ASR_Menu_AiConversation,
 	ASR_Menu_Translation,
 	ASR_Menu_VideoRecording,

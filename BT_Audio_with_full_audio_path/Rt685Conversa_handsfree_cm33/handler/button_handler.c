@@ -11,6 +11,7 @@
 #include "WorkStateManager.h"
 #include "system_status.h"
 #include "app_connect.h"
+#include "app_handsfree.h"
 
 /* ===== external SPI handlers ===== */
 extern QueueHandle_t      spi_request_queue;
@@ -40,6 +41,9 @@ extern volatile SystemStatus ss;
 #if UsingQAR87BoardHwVersion == 1 // Actual Board
 static uint8_t current_usb_output = 0;
 #endif
+
+// gill
+extern RingtoneState general_RingtoneState;
 
 /* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
 static inline void delay_ms(uint32_t ms)
@@ -418,6 +422,7 @@ void button_task(void *pvParameters)
 #endif
                         led_post_event(LED_EVT_POWER_OFF_PROGRESS);
                         /* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
+                        general_RingtoneState = Ringtone_PowerOFF;
                     }
                     else if (press_dur >= pwr_minShortTicks)
                     {
