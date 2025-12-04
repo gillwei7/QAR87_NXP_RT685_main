@@ -171,6 +171,7 @@ SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);			\
 
 //gill
 #define AUTO_CONNECT_ENABLE 1
+#define MAX_RINGTONE_OPUS_INDEX 12
 
 #endif
 

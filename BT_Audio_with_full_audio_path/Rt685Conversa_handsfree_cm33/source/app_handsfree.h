@@ -10,6 +10,23 @@
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
+typedef enum
+{
+    Ringtone_No  = 0,
+    Ringtone_PowerON,
+    Ringtone_PowerOFF,
+    Ringtone_LowBattery,
+    Ringtone_WiFi_Disconnected,
+    Ringtone_BT_Disconnected,
+    Ringtone_StartRecording,
+    Ringtone_StopRecording,
+    Ringtone_PhotoCapture,
+    Ringtone_StartVideoAI,
+    Ringtone_StopVideoAI,
+    Ringtone_StartTranslation,
+    Ringtone_StopTranslation,
+    Ringtone_WakeWord
+} RingtoneState;
 
 /*******************************************************************************
  * API
@@ -33,5 +50,6 @@ int app_hfp_hf_discover(struct bt_conn *conn, uint8_t channel);
 void hfp_hf_query_list_current_calls(void);
 void hfp_hf_init(void);
 int call_status();
+void startOpusPlayIndex(int opus_index);
 
 #endif /* __APPL_PERIPHERAL_HFP_HF_MAIN_H__ */

@@ -40,6 +40,8 @@
 #include "CircularBuf.h"
 #include "SubFunc.h"
 #include "WorkStateManager.h"
+#include "app_handsfree.h"
+#include "system_status.h"
 
 /*******************************************************************************
  * Definitions
@@ -552,9 +554,7 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
 
 		if(opus_number >= 0 && opus_number <= 12)
 		{
-			//play the first opus file
-			VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
-			VarBlockSharedByDspAndMcu.PlayOpusFileIdx=opus_number;
+		    startOpusPlayIndex(opus_number);
 		}
 		else
 		{
@@ -596,6 +596,11 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
 			PRINTF("Invalid volume level. Use: 0 ~ 15\r\n");
 		}
 	}
+    else if(strcmp(argv[1], "ss_get_state") == 0)
+    {
+        int current_usage_state = ss_get_state();
+        PRINTF("current_usage_state:%d\r\n", current_usage_state);
+    }
     else
     {
     	PRINTF("invalid parameter\n");

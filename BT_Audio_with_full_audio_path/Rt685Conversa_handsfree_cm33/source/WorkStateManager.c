@@ -31,6 +31,8 @@
 #include "system_status.h"
 #endif
 
+#include "app_handsfree.h"
+
 int AudioPortIsActive_I2SToAmp;
 int AudioPortIsActive_I2SToNvt;
 int AudioPortIsActive_Pdm;
@@ -82,8 +84,6 @@ bit 8~9:   	PDM Fs: 0,1,2,3 -> 16K, 32K, 44.1K, 48K
 bit 10~15:  	PDM ch enable
 */
 
-
-
 const char *WorkStateName[]=
 {
 	"WorkState_Void",
@@ -98,6 +98,9 @@ const char *WorkStateName[]=
 	"WorkState_AiConversation",
 	"WorkState_VideoAi",
 };
+
+extern RingtoneState general_RingtoneState;
+
 
 void ChangeMasterVolumeLevel16(int level16)
 {
@@ -155,6 +158,7 @@ void WorkStateDeInit(int WhichState, U32 Opt)
 		#if EnableWorkState_Translation==1
 			case WorkState_Translation:
 				DeInitAudioInterface_Translation(0);
+				general_RingtoneState = Ringtone_StopTranslation;
 				PRINTF_M("    Mcu: WorkState_Translation DeInit is done\r\n");
 				break;
 		#endif
@@ -167,6 +171,7 @@ void WorkStateDeInit(int WhichState, U32 Opt)
 		#if EnableWorkState_VideoAi==1
 			case WorkState_VideoAi:
 				DeInitAudioInterface_VideoAi(0);
+				general_RingtoneState = Ringtone_StopVideoAI;
 				PRINTF_M("    Mcu: WorkState_VideoAi DeInit is done\r\n");
 				break;
 		#endif
@@ -219,6 +224,7 @@ int WorkStateInit(int WhichState, U32 Opt)
 		#if EnableWorkState_Translation==1
 			case WorkState_Translation_Pre:
 				InitAudioInterface_Translation(0);
+				general_RingtoneState = Ringtone_StartTranslation;
 				PRINTF_M("    Mcu: WorkState_Translation Init is done\r\n");
 				return(WorkState_Translation);
 				break;
@@ -233,6 +239,7 @@ int WorkStateInit(int WhichState, U32 Opt)
 		#if EnableWorkState_VideoAi==1
 			case WorkState_VideoAi_Pre:
 				InitAudioInterface_VideoAi(0);
+				general_RingtoneState = Ringtone_StartVideoAI;
 				PRINTF_M("    Mcu: WorkState_VideoAi Init is done\r\n");
 				VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
 				VarBlockSharedByDspAndMcu.PlayOpusFileIdx=5;

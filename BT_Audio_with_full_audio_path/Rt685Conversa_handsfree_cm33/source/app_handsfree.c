@@ -45,6 +45,7 @@
 #include "hal_common.h"
 #include "app_connect.h"
 #include "system_status.h"
+#include "WorkStateManager.h"
 #endif
 
 #define Manager_TASK_PRIORITY				2			//this is low
@@ -137,6 +138,9 @@ static struct bt_sdp_attribute hfp_hf_attrs[] = {
     BT_SDP_SUPPORTED_FEATURES(0x3400),
 };
 static struct bt_sdp_record hfp_hf_rec = BT_SDP_RECORD(hfp_hf_attrs);
+
+RingtoneState general_RingtoneState = Ringtone_No;
+extern TDeviceWorkState DeviceWorkStateCur;
 
 void hfp_hf_register_service()
 {
@@ -525,20 +529,58 @@ extern void StartMicSpkTest(void);
 extern void Manager_Task(void *pvParameters);
 extern void connect_paired_device(uint8_t device_index);
 
+void startOpusPlayIndex(int opus_index){
+    int play_opus_index  = 0;
+    if(opus_index < 0){
+        PRINTF("startOpusPlay: opus index < 0\r\n");
+        return;
+    } else if (opus_index > MAX_RINGTONE_OPUS_INDEX){
+        play_opus_index = MAX_RINGTONE_OPUS_INDEX;
+        PRINTF("startOpusPlay: opus index > %d\r\n", MAX_RINGTONE_OPUS_INDEX);
+    } else {
+        play_opus_index = opus_index;
+        PRINTF("startOpusPlay: opus index %d\r\n", play_opus_index);
+    }
+    VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
+    VarBlockSharedByDspAndMcu.PlayOpusFileIdx=play_opus_index;
+}
+
+
 static void app_task(void *pvParameters)
 {
     while(1){
+#if AUTO_CONNECT_ENABLE
         if(connection_timer_count < (CONNECTION_TIMER_TIMEOUT_MILLISECOND/CONNECTION_TIMER_TASK_DELAY) && (conn_rider_phone == NULL)){
             connection_timer_count++;
         }else{
             connection_timer_count = 0;
             if((g_pairedDeviceCount > 0) && (conn_rider_phone == NULL)){
-#if AUTO_CONNECT_ENABLE
+
                 PRINTF("Connection timeout. Connect previous paired device\r\n");
                 app_auto_connect_paired_devices();
-#endif
             }
         }
+#endif
+        if(general_RingtoneState == Ringtone_StartVideoAI && DeviceWorkStateCur == WorkState_VideoAi){
+            general_RingtoneState = Ringtone_No;
+            startOpusPlayIndex(8);
+        }
+
+        if(general_RingtoneState == Ringtone_StopVideoAI && DeviceWorkStateCur == WorkState_HomeVitStandby){
+            general_RingtoneState = Ringtone_No;
+            startOpusPlayIndex(9);
+        }
+
+        if(general_RingtoneState == Ringtone_StartTranslation && DeviceWorkStateCur == WorkState_Translation){
+            general_RingtoneState = Ringtone_No;
+            startOpusPlayIndex(10);
+        }
+
+        if(general_RingtoneState == Ringtone_StopTranslation && DeviceWorkStateCur == WorkState_HomeVitStandby){
+            general_RingtoneState = Ringtone_No;
+            startOpusPlayIndex(11);
+        }
+
         vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
     }
 }

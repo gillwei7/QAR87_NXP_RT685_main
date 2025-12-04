@@ -241,7 +241,7 @@ U32 ThreadStackMem_AudioFrameProc[THREAD_STACK_SIZE_AudioFrameProc];
 void CommandToPlayWakeSound(void)
 {
 	PtrVarBlockSharedByDspAndMcu->NeedToStartPlayOpus=1;
-	PtrVarBlockSharedByDspAndMcu->PlayOpusFileIdx=0;		//opus file 0 is the wakesound
+	PtrVarBlockSharedByDspAndMcu->PlayOpusFileIdx=12;		//gill wakesound opus file from 0 change to 12
 }
 extern int XOS_Test(void);
 int main(void)
