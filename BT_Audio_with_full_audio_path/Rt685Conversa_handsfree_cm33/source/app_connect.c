@@ -561,34 +561,34 @@ static int app_auto_connect_del_addr(bt_addr_t const *addr)
     return err;
 }
 
-int app_auto_connect_save_addr(bt_addr_t const *addr)
-{
-    int err;
-    int len;
-
-    lfs_remove(lfs, FILE_NAME);
-    err = lfs_file_open(lfs, &lfs_file, FILE_NAME, LFS_O_WRONLY | LFS_O_CREAT);
-
-    if (err)
-    {
-        PRINTF("fail to save device addr\r\n");
-        return err;
-    }
-
-    len = lfs_file_write(lfs, &lfs_file, addr, 6U);
-    if (len != 6U)
-    {
-        PRINTF("fail to save device addr\r\n");
-        err = -EIO;
-    }
-    else
-    {
-        err = 0;
-    }
-    lfs_file_close(lfs, &lfs_file);
-
-    return err;
-}
+//int app_auto_connect_save_addr(bt_addr_t const *addr)
+//{
+//    int err;
+//    int len;
+//
+//    lfs_remove(lfs, FILE_NAME);
+//    err = lfs_file_open(lfs, &lfs_file, FILE_NAME, LFS_O_WRONLY | LFS_O_CREAT);
+//
+//    if (err)
+//    {
+//        PRINTF("fail to save device addr\r\n");
+//        return err;
+//    }
+//
+//    len = lfs_file_write(lfs, &lfs_file, addr, 6U);
+//    if (len != 6U)
+//    {
+//        PRINTF("fail to save device addr\r\n");
+//        err = -EIO;
+//    }
+//    else
+//    {
+//        err = 0;
+//    }
+//    lfs_file_close(lfs, &lfs_file);
+//
+//    return err;
+//}
 #endif
 
 #if ((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
@@ -655,4 +655,42 @@ void app_a2dp_hf_auto_connect(void)
         app_hf_set_connectable();
     }
 #endif
+}
+
+void app_clear_device_enter_discoverable(void){
+
+    // Delete all paired device and set Connectable and Discoverable
+
+    if (conn_rider_phone != NULL)
+    {
+        app_disconnect(RIDER_PHONE);
+        while(conn_rider_phone != NULL);
+    }
+
+#if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
+    /*First need to read the paired device*/
+    if (!app_read_paired_devices())
+    {
+        uint8_t addr[6];
+        PRINTF("Number of paired device count is %d\n", g_pairedDeviceCount);
+        for(int i = 0;i < g_pairedDeviceCount; i++)
+        {
+            PRINTF("[%d] Address: %02X:%02X:%02X:%02X:%02X:%02X, Name: %s, Type: %d\n",
+                    i + 1,
+                    paired_devices[i].addr[0], paired_devices[i].addr[1], paired_devices[i].addr[2],
+                    paired_devices[i].addr[3], paired_devices[i].addr[4], paired_devices[i].addr[5],
+                    paired_devices[i].name, paired_devices[i].device_type);
+
+            if (memcmp(paired_devices[i].addr, addr, 6) == 0)
+            {
+                bt_unpair(BT_ID_DEFAULT,(bt_addr_le_t *)addr);
+            }
+        }
+        PRINTF("clear_paired_devices_from_lfs.\n\n");
+        vTaskDelay(pdMS_TO_TICKS(50));
+        app_clear_paired_devices();
+    }
+#endif
+
+    app_hf_set_connectable();
 }

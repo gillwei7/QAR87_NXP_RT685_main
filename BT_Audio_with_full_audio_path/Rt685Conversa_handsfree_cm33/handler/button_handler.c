@@ -10,6 +10,7 @@
 #include "spi_handler.h"
 #include "WorkStateManager.h"
 #include "system_status.h"
+#include "app_connect.h"
 
 /* ===== external SPI handlers ===== */
 extern QueueHandle_t      spi_request_queue;
@@ -236,6 +237,7 @@ void button_task(void *pvParameters)
 		                PRINTF("[Button] Charging mode: 5 clicks within 6s detected -> trigger event.\r\n");
 
 		                /* ToDo: BT Discover*/
+		                app_clear_device_enter_discoverable();
 
 		                /* 觸發後重置視窗與計數，避免卡住 */
 		                sChg5Clicks = 0;
