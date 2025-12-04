@@ -419,9 +419,10 @@
 #define HW_CONFIG_01_PIN              10U
 #define HW_CONFIG_02_PORT             0U
 #define HW_CONFIG_02_PIN              11U
+#endif
+
 #define HW_CONFIG_03_PORT             0U
 #define HW_CONFIG_03_PIN              12U
-#endif
 
 #define POWER_KEY_PINT_CH  		      0      // PINT channel
 #define FUN_KEY_PINT_CH  		      1      // PINT channel

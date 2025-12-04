@@ -67,7 +67,7 @@ void hal_loop_delay_us(uint32_t val)
 void hal_loop_delay_ms(uint32_t val)
 {
     if (val < 4294 && val > 0) {
-        SDK_DelayAtLeastUs(val * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk));
+        SDK_DelayAtLeastUs(val * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk));
     }
 //    volatile uint32_t i = 0;
 //    volatile uint32_t j = 0;
@@ -107,6 +107,8 @@ static void hal_gpio_pin_init(void)
     GPIO_PinInit(GPIO, AP533_WAKEUP_N_PORT, AP533_WAKEUP_N_PIN, &output_low_pin_config);
     /* AMP GPIO */
     GPIO_PinInit(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, &output_low_pin_config);
+    /* HW Config GPIO */
+    GPIO_PinInit(GPIO, HW_CONFIG_03_PORT, HW_CONFIG_03_PIN, &input_pin_config);
 #if UsingQAR87BoardHwVersion == 1 // Actual Board
     /* USB Switch GPIO */
     GPIO_PinInit(GPIO, NXP_532_USB_SWITCH_PORT, NXP_532_USB_SWITCH_PIN, &output_low_pin_config);
