@@ -19,8 +19,8 @@ void hal_pmic_pca9422_power_down(void);
 void hal_pmic_pca9422_enter_ship_mode(void);
 
 
-void hal_pmic_glf70583_init(void);
-
+void hal_pmic_glf70583_init (uint8_t, uint8_t);
+void hal_pmic_glf70583_actual_board_init (void);
 void BOARD_InitPMICs(void);
 
 
