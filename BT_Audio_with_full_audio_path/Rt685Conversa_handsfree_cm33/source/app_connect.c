@@ -34,6 +34,7 @@
 #include "lfs.h"
 #include "littlefs_pl.h"
 #endif
+#include "app_handsfree.h"
 
 static int app_auto_connect_del_addr(bt_addr_t const *addr);
 static void connected(struct bt_conn *conn, uint8_t err);
@@ -72,6 +73,7 @@ static lfs_file_t lfs_file;
 #endif
 
 #define LFS_PAIRED_DEVICES_FILE  "paired_devices"
+extern RingtoneState general_RingtoneState;
 
 void app_hf_set_connectable(void)
 {
@@ -177,6 +179,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
     PRINTF("ACL Disconnection (reason %d)\n", reason);
+    general_RingtoneState = Ringtone_BT_Disconnected;
 
    if(conn_rider_phone == conn)
     {
@@ -190,7 +193,7 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 #ifdef APP_DEBUG_EN
     	PRINTF("Disconnection event from unknown device !!\n");
 #endif
-		return;
+    	return;
 	}
 }
 

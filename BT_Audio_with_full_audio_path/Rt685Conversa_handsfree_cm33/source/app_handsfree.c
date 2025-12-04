@@ -563,33 +563,43 @@ static void app_task(void *pvParameters)
 #endif
         if(general_RingtoneState == Ringtone_StartVideoAI && DeviceWorkStateCur == WorkState_VideoAi){
             general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(8);
+            startOpusPlayIndex(Ringtone_StartVideoAI-1);
         }
 
         if(general_RingtoneState == Ringtone_StopVideoAI && DeviceWorkStateCur == WorkState_HomeVitStandby){
             general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(9);
+            startOpusPlayIndex(Ringtone_StopVideoAI-1);
         }
 
         if(general_RingtoneState == Ringtone_StartTranslation && DeviceWorkStateCur == WorkState_Translation){
             general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(10);
+            startOpusPlayIndex(Ringtone_StartTranslation-1);
         }
 
         if(general_RingtoneState == Ringtone_StopTranslation && DeviceWorkStateCur == WorkState_HomeVitStandby){
             general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(11);
+            startOpusPlayIndex(Ringtone_PowerON-1);
         }
 
         if(general_RingtoneState == Ringtone_PowerON && DeviceWorkStateCur == WorkState_HomeVitStandby){
             general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(0);
+            startOpusPlayIndex(Ringtone_PowerON-1);
         }
 
-        // TODO No matter on what state, need to play Power Off ringtone
+        // TODO No matter on what state, need to play Power Off, Wifi disconnected,  ringtone
         if(general_RingtoneState == Ringtone_PowerOFF){
                 general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(1);
+                startOpusPlayIndex(Ringtone_PowerOFF-1);
+        }
+
+        if(general_RingtoneState == Ringtone_WiFi_Disconnected){
+                general_RingtoneState = Ringtone_No;
+                startOpusPlayIndex(Ringtone_WiFi_Disconnected-1);
+        }
+
+        if(general_RingtoneState == Ringtone_BT_Disconnected){
+                general_RingtoneState = Ringtone_No;
+                startOpusPlayIndex(Ringtone_BT_Disconnected-1);
         }
 
         vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));

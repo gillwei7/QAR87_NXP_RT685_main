@@ -8,6 +8,7 @@
 #include "spi_handler.h"
 #include "i2c_component_handler.h"
 #include "system_status.h"
+#include "app_handsfree.h"
 
 /* ============= 被動模式相關定義 ============= */
 typedef enum {
@@ -83,6 +84,7 @@ QueueSetHandle_t spi_evt_set = NULL;
 
 extern volatile SystemStatus ss ;
 uint8_t Novatek_boot_completed = 0;
+extern RingtoneState general_RingtoneState;
 
 /*******************************************************************************
  * Code
@@ -161,7 +163,7 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 			}
 			else if (val == 0x09) {
 				PRINTF("[Passive] ACK:[00 %02X] WiFi disconnection \r\n",val);
-				// ToDo:手機Wi-Fi斷線時，發出提示聲音
+				general_RingtoneState = Ringtone_WiFi_Disconnected;
 			}
 			break;
 
