@@ -56,9 +56,9 @@
 // SW Version
 /* Rule of Version: [based version]_[commit_date]_[commit_time]_[sub_item] */
 #if HAL_MCU_APP_RELEASE
-static uint8_t sw_version[40] = "R00.QAR87.01.01.251122";
+static uint8_t sw_version[40] = "R01.QAR88n.01.01.251205";
 #else
-static uint8_t sw_version[40] = "T00.QAR87.01.01.251122.Demo";
+static uint8_t sw_version[40] = "T01.QAR88n.01.01.251205";
 #endif
 
 
