@@ -9,6 +9,9 @@
 #include "system_status.h"
 #include "spi_handler.h"
 #include "WorkStateManager.h"
+#include "app_handsfree.h"
+
+extern RingtoneState general_RingtoneState;
 
 volatile uint8_t System_Status = 0; //Send system status to Novatek
 volatile SystemStatus ss = {0};
@@ -202,6 +205,7 @@ void ss_set_capture_status(uint8_t status)
 	if (status == COMPONENT_START)
 	{
 		capture_start = 1;
+		general_RingtoneState = Ringtone_PhotoCapture;
 	}
 	else if (status == COMPONENT_END)
 	{
@@ -214,10 +218,13 @@ void ss_set_recording_status(uint8_t status)
 	if (status == COMPONENT_START)
 	{
 		recording_start = 1;
+		general_RingtoneState = Ringtone_StartRecording;
+
 	}
 	else if (status == COMPONENT_END)
 	{
 		recording_finished = 1;
+		general_RingtoneState = Ringtone_StopRecording;
 	}
 }
 

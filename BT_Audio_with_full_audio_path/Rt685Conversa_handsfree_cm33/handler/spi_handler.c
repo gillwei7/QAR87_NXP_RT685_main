@@ -142,20 +142,24 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 				PRINTF("[Passive] ACK:[00 %02X] Capture Start \r\n",val);
 				led_post_event(LED_EVT_POWER_ON_PROGRESS);//While LED ON
 				// ToDo:使NXP發出 "滴～喀嚓 "聲音
+				ss_set_capture_status(COMPONENT_START);
 			}
 			else if (val == 0x03) {
 				PRINTF("[Passive] ACK:[00 %02X] Capture Completed \r\n",val);
 				led_post_event(LED_EVT_ALL_OFF);
+				ss_set_capture_status(COMPONENT_END);
 			}
 			else if (val == 0x04) {
 				PRINTF("[Passive] ACK:[00 %02X] Recording Start \r\n",val);
 				led_post_event(LED_EVT_POWER_ON_PROGRESS);//While LED ON
 				// ToDo:使NXP發出 "登登"聲音
+				ss_set_recording_status(COMPONENT_START);
 			}
 			else if (val == 0x05) {
 				PRINTF("[Passive] ACK:[00 %02X] Recording Completed \r\n",val);
 				led_post_event(LED_EVT_ALL_OFF);
 				// ToDo:使NXP發出 "等登"聲音
+				ss_set_recording_status(COMPONENT_END);
 			}
 			else if (val == 0x08) {
 				PRINTF("[Passive] ACK:[00 %02X] Wi-Fi connection \r\n",val);

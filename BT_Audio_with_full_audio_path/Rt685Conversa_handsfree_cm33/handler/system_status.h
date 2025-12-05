@@ -61,6 +61,12 @@ enum {
 
 };
 
+
+void ss_set_camera_status(uint8_t status);
+void ss_set_capture_status(uint8_t status);
+void ss_set_recording_status(uint8_t status);
+void ss_set_recording_status(uint8_t status);
+
 void ss_set_bt_addr_0 (uint8_t addr);
 void ss_set_bt_addr_1 (uint8_t addr);
 void ss_set_bt_addr_2 (uint8_t addr);

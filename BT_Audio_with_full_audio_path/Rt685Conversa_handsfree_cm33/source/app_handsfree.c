@@ -602,6 +602,26 @@ static void app_task(void *pvParameters)
                 startOpusPlayIndex(Ringtone_BT_Disconnected-1);
         }
 
+        if(general_RingtoneState == Ringtone_PhotoCapture){
+                general_RingtoneState = Ringtone_No;
+                startOpusPlayIndex(Ringtone_PhotoCapture-1);
+        }
+
+        if(general_RingtoneState == Ringtone_StartRecording){
+                general_RingtoneState = Ringtone_No;
+                startOpusPlayIndex(Ringtone_StartRecording-1);
+        }
+
+        if(general_RingtoneState == Ringtone_StopRecording){
+                general_RingtoneState = Ringtone_No;
+                startOpusPlayIndex(Ringtone_StopRecording-1);
+        }
+
+        if(general_RingtoneState == Ringtone_LowBattery){
+                general_RingtoneState = Ringtone_No;
+                startOpusPlayIndex(Ringtone_LowBattery-1);
+        }
+
         vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
     }
 }
