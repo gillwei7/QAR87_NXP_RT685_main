@@ -92,11 +92,13 @@ const char *WorkStateName[]=
 	"WorkState_Menu",
 	"WorkState_AudioIoDbg",
 	"WorkState_VideoRecording",
+	"WorkState_TakePhoto",
 	"WorkState_MediaPlayer",
 	"WorkState_MusicPlayer",
 	"WorkState_Translation",
 	"WorkState_AiConversation",
 	"WorkState_VideoAi",
+	"WorkState_About",
 };
 
 extern RingtoneState general_RingtoneState;
@@ -131,6 +133,14 @@ void WorkStateDeInit(int WhichState, U32 Opt)
 			DeInitAudioInterface_HomeVitStandby(0);
 			PRINTF_M("    Mcu: WorkState_HomeVitStandby DeInit is done\r\n");
 			break;
+//		case WorkState_Menu:
+//			DeInitAudioInterface_HomeVitStandby(0);
+//			PRINTF_M("    Mcu: WorkState_HomeVitStandby(Menu) DeInit is done\r\n");
+//			break;
+//		case WorkState_About:
+//			DeInitAudioInterface_HomeVitStandby(0);
+//			PRINTF_M("    Mcu: WorkState_HomeVitStandby(About) DeInit is done\r\n");
+//			break;
 		#if EnableWorkState_AudioIoDbg==1
 			case WorkState_AudioIoDbg:
 				DeInitAudioInterface_AudioIoDebug(0);
@@ -246,7 +256,23 @@ int WorkStateInit(int WhichState, U32 Opt)
 				return(WorkState_VideoAi);
 				break;
 		#endif
+//		#if EnableWorkState_Menu==1
+//			case WorkState_Menu_Pre:
+////				InitAudioInterface_HomeVitStandby(0);
+//				PRINTF_M("    Mcu: WorkState_HomeVitStandby(Menu) Init is done\r\n");
+//				return(WorkState_Menu);
+//				break;
+//		#endif
+//		#if EnableWorkState_About==1
+//			case WorkState_About_Pre:
+////				InitAudioInterface_HomeVitStandby(0);
+//				PRINTF_M("    Mcu: WorkState_HomeVitStandby(About) Init is done\r\n");
+//				return(WorkState_About);
+//				break;
+//		#endif
+
 		default:
+			return(WhichState);
 			break;
 	}
 }
@@ -653,7 +679,24 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_MusicPlayer)
 						{
+							if (ss_get_state == USAGE_STATE_HOME) {
 							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MENU) {
+								DeviceWorkStateCur=WorkState_Menu_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_ABOUT) {
+								DeviceWorkStateCur=WorkState_About_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_RECORDING) {
+								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TAKE_PHOTO) {
+								DeviceWorkStateCur=WorkState_TakePhoto_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_AI) {
+								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TRANSLATION) {
+								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
+							}
+
 							DeviceWorkStatePre=WorkState_MusicPlayer;
 							WorkStateIsChanged=1;
 
@@ -780,12 +823,62 @@ void Manager_Task(void *pvParameters)
 					}
 				#endif // #if EnableWorkState_VideoRecording == 1
 
+				#if EnableWorkState_TakePhoto == 1
+					if(RequestToGetIntoTakePhoto && !RequestToGetOutofMenu)
+					{
+						if(DeviceWorkStateCur!=WorkState_TakePhoto)
+						{
+							DeviceWorkStatePre=DeviceWorkStateCur;
+							DeviceWorkStateCur=WorkState_TakePhoto_Pre;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetIntoTakePhoto=0;
+						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+					if(RequestToGetOutofTakePhoto)
+					{
+						if(DeviceWorkStateCur==WorkState_TakePhoto)
+						{
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							DeviceWorkStatePre=WorkState_TakePhoto;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetOutofTakePhoto=0;
+						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+				#endif // #if EnableWorkState_TakePhoto == 1
+
+
+
+					if(RequestToGetIntoAbout)
+					{
+						if(DeviceWorkStateCur!=WorkState_About)
+						{
+							DeviceWorkStatePre=DeviceWorkStateCur;
+							DeviceWorkStateCur=WorkState_About;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetIntoAbout=0;
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+					if(RequestToGetOutofAbout)
+					{
+						if(DeviceWorkStateCur==WorkState_About)
+						{
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							DeviceWorkStatePre=WorkState_About;
+							WorkStateIsChanged=1;
+						}
+						RequestToGetOutofAbout=0;
+						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+					}
+
 					if(RequestToGetIntoMenu)
 					{
 						if(DeviceWorkStateCur!=WorkState_Menu)
 						{
 							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_Menu_Pre;
+							DeviceWorkStateCur=WorkState_Menu;
 							WorkStateIsChanged=1;
 						}
 						RequestToGetIntoMenu=0;
@@ -795,7 +888,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_Menu)
 						{
-							DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_Menu;
 							WorkStateIsChanged=1;
 						}

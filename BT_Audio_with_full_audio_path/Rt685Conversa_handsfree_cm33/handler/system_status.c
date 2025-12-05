@@ -48,12 +48,13 @@ void ss_set_state(uint8_t state)
 
 	if (state == USAGE_STATE_HOME) {
 		if (current_usage_state == USAGE_STATE_MUSIC_PLAYER) {
-			RequestToGetOutofA2dpPlay = 1;
-			current_usage_state = state;
-			need_send_music_status = 1;
-			music_status = 0;
+//			RequestToGetOutofA2dpPlay = 1;
+//			current_usage_state = state;
+//			need_send_music_status = 1;
+//			music_status = 0;
 
-		} else if (current_usage_state == USAGE_STATE_MEDIA_PLAYER) {
+		} else
+		if (current_usage_state == USAGE_STATE_MEDIA_PLAYER) {
 			RequestToGetOutofMediaPlayer = 1;
 			current_usage_state = state;
 			need_send_state = 1;
@@ -95,7 +96,7 @@ void ss_set_state(uint8_t state)
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_ABOUT && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
+	} else if (state == USAGE_STATE_ABOUT && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
 			RequestToGetOutofMenu = 1;
 		}
@@ -103,16 +104,17 @@ void ss_set_state(uint8_t state)
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_MUSIC_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
-		if (current_usage_state == USAGE_STATE_MENU) {
-			RequestToGetOutofMenu = 1;
-		}
-		RequestToGetIntoA2dpPlay = 1;
-		current_usage_state = state;
-		need_send_music_status = 1;
-		music_status = 1;
+	} else if (state == USAGE_STATE_MUSIC_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
+//		if (current_usage_state == USAGE_STATE_MENU) {
+//			RequestToGetOutofMenu = 1;
+//		}
+//		RequestToGetIntoA2dpPlay = 1;
+//		current_usage_state = state;
+//		need_send_music_status = 1;
+//		music_status = 1;
 
-	} else if (state == USAGE_STATE_MEDIA_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
+
+	} else if (state == USAGE_STATE_MEDIA_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
 			RequestToGetOutofMenu = 1;
 		}
@@ -120,7 +122,7 @@ void ss_set_state(uint8_t state)
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_VIDEO_RECORDING && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
+	} else if (state == USAGE_STATE_VIDEO_RECORDING && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
 			RequestToGetOutofMenu = 1;
 		}
@@ -128,7 +130,7 @@ void ss_set_state(uint8_t state)
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_TAKE_PHOTO && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
+	} else if (state == USAGE_STATE_TAKE_PHOTO && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
 			RequestToGetOutofMenu = 1;
 		}
@@ -136,7 +138,7 @@ void ss_set_state(uint8_t state)
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_VIDEO_AI && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
+	} else if (state == USAGE_STATE_VIDEO_AI && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
 			RequestToGetOutofMenu = 1;
 		}
@@ -144,7 +146,7 @@ void ss_set_state(uint8_t state)
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_TRANSLATION && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
+	} else if (state == USAGE_STATE_TRANSLATION && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
 		if (current_usage_state == USAGE_STATE_MENU) {
 			RequestToGetOutofMenu = 1;
 		}
@@ -166,11 +168,12 @@ void send_state_to_soc(void) // send state to soc if both audio path and state a
 		(void)xQueueSend(spi_request_queue, &current_state_value, 0);
 		need_send_state = 0;
 
-	} else if (need_send_music_status) {
-		PRINTF("[System] send_music_status_to_soc (%d) \r\n", music_status);
-		send_music_status_to_soc();
-		need_send_music_status = 0;
 	}
+//	else if (need_send_music_status) {
+//		PRINTF("[System] send_music_status_to_soc (%d) \r\n", music_status);
+//		send_music_status_to_soc();
+//		need_send_music_status = 0;
+//	}
 }
 
 void send_music_status_to_soc(void)

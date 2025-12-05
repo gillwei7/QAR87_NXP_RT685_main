@@ -104,6 +104,9 @@ extern EventGroupHandle_t EvtGrpHdl_StateMangerTaskToBtStack;
 #define EnableWorkState_Translation							1
 #define EnableWorkState_AiConversation						1
 #define EnableWorkState_VideoAi								1
+#define EnableWorkState_Menu								1
+#define EnableWorkState_About								1
+#define EnableWorkState_TakePhoto							1
 										/*
 										Note:
 											HfpCall			--- always enabled
@@ -126,11 +129,13 @@ typedef enum
 	WorkState_AudioIoDbg,
 	WorkState_Menu,
 	WorkState_VideoRecording,
+	WorkState_TakePhoto,
 	WorkState_MediaPlayer,
 	WorkState_MusicPlayer,
 	WorkState_Translation,
 	WorkState_AiConversation,
 	WorkState_VideoAi,
+	WorkState_About,
 
 	//-------------------------
 	WorkState_Void_Pre,
@@ -139,11 +144,14 @@ typedef enum
 	WorkState_AudioIoDbg_Pre,
 	WorkState_Menu_Pre,
 	WorkState_VideoRecording_Pre,
+	WorkState_TakePhoto_Pre,
 	WorkState_MediaPlayer_Pre,
 	WorkState_MusicPlayer_Pre,
 	WorkState_Translation_Pre,
 	WorkState_AiConversation_Pre,
 	WorkState_VideoAi_Pre,
+	WorkState_About_Pre,
+
 
 } TDeviceWorkState;
 
