@@ -190,7 +190,7 @@ static void connected(struct bt_conn *conn, int err)
     }
     conn_rider_phone = conn;
 
-//    ss_bt_on();
+    ss_bt_on();
     
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
     bt_conn_get_info(conn, &info);
@@ -206,7 +206,7 @@ static void disconnected(struct bt_conn *conn)
     {
         conn_rider_phone = NULL;
     }
-//    ss_bt_off();
+    ss_bt_off();
 }
 
 static void service(struct bt_conn *conn, uint32_t value)

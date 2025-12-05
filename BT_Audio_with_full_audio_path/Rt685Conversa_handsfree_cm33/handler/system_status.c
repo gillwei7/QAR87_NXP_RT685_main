@@ -258,20 +258,20 @@ void ss_print_bt_addr (void)
 }
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
-  void ss_ble_on()  { ss.flags |=  SS_BLE_BIT; System_Status=1; }
-  void ss_ble_off() { ss.flags &= ~SS_BLE_BIT; System_Status=1;}
+  void ss_ble_on()  { ss.flags |=  SS_BLE_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
+  void ss_ble_off() { ss.flags &= ~SS_BLE_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
   bool ss_ble_is_on() { return (ss.flags & SS_BLE_BIT) != 0; }
 
-  void ss_ha_on()   { ss.flags |=  SS_HA_BIT; System_Status=1;}
-  void ss_ha_off()  { ss.flags &= ~SS_HA_BIT; System_Status=1;}
+  void ss_ha_on()   { ss.flags |=  SS_HA_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
+  void ss_ha_off()  { ss.flags &= ~SS_HA_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
   bool ss_ha_is_on()  { return (ss.flags & SS_HA_BIT) != 0; }
 
-  void ss_bt_on()   { ss.flags |=  SS_BT_BIT; System_Status=1;}
-  void ss_bt_off()  { ss.flags &= ~SS_BT_BIT; System_Status=1;}
+  void ss_bt_on()   { ss.flags |=  SS_BT_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
+  void ss_bt_off()  { ss.flags &= ~SS_BT_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
   bool ss_bt_is_on()  { return (ss.flags & SS_BT_BIT) != 0; }
 
-  void ss_mic_on()  { ss.flags |=  SS_MIC_BIT; System_Status=1;}
-  void ss_mic_off() { ss.flags &= ~SS_MIC_BIT; System_Status=1;}
+  void ss_mic_on()  { ss.flags |=  SS_MIC_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
+  void ss_mic_off() { ss.flags &= ~SS_MIC_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
   bool ss_mic_is_on() { return (ss.flags & SS_MIC_BIT) != 0; }
 
 
