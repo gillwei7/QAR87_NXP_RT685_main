@@ -113,8 +113,8 @@ void Init_I2C_Component(void)
 #if PMIC_PCA9422_ENABLE
 	hal_pmic_pca9422_init();
 #endif
-	//power_off_charging();
-	//Determine_pca9422_enter_ship_mode();
+	power_off_charging();
+	Determine_pca9422_enter_ship_mode();
 #if PMIC_GLF70583_ENABLE
 	hal_pmic_glf70583_actual_board_init();
 #endif
