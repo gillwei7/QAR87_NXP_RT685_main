@@ -679,7 +679,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_MusicPlayer)
 						{
-							if (ss_get_state == USAGE_STATE_HOME) {
+							if (ss_get_state() == USAGE_STATE_HOME) {
 							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							} else if (ss_get_state() == USAGE_STATE_MENU) {
 								DeviceWorkStateCur=WorkState_Menu_Pre;		//this gives _pre
