@@ -1273,7 +1273,7 @@ void McuMainAudioFlowFinalize_VideoRecording(void)
 
 #if 1   //folding --- write Dsp out audio to I2S to AMP and I2S to NVT
     MoveAudioDataFromDspToI2SDmaBufNvt(AudioFrameSizeInSamplePerCh_48KHz,1);
-    //MoveAudioDataFromDspToI2SDmaBufAmp(AudioFrameSizeInSamplePerCh_48KHz,1);
+    MoveAudioDataFromDspToI2SDmaBufAmp(AudioFrameSizeInSamplePerCh_48KHz,1);
 #endif
 }
 
@@ -2097,7 +2097,7 @@ void DeInitAudioInterface_HomeVitStandby(int Opt)
 
 void DeInitAudioInterface_VideoRecording(int Opt)
 {
-    //VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
+   // VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
     Deinit_GeneralAudio(1,1,1,1);   //int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
     ClearAudioCirBuf(0,1,0);        //int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
     return;
