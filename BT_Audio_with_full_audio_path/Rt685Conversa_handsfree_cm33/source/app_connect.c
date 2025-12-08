@@ -133,7 +133,9 @@ static void connected(struct bt_conn *conn, uint8_t err)
 	struct bt_conn_info info;
 	if (err)
 	{
+#if BT_CONNECTION_LOG
 		PRINTF("ACL Connection Failed (err %d)\n",err);
+#endif
 		if (g_connectInitRiderPhone)
 		{
 			g_connectInitRiderPhone = 0U;
@@ -146,8 +148,6 @@ static void connected(struct bt_conn *conn, uint8_t err)
 				conn_rider_phone = NULL;
 			}
 		}
-
-
 		return;
 	}
 
@@ -288,7 +288,9 @@ void app_connect(uint8_t device_type,uint8_t *addr)
 				{
 					PRINTF("Debug NULL Connecting Rider Phone\r\n");
 				}
+#if BT_CONNECTION_LOG
 				PRINTF("Connecting Rider Phone\r\n");
+#endif
 			}
 		} else
 		{

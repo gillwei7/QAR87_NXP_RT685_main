@@ -170,8 +170,9 @@ SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);			\
 } while(0)
 
 //gill
-#define AUTO_CONNECT_ENABLE 1
+#define AUTO_CONNECT_ENABLE     1
 #define MAX_RINGTONE_OPUS_INDEX 12
+#define BT_CONNECTION_LOG       0
 
 #endif
 

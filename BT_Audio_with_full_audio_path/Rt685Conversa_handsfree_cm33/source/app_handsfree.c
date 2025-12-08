@@ -555,8 +555,9 @@ static void app_task(void *pvParameters)
         }else{
             connection_timer_count = 0;
             if((g_pairedDeviceCount > 0) && (conn_rider_phone == NULL)){
-
+#if BT_CONNECTION_LOG
                 PRINTF("Connection timeout. Connect previous paired device\r\n");
+#endif
                 app_auto_connect_paired_devices();
             }
         }
