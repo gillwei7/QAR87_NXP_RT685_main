@@ -580,13 +580,6 @@ void StartAudioTask(void)
 
 	InitAudioCircularBuf(1,1,1);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 	//InitAndStartPdm();		//if use this , it init dma again, cause BT firmware downloading fail
-	
-#if UsingQAR87Board == 1
-	//Initial Smart Amplifier
-    hal_amp_aw88166_power_on();
-    hal_amp_aw88166_init();
-
-#endif
 
 	if (taskCreated == 0)
 	{

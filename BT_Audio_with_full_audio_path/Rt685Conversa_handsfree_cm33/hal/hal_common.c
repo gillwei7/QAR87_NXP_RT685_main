@@ -207,7 +207,7 @@ void hal_gpio_init(void)
 void hal_i3c_init(void)
 {
     BOARD_I3C_Init(BOARD_PMIC_I3C_BASEADDR, BOARD_PMIC_I3C_CLOCK_FREQ);
-    hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
+    //hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
     i2c_event_group = xEventGroupCreate();
     configASSERT(i2c_event_group);
 
@@ -289,6 +289,7 @@ void hal_board_init(void)
 	hal_i3c_init();
 	hal_spi_init();
 	Init_I2C_Component();
+	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
 	hal_soc_enable();
 
 }

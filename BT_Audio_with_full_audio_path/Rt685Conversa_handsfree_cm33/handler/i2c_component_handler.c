@@ -125,6 +125,7 @@ void Init_I2C_Component(void)
 	hal_led_ktd2027_init();
 	hal_led_ktd2027_power_on_indicator(); //White light turns on first
 #endif
+
 #if TOUCH_AW93305_ENABLE
 	hal_touch_aw93305_init(); //Touch Init
 #endif
@@ -134,9 +135,12 @@ void Init_I2C_Component(void)
 	battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
 	ss_set_battery(battery_info.soc);
 #endif
+
 #if AMP_AW88166_ENABLE
+	hal_amp_aw88166_power_on();
 	hal_amp_aw88166_init(); // Init AMP
 #endif
+
 #if CHG_BQ25618_ENABLE
 
 	hal_power_charger_bq25618_get_charging_status();
