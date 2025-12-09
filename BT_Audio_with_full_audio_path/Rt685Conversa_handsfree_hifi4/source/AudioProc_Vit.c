@@ -90,7 +90,7 @@ const char *MenuItemName[]=
 {
 	"ASR_Menu_None",
 	"ASR_Menu_Home",
-	"ASR_Menu_VidioAi",
+	"ASR_Menu_VideoAi",
 	"ASR_Menu_AiConversation",
 	"ASR_Menu_Translation",
 	"ASR_Menu_VideoRecording",
@@ -302,7 +302,7 @@ void IdentifyCurrentVoiceCommand(void)
 	}
 	if(!strcmp("VideoAI",CurrentIntentName))
 	{
-		PtrVarBlockSharedByDspAndMcu->CurrentVoiceCommandIntent=ASR_Menu_VidioAi;
+		PtrVarBlockSharedByDspAndMcu->CurrentVoiceCommandIntent=ASR_Menu_VideoAi;
 		if(!strcmp("Home",CurrentTagName))
 		{
 			PtrVarBlockSharedByDspAndMcu->CurrentVoiceCommandTagName=ASR_VoiceCommand_GoHomeVideoAi;
@@ -1227,7 +1227,7 @@ status_t swProcessVIT( AUDIO_vit_st* 			 p_definitionVIT,
 						if(PtrVarBlockSharedByDspAndMcu->CurrentVoiceCommandTagName==ASR_VoiceCommand_StartVideoAi)
 						{
 							PtrVarBlockSharedByDspAndMcu->PreVoiceMenu=PtrVarBlockSharedByDspAndMcu->CurVoiceMenu;
-							PtrVarBlockSharedByDspAndMcu->CurVoiceMenu=ASR_Menu_VidioAi;
+							PtrVarBlockSharedByDspAndMcu->CurVoiceMenu=ASR_Menu_VideoAi;
 							VIT_Status = VIT_ConfigureIntentSlotMask (*p_VITHandle, VIT_Intent_Slot_Mask_VideoAI, sizeof(VIT_Intent_Slot_Mask_VideoAI)/sizeof(PL_BOOL));
 							if (VIT_Status != VIT_SUCCESS)
 								PRINTF("VIT_ConfigureIntentMask error %d\r\n", VIT_Status);
@@ -1265,7 +1265,7 @@ status_t swProcessVIT( AUDIO_vit_st* 			 p_definitionVIT,
 								PRINTF("Now in MainMenu menu\r\n");
 						}
 					break;
-				case ASR_Menu_VidioAi:
+				case ASR_Menu_VideoAi:
 						if(PtrVarBlockSharedByDspAndMcu->CurrentVoiceCommandTagName==ASR_VoiceCommand_GoHomeVideoAi)
 						{
 							PtrVarBlockSharedByDspAndMcu->PreVoiceMenu=PtrVarBlockSharedByDspAndMcu->CurVoiceMenu;

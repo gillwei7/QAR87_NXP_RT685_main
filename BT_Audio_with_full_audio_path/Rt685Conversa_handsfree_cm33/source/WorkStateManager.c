@@ -251,8 +251,6 @@ int WorkStateInit(int WhichState, U32 Opt)
 				InitAudioInterface_VideoAi(0);
 				general_RingtoneState = Ringtone_StartVideoAI;
 				PRINTF_M("    Mcu: WorkState_VideoAi Init is done\r\n");
-				VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
-				VarBlockSharedByDspAndMcu.PlayOpusFileIdx=5;
 				return(WorkState_VideoAi);
 				break;
 		#endif
