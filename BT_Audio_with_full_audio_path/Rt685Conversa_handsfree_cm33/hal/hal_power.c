@@ -19,12 +19,12 @@ void hal_power_charger_bq25618_init(void)
 #if CHG_BQ25618_ENABLE
 	/* ============== Charger Init Start==============*/
 		bq256xx_cfg_t charger_cfg = {
-				.vindpm_uv = 4450000,
-				.iindpm_ua = 2000000,
-				.ichg_ua = 530000,
-				.vbatreg_uv = 4005000,
-				.iprechg_ua = 60000,
-				.iterm_ua = 20000,
+				.vindpm_uv = 5000000, //5.0V
+				.iindpm_ua = 2000000, //2.0A
+				.ichg_ua = 600000,    //600mA
+				.vbatreg_uv = 4450000,//4.45V
+				.iprechg_ua = 20000,  //20mA
+				.iterm_ua = 20000,    //20mA
 				.wdt_ms = 0
 		};
 		status_t bq_ret = bq256xx_init(&charger_cfg);
@@ -35,7 +35,8 @@ void hal_power_charger_bq25618_init(void)
 		else{
 			PRINTF("[Charger] bq256xx initialized.OK \n");
 		}
-		bq256xx_write_reg(0x03, 0x31); // IPRECHG = 60mA, ITERM = 20mA
+		bq256xx_write_reg(0x03, 0x11); // IPRECHG = 20mA, ITERM = 20mA
+		bq256xx_write_reg(0x04, 0xC0); // VBATREG = 4.45V
 		s_bq256xx_iindpm_target_ua = charger_cfg.iindpm_ua;
 		/*
 	    uint8_t val;
@@ -44,7 +45,7 @@ void hal_power_charger_bq25618_init(void)
 	    	(void)bq256xx_read_reg(reg, &val, 1);
 	    	 PRINTF("[Debug][bq256xx] REG %u = 0x%02X\r\n", reg, val);
 	    }
-	    */
+		*/
 	/* ============== Charger Init End==============*/
 #endif
 }

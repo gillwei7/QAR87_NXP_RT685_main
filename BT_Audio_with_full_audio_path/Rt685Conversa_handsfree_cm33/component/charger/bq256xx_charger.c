@@ -135,7 +135,7 @@ status_t bq256xx_set_vbatreg(uint32_t uv)
 
 status_t bq256xx_set_iprechg(uint32_t ua)
 {
-    if (ua < BQ256XX_IPRECHG_MIN_uA || ua > BQ256XX_IPRECHG_MAX_uA)
+    if (ua < BQ25618_IPRECHG_MIN_uA || ua > BQ256XX_IPRECHG_MAX_uA)
         return kStatus_Fail;
 
     uint8_t val = (ua - BQ25618_IPRECHG_MIN_uA) / BQ25618_IPRECHG_MIN_uA;
