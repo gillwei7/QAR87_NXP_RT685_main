@@ -16,7 +16,7 @@
 #include "fsl_debug_console.h"
 #include "ringtone.h"
 #include <sys/atomic.h>
-
+#include "i2c_component_handler.h"
 
 /*******************************************************************************
  * Definitions
@@ -281,8 +281,8 @@ void DeInitCodec(void)
 	//to do...... deinit codec //B36932
 	//r = deinit codec
 	//Not sure if "stop" same with Deinit //B36932
-	hal_amp_aw88166_left_stop();
-	hal_amp_aw88166_right_stop();
+	// gill modify to amp_post_event, align with I2C task control the I2C write function
+	amp_post_event(AMP_EVT_STOP);
 	
 	//if(r!=kStatus_Success)
 	//{
@@ -302,13 +302,13 @@ void InitAndStartCodec(int fs, int bits, int Mfreq)
 	//r = initial codec or start codec
 	if(fs==48000)
 	{
-		hal_amp_aw88166_left_start ("Music");
-		hal_amp_aw88166_right_start("Music");
+		// gill modify to amp_post_event, align with I2C task control the I2C write function
+		amp_post_event(AMP_EVT_MUSIC_START);
 	}else
 	if(fs==16000)
 	{
-		hal_amp_aw88166_left_start ("Receiver");
-		hal_amp_aw88166_right_start("Receiver");
+		// gill modify to amp_post_event, align with I2C task control the I2C write function
+		amp_post_event(AMP_EVT_RECEIVER_START);
 	}
 	AmpState=AmpState_ConfiguredAndActive;
 }
