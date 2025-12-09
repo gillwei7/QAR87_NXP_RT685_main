@@ -579,12 +579,22 @@ static void app_task(void *pvParameters)
 
         if(general_RingtoneState == Ringtone_StopTranslation && DeviceWorkStateCur == WorkState_HomeVitStandby){
             general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_PowerON-1);
+            startOpusPlayIndex(Ringtone_StopTranslation-1);
         }
 
         if(general_RingtoneState == Ringtone_PowerON && DeviceWorkStateCur == WorkState_HomeVitStandby){
             general_RingtoneState = Ringtone_No;
             startOpusPlayIndex(Ringtone_PowerON-1);
+        }
+
+        if(general_RingtoneState == Ringtone_StartRecording  && DeviceWorkStateCur == WorkState_VideoRecording){
+                general_RingtoneState = Ringtone_No;
+                startOpusPlayIndex(Ringtone_StartRecording-1);
+        }
+
+        if(general_RingtoneState == Ringtone_StopRecording  && DeviceWorkStateCur == WorkState_HomeVitStandby){
+                general_RingtoneState = Ringtone_No;
+                startOpusPlayIndex(Ringtone_StopRecording-1);
         }
 
         // TODO No matter on what state, need to play Power Off, Wifi disconnected,  ringtone
@@ -603,19 +613,12 @@ static void app_task(void *pvParameters)
                 startOpusPlayIndex(Ringtone_BT_Disconnected-1);
         }
 
-        if(general_RingtoneState == Ringtone_PhotoCapture){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_PhotoCapture-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StartRecording){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_StartRecording-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StopRecording){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_StopRecording-1);
+        if (general_RingtoneState == Ringtone_PhotoCapture) {
+            general_RingtoneState = Ringtone_No;
+            // If not in recording state, play photo capture ringtone
+            if (DeviceWorkStateCur != WorkState_VideoRecording) {
+                startOpusPlayIndex(Ringtone_PhotoCapture - 1);
+            }
         }
 
         if(general_RingtoneState == Ringtone_LowBattery){

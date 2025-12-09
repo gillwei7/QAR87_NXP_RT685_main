@@ -218,13 +218,10 @@ void ss_set_recording_status(uint8_t status)
 	if (status == COMPONENT_START)
 	{
 		recording_start = 1;
-		general_RingtoneState = Ringtone_StartRecording;
-
 	}
 	else if (status == COMPONENT_END)
 	{
 		recording_finished = 1;
-		general_RingtoneState = Ringtone_StopRecording;
 	}
 }
 
