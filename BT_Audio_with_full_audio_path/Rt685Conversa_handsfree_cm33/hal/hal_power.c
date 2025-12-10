@@ -19,7 +19,7 @@ void hal_power_charger_bq25618_init(void)
 #if CHG_BQ25618_ENABLE
 	/* ============== Charger Init Start==============*/
 		bq256xx_cfg_t charger_cfg = {
-				.vindpm_uv = 5000000, //5.0V
+				.vindpm_uv = 4500000, //4.5V
 				.iindpm_ua = 2000000, //2.0A
 				.ichg_ua = 600000,    //600mA
 				.vbatreg_uv = 4450000,//4.45V
