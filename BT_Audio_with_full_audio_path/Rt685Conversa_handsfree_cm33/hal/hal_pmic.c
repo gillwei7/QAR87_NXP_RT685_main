@@ -6,6 +6,7 @@
  */
 #if UsingQAR87Board == 1
 #include "hal_pmic.h"
+#include "GlobalDef.h"
 
 static uint8_t config_status = 1;
 
@@ -21,6 +22,7 @@ void hal_pmic_pca9422_init(void)
 
 void hal_pmic_pca9422_power_down(void)
 {
+#if ENABLE_POWER_DOWN
     PRINTF("[PCA9422] PCA9422 power down \r\n");
 	/* pca9422 power down  process */
     uint8_t value;
@@ -28,6 +30,9 @@ void hal_pmic_pca9422_power_down(void)
     BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x09, 1, &value, 1);
     value = 0x00;
     BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x0A, 1, &value, 1);
+#else
+    PRINTF("For debug, disable power down\r\n");
+#endif
 }
 
 void hal_pmic_pca9422_enter_ship_mode(void)
