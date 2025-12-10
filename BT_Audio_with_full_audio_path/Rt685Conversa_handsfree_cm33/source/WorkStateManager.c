@@ -611,9 +611,6 @@ void Manager_Task(void *pvParameters)
 
 	VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;		//must set an initial value
 
-	//gill change Ringtone before Home state init
-	general_RingtoneState = Ringtone_PowerON;
-
 	while(1)
 	{
 		vTaskDelay(40);

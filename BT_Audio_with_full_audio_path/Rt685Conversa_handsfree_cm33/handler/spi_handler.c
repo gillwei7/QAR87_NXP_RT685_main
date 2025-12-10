@@ -176,6 +176,7 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 				PRINTF("[Passive] ACK:[11 11] Nova boot completed\r\n");
 				Novatek_boot_completed = 1;
 				led_post_event(LED_EVT_ALL_OFF);
+				general_RingtoneState = Ringtone_PowerON;
 			}
 			break;
         case 0x40: //Novatek update usage state
