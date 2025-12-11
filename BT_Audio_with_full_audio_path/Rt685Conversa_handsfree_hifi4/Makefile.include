@@ -81,7 +81,8 @@ post-all:
 	xt-objcopy ${xt_sysargs} -O binary ${xt_project} ${xt_project_loc}/binary/dsp_ncache_$(build_target).bin \
 --only-section=NonCacheable \
 --only-section=.control_reg_addr.data
-	del ..\..\..\..\Rt685Conversa_handsfree_cm33\Debug\source\incbin.o
+	if exist "..\..\..\..\Rt685Conversa_handsfree_cm33\Debug\source\incbin.o" del ..\..\..\..\Rt685Conversa_handsfree_cm33\Debug\source\incbin.o
+	if exist "..\..\..\..\Rt685Conversa_handsfree_cm33\Actual_Board_Debug\source\incbin.o" del ..\..\..\..\Rt685Conversa_handsfree_cm33\Actual_Board_Debug\source\incbin.o
 
 pre-clean:
 	@echo pre-clean rule
