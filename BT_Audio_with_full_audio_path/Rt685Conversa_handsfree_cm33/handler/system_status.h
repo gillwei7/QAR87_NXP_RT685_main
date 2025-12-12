@@ -105,6 +105,10 @@ uint8_t ss_get_battery();
 
 uint8_t ss_get_state(void);
 void ss_set_state(uint8_t state);//Change the usage state and send a notification back to Novatek.
+
+uint8_t get_music_status(void);
+void set_music_status(uint8_t status);
+
 void send_state_to_soc(void);
 void ss_set_music_status(uint8_t status);
 void send_music_status_to_soc(void);

@@ -78,39 +78,63 @@ void ss_set_state(uint8_t state)
 			need_send_state = 1;
 
 		} else if (current_usage_state == USAGE_STATE_TAKE_PHOTO) {
-			RequestToGetOutofTakePhoto = 1;
 			current_usage_state = state;
 			need_send_state = 1;
+
+			if (music_status == COMPONENT_ON) {
+				send_state_to_soc();
+				return;
+			}
+
+			RequestToGetOutofTakePhoto = 1;
 
 		} else if (current_usage_state == USAGE_STATE_ABOUT) {
-			RequestToGetOutofAbout = 1;
 			current_usage_state = state;
 			need_send_state = 1;
 
+			if (music_status == COMPONENT_ON) {
+				send_state_to_soc();
+				return;
+			}
+
+			RequestToGetOutofAbout = 1;
+
 		} else if (current_usage_state == USAGE_STATE_MENU) {
-			RequestToGetOutofMenu = 1;
 			current_usage_state = state;
 			need_send_state = 1;
+
+			if (music_status == COMPONENT_ON) {
+				send_state_to_soc();
+				return;
+			}
+
+			RequestToGetOutofMenu = 1;
 
 		}
 
 	} else if (state == USAGE_STATE_MENU && current_usage_state == USAGE_STATE_HOME) {
-		RequestToGetIntoMenu = 1;
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_ABOUT && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
-		if (current_usage_state == USAGE_STATE_MENU) {
-			RequestToGetOutofMenu = 1;
+		if (music_status == COMPONENT_ON) {
+			send_state_to_soc();
+			return;
 		}
-		RequestToGetIntoAbout = 1;
+
+		RequestToGetIntoMenu = 1;
+
+	} else if (state == USAGE_STATE_ABOUT && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
 		current_usage_state = state;
 		need_send_state = 1;
+
+		if (music_status == COMPONENT_ON) {
+			send_state_to_soc();
+			return;
+		}
+
+		RequestToGetIntoAbout = 1;
 
 	} else if (state == USAGE_STATE_MUSIC_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
-//		if (current_usage_state == USAGE_STATE_MENU) {
-//			RequestToGetOutofMenu = 1;
-//		}
 //		RequestToGetIntoA2dpPlay = 1;
 //		current_usage_state = state;
 //		need_send_music_status = 1;
@@ -118,47 +142,48 @@ void ss_set_state(uint8_t state)
 
 
 	} else if (state == USAGE_STATE_MEDIA_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
-		if (current_usage_state == USAGE_STATE_MENU) {
-			RequestToGetOutofMenu = 1;
-		}
 		RequestToGetIntoMediaPlayer = 1;
 		current_usage_state = state;
 		need_send_state = 1;
 
 	} else if (state == USAGE_STATE_VIDEO_RECORDING && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
-		if (current_usage_state == USAGE_STATE_MENU) {
-			RequestToGetOutofMenu = 1;
-		}
 		RequestToGetIntoVideoRecording = 1;
 		current_usage_state = state;
 		need_send_state = 1;
 
 	} else if (state == USAGE_STATE_TAKE_PHOTO && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
-		if (current_usage_state == USAGE_STATE_MENU) {
-			RequestToGetOutofMenu = 1;
-		}
-		RequestToGetIntoTakePhoto = 1;
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_VIDEO_AI && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
-		if (current_usage_state == USAGE_STATE_MENU) {
-			RequestToGetOutofMenu = 1;
+		if (music_status == COMPONENT_ON) {
+			send_state_to_soc();
+			return;
 		}
+
+		RequestToGetIntoTakePhoto = 1;
+
+	} else if (state == USAGE_STATE_VIDEO_AI && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
 		RequestToGetIntoVideoAI = 1;
 		current_usage_state = state;
 		need_send_state = 1;
 
 	} else if (state == USAGE_STATE_TRANSLATION && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
-		if (current_usage_state == USAGE_STATE_MENU) {
-			RequestToGetOutofMenu = 1;
-		}
 		RequestToGetIntoTranslation = 1;
 		current_usage_state = state;
 		need_send_state = 1;
 
 	}
 
+}
+
+uint8_t get_music_status(void)
+{
+	return music_status;
+}
+
+void set_music_status(uint8_t status)
+{
+	music_status = status;
 }
 
 void send_state_to_soc(void) // send state to soc if both audio path and state are ready

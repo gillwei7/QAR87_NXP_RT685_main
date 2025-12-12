@@ -89,8 +89,8 @@ const char *WorkStateName[]=
 	"WorkState_Void",
 	"WorkState_HfpCall",
 	"WorkState_HomeVitStandby",
-	"WorkState_Menu",
 	"WorkState_AudioIoDbg",
+	"WorkState_Menu",
 	"WorkState_VideoRecording",
 	"WorkState_TakePhoto",
 	"WorkState_MediaPlayer",
@@ -642,7 +642,7 @@ void Manager_Task(void *pvParameters)
 				if((RequestToGetIntoHfp)&&(DeviceWorkStateCur!=WorkState_HfpCall))
 					{
 						DeviceWorkStatePre=DeviceWorkStateCur;
-					DeviceWorkStateCur=WorkState_HfpCall_Pre;
+						DeviceWorkStateCur=WorkState_HfpCall_Pre;
 						WorkStateIsChanged=1;
 						RequestToGetIntoHfp=0;
 						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
@@ -651,7 +651,7 @@ void Manager_Task(void *pvParameters)
 				//if((RequestToGetOutofHfp)&&(DeviceWorkStateCur==WorkState_HfpCall))
 					if(RequestToGetOutofHfp)
 					{
-					DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+						DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
 						DeviceWorkStatePre=WorkState_HfpCall;
 						WorkStateIsChanged=1;
 						RequestToGetOutofHfp=0;
@@ -677,7 +677,7 @@ void Manager_Task(void *pvParameters)
 						if(DeviceWorkStateCur==WorkState_MusicPlayer)
 						{
 							if (ss_get_state() == USAGE_STATE_HOME) {
-							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							} else if (ss_get_state() == USAGE_STATE_MENU) {
 								DeviceWorkStateCur=WorkState_Menu_Pre;		//this gives _pre
 							} else if (ss_get_state() == USAGE_STATE_ABOUT) {
@@ -721,7 +721,7 @@ void Manager_Task(void *pvParameters)
 					#endif
 				#endif
 				#if EnableWorkState_MediaPlayer == 1
-					if(RequestToGetIntoMediaPlayer && !RequestToGetOutofMenu)
+					if(RequestToGetIntoMediaPlayer)
 					{
 						if(DeviceWorkStateCur!=WorkState_MediaPlayer)
 						{
@@ -736,7 +736,21 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_MediaPlayer)
 						{
-							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							if (ss_get_state() == USAGE_STATE_HOME) {
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MENU) {
+								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_ABOUT) {
+								DeviceWorkStateCur=WorkState_About;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_RECORDING) {
+								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TAKE_PHOTO) {
+								DeviceWorkStateCur=WorkState_TakePhoto_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_AI) {
+								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TRANSLATION) {
+								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
+							}
 							DeviceWorkStatePre=WorkState_MediaPlayer;
 							WorkStateIsChanged=1;
 						}
@@ -746,7 +760,7 @@ void Manager_Task(void *pvParameters)
 				#endif // #if EnableWorkState_MediaPlayer == 1
 
 				#if EnableWorkState_Translation == 1
-					if(RequestToGetIntoTranslation && !RequestToGetOutofMenu)
+					if(RequestToGetIntoTranslation)
 					{
 						if(DeviceWorkStateCur!=WorkState_Translation)
 						{
@@ -761,7 +775,21 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_Translation)
 						{
-							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							if (ss_get_state() == USAGE_STATE_HOME) {
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MENU) {
+								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_ABOUT) {
+								DeviceWorkStateCur=WorkState_About;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_RECORDING) {
+								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TAKE_PHOTO) {
+								DeviceWorkStateCur=WorkState_TakePhoto_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_AI) {
+								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
+							}
 							DeviceWorkStatePre=WorkState_Translation;
 							WorkStateIsChanged=1;
 						}
@@ -771,7 +799,7 @@ void Manager_Task(void *pvParameters)
 				#endif // #if EnableWorkState_Translation == 1
 
 				#if EnableWorkState_VideoAi == 1
-					if(RequestToGetIntoVideoAI && !RequestToGetOutofMenu)
+					if(RequestToGetIntoVideoAI)
 					{
 						if(DeviceWorkStateCur!=WorkState_VideoAi)
 						{
@@ -786,7 +814,21 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_VideoAi)
 						{
-							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							if (ss_get_state() == USAGE_STATE_HOME) {
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MENU) {
+								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_ABOUT) {
+								DeviceWorkStateCur=WorkState_About;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_RECORDING) {
+								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TAKE_PHOTO) {
+								DeviceWorkStateCur=WorkState_TakePhoto_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TRANSLATION) {
+								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
+							}
 							DeviceWorkStatePre=WorkState_VideoAi;
 							WorkStateIsChanged=1;
 						}
@@ -796,7 +838,7 @@ void Manager_Task(void *pvParameters)
 				#endif // #if EnableWorkState_VideoAi == 1
 
 				#if EnableWorkState_VideoRecording == 1
-					if(RequestToGetIntoVideoRecording && !RequestToGetOutofMenu)
+					if(RequestToGetIntoVideoRecording)
 					{
 						if(DeviceWorkStateCur!=WorkState_VideoRecording)
 						{
@@ -811,7 +853,21 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_VideoRecording)
 						{
-							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							if (ss_get_state() == USAGE_STATE_HOME) {
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MENU) {
+								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_ABOUT) {
+								DeviceWorkStateCur=WorkState_About;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TAKE_PHOTO) {
+								DeviceWorkStateCur=WorkState_TakePhoto_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_AI) {
+								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TRANSLATION) {
+								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
+							}
 							DeviceWorkStatePre=WorkState_VideoRecording;
 							WorkStateIsChanged=1;
 						}
@@ -821,12 +877,12 @@ void Manager_Task(void *pvParameters)
 				#endif // #if EnableWorkState_VideoRecording == 1
 
 				#if EnableWorkState_TakePhoto == 1
-					if(RequestToGetIntoTakePhoto && !RequestToGetOutofMenu)
+					if(RequestToGetIntoTakePhoto)
 					{
 						if(DeviceWorkStateCur!=WorkState_TakePhoto)
 						{
 							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_TakePhoto_Pre;
+							DeviceWorkStateCur=WorkState_TakePhoto;
 							WorkStateIsChanged=1;
 						}
 						RequestToGetIntoTakePhoto=0;
@@ -836,7 +892,21 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_TakePhoto)
 						{
-							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							if (ss_get_state() == USAGE_STATE_HOME) {
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MENU) {
+								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_ABOUT) {
+								DeviceWorkStateCur=WorkState_About;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_RECORDING) {
+								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_AI) {
+								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TRANSLATION) {
+								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
+							}
 							DeviceWorkStatePre=WorkState_TakePhoto;
 							WorkStateIsChanged=1;
 						}
@@ -862,7 +932,19 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_About)
 						{
-							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							if (ss_get_state() == USAGE_STATE_HOME) {
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MENU) {
+								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_RECORDING) {
+								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_AI) {
+								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TRANSLATION) {
+								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
+							}
 							DeviceWorkStatePre=WorkState_About;
 							WorkStateIsChanged=1;
 						}
@@ -885,7 +967,19 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_Menu)
 						{
-							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							if (ss_get_state() == USAGE_STATE_HOME) {
+								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_ABOUT) {
+								DeviceWorkStateCur=WorkState_About;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_RECORDING) {
+								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_VIDEO_AI) {
+								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
+							} else if (ss_get_state() == USAGE_STATE_TRANSLATION) {
+								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
+							}
 							DeviceWorkStatePre=WorkState_Menu;
 							WorkStateIsChanged=1;
 						}

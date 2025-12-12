@@ -106,7 +106,7 @@ extern EventGroupHandle_t EvtGrpHdl_StateMangerTaskToBtStack;
 #define EnableWorkState_VideoAi								1
 #define EnableWorkState_Menu								1
 #define EnableWorkState_About								1
-#define EnableWorkState_TakePhoto							1
+#define EnableWorkState_TakePhoto							0
 										/*
 										Note:
 											HfpCall			--- always enabled
