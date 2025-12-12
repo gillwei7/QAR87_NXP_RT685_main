@@ -1315,7 +1315,7 @@ void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float *
 	{
 		if (retStatusConversa == LICENSE_EXPIRED)       // if license expired occurs
 		{
-			PRINTF_M("FAIL: conversa LICENSE_EXPIRED error\r\n");
+			//PRINTF_M("FAIL: conversa LICENSE_EXPIRED error\r\n");
 			retStatus = kStatus_LicenseError;
 		}
 		else
@@ -1425,16 +1425,16 @@ void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float *
 	//-----------------------------------------------switch conversa tuning config when MCU side requests--------------------------------------------------
 	//---beg---
 	#if 1	//folding
-		if(PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg!=ConversaTuningCfg_NoChange)
-		{
-			//confirmed need to change Conversa cfg
-			if(PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg!=CurrentConversaTuningCfg)
-			{
-				//confirmed the new cfg is different from current
-				DeInitConversa();
-				InitConversa(PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg, 0);	//no need to print
-			}
-		}
+//		if(PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg!=ConversaTuningCfg_NoChange)
+//		{
+//			//confirmed need to change Conversa cfg
+//			if(PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg!=CurrentConversaTuningCfg)
+//			{
+//				//confirmed the new cfg is different from current
+//				DeInitConversa();
+//				InitConversa(PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg, 0);	//no need to print
+//			}
+//		}
 	#endif
 	//---end---
 	//-----------------------------------------------switch conversa tuning config when MCU side requests--------------------------------------------------
