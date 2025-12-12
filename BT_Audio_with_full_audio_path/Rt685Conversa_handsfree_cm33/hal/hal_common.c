@@ -290,8 +290,6 @@ void hal_board_init(void)
 	hal_spi_init();
 	Init_I2C_Component();
 	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
-	hal_soc_enable();
-
 }
 
 #endif

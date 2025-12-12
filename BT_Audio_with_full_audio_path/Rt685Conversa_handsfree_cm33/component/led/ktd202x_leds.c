@@ -52,8 +52,14 @@ static int32_t ktd202x_write(uint8_t address, uint8_t value, uint32_t length)
 void ktd202x_reset(void)
 {
 	uint8_t val0 = 0x1F;
+	uint8_t ret;
+
 	ktd202x_write(0x00, val0, 1);
 	PRINTF("[KTD2027] ktd202x_reset \n");
+	ret = ktd202x_write(0x00, 0x19, 1);
+	if (ret != kStatus_Success) {
+		PRINTF("[KTD2027] ktd202x_reset fail \n");
+	}
 }
 
 int ktd202x_probe(void)

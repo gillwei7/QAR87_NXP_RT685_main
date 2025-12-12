@@ -121,6 +121,9 @@ void Init_I2C_Component(void)
 #if CHG_BQ25618_ENABLE
 	hal_power_charger_bq25618_init();
 #endif
+
+	hal_soc_enable();
+
 #if LED_KTD2027_ENABLE
 	hal_led_ktd2027_init();
 	hal_led_ktd2027_power_on_indicator(); //White light turns on first
