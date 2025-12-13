@@ -4099,10 +4099,10 @@ void BOARD_InitActualGpioPins(void)
 
     const uint32_t port0_pin21_config = (/* Pin is configured as PIO0_21 */
                                          IOPCTL_PIO_FUNC0 |
-                                         /* Disable pull-up / pull-down function */
-                                         IOPCTL_PIO_PUPD_DI |
-                                         /* Enable pull-down function */
-                                         IOPCTL_PIO_PULLDOWN_EN |
+                                         /* Enable pull-up / pull-down function */
+                                         IOPCTL_PIO_PUPD_EN |
+                                         /* Enable pull-up function */
+                                         IOPCTL_PIO_PULLUP_EN |
                                          /* Enable input buffer function */
                                          IOPCTL_PIO_INBUF_EN |
                                          /* Normal mode */
