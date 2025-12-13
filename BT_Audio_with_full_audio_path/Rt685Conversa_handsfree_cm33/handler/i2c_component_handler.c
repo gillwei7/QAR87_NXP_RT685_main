@@ -512,6 +512,7 @@ void power_off_charging(void)
 	glf70302_init();//Gauge Init
 	ktd202x_probe();
 	hal_power_charger_bq25618_init();
+	SDK_DelayAtLeastUs(100 * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 100ms
 
 	hal_power_charger_bq25618_get_charging_status();
 	if(charger_status.vbus_good)
@@ -550,7 +551,7 @@ void power_off_charging(void)
 				hal_pmic_pca9422_power_down();
 			}
 
-			SDK_DelayAtLeastUs(1000 * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 1s
+			SDK_DelayAtLeastUs(10 * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 10ms
 		}
 	}
 }

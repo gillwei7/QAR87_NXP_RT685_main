@@ -9,6 +9,9 @@
 #include "bq256xx_charger.h"
 #include "glf70302_driver.h"
 
+#define EN_HIZ_BIT      7
+#define EN_HIZ_MASK     (1u << EN_HIZ_BIT)
+
 volatile bq256xx_status_t charger_status;
 volatile BatteryInfo battery_info;
 
@@ -35,6 +38,15 @@ void hal_power_charger_bq25618_init(void)
 		else{
 			PRINTF("[Charger] bq256xx initialized.OK \n");
 		}
+
+		uint8_t reg_val = 0;
+		bq256xx_read_reg(0x00, &reg_val, 1);
+		if ((reg_val & EN_HIZ_MASK) != 0)
+		{
+			uint8_t new_val = (uint8_t)(reg_val & ~EN_HIZ_MASK);
+			bq256xx_write_reg(0x00, new_val);
+		}
+
 		bq256xx_write_reg(0x03, 0x11); // IPRECHG = 20mA, ITERM = 20mA
 		bq256xx_write_reg(0x04, 0xC0); // VBATREG = 4.45V
 		s_bq256xx_iindpm_target_ua = charger_cfg.iindpm_ua;
