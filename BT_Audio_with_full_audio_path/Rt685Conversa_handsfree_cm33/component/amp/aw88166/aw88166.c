@@ -101,10 +101,15 @@ void init_aw88166(void){
 	PRINTF("[AMP][init_aw88166] \r\n");
 
 	ret = aw883xx_smartpa_init((void *)&init_info[AW_DEV_0]);
-	ret+= aw883xx_smartpa_init((void *)&init_info[AW_DEV_1]);
+	if(ret==0)
+		PRINTF("[AMP][init_aw88166]aw883xx_smartpa_init 0x34 OK \r\n");
+	else
+		PRINTF("[AMP][init_aw88166]aw883xx_smartpa_init error:%d \r\n",ret);
+
+	ret= aw883xx_smartpa_init((void *)&init_info[AW_DEV_1]);
 
 	if(ret==0)
-		PRINTF("[AMP][init_aw88166]aw883xx_smartpa_init OK \r\n");
+		PRINTF("[AMP][init_aw88166]aw883xx_smartpa_init 0x35 OK \r\n");
 	else
 		PRINTF("[AMP][init_aw88166]aw883xx_smartpa_init error:%d \r\n",ret);
 }
