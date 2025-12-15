@@ -29,7 +29,9 @@ LOG_MODULE_DEFINE(LOG_MODULE_NAME, kLOG_LevelTrace);
 
 #if UsingQAR87Board == 1
 #include "system_status.h"
+#include "bt_pal_id.h"
 #endif
+
 
 enum __packed resolve_name_state {
 	RESOLVE_REMOTE_NAME_PENDING,
@@ -924,8 +926,14 @@ int bt_br_init(void)
 	bt_addr_le_t bt_addr_temp[6];
 	size_t count_temp = 4;
 	uint8_t BTName[200];
-	bt_id_get(bt_addr_temp, &count_temp);
+	//bt_id_get(bt_addr_temp, &count_temp);
+	bt_id_read_public_addr(bt_addr_temp);
 	snprintf(BTName, sizeof(BTName), "QAR87_88n_%02X%02X",bt_addr_temp[0].a.val[1],bt_addr_temp[0].a.val[0] );
+	PRINTF("BD address:");
+	for(int i = 5;i >=0 ;i--){
+		PRINTF(" %02X",bt_addr_temp[0].a.val[i]);
+	}
+	PRINTF("\r\n");
 	PRINTF("Device name: %s\r\n",BTName);
 
 	name_cp = net_buf_add(buf, sizeof(*name_cp));
