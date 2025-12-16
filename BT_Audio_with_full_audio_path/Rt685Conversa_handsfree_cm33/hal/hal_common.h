@@ -58,7 +58,13 @@
 #if HAL_MCU_APP_RELEASE
 static uint8_t sw_version[40] = "R01.QAR88n.01.01.251205";
 #else
-static uint8_t sw_version[40] = "T01.QAR88n.01.01.251205";
+#if UsingQAR87BoardHwVersion == 0 // Dev Board
+static uint8_t sw_version[40] = "T02.QAR88n.01.01.251216";
+#endif
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
+static uint8_t sw_version[40] = "T02.QAR88n.02.01.251216";
+#endif
+
 #endif
 
 
