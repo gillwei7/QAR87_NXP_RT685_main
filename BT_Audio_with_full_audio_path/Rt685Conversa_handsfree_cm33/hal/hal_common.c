@@ -78,6 +78,20 @@ void hal_loop_delay_ms(uint32_t val)
 //	}
 }
 
+/**
+ * @description: Delay N s
+ * @paran:
+ * @return {*}
+ * @author: lmx
+ * @param {u32} val：delay time，unit：s
+ */
+void hal_loop_delay_s(uint32_t val)
+{
+    for (int i = 0; i < val; i++) {
+        SDK_DelayAtLeastUs(1000 * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk));
+    }
+}
+
 static void hal_gpio_port_init(void)
 {
     GPIO_PortInit(GPIO, GPIO0_PORT);
