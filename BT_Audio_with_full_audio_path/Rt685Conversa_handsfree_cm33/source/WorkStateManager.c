@@ -62,7 +62,7 @@ int RequestToGetIntoAbout=0;
 int RequestToGetOutofAbout=0;
 int RequestToGetIntoHome=0;
 int RequestToGetOutofHome=0;
-
+static int currentLevel15 = 12;  // 1~15
 
 TDeviceWorkState DeviceWorkStateCur;
 TDeviceWorkState DeviceWorkStatePre;
@@ -101,23 +101,73 @@ const char *WorkStateName[]=
 	"WorkState_About",
 };
 
+// 15-level volume gain table (0.00158f → 0.999f, equal-dB spacing)
+const float MasterVolumeGainTable15[15] =
+{
+    0.063058f, // Level 1  (-24.00 dB)
+    0.076595f, // Level 2  (-22.29 dB)
+    0.093045f, // Level 3  (-20.57 dB)
+    0.113032f, // Level 4  (-18.86 dB)
+    0.137322f, // Level 5  (-17.14 dB)
+    0.166849f, // Level 6  (-15.43 dB)
+    0.202735f, // Level 7  (-13.71 dB)
+    0.246328f, // Level 8  (-12.00 dB)
+    0.299249f, // Level 9  (-10.29 dB)
+    0.363456f, // Level 10 (-8.57 dB)
+    0.441327f, // Level 11 (-6.86 dB)
+    0.535755f, // Level 12 (-5.14 dB)
+    0.650282f, // Level 13 (-3.43 dB)
+    0.789206f, // Level 14 (-1.71 dB)
+    0.999000f  // Level 15 (~0 dB)
+};
+
 extern RingtoneState general_RingtoneState;
 
 
-void ChangeMasterVolumeLevel16(int level16)
+void ChangeMasterVolumeLevel15(int level15)
 {
-    int index = level16 - 1;  // level 1~16 → index 0~15
+    int index = level15 - 1;  // level 1~16 → index 0~15
 
     // Clamp
     if(index < 0) index = 0;
-    if(index > 15) index = 15;
+    if(index > 14) index = 14;
 
-    float set_MasterVolumeGain0To1 = MasterVolumeGainTable16[index];
+    float set_MasterVolumeGain0To1 = MasterVolumeGainTable15[index];
 
     VarBlockSharedByDspAndMcu.MasterVolumeGain0To1 = set_MasterVolumeGain0To1;
 
     PRINTF("Volume Change to Level %d : %f\r\n",
-            level16, set_MasterVolumeGain0To1);
+    		level15, set_MasterVolumeGain0To1);
+}
+
+void ChangeMasterVolumeLevel15_UpDown(int direction)
+{
+    /* direction: +1 = volume up, -1 = volume down */
+    if(direction > 0)
+    {
+        currentLevel15++;
+    }
+    else if(direction <= 0)
+    {
+        currentLevel15--;
+    }
+
+    /* Clamp */
+    if(currentLevel15 < 1)  currentLevel15 = 1;
+    if(currentLevel15 > 15) currentLevel15 = 15;
+
+    int index = currentLevel15 - 1;
+
+    float set_MasterVolumeGain0To1 =
+        MasterVolumeGainTable15[index];
+
+    VarBlockSharedByDspAndMcu.MasterVolumeGain0To1 =
+        set_MasterVolumeGain0To1;
+
+    PRINTF("Volume Change %s -> Level %d : %f\r\n",
+           (direction > 0) ? "UP" : "DOWN",
+           currentLevel15,
+           set_MasterVolumeGain0To1);
 }
 
 #if 1	//folding --- all work states init and deinit

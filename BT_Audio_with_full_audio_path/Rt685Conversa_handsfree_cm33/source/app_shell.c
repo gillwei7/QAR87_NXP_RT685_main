@@ -587,13 +587,13 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
 	{
     	int level = atoi(argv[2]);   // convert string to int
 
-		if(level >= 0 && level <= 15)
+		if(level >= 0 && level <= 14)
 		{
-			ChangeMasterVolumeLevel16(level);
+			ChangeMasterVolumeLevel15(level);
 		}
 		else
 		{
-			PRINTF("Invalid volume level. Use: 0 ~ 15\r\n");
+			PRINTF("Invalid volume level. Use: 0 ~ 14\r\n");
 		}
 	}
     else if(strcmp(argv[1], "ss_get_state") == 0)
