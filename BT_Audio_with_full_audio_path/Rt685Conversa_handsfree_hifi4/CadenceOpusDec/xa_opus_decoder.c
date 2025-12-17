@@ -1097,7 +1097,7 @@ int OpusDecodeProcess(void)
 				{
 			#endif
 
-				PRINTF("Opus Packet: %d, %d, %d \n", OpusPacketsDecoded, OpusFrmSizeInSamplesPerCh, OpusFrmSizeInBytes);
+				//PRINTF("Opus Packet: %d, %d, %d \n", OpusPacketsDecoded, OpusFrmSizeInSamplesPerCh, OpusFrmSizeInBytes);
 				OpusFrmSizeInBytes=0;
 
 				/* Decode frame */

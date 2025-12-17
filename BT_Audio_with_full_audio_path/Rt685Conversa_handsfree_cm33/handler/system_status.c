@@ -191,7 +191,7 @@ void send_state_to_soc(void) // send state to soc if both audio path and state a
 	PRINTF("[System] send_state_to_soc (%d) \r\n", current_usage_state);
 
 	if (need_send_state) {
-		PRINTF("[System] send_state_to_soc (%d) \r\n", current_usage_state);
+		PRINTF("[System] need_send_state send_state_to_soc (%d) \r\n", current_usage_state);
 		current_state_value = USAGE_STATE_HEX_VALUE + current_usage_state;
 		(void)xQueueSend(spi_request_queue, &current_state_value, 0);
 		need_send_state = 0;

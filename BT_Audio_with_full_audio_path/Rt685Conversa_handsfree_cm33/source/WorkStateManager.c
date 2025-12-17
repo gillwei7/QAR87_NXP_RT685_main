@@ -86,19 +86,34 @@ bit 10~15:  	PDM ch enable
 
 const char *WorkStateName[]=
 {
-	"WorkState_Void",
-	"WorkState_HfpCall",
-	"WorkState_HomeVitStandby",
-	"WorkState_AudioIoDbg",
-	"WorkState_Menu",
-	"WorkState_VideoRecording",
-	"WorkState_TakePhoto",
-	"WorkState_MediaPlayer",
-	"WorkState_MusicPlayer",
-	"WorkState_Translation",
-	"WorkState_AiConversation",
-	"WorkState_VideoAi",
-	"WorkState_About",
+	    "WorkState_Void",		//this is a state that there is no audio interface active at all
+		"WorkState_HfpCall",
+		"WorkState_HomeVitStandby",
+		"WorkState_AudioIoDbg",
+		"WorkState_Menu",
+		"WorkState_VideoRecording",
+		"WorkState_TakePhoto",
+		"WorkState_MediaPlayer",
+		"WorkState_MusicPlayer",
+		"WorkState_Translation",
+		"WorkState_AiConversation",
+		"WorkState_VideoAi",
+		"WorkState_About",
+
+		//-------------------------
+		"WorkState_Void_Pre",
+		"WorkState_HfpCall_Pre",
+		"WorkState_HomeVitStandby_Pre",
+		"WorkState_AudioIoDbg_Pre",
+		"WorkState_Menu_Pre",
+		"WorkState_VideoRecording_Pre",
+		"WorkState_TakePhoto_Pre",
+		"WorkState_MediaPlayer_Pre",
+		"WorkState_MusicPlayer_Pre",
+		"WorkState_Translation_Pre",
+		"WorkState_AiConversation_Pre",
+		"WorkState_VideoAi_Pre",
+		"WorkState_About_Pre",
 };
 
 // 15-level volume gain table (0.00158f → 0.999f, equal-dB spacing)
@@ -695,7 +710,6 @@ void Manager_Task(void *pvParameters)
 						DeviceWorkStateCur=WorkState_HfpCall_Pre;
 						WorkStateIsChanged=1;
 						RequestToGetIntoHfp=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 
 				//if((RequestToGetOutofHfp)&&(DeviceWorkStateCur==WorkState_HfpCall))
@@ -705,7 +719,6 @@ void Manager_Task(void *pvParameters)
 						DeviceWorkStatePre=WorkState_HfpCall;
 						WorkStateIsChanged=1;
 						RequestToGetOutofHfp=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 
 				#if EnableWorkState_MusicPlayer==1
@@ -720,7 +733,6 @@ void Manager_Task(void *pvParameters)
 
 						}
 						RequestToGetIntoA2dpPlay=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 					if(RequestToGetOutofA2dpPlay)
 					{
@@ -749,7 +761,6 @@ void Manager_Task(void *pvParameters)
 
 						}
 						RequestToGetOutofA2dpPlay=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 
 					#if 0
@@ -780,7 +791,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetIntoMediaPlayer=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 					if(RequestToGetOutofMediaPlayer)
 					{
@@ -805,7 +815,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetOutofMediaPlayer=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 				#endif // #if EnableWorkState_MediaPlayer == 1
 
@@ -819,7 +828,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetIntoTranslation=0;
-						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 					if(RequestToGetOutofTranslation)
 					{
@@ -844,7 +852,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetOutofTranslation=0;
-						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 				#endif // #if EnableWorkState_Translation == 1
 
@@ -858,7 +865,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetIntoVideoAI=0;
-						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 					if(RequestToGetOutofVideoAI)
 					{
@@ -883,7 +889,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetOutofVideoAI=0;
-						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 				#endif // #if EnableWorkState_VideoAi == 1
 
@@ -897,7 +902,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetIntoVideoRecording=0;
-						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 					if(RequestToGetOutofVideoRecording)
 					{
@@ -922,7 +926,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetOutofVideoRecording=0;
-						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 				#endif // #if EnableWorkState_VideoRecording == 1
 
@@ -965,8 +968,6 @@ void Manager_Task(void *pvParameters)
 					}
 				#endif // #if EnableWorkState_TakePhoto == 1
 
-
-
 					if(RequestToGetIntoAbout)
 					{
 						if(DeviceWorkStateCur!=WorkState_About)
@@ -976,7 +977,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetIntoAbout=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 					if(RequestToGetOutofAbout)
 					{
@@ -999,7 +999,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetOutofAbout=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 
 					if(RequestToGetIntoMenu)
@@ -1011,7 +1010,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetIntoMenu=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 					if(RequestToGetOutofMenu)
 					{
@@ -1034,7 +1032,6 @@ void Manager_Task(void *pvParameters)
 							WorkStateIsChanged=1;
 						}
 						RequestToGetOutofMenu=0;
-						//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 					}
 
 
@@ -1055,7 +1052,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_AudioIoDbg_Pre;
 								WorkStateIsChanged=1;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						#if EnableWorkState_VideoRecording==1
@@ -1066,7 +1062,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_VideoRecording_Pre;
 								WorkStateIsChanged=1;
 								general_RingtoneState = Ringtone_StartRecording;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						#if EnableWorkState_MediaPlayer==1
@@ -1076,7 +1071,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;
 								WorkStateIsChanged=1;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						#if EnableWorkState_MusicPlayer==1
@@ -1090,7 +1084,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_Translation_Pre;
 								WorkStateIsChanged=1;
 								general_RingtoneState = Ringtone_StartTranslation;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						#if EnableWorkState_AiConversation==1
@@ -1100,7 +1093,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_AiConversation_Pre;
 								WorkStateIsChanged=1;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						#if EnableWorkState_VideoAi==1
@@ -1111,7 +1103,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_VideoAi_Pre;
 								WorkStateIsChanged=1;
 								general_RingtoneState == Ringtone_StartVideoAI;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						break;
@@ -1125,7 +1116,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						break;
@@ -1138,7 +1128,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
 								general_RingtoneState = Ringtone_StopRecording;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						break;
@@ -1150,7 +1139,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						break;
@@ -1162,7 +1150,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						break;
@@ -1175,7 +1162,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
 								general_RingtoneState = Ringtone_StopTranslation;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						break;
@@ -1187,7 +1173,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 						break;
@@ -1200,7 +1185,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
 								general_RingtoneState = Ringtone_StopVideoAI;
-								//PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 							}
 						#endif
 
@@ -1209,6 +1193,7 @@ void Manager_Task(void *pvParameters)
 						break;
 				}
 				PRINTF_M("Voice events for switching work state\r\n");
+				PRINTF_M("Mcu: Pre in: %s\r\n",WorkStateName[DeviceWorkStatePre]);
 				PRINTF_M("Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 				VarBlockSharedByDspAndMcu.CurrentVoiceCommandIntent=ASR_Menu_None;
 			}
@@ -1229,8 +1214,9 @@ void Manager_Task(void *pvParameters)
 				// Send SPI command to SoC
 				// If it is placed between deinit and init , it will cause SPI failure
 				send_state_to_soc();
-
-				PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+				PRINTF_M("WorkStateIsChanged\r\n");
+				PRINTF_M("Mcu: Pre in: %s\r\n",WorkStateName[DeviceWorkStatePre]);
+				PRINTF_M("Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 				WorkStateIsChanged=0;
 			}
 		#endif
