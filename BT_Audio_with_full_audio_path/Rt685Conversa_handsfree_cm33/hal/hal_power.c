@@ -8,6 +8,8 @@
 #include "hal_power.h"
 #include "bq256xx_charger.h"
 #include "glf70302_driver.h"
+#include "hal_led.h"
+#include "hal_pmic.h"
 
 #define EN_HIZ_BIT      7
 #define EN_HIZ_MASK     (1u << EN_HIZ_BIT)
@@ -103,6 +105,52 @@ uint8_t hal_power_get_battery_percentage (uint32_t mv)
     return soc;   // 0~100
 }
 
+void power_off_charging(void)
+{
+	uint8_t LED_state=0; //1->charging； 2->full-charge
 
+	SDK_DelayAtLeastUs(100 * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 100ms
+
+	hal_power_charger_bq25618_get_charging_status();
+	if(charger_status.vbus_good)
+	{
+		PRINTF("[System] power off charging \r\n");
+		while(1)
+		{
+
+			hal_power_charger_bq25618_get_charging_status();
+			hal_power_gauge_glf70302_get_battery_level();
+			battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
+			if(charger_status.vbus_good)
+			{
+				switch (LED_state) {
+					case 0:
+							hal_led_ktd2027_off();
+							hal_led_ktd2027_charging_indicator();
+							LED_state++;
+							break;
+					case 1:
+							if(battery_info.soc>=99)
+							{
+								hal_led_ktd2027_off();
+								hal_led_ktd2027_full_charged_indicator();
+								LED_state++;
+							}
+							break;
+                    default:
+                        	break;
+									}
+			}
+			else
+			{
+				hal_led_ktd2027_off();
+				PRINTF("[System] power off charging -> power down \r\n");
+				hal_pmic_pca9422_power_down();
+			}
+
+			SDK_DelayAtLeastUs(10 * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 10ms
+		}
+	}
+}
 
 #endif

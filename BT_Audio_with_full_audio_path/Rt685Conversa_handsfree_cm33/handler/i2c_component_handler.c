@@ -99,19 +99,25 @@ void Init_I2C_Component(void)
 #if PMIC_PCA9422_ENABLE
 	hal_pmic_pca9422_init();
 #endif
-	power_off_charging();
-	Determine_pca9422_enter_ship_mode();
-#if PMIC_GLF70583_ENABLE
-	hal_pmic_glf70583_actual_board_init();
+#if LED_KTD2027_ENABLE
+	hal_led_ktd2027_init();
+#endif
+#if FG_GLF70302_ENABLE
+	hal_power_gauge_glf70302_init();//Gauge Init
 #endif
 #if CHG_BQ25618_ENABLE
 	hal_power_charger_bq25618_init();
 #endif
 
+	power_off_charging();
+	Determine_pca9422_enter_ship_mode();
+#if PMIC_GLF70583_ENABLE
+	hal_pmic_glf70583_actual_board_init();
+#endif
+
 	hal_soc_enable();
 
 #if LED_KTD2027_ENABLE
-	hal_led_ktd2027_init();
 	hal_led_ktd2027_power_on_indicator(); //White light turns on first
 #endif
 
@@ -119,7 +125,6 @@ void Init_I2C_Component(void)
 	hal_touch_aw93305_init(); //Touch Init
 #endif
 #if FG_GLF70302_ENABLE
-	hal_power_gauge_glf70302_init();//Gauge Init
 	hal_power_gauge_glf70302_get_battery_level(); //Read the battery level after powering on
 	battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
 	ss_set_battery(battery_info.soc);
@@ -492,54 +497,4 @@ void I2C_Task(void *pvParameters)
 
     }
 }
-void power_off_charging(void)
-{
-	uint8_t LED_state=0; //1->charging； 2->full-charge
 
-
-	hal_power_gauge_glf70302_init();//Gauge Init
-	ktd202x_probe();
-	hal_power_charger_bq25618_init();
-	SDK_DelayAtLeastUs(100 * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 100ms
-
-	hal_power_charger_bq25618_get_charging_status();
-	if(charger_status.vbus_good)
-	{
-		PRINTF("[System] power off charging \r\n");
-		while(1)
-		{
-
-			hal_power_charger_bq25618_get_charging_status();
-			hal_power_gauge_glf70302_get_battery_level();
-			battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
-			if(charger_status.vbus_good)
-			{
-				switch (LED_state) {
-					case 0:
-							ktd202x_led_off();
-							ktd202x_ch2_led_blink(500, 500, TIM_1);
-							LED_state++;
-							break;
-					case 1:
-							if(battery_info.soc>=99)
-							{
-								ktd202x_led_off();
-								ktd202x_ch3_led_on(LED_ON);
-								LED_state++;
-							}
-							break;
-                    default:
-                        	break;
-									}
-			}
-			else
-			{
-				ktd202x_led_off();
-				PRINTF("[System] power off charging -> power down \r\n");
-				hal_pmic_pca9422_power_down();
-			}
-
-			SDK_DelayAtLeastUs(10 * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 10ms
-		}
-	}
-}

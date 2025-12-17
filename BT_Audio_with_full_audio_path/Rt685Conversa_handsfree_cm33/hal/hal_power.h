@@ -19,5 +19,7 @@ void hal_power_gauge_glf70302_get_battery_level(void);
 
 uint8_t hal_power_get_battery_percentage (uint32_t mv);
 
+void power_off_charging(void);
+
 #endif /* HAL_POWER_H_ */
 #endif
