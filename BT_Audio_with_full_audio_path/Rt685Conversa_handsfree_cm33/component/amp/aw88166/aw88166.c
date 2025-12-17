@@ -15,8 +15,8 @@
 //#include "aw_params_music_48k_32bit_20251112.h" //B36932
 //#include "aw_params_music_48k_16bit.h"
 //#include "aw_params_music_overcompressed.h"
-#include "aw_params_music_48k16b_receiver_16k16b.h"
-
+//#include "aw_params_music_48k16b_receiver_16k16b.h"
+#include "AW88166_QAR88n_R_20251216_RCV mode no effect.h"
 
 
 static status_t aw_dev0_i2c_write_func(uint16_t dev_addr, uint8_t reg_addr,
