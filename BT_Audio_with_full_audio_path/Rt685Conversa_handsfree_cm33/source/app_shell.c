@@ -42,6 +42,7 @@
 #include "WorkStateManager.h"
 #include "app_handsfree.h"
 #include "system_status.h"
+#include "DefForBothMcuAndDsp.h"
 
 /*******************************************************************************
  * Definitions
@@ -552,13 +553,13 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
     {
     	int opus_number = atoi(argv[2]);   // convert string to int
 
-		if(opus_number >= 0 && opus_number <= 12)
+		if(opus_number >= 0 && opus_number <= (OPUS_INDEX_MAXIMUM-1))
 		{
 		    startOpusPlayIndex(opus_number);
 		}
 		else
 		{
-			PRINTF("Invalid opus number. Use: 0 ~ 12\r\n");
+			PRINTF("Invalid opus number. Use: 0 ~ %d\r\n",OPUS_INDEX_MAXIMUM-1);
 		}
     }
     else if(strcmp(argv[1], "playsbc") == 0)

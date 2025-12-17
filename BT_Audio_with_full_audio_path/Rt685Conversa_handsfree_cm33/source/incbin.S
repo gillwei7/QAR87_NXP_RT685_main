@@ -102,6 +102,8 @@ dsp_ncache_image_size:
 		.global OpusFileEnd12
 		.global OpusFileBeg13
 		.global OpusFileEnd13
+		.global OpusFileBeg14
+		.global OpusFileEnd14
 
 		.type SbcFileBeg1, %object
 		.type SbcFileEnd1, %object
@@ -136,7 +138,8 @@ dsp_ncache_image_size:
 		.type OpusFileEnd12, %object
 		.type OpusFileBeg13, %object
 		.type OpusFileEnd13, %object
-
+		.type OpusFileBeg14, %object
+		.type OpusFileEnd14, %object
 
         //.section OpusSbcBin //,  "ax" @progbits @preinit_array
 
@@ -233,6 +236,12 @@ OpusFileEnd12:
 OpusFileBeg13:
 		.incbin "Beep1_16KHz_1Ch_16Kbps.opus"
 OpusFileEnd13:
+		.int 0
+
+        .align 4;
+OpusFileBeg14:
+		.incbin "14.bt_connected.opus"
+OpusFileEnd14:
 		.int 0
 
         .end

@@ -158,9 +158,10 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
 	 if (g_connectInitRiderPhone)
 	{
-		PRINTF("ACL Connection Successful with Rider Phone,Role: %d\n",info.role);
+		PRINTF("Glasses trigger ACL Connection Successful\r\n");
 		g_connectInitRiderPhone = 0U;
 		conn_rider_phone = conn;
+
 #if AVRCP_BROWSING_ENABLE
 		if(!bt_avrcp_browsing_connect(conn_rider_phone))
 		{
@@ -170,8 +171,11 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
 		/*Profile level connection HFP HF*/
 		sdp_discover_for_hfp_hf(&info);
-
+	}else{
+		PRINTF("ACL Connected\r\n");
 	}
+	general_RingtoneState = Ringtone_BT_Connected;
+	PRINTF("general_RingtoneState = Ringtone_BT_Connected\r\n");
 }
 
 

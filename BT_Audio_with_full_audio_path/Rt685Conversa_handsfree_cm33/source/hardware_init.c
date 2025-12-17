@@ -753,6 +753,8 @@ void BOARD_InitHardware(void)
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[23]=(unsigned int)&OpusFileEnd12;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[24]=(unsigned int)&OpusFileBeg13;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[25]=(unsigned int)&OpusFileEnd13;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[26]=(unsigned int)&OpusFileBeg14;
+		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[27]=(unsigned int)&OpusFileEnd14;
 
 		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[0]=(unsigned int)&SbcFileBeg1;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[1]=(unsigned int)&SbcFileEnd1;

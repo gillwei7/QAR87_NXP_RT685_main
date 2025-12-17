@@ -25,7 +25,8 @@ typedef enum
     Ringtone_StopVideoAI,
     Ringtone_StartTranslation,
     Ringtone_StopTranslation,
-    Ringtone_WakeWord
+    Ringtone_WakeWord,
+	Ringtone_BT_Connected
 } RingtoneState;
 
 /*******************************************************************************

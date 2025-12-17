@@ -46,6 +46,7 @@
 #include "app_connect.h"
 #include "system_status.h"
 #include "WorkStateManager.h"
+#include "DefForBothMcuAndDsp.h"
 #endif
 
 #define Manager_TASK_PRIORITY				2			//this is low
@@ -534,9 +535,9 @@ void startOpusPlayIndex(int opus_index){
     if(opus_index < 0){
         PRINTF("startOpusPlay: opus index < 0\r\n");
         return;
-    } else if (opus_index > MAX_RINGTONE_OPUS_INDEX){
-        play_opus_index = MAX_RINGTONE_OPUS_INDEX;
-        PRINTF("startOpusPlay: opus index > %d\r\n", MAX_RINGTONE_OPUS_INDEX);
+    } else if (opus_index > (OPUS_INDEX_MAXIMUM-1)){
+        play_opus_index = OPUS_INDEX_MAXIMUM;
+        PRINTF("startOpusPlay: opus index > %d\r\n", OPUS_INDEX_MAXIMUM-1);
     } else {
         play_opus_index = opus_index;
         PRINTF("startOpusPlay: opus index %d\r\n", play_opus_index);
@@ -625,6 +626,11 @@ static void app_task(void *pvParameters)
                 general_RingtoneState = Ringtone_No;
                 startOpusPlayIndex(Ringtone_LowBattery-1);
         }
+
+        if(general_RingtoneState == Ringtone_BT_Connected){
+				general_RingtoneState = Ringtone_No;
+				startOpusPlayIndex(Ringtone_BT_Connected-1);
+		}
 
         vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
     }

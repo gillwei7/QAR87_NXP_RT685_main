@@ -141,7 +141,8 @@
 #define AUDIO_OUT_TRANSFER_LENGTH_ONE_FRAME (AUDIO_OUT_SAMPLING_RATE_KHZ * AUDIO_OUT_FORMAT_CHANNELS * AUDIO_OUT_FORMAT_SIZE)
 
 #endif
-
+//gill
+#define OPUS_INDEX_MAXIMUM 14
 
 typedef enum _VoiceCommandMenu
 {
@@ -254,7 +255,7 @@ typedef struct
 	U32 MonitorInfoArray1	[20];
 	U32 MonitorInfoArray2	[20];
 	U32 U32ControlPara		[40];
-	U32 FileAddrTable_Opus	[26];
+	U32 FileAddrTable_Opus	[OPUS_INDEX_MAXIMUM*2];
 	U32 FileAddrTable_Sbc	[10];
 
 	U32 NeedToSwitchConversaTuningCfg;		//MCU writes this to command DSP side to re-init conversa with the selected tuning cfg
