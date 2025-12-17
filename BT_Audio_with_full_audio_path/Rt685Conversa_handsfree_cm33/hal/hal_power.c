@@ -12,6 +12,10 @@
 #define EN_HIZ_BIT      7
 #define EN_HIZ_MASK     (1u << EN_HIZ_BIT)
 
+#define BATTERY_FULL_VOLTAGE   4450//(mV)
+#define BATTERY_EMPTY_VOLTAGE  3300//(mV)
+
+
 volatile bq256xx_status_t charger_status;
 volatile BatteryInfo battery_info;
 
@@ -69,6 +73,12 @@ void hal_power_charger_bq25618_get_charging_status(void)
 #endif
 }
 
+void hal_power_gauge_glf70302_init(void)
+{
+#if FG_GLF70302_ENABLE
+	glf70302_init();//Gauge Init
+#endif
+}
 
 void hal_power_gauge_glf70302_get_battery_level(void)
 {
@@ -76,5 +86,23 @@ void hal_power_gauge_glf70302_get_battery_level(void)
 	glf70302_polling(&battery_info); //Read the battery level after powering on
 #endif
 }
+
+uint8_t hal_power_get_battery_percentage (uint32_t mv)
+{
+    // 邊界保護
+    if (mv <= BATTERY_EMPTY_VOLTAGE) return 0;
+    if (mv >= BATTERY_FULL_VOLTAGE)  return 100;
+
+    // 線性比例： (mv - empty) * 100 / (full - empty)
+    uint32_t range = (uint32_t)(BATTERY_FULL_VOLTAGE - BATTERY_EMPTY_VOLTAGE);
+    uint32_t num   = (uint32_t)(mv - BATTERY_EMPTY_VOLTAGE) * 100u;
+
+    // 四捨五入：+range/2
+    uint8_t soc = (uint8_t)((num + (range / 2u)) / range);
+
+    return soc;   // 0~100
+}
+
+
 
 #endif

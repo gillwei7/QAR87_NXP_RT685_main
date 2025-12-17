@@ -11,8 +11,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#define BATTERY_FULL_VOLTAGE   4450//(mV)
-#define BATTERY_EMPTY_VOLTAGE  3300//(mV)
 
 #define COMPONENT_OFF          0
 #define COMPONENT_ON           1

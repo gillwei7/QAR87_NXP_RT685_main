@@ -40,21 +40,6 @@ battery_state_t battery_state = BATTERY_STATE_NORMAL;
 
 extern uint32_t s_bq256xx_iindpm_target_ua;
 
-static inline uint8_t battery_soc_percent_mv(uint32_t mv)
-{
-    // 邊界保護
-    if (mv <= BATTERY_EMPTY_VOLTAGE) return 0;
-    if (mv >= BATTERY_FULL_VOLTAGE)  return 100;
-
-    // 線性比例： (mv - empty) * 100 / (full - empty)
-    uint32_t range = (uint32_t)(BATTERY_FULL_VOLTAGE - BATTERY_EMPTY_VOLTAGE);
-    uint32_t num   = (uint32_t)(mv - BATTERY_EMPTY_VOLTAGE) * 100u;
-
-    // 四捨五入：+range/2
-    uint8_t soc = (uint8_t)((num + (range / 2u)) / range);
-
-    return soc;   // 0~100
-}
 
 
 static void BatteryReadTimerCb(TimerHandle_t xTimer)
@@ -134,9 +119,9 @@ void Init_I2C_Component(void)
 	hal_touch_aw93305_init(); //Touch Init
 #endif
 #if FG_GLF70302_ENABLE
-	glf70302_init();//Gauge Init
+	hal_power_gauge_glf70302_init();//Gauge Init
 	hal_power_gauge_glf70302_get_battery_level(); //Read the battery level after powering on
-	battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
+	battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
 	ss_set_battery(battery_info.soc);
 #endif
 
@@ -370,7 +355,7 @@ void I2C_Task(void *pvParameters)
             {
 #if FG_GLF70302_ENABLE
             	glf70302_polling(&battery_info);
-            	battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
+            	battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
                 PRINTF("[Battery] SOC: %d%%\r\n",battery_info.soc);
                 if(battery_info.soc>=99 && ss_is_charging())
                 {
@@ -512,7 +497,7 @@ void power_off_charging(void)
 	uint8_t LED_state=0; //1->charging； 2->full-charge
 
 
-	glf70302_init();//Gauge Init
+	hal_power_gauge_glf70302_init();//Gauge Init
 	ktd202x_probe();
 	hal_power_charger_bq25618_init();
 	SDK_DelayAtLeastUs(100 * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 100ms
@@ -526,7 +511,7 @@ void power_off_charging(void)
 
 			hal_power_charger_bq25618_get_charging_status();
 			hal_power_gauge_glf70302_get_battery_level();
-			battery_info.soc = battery_soc_percent_mv(battery_info.voltage);
+			battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
 			if(charger_status.vbus_good)
 			{
 				switch (LED_state) {
