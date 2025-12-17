@@ -133,9 +133,8 @@ static void connected(struct bt_conn *conn, uint8_t err)
 	struct bt_conn_info info;
 	if (err)
 	{
-#if BT_CONNECTION_LOG
 		PRINTF("ACL Connection Failed (err %d)\n",err);
-#endif
+
 		if (g_connectInitRiderPhone)
 		{
 			g_connectInitRiderPhone = 0U;
