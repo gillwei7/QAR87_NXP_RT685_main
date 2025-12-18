@@ -51,21 +51,6 @@ static void BatteryReadTimerCb(TimerHandle_t xTimer)
 
 }
 
-
-static void Stop_AMP(void)
-{
-    close_aw88166_pa(AW_DEV_0);
-    close_aw88166_pa(AW_DEV_1);
-}
-
-static void Start_AMP(amp_mode_t mode)
-{
-	const char *profile = (mode == AMP_MODE_RECEIVER) ? "Receiver" : "Music";
-
-    start_aw88166_pa(AW_DEV_0, profile);
-    start_aw88166_pa(AW_DEV_1, profile);
-}
-
 static void Determine_pca9422_enter_ship_mode(void)
 {
 	/* 讀取當下按鍵狀態 */
@@ -110,7 +95,9 @@ void Init_I2C_Component(void)
 #endif
 
 	power_off_charging();
+
 	Determine_pca9422_enter_ship_mode();
+
 #if PMIC_GLF70583_ENABLE
 	hal_pmic_glf70583_actual_board_init();
 #endif
@@ -198,16 +185,16 @@ void I2C_Task(void *pvParameters)
 #if AMP_AW88166_ENABLE
                 switch (evt) {
                     case AMP_EVT_MUSIC_START:
-//                        StartSoundPlayback();
-                        Start_AMP(AMP_MODE_MUSIC);
+                        hal_amp_aw88166_left_start("Music");
+                        hal_amp_aw88166_right_start("Music");
                         break;
                     case AMP_EVT_RECEIVER_START:
-//                        StartSoundPlayback();
-                        Start_AMP(AMP_MODE_RECEIVER);
+                        hal_amp_aw88166_left_start("Receiver");
+                        hal_amp_aw88166_right_start("Receiver");
                         break;
                     case AMP_EVT_STOP:
-                    	Stop_AMP();
-//                        StopSoundPlayback();
+                    	hal_amp_aw88166_left_stop();
+                    	hal_amp_aw88166_right_stop();
                         break;
                     default:
                         break;
