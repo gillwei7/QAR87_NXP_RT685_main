@@ -121,48 +121,45 @@ uint8_t hal_power_is_power_off_charging_mode(void) {
 	return is_power_off_charging_mode;
 }
 
-void power_off_charging(void)
+void hal_power_go_to_power_off_charging(void)
 {
 	uint8_t LED_state=0; //1->charging, 2->full-charge
 
-	if(hal_power_is_power_off_charging_mode())
+	PRINTF("[System] power off charging \r\n");
+	while(1)
 	{
-		PRINTF("[System] power off charging \r\n");
-		while(1)
+
+		hal_power_charger_bq25618_get_charging_status();
+		hal_power_gauge_glf70302_get_battery_level();
+		battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
+		if(charger_status.vbus_good)
 		{
-
-			hal_power_charger_bq25618_get_charging_status();
-			hal_power_gauge_glf70302_get_battery_level();
-			battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
-			if(charger_status.vbus_good)
-			{
-				switch (LED_state) {
-					case 0:
+			switch (LED_state) {
+				case 0:
+						hal_led_ktd2027_off();
+						hal_led_ktd2027_charging_indicator();
+						LED_state = 1;
+						break;
+				case 1:
+						if(battery_info.soc>=99)
+						{
 							hal_led_ktd2027_off();
-							hal_led_ktd2027_charging_indicator();
-							LED_state = 1;
-							break;
-					case 1:
-							if(battery_info.soc>=99)
-							{
-								hal_led_ktd2027_off();
-								hal_led_ktd2027_full_charged_indicator();
-								LED_state = 2;
-							}
-							break;
-                    default:
-                        	break;
-				}
+							hal_led_ktd2027_full_charged_indicator();
+							LED_state = 2;
+						}
+						break;
+				default:
+						break;
 			}
-			else
-			{
-				hal_led_ktd2027_off();
-				PRINTF("[System] power off charging -> power down \r\n");
-				hal_pmic_pca9422_power_down();
-			}
-
-			SDK_DelayAtLeastUs(1000 * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 1s
 		}
+		else
+		{
+			hal_led_ktd2027_off();
+			PRINTF("[System] power off charging -> power down \r\n");
+			hal_pmic_pca9422_power_down();
+		}
+
+		SDK_DelayAtLeastUs(1000 * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 1s
 	}
 }
 

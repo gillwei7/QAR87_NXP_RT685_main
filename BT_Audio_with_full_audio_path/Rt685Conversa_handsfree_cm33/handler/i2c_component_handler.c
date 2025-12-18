@@ -94,8 +94,9 @@ void Init_I2C_Component(void)
 	hal_power_charger_bq25618_init();
 #endif
 
-	power_off_charging();
-
+	if (hal_power_is_power_off_charging_mode()) {
+		hal_power_go_to_power_off_charging();
+	}
 	Determine_pca9422_enter_ship_mode();
 
 #if PMIC_GLF70583_ENABLE

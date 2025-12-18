@@ -83,6 +83,5 @@ void amp_post_event(amp_event_t e);
 //void Scan_I2C_Devices(I3C_Type *base);
 void I2C_Task(void *pvParameters);
 
-void power_off_charging(void);
 
 #endif /* I2C_COMPONENT_HANDLER_H_ */
