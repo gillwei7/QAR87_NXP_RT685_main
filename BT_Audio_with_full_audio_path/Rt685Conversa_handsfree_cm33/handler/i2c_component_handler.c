@@ -114,7 +114,7 @@ void Init_I2C_Component(void)
 #endif
 #if FG_GLF70302_ENABLE
 	hal_power_gauge_glf70302_get_battery_level(); //Read the battery level after powering on
-	battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
+	//battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
 	ss_set_battery(battery_info.soc);
 #endif
 
@@ -317,9 +317,10 @@ void I2C_Task(void *pvParameters)
     					led_post_event(LED_EVT_ALL_OFF);
     					ss_set_charging(false);
     				}
-    				if(charger_status.chg_stat==0x11)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
+    				if(charger_status.chg_stat==0x03)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
     				{
     					battery_state = BATTERY_STATE_FULL;
+    					led_post_event(LED_EVT_FULL_CHARGERED);
     				}
     				/*
     			    uint8_t val;
@@ -348,14 +349,14 @@ void I2C_Task(void *pvParameters)
             {
 #if FG_GLF70302_ENABLE
             	glf70302_polling(&battery_info);
-            	battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
+            	//battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
                 PRINTF("[Battery] SOC: %d%%\r\n",battery_info.soc);
-                if(battery_info.soc>=99 && ss_is_charging())
+                if(battery_info.soc>=FULLY_CHARGE_PERCENTAGE && ss_is_charging())
                 {
                 	battery_state = BATTERY_STATE_FULL;
                 	led_post_event(LED_EVT_FULL_CHARGERED);
                 }
-                else if (battery_info.soc<=20)
+                else if (battery_info.soc<=LOW_POWER_PERCENTAGE && ss_is_charging()==false)
                 {
                 	battery_state = BATTERY_STATE_LOW;
                 	led_post_event(LED_EVT_LOW_BATTERY);
@@ -363,6 +364,7 @@ void I2C_Task(void *pvParameters)
                 else
                 {
                 	battery_state = BATTERY_STATE_NORMAL;
+                	led_post_event(LED_EVT_CHARGING);
                 }
             	ss_set_battery(battery_info.soc);
 #endif

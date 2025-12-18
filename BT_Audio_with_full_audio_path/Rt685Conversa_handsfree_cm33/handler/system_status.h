@@ -17,7 +17,8 @@
 #define COMPONENT_START        2
 #define COMPONENT_END          3
 
-
+#define FULLY_CHARGE_PERCENTAGE	90
+#define LOW_POWER_PERCENTAGE	40
 
 typedef enum {
     BATTERY_STATE_NORMAL = 0,       // 一般狀態

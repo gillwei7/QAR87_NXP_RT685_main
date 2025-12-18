@@ -10,6 +10,7 @@
 #include "glf70302_driver.h"
 #include "hal_led.h"
 #include "hal_pmic.h"
+#include "system_status.h"
 
 #define EN_HIZ_BIT      7
 #define EN_HIZ_MASK     (1u << EN_HIZ_BIT)
@@ -131,7 +132,7 @@ void hal_power_go_to_power_off_charging(void)
 
 		hal_power_charger_bq25618_get_charging_status();
 		hal_power_gauge_glf70302_get_battery_level();
-		battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
+		//battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
 		if(charger_status.vbus_good)
 		{
 			switch (LED_state) {
@@ -141,7 +142,7 @@ void hal_power_go_to_power_off_charging(void)
 						LED_state = 1;
 						break;
 				case 1:
-						if(battery_info.soc>=99)
+						if(battery_info.soc>=FULLY_CHARGE_PERCENTAGE)
 						{
 							hal_led_ktd2027_off();
 							hal_led_ktd2027_full_charged_indicator();
