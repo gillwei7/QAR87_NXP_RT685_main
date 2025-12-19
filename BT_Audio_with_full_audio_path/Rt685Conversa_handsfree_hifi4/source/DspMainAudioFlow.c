@@ -931,9 +931,9 @@ void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp2R[i]; //Output to AMP R
 
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic0[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic1[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic2[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic3[i];
 		}
 	#endif
 
