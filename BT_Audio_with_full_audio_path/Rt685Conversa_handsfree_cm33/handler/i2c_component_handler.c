@@ -84,11 +84,11 @@ void Init_I2C_Component(void)
 #if PMIC_PCA9422_ENABLE
 	hal_pmic_pca9422_init();
 #endif
-#if LED_KTD2027_ENABLE
-	hal_led_ktd2027_init();
-#endif
 #if FG_GLF70302_ENABLE
 	hal_power_gauge_glf70302_init();//Gauge Init
+#endif
+#if LED_KTD2027_ENABLE
+	hal_led_ktd2027_init();
 #endif
 #if CHG_BQ25618_ENABLE
 	hal_power_charger_bq25618_init();
@@ -224,7 +224,7 @@ void I2C_Task(void *pvParameters)
                 	if(btn_event==1)
                 	{
 #if SOC_SPI_ENABLE
-                        if (ss_get_state() != USAGE_STATE_MUSIC_PLAYER && ss_get_state() != USAGE_STATE_MEDIA_PLAYER) {
+                        if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER || ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_HOME) {
                 	        send_spi_request(ONE_TOUCH_HEX_VALUE);
                         }
 #endif
@@ -232,7 +232,7 @@ void I2C_Task(void *pvParameters)
                 	else if(btn_event==2)
                 	{
 #if SOC_SPI_ENABLE
-                        if (ss_get_state() != USAGE_STATE_MUSIC_PLAYER) {
+                        if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
                             send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
                         }
 #endif
@@ -243,7 +243,7 @@ void I2C_Task(void *pvParameters)
                 {
                 	PRINTF("[Touch] press \n");
 #if SOC_SPI_ENABLE
-                    if (ss_get_state() != USAGE_STATE_MUSIC_PLAYER) {
+                    if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER || ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT) {
                         send_spi_request(PRESS_TOUCH_HEX_VALUE);
                     }
 #endif
@@ -260,7 +260,7 @@ void I2C_Task(void *pvParameters)
                 {
                 	PRINTF("[Touch] slide_right \n");
 #if SOC_SPI_ENABLE
-                    if (ss_get_state() != USAGE_STATE_MUSIC_PLAYER && ss_get_state() != USAGE_STATE_MEDIA_PLAYER) {
+                    if (ss_get_state() == USAGE_STATE_MENU) {
                         send_spi_request(FORWARD_SLIDE_HEX_VALUE);
                     }
 #endif
@@ -274,7 +274,7 @@ void I2C_Task(void *pvParameters)
                 {
                 	PRINTF("[Touch] slide_left \n");
 #if SOC_SPI_ENABLE
-                    if (ss_get_state() != USAGE_STATE_MUSIC_PLAYER && ss_get_state() != USAGE_STATE_MEDIA_PLAYER) {
+                    if (ss_get_state() == USAGE_STATE_MENU) {
                         send_spi_request(BACK_SLIDE_HEX_VALUE);
                     }
 #endif
