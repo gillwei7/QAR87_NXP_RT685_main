@@ -364,7 +364,6 @@ void I2C_Task(void *pvParameters)
                 else
                 {
                 	battery_state = BATTERY_STATE_NORMAL;
-                	led_post_event(LED_EVT_CHARGING);
                 }
             	ss_set_battery(battery_info.soc);
 #endif
