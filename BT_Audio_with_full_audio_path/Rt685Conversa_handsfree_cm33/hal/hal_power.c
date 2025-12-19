@@ -12,6 +12,10 @@
 #include "hal_pmic.h"
 #include "system_status.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+
+
 #define EN_HIZ_BIT      7
 #define EN_HIZ_MASK     (1u << EN_HIZ_BIT)
 
@@ -26,6 +30,13 @@ uint32_t s_bq256xx_iindpm_target_ua = 0;
 
 static uint8_t is_booting = 1;
 static uint8_t is_power_off_charging_mode = 0;
+
+
+#define PWR_OFF_CHG_TASK_STACK     (configMINIMAL_STACK_SIZE + 256)
+#define PWR_OFF_CHG_TASK_PRIORITY  (tskIDLE_PRIORITY + 2)
+
+static TaskHandle_t s_powerOffChargingTaskHandle = NULL;
+
 
 void hal_power_charger_bq25618_init(void)
 {
@@ -122,46 +133,86 @@ uint8_t hal_power_is_power_off_charging_mode(void) {
 	return is_power_off_charging_mode;
 }
 
+
+
+static void PowerOffChargingTask(void *pvParameters)
+{
+    (void)pvParameters;
+    uint8_t LED_state = 0; //1->charging, 2->full-charge
+
+	gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
+	GPIO_PinInit(GPIO, 0U, 19U, &input_pin_config);
+
+    PRINTF("[System] power off charging (RTOS Task) \r\n");
+
+    for (;;)
+    {
+        //hal_power_charger_bq25618_get_charging_status();
+        //if (charger_status.vbus_good)
+        uint8_t charger_status = (uint8_t)GPIO_PinRead(GPIO, 0U, 19U);
+        if(charger_status==1)
+        {
+        	vTaskDelay(pdMS_TO_TICKS(100));
+            hal_power_gauge_glf70302_get_battery_level();
+            switch (LED_state) {
+                case 0:
+                    hal_led_ktd2027_off();
+                    hal_led_ktd2027_charging_indicator();
+                    LED_state = 1;
+                    break;
+
+                case 1:
+                    if (battery_info.soc >= FULLY_CHARGE_PERCENTAGE)
+                    {
+                        hal_led_ktd2027_off();
+                        hal_led_ktd2027_full_charged_indicator();
+                        LED_state = 2;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            hal_led_ktd2027_off();
+            PRINTF("[System] power off charging -> power down \r\n");
+            vTaskDelay(pdMS_TO_TICKS(100));
+            hal_pmic_pca9422_power_down();
+            vTaskSuspend(NULL);
+        }
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+}
+
+
+static void StartPowerOffChargingTask(void)
+{
+    if (s_powerOffChargingTaskHandle == NULL)
+    {
+        BaseType_t ret = xTaskCreate(
+            PowerOffChargingTask,
+            "PwrOffChg",
+            PWR_OFF_CHG_TASK_STACK,
+            NULL,
+            PWR_OFF_CHG_TASK_PRIORITY,
+            &s_powerOffChargingTaskHandle
+        );
+        configASSERT(ret == pdPASS);
+    }
+}
+
 void hal_power_go_to_power_off_charging(void)
 {
-	uint8_t LED_state=0; //1->charging, 2->full-charge
 
-	PRINTF("[System] power off charging \r\n");
-	while(1)
-	{
+	StartPowerOffChargingTask();
 
-		hal_power_charger_bq25618_get_charging_status();
-		hal_power_gauge_glf70302_get_battery_level();
-		//battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
-		if(charger_status.vbus_good)
-		{
-			switch (LED_state) {
-				case 0:
-						hal_led_ktd2027_off();
-						hal_led_ktd2027_charging_indicator();
-						LED_state = 1;
-						break;
-				case 1:
-						if(battery_info.soc>=FULLY_CHARGE_PERCENTAGE)
-						{
-							hal_led_ktd2027_off();
-							hal_led_ktd2027_full_charged_indicator();
-							LED_state = 2;
-						}
-						break;
-				default:
-						break;
-			}
-		}
-		else
-		{
-			hal_led_ktd2027_off();
-			PRINTF("[System] power off charging -> power down \r\n");
-			hal_pmic_pca9422_power_down();
-		}
-
-		SDK_DelayAtLeastUs(1000 * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 1s
-	}
+    vTaskStartScheduler();
+    for (;;)
+        ;
 }
+
+
 
 #endif
