@@ -400,6 +400,7 @@ void I2C_Task(void *pvParameters)
                         break;
                     case LED_EVT_NOT_CHARGING:
                     	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_DISENABLE);
+                    	hal_led_set_situation(LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_LOW_BATTERY:
                     	hal_led_set_situation(LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
