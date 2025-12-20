@@ -12,8 +12,10 @@
 #include <stdbool.h>
 
 
+
 #define COMPONENT_OFF          0
 #define COMPONENT_ON           1
+
 #define COMPONENT_START        2
 #define COMPONENT_END          3
 
@@ -63,8 +65,9 @@ enum {
 
 void ss_set_camera_status(uint8_t status);
 void ss_set_capture_status(uint8_t status);
+uint8_t ss_get_capture_status(void);
 void ss_set_recording_status(uint8_t status);
-void ss_set_recording_status(uint8_t status);
+uint8_t ss_get_recording_status(void);
 
 void ss_set_bt_addr_0 (uint8_t addr);
 void ss_set_bt_addr_1 (uint8_t addr);

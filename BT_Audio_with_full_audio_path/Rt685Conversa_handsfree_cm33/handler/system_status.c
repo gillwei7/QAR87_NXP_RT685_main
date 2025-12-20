@@ -16,17 +16,15 @@ extern RingtoneState general_RingtoneState;
 volatile uint8_t System_Status = 0; //Send system status to Novatek
 volatile SystemStatus ss = {0};
 
-volatile usage_state_t current_usage_state = USAGE_STATE_HOME;
-volatile uint8_t music_status = 0; // 0: off, 1: on
-volatile uint8_t is_turning_on_camera = 0;
-volatile uint8_t capture_start = 0;
-volatile uint8_t capture_finished = 0;
-volatile uint8_t recording_start = 0;
-volatile uint8_t recording_finished = 0;
-volatile uint8_t need_send_state = 0;
-volatile uint8_t need_send_music_status = 0;
+static volatile usage_state_t current_usage_state = USAGE_STATE_HOME;
 
-static uint8_t current_state_value = 0;
+static volatile uint8_t current_state_value = 0;
+static volatile uint8_t capture_status = 0;
+static volatile uint8_t recording_status = 0;
+static volatile uint8_t music_status = 0; // 0: off, 1: on
+static volatile uint8_t is_turning_on_camera = 0;
+static volatile uint8_t need_send_state = 0;
+static volatile uint8_t need_send_music_status = 0;
 
 static uint8_t bt_addr_0 = 0;
 static uint8_t bt_addr_1 = 0;
@@ -229,25 +227,36 @@ void ss_set_capture_status(uint8_t status)
 {
 	if (status == COMPONENT_START)
 	{
-		capture_start = 1;
+		capture_status = 1;
 		general_RingtoneState = Ringtone_PhotoCapture;
 	}
 	else if (status == COMPONENT_END)
 	{
-		capture_finished = 1;
+		capture_status = 0;
+
 	}
+}
+
+uint8_t ss_get_capture_status(void)
+{
+	return capture_status;
 }
 
 void ss_set_recording_status(uint8_t status)
 {
 	if (status == COMPONENT_START)
 	{
-		recording_start = 1;
+		recording_status = 1;
 	}
 	else if (status == COMPONENT_END)
 	{
-		recording_finished = 1;
+		recording_status = 0;
 	}
+}
+
+uint8_t ss_get_recording_status(void)
+{
+	return recording_status;
 }
 
 void ss_set_bt_addr_0 (uint8_t addr)
