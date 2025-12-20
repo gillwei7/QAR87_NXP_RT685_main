@@ -43,19 +43,6 @@ GPIO_HANDLE_DEFINE(s_TouchIntGpioHandle);
 GPIO_HANDLE_DEFINE(s_ChargerIntGpioHandle);
 GPIO_HANDLE_DEFINE(s_GaugeIntGpioHandle);
 
-/**
- * @description: Delay N us
- * @paran:
- * @return {*}
- * @author: lmx
- * @param {u32} val：delay time，unit：us
- */
-void hal_loop_delay_us(uint32_t val)
-{
-    if (val < 4294967 && val > 0) {
-        SDK_DelayAtLeastUs(val, CLOCK_GetFreq(kCLOCK_CoreSysClk));
-    }
-}
 
 /**
  * @description: Delay N ms
@@ -64,11 +51,11 @@ void hal_loop_delay_us(uint32_t val)
  * @author: lmx
  * @param {u32} val：delay time，unit：ms
  */
-void hal_loop_delay_ms(uint32_t val)
+void hal_delay_ms(uint32_t val)
 {
-    if (val < 4294 && val > 0) {
-        SDK_DelayAtLeastUs(val * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk));
-    }
+//    if (val < 4294 && val > 0) {
+//        SDK_DelayAtLeastUs(val * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk));
+//    }
 //    volatile uint32_t i = 0;
 //    volatile uint32_t j = 0;
 //    for (j = 0; j < val; j++)
@@ -76,20 +63,8 @@ void hal_loop_delay_ms(uint32_t val)
 //	{
 //		__NOP();
 //	}
-}
 
-/**
- * @description: Delay N s
- * @paran:
- * @return {*}
- * @author: lmx
- * @param {u32} val：delay time，unit：s
- */
-void hal_loop_delay_s(uint32_t val)
-{
-    for (int i = 0; i < val; i++) {
-        SDK_DelayAtLeastUs(1000 * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk));
-    }
+	vTaskDelay(pdMS_TO_TICKS(val));
 }
 
 static void hal_gpio_port_init(void)
@@ -298,7 +273,6 @@ void hal_soc_enable(void)
 
 void hal_board_init(void)
 {
-	PRINTF("[System] Version= %s \n", HAL_MCU_APP_VERSION);
 	hal_gpio_init();
 	hal_i3c_init();
 	hal_spi_init();

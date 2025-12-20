@@ -47,7 +47,7 @@ extern void BOARD_InitHardware(void);
 int main(void)
 {
     BOARD_InitHardware();
-    hal_board_init();
+
 
     if (xTaskCreate(hfp_hf_a2dp_task, "hfp_hf_a2dp_task", configMINIMAL_STACK_SIZE * 8, NULL,		//was configMINIMAL_STACK_SIZE * 8
                     tskIDLE_PRIORITY + 1, NULL) != pdPASS)

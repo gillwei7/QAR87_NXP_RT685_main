@@ -21,8 +21,8 @@
 
 static void HAL_Delay(unsigned int ms)
 {
-	SDK_DelayAtLeastUs(ms * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk));
-	//vTaskDelay(pdMS_TO_TICKS(ms));
+//	SDK_DelayAtLeastUs(ms * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk));
+	vTaskDelay(pdMS_TO_TICKS(ms));
 }
 
 uint8_t glf70302_read_one_byte(uint8_t regaddr)

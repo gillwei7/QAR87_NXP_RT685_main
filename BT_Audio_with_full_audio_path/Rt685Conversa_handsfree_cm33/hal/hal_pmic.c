@@ -73,7 +73,7 @@ void hal_pmic_glf70583_init (uint8_t glf70583_a_i2c_addr, uint8_t glf70583_b_i2c
     /** Solution: The manufacturer did not set LDO1 to LOAD SWITCH **/
     glf70583_i2c_write(glf70583_a_i2c_addr, 0xF5, 0xC6); // unlocked chip
     glf70583_i2c_write(glf70583_a_i2c_addr, 0x24, 0xB8);
-    hal_loop_delay_ms(10);
+    hal_delay_ms(10);
     glf70583_i2c_write(glf70583_a_i2c_addr, 0x24, 0xB9);
 
 //    PRINTF("[GLF70583] Start to Set GLF70583_A \n");

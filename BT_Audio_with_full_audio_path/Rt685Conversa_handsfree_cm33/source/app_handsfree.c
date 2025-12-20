@@ -640,6 +640,8 @@ void hfp_hf_a2dp_task(void *pvParameters)
 {
     int err = 0;
 
+    hal_board_init();
+
     PRINTF("Bluetooth Handsfree demo start...\n");
 
     /* Initializate BT Host stack */

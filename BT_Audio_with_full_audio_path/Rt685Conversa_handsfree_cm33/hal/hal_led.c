@@ -17,15 +17,15 @@ static uint8_t led_has_new_situation = 0;
 void hal_led_ktd2027_power_on_indicator(void)
 {
     ktd202x_ch2_led_on(LED_CURRENT_CH2);
-    hal_loop_delay_ms(500);
+    hal_delay_ms(500);
     ktd202x_led_off();
 
     ktd202x_ch3_led_on(LED_CURRENT_CH3);
-    hal_loop_delay_ms(500);
+    hal_delay_ms(500);
     ktd202x_led_off();
 
     ktd202x_ch1_led_on(LED_CURRENT_CH1);
-    hal_loop_delay_ms(500);
+    hal_delay_ms(500);
     ktd202x_led_off();
 
     ktd202x_ch4_led_on(LED_CURRENT_CH4);

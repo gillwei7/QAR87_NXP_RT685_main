@@ -75,9 +75,7 @@ static uint8_t sw_version[40] = "T02.QAR88n.02.01.251216";
  * Functions
  ******************************************************************************/
 // Delay
-void hal_loop_delay_us(uint32_t val);
-void hal_loop_delay_ms(uint32_t val);
-void hal_loop_delay_s(uint32_t val);
+void hal_delay_ms(uint32_t val);
 
 // GPIO
 void hal_gpio_init(void);

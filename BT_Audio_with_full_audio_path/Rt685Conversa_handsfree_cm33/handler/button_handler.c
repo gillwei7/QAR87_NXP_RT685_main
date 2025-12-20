@@ -48,7 +48,9 @@ extern RingtoneState general_RingtoneState;
 /* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
 static inline void delay_ms(uint32_t ms)
 {
-    SDK_DelayAtLeastUs(ms * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk));
+//    SDK_DelayAtLeastUs(ms * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk));
+	vTaskDelay(pdMS_TO_TICKS(ms));
+
 }
 
 /* 檢查按鍵是否連續維持低電位（active-low）達指定毫秒數：for pca9422 ship mode */
