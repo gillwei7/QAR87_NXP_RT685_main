@@ -21,16 +21,16 @@ typedef enum {
 /**@brief Enumeration type of the led situation event . */
 typedef enum
 {
-	LED_EVENT_OFF                = 0x00,
-	LED_EVENT_CHARGING           = 0x01,
-	LED_EVENT_FULL_CHARGED       = 0x02,
-	LED_EVENT_LOW_BATTERY        = 0x04,
-	LED_EVENT_RECORDING          = 0x08,
-	LED_EVENT_PAIRING            = 0x10,
-	LED_EVENT_OTA                = 0x20,
-	LED_EVENT_OTA_SUCCESS        = 0x40,
-	LED_EVENT_OTA_FAILED         = 0x80,
-} LED_EVENT_T;
+	HAL_LED_EVENT_OFF                = 0x00,
+	HAL_LED_EVENT_CHARGING           = 0x01,
+	HAL_LED_EVENT_FULL_CHARGED       = 0x02,
+	HAL_LED_EVENT_LOW_BATTERY        = 0x04,
+	HAL_LED_EVENT_RECORDING          = 0x08,
+	HAL_LED_EVENT_PAIRING            = 0x10,
+	HAL_LED_EVENT_OTA                = 0x20,
+	HAL_LED_EVENT_OTA_SUCCESS        = 0x40,
+	HAL_LED_EVENT_OTA_FAILED         = 0x80,
+} HAL_LED_EVENT_T;
 
 
 void hal_led_ktd2027_init(void);

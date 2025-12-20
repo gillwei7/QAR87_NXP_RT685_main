@@ -10,7 +10,7 @@
 
 
 static hal_led_indicator_status_t led_indicator_status_t = HAL_LED_OFF;
-static uint8_t led_situation = LED_EVENT_OFF;
+static uint8_t led_situation = HAL_LED_EVENT_OFF;
 static uint8_t led_has_new_situation = 0;
 
 
@@ -166,35 +166,35 @@ void hal_led_status_handler (void) {
 	led_has_new_situation = 0;
 
 
-	if (led_situation & LED_EVENT_PAIRING) {
+	if (led_situation & HAL_LED_EVENT_PAIRING) {
 		hal_led_ktd2027_pairing_indicator();
 		return;
 
-	} else if (led_situation & LED_EVENT_RECORDING) {
+	} else if (led_situation & HAL_LED_EVENT_RECORDING) {
 		hal_led_ktd2027_recording_indicator();
 		return;
 
-	} else if (led_situation & LED_EVENT_OTA) {
+	} else if (led_situation & HAL_LED_EVENT_OTA) {
 		hal_led_ktd2027_ota_indicator();
 		return;
 
-	} else if (led_situation & LED_EVENT_OTA_SUCCESS) {
+	} else if (led_situation & HAL_LED_EVENT_OTA_SUCCESS) {
 		hal_led_ktd2027_ota_success_indicator();
 		return;
 
-	} else if (led_situation & LED_EVENT_OTA_FAILED) {
+	} else if (led_situation & HAL_LED_EVENT_OTA_FAILED) {
 		hal_led_ktd2027_ota_fail_indicator();
 		return;
 
-	} else if (led_situation & LED_EVENT_CHARGING) {
-		hal_led_ktd2027_charging_indicator();
-		return;
-
-	} else if (led_situation & LED_EVENT_FULL_CHARGED) {
+	} else if (led_situation & HAL_LED_EVENT_FULL_CHARGED) {
 		hal_led_ktd2027_full_charged_indicator();
 		return;
 
-	} else if (led_situation & LED_EVENT_LOW_BATTERY) {
+	} else if (led_situation & HAL_LED_EVENT_CHARGING) {
+		hal_led_ktd2027_charging_indicator();
+		return;
+
+	} else if (led_situation & HAL_LED_EVENT_LOW_BATTERY) {
 		hal_led_ktd2027_low_battery_indicator();
 		return;
 

@@ -396,51 +396,51 @@ void I2C_Task(void *pvParameters)
                     	hal_pmic_pca9422_power_down();
                         break;
                     case LED_EVT_CHARGING:
-                    	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_ENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_ENABLE);
                         break;
                     case LED_EVT_NOT_CHARGING:
-                    	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_DISENABLE);
-                    	hal_led_set_situation(LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_LOW_BATTERY:
-                    	hal_led_set_situation(LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
-                    	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_DISENABLE);
-                    	hal_led_set_situation(LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_NORMAL_BATTERY:
-                    	hal_led_set_situation(LED_EVENT_LOW_BATTERY, SITUATION_DISENABLE);
-                    	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_DISENABLE);
-                    	hal_led_set_situation(LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_FULL_CHARGERED:
-                    	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_DISENABLE);
-                    	hal_led_set_situation(LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
                         break;
                     case LED_EVT_PHOTO_CAPTURE:
                     	hal_led_set_indicator_status(HAL_LED_TAKE_PHOTO);
                         break;
                     case LED_EVT_RECORDING_START:
-                    	hal_led_set_situation(LED_EVENT_RECORDING, SITUATION_ENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
                         break;
                     case LED_EVT_RECORDING_COMPLETED:
-                    	hal_led_set_situation(LED_EVENT_RECORDING, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_PAIRING_MODE_START:
-                    	hal_led_set_situation(LED_EVENT_PAIRING, SITUATION_ENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_PAIRING, SITUATION_ENABLE);
                         break;
                     case LED_EVT_PAIRING_MODE_STOP:
-                    	hal_led_set_situation(LED_EVENT_PAIRING, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_PAIRING, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_OTA_PROGRESS:
-                    	hal_led_set_situation(LED_EVENT_OTA, SITUATION_ENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_OTA, SITUATION_ENABLE);
                         break;
                     case LED_EVT_OTA_SUCCESS:
-                    	hal_led_set_situation(LED_EVENT_OTA_SUCCESS, SITUATION_ENABLE);
-                    	hal_led_set_situation(LED_EVENT_OTA, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_OTA_SUCCESS, SITUATION_ENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_OTA, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_OTA_FAIL:
-                    	hal_led_set_situation(LED_EVENT_OTA_FAILED, SITUATION_ENABLE);
-                    	hal_led_set_situation(LED_EVENT_OTA, SITUATION_DISENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_OTA_FAILED, SITUATION_ENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_OTA, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_ALL_OFF:
                     	hal_led_set_indicator_status(HAL_LED_OFF);
