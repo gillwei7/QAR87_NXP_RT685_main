@@ -314,7 +314,7 @@ void I2C_Task(void *pvParameters)
     				}
     				else
     				{
-    					led_post_event(LED_EVT_ALL_OFF);
+    					led_post_event(LED_EVT_NOT_CHARGING);
     					ss_set_charging(false);
     				}
     				if(charger_status.chg_stat==0x03)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
@@ -351,12 +351,12 @@ void I2C_Task(void *pvParameters)
             	glf70302_polling(&battery_info);
             	//battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
                 PRINTF("[Battery] SOC: %d%%\r\n",battery_info.soc);
-                if(battery_info.soc>=FULLY_CHARGE_PERCENTAGE && ss_is_charging())
+                if(battery_info.soc >= FULLY_CHARGE_PERCENTAGE && ss_is_charging())
                 {
                 	battery_state = BATTERY_STATE_FULL;
                 	led_post_event(LED_EVT_FULL_CHARGERED);
                 }
-                else if (battery_info.soc<=LOW_POWER_PERCENTAGE && ss_is_charging()==false)
+                else if (battery_info.soc <= LOW_POWER_PERCENTAGE && ss_is_charging() == false)
                 {
                 	battery_state = BATTERY_STATE_LOW;
                 	led_post_event(LED_EVT_LOW_BATTERY);
@@ -364,6 +364,7 @@ void I2C_Task(void *pvParameters)
                 else
                 {
                 	battery_state = BATTERY_STATE_NORMAL;
+                	led_post_event(LED_EVT_NORMAL_BATTERY);
                 }
             	ss_set_battery(battery_info.soc);
 #endif
@@ -385,73 +386,68 @@ void I2C_Task(void *pvParameters)
 #if LED_KTD2027_ENABLE
                     switch (evt) {
                     case LED_EVT_POWER_ON_PROGRESS:
-                    	ktd202x_led_off();
-                        ktd202x_ch4_led_on(LED_ON);
+                    	hal_led_set_indicator_status(HAL_LED_POWER_ON);
+                        break;
+                    case LED_EVT_REFRESH:
+                    	hal_led_set_indicator_status(HAL_LED_REFRESH);
                         break;
                     case LED_EVT_POWER_OFF_PROGRESS:
-                    	ktd202x_led_off();
-                    	ktd202x_ch2_led_on(LED_ON);
-                    	vTaskDelay(pdMS_TO_TICKS(10000));
-                    	ktd202x_ch2_led_off();
+                    	hal_led_set_indicator_status(HAL_LED_POWER_OFF);
                     	hal_pmic_pca9422_power_down();
                         break;
                     case LED_EVT_CHARGING:
-                    	ktd202x_led_off();
-                        ktd202x_ch2_led_blink(500, 500, TIM_1);
+                    	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_ENABLE);
+                        break;
+                    case LED_EVT_NOT_CHARGING:
+                    	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_LOW_BATTERY:
-                    	ktd202x_led_off();
-                        ktd202x_ch2_led_blink(500, 4500, TIM_1);
+                    	hal_led_set_situation(LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
+                    	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_DISENABLE);
+                    	hal_led_set_situation(LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
+                        break;
+                    case LED_EVT_NORMAL_BATTERY:
+                    	hal_led_set_situation(LED_EVENT_LOW_BATTERY, SITUATION_DISENABLE);
+                    	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_DISENABLE);
+                    	hal_led_set_situation(LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_FULL_CHARGERED:
-                    	ktd202x_led_off();
-                    	ktd202x_ch3_led_on(LED_ON);
+                    	hal_led_set_situation(LED_EVENT_CHARGING, SITUATION_DISENABLE);
+                    	hal_led_set_situation(LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
                         break;
                     case LED_EVT_PHOTO_CAPTURE:
-                    	ktd202x_led_off();
-                    	ktd202x_ch4_led_on(LED_ON);
-                    	vTaskDelay(50);
-                    	ktd202x_ch4_led_off();
+                    	hal_led_set_indicator_status(HAL_LED_TAKE_PHOTO);
                         break;
-                    case LED_EVT_VIDEO_CAPTURE:
-                    	ktd202x_led_off();
-                    	ktd202x_ch4_led_blink(500, 500, TIM_2);
+                    case LED_EVT_RECORDING_START:
+                    	hal_led_set_situation(LED_EVENT_RECORDING, SITUATION_ENABLE);
                         break;
-                    case LED_EVT_PAIRING_MODE:
-                    	ktd202x_led_off();
-                    	ktd202x_ch1_led_blink(100, 100, TIM_2);
+                    case LED_EVT_RECORDING_COMPLETED:
+                    	hal_led_set_situation(LED_EVENT_RECORDING, SITUATION_DISENABLE);
+                        break;
+                    case LED_EVT_PAIRING_MODE_START:
+                    	hal_led_set_situation(LED_EVENT_PAIRING, SITUATION_ENABLE);
+                        break;
+                    case LED_EVT_PAIRING_MODE_STOP:
+                    	hal_led_set_situation(LED_EVENT_PAIRING, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_OTA_PROGRESS:
-                    	ktd202x_led_off();
-                    	ktd202x_ch4_led_blink(300, 300, TIM_1);
+                    	hal_led_set_situation(LED_EVENT_OTA, SITUATION_ENABLE);
                         break;
                     case LED_EVT_OTA_SUCCESS:
-                    	ktd202x_led_off();
-                    	ktd202x_ch3_led_breathe(PERIOD_CODE_1P5S,
-                    	                        RISE_CODE_600MS,
-                    	                        FALL_CODE_600MS,
-                    	                        ON_PERCENT_60,
-                    	                        RAMP_SCALE_2X_SLOW,
-												true,
-                    	                        LED_CURRENT_CH3 );
+                    	hal_led_set_situation(LED_EVENT_OTA_SUCCESS, SITUATION_ENABLE);
+                    	hal_led_set_situation(LED_EVENT_OTA, SITUATION_DISENABLE);
                         break;
                     case LED_EVT_OTA_FAIL:
-                    	ktd202x_led_off();
-                    	ktd202x_ch2_led_breathe(PERIOD_CODE_1P5S,
-                    							RISE_CODE_600MS,
-                    							FALL_CODE_600MS,
-                    	                        ON_PERCENT_60,
-                    							RAMP_SCALE_2X_SLOW,
-                    	                        true,
-                    							LED_CURRENT_CH2);
+                    	hal_led_set_situation(LED_EVENT_OTA_FAILED, SITUATION_ENABLE);
+                    	hal_led_set_situation(LED_EVENT_OTA, SITUATION_DISENABLE);
                         break;
-
                     case LED_EVT_ALL_OFF:
-                    	ktd202x_led_off();
+                    	hal_led_set_indicator_status(HAL_LED_OFF);
                         break;
                     default:
                         break;
                     }
+                    hal_led_status_handler();
 #endif
                     xSemaphoreGive(i2c_mutex);
                 }
@@ -477,8 +473,11 @@ void I2C_Task(void *pvParameters)
         	}
         	else
         	{
-        		if(battery_state==BATTERY_STATE_LOW)
+        		if (battery_state==BATTERY_STATE_LOW) {
         			led_post_event(LED_EVT_LOW_BATTERY);
+        		} else if (battery_state == BATTERY_STATE_NORMAL) {
+        			led_post_event(LED_EVT_NORMAL_BATTERY);
+        		}
         	}
 
         }

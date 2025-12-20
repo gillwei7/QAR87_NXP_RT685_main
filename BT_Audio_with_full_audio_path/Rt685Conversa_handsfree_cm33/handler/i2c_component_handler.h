@@ -25,7 +25,6 @@
 #include "aw93305.h"
 #include "bq256xx_charger.h"
 #include "glf70302_driver.h"
-#include "ktd202x_leds.h"
 #include "aw88166.h"
 
 
@@ -55,19 +54,24 @@ typedef enum {
 /*===== LED ===== */
 /* LED events (single, centralized event model) */
 typedef enum {
-    LED_EVT_NONE = 0,
-    LED_EVT_POWER_ON_PROGRESS,       /* 白燈常亮直到ready */
-	LED_EVT_POWER_OFF_PROGRESS,		 /* 紅燈亮1秒 */
-    LED_EVT_CHARGING,                /* 紅燈閃爍(週期1秒) */
-    LED_EVT_LOW_BATTERY,             /* 紅燈閃爍(週期5秒) */
-	LED_EVT_FULL_CHARGERED,			 /* 綠燈常亮 */
-	LED_EVT_PHOTO_CAPTURE,			 /* 白燈閃一次 */
-	LED_EVT_VIDEO_CAPTURE,			 /* 白燈閃爍(週期1秒) */
-	LED_EVT_PAIRING_MODE,			 /* 藍燈閃爍 */
-	LED_EVT_OTA_PROGRESS,			 /* 白燈閃爍 */
-	LED_EVT_OTA_SUCCESS,			 /* 綠燈呼吸 */
-	LED_EVT_OTA_FAIL,			     /* 紅燈呼吸 */
-    LED_EVT_ALL_OFF                  /* 全部關閉 */
+	LED_EVT_NONE = 0,
+	LED_EVT_POWER_ON_PROGRESS,       /* 白燈常亮直到ready */
+	LED_EVT_POWER_OFF_PROGRESS,      /* 紅燈亮1秒 */
+	LED_EVT_CHARGING,                /* 紅燈閃爍(週期1秒) */
+	LED_EVT_NOT_CHARGING,            /* 紅燈閃爍(週期1秒) */
+	LED_EVT_LOW_BATTERY,             /* 紅燈閃爍(週期5秒) */
+	LED_EVT_NORMAL_BATTERY,          /* Nothing */
+	LED_EVT_FULL_CHARGERED,          /* 綠燈常亮 */
+	LED_EVT_PHOTO_CAPTURE,           /* 白燈閃一次 */
+	LED_EVT_RECORDING_START,         /* 白燈閃爍(週期1秒) */
+	LED_EVT_RECORDING_COMPLETED,     /* 白燈閃爍(週期1秒) */
+	LED_EVT_PAIRING_MODE_START,      /* 藍燈閃爍 */
+	LED_EVT_PAIRING_MODE_STOP,       /* 藍燈閃爍 */
+	LED_EVT_OTA_PROGRESS,            /* 白燈閃爍 */
+	LED_EVT_OTA_SUCCESS,             /* 綠燈呼吸 */
+	LED_EVT_OTA_FAIL,                /* 紅燈呼吸 */
+	LED_EVT_REFRESH,                 /* Refresh the led indicator */
+	LED_EVT_ALL_OFF                  /* 全部關閉 */
 } led_event_t;
 
 

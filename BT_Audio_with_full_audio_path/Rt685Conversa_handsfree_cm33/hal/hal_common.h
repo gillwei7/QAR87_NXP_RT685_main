@@ -48,6 +48,8 @@
 #define HAL_MCU_APP_VERSION        sw_version
 
 
+#define SITUATION_ENABLE           1
+#define SITUATION_DISENABLE        0
 
 /*******************************************************************************
  * Prototypes and Variables

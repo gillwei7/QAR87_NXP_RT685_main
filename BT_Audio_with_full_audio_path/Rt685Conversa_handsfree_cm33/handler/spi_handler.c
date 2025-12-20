@@ -107,7 +107,7 @@ static void handle_active_ack_frame(const uint8_t *frame)
         case 0x00:
             if (val == 0x00) {
                 PRINTF("[Active] ACK:[00 00] Nova close all component(led,Dmic,AMP) \r\n");
-                led_post_event(LED_EVT_ALL_OFF);
+                led_post_event(LED_EVT_RECORDING_COMPLETED);
                 // TODO: Dmic,AMP
             }
             break;
@@ -136,28 +136,28 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 		case 0x00:
 			if (val == 0x00) {
 				PRINTF("[Passive] ACK:[00 %02X] Nova do nothing \r\n",val);
-				led_post_event(LED_EVT_ALL_OFF);
+				led_post_event(LED_EVT_RECORDING_COMPLETED);
 			}
 			else if (val == 0x01) {
 				PRINTF("[Passive] ACK:[00 %02X] Capture Start \r\n",val);
-				led_post_event(LED_EVT_POWER_ON_PROGRESS);//While LED ON
+				led_post_event(LED_EVT_PHOTO_CAPTURE);//While LED ON
 				// ToDo:使NXP發出 "滴～喀嚓 "聲音
 				ss_set_capture_status(COMPONENT_START);
 			}
 			else if (val == 0x03) {
 				PRINTF("[Passive] ACK:[00 %02X] Capture Completed \r\n",val);
-				led_post_event(LED_EVT_ALL_OFF);
+				led_post_event(LED_EVT_REFRESH);
 				ss_set_capture_status(COMPONENT_END);
 			}
 			else if (val == 0x04) {
 				PRINTF("[Passive] ACK:[00 %02X] Recording Start \r\n",val);
-				led_post_event(LED_EVT_POWER_ON_PROGRESS);//While LED ON
+				led_post_event(LED_EVT_RECORDING_START);//While LED ON
 				// ToDo:使NXP發出 "登登"聲音
 				ss_set_recording_status(COMPONENT_START);
 			}
 			else if (val == 0x05) {
 				PRINTF("[Passive] ACK:[00 %02X] Recording Completed \r\n",val);
-				led_post_event(LED_EVT_ALL_OFF);
+				led_post_event(LED_EVT_RECORDING_COMPLETED);
 				// ToDo:使NXP發出 "等登"聲音
 				ss_set_recording_status(COMPONENT_END);
 			}
@@ -175,7 +175,7 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 			if (val == 0x11) {
 				PRINTF("[Passive] ACK:[11 11] Nova boot completed\r\n");
 				Novatek_boot_completed = 1;
-				led_post_event(LED_EVT_ALL_OFF);
+				led_post_event(LED_EVT_REFRESH);
 				general_RingtoneState = Ringtone_PowerON;
 			}
 			break;
