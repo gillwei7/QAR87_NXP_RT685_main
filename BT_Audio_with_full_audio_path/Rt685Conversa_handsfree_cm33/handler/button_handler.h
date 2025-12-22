@@ -32,7 +32,7 @@
 #define BTN_DBLCLICK_GAP_MS     300
 #define PWR_ACTIVE_LEVEL          0      // active-low: pressed = 0; if active-high, change to 1
 #define PWR_DEBOUNCE_MS          30
-#define PWR_LONG_MS            3000      // Press and hold for 3 seconds (judgment only after releasing)
+#define PWR_LONG_MS            5000      // Press and hold for 3 seconds (judgment only after releasing)
 #define PWR_MIN_SHORT_MS         50      // Too short jitter/false touch (<50ms) is not considered a short press
 #define POWER_KEY_PINT_CH  		  0   // PINT channel
 #define FUN_KEY1_PINT_CH  		  1   // PINT channel
