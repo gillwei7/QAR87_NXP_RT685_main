@@ -362,8 +362,8 @@ void button_task(void *pvParameters)
                             } else if (current_usb_output == 1) {
                                 PRINTF("[USB] NXP USB.\r\n");
                                 current_usb_output++;
-                                GPIO_PinWrite(GPIO, NXP_532_USB_SWITCH_PORT, NXP_532_USB_SWITCH_PIN, 1U);
-                                GPIO_PinWrite(GPIO, USB_SWDIO_SWITCH_PORT, USB_SWDIO_SWITCH_PIN, 0U);
+                                GPIO_PinWrite(GPIO, NXP_532_USB_SWITCH_PORT, NXP_532_USB_SWITCH_PIN, 0U);
+                                GPIO_PinWrite(GPIO, USB_SWDIO_SWITCH_PORT, USB_SWDIO_SWITCH_PIN, 1U);
 
                             } else if (current_usb_output == 2) {
                                 PRINTF("[USB] NXP SWD.\r\n");
