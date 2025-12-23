@@ -1,5 +1,6 @@
-/* Copyright 2021 Retune DSP 
- * Copyright 2022,2025 NXP
+/*
+ * Copyright 2021 Retune DSP
+ * Copyright 2022, 2025 NXP
  *
  * NXP Confidential and Proprietary. This software is owned or controlled by NXP
  * and may only be used strictly in accordance with the applicable license terms.
@@ -49,7 +50,7 @@ NXP_STATIC int32_t nxp_wav_read_open(nxp_wav_file_t *Awavfile, const char *Afile
 #if !USE_FATFS
 	Awavfile->fid = fid;	// Update fid in struct
 #endif
-	if (fid == NULL) {
+	if (fid == NULL || fstat != FILE_OK) {
 		nxp_printf("Failed to open %s, errno = %d\n", Afilename, errno);
 		return 1;
 	}
@@ -147,7 +148,7 @@ NXP_STATIC int32_t nxp_wav_write_open(nxp_wav_file_t *Awavfile, const char *Afil
 #if !USE_FATFS
 	Awavfile->fid = fid;	// Update fid in struct
 #endif
-	if (fid == NULL) {
+	if (fid == NULL || e != FILE_OK) {
 		nxp_printf("Failed to open %s, errno = %d\n", Afilename, errno);
 		return 1;
 	}
@@ -156,7 +157,6 @@ NXP_STATIC int32_t nxp_wav_write_open(nxp_wav_file_t *Awavfile, const char *Afil
 
 	int32_t subchunk1_size = 16; // PCM
 	int32_t bits_per_sample = Abit_depth;
-	int32_t bytes_per_sample = bits_per_sample / 8;
 	int32_t subchunk2_size = 0; // Update when writing file. Equal to num_samples * num_channels * bits_per_sample / 8
 
 	chunk_header_t riff_header;
@@ -269,7 +269,7 @@ NXP_STATIC int32_t nxp_wav_read(int32_t **Abuffer, int32_t Anum_samples, nxp_wav
 		}
 		free(tmp_buf_float);
 	} else {
-		nxp_printf("Only 16/32 bit integer wav files and 32 bit float wav files are supported.", stderr);
+		nxp_printf("Only 16/32 bit integer wav files and 32 bit float wav files are supported.");
 	}
 
 	Awav_file->num_read += num_read;

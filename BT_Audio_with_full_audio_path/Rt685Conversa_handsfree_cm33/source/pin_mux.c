@@ -3152,6 +3152,7 @@ void BOARD_InitDmicPins(void)
                                 IOPCTL_PIO_INV_DI);
     /* PORT2 PIN16 (coords: R1) is configured as PDM_CLK01 */
     IOPCTL_PinMuxSet(IOPCTL, BOARD_INITDMICPINS_PDM_CLK01_PORT, BOARD_INITDMICPINS_PDM_CLK01_PIN, PDM_CLK01);
+#if UsingQAR87Board==1	//this is to let the prj run on RT685 EVK board
     const uint32_t PDM_CLK23 = (/* Pin is configured as PDM_CLK23 */
                                 IOPCTL_PIO_FUNC1 |
                                 /* Disable pull-up / pull-down function */
@@ -3172,6 +3173,7 @@ void BOARD_InitDmicPins(void)
                                 IOPCTL_PIO_INV_DI);
     /* PORT2 PIN17 (coords: U1) is configured as PDM_CLK23 */
     IOPCTL_PinMuxSet(IOPCTL, BOARD_INITDMICPINS_PDM_CLK23_PORT, BOARD_INITDMICPINS_PDM_CLK23_PIN, PDM_CLK23);
+#endif
 #if 0
     const uint32_t PDM_CLK45 = (/* Pin is configured as PDM_CLK45 */
                                 IOPCTL_PIO_FUNC1 |

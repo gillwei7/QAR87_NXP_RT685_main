@@ -863,28 +863,74 @@ DEBUG_CONSOLE_FUNCTION_PREFIX status_t DbgConsole_Flush(void)
 }
 #endif
 
+
+
+
+
+#if DspPrintsToMcuThenMcuPrintsToUsbCom==1
+int IncreasePrintBufIdx(int Idx, int l)
+{
+	Idx++;
+	if(Idx >= l)
+		Idx=0;
+	return Idx;
+}
+int FreeSpaceOfThePrintBuf(int WIdx, int RIdx, int l)
+{
+	if(WIdx==RIdx)
+		return (l);
+	if(WIdx>RIdx)
+		return(l-(WIdx-RIdx));
+	else
+		return((RIdx-WIdx)-1);
+}
+int UsedSpaceOfThePrintBuf(int WIdx, int RIdx, int l)
+{
+	if(WIdx==RIdx)
+		return (0);
+	if(WIdx>RIdx)
+		return(WIdx-RIdx);
+	else
+		return(l+1-(RIdx-WIdx));
+}
+#endif
+
 #if SDK_DEBUGCONSOLE
 /* See fsl_debug_console.h for documentation of this function. */
 int DbgConsole_Printf(const char *formatString, ...)
 {
-	#if(!Using_UART5ToPrint)&&(!Using_UART2ToPrint)
-		return 0;
+	#if(!Using_UART5ToPrint)&&(!Using_UART2ToPrint)&&(DspPrintsToMcuThenMcuPrintsToUsbCom==0)
+		r eturn 0;
 	#endif
 
     va_list ap;
     int logLength = 0, dbgResult = 0;
     char printBuf[DEBUG_CONSOLE_PRINTF_MAX_LOG_LEN] = {'\0'};
 
-    if (NULL == g_serialHandle)
-    {
-        return 0;
-    }
+	#if(!Using_UART5ToPrint)&&(!Using_UART2ToPrint)&&(DspPrintsToMcuThenMcuPrintsToUsbCom==0)
+		if (NU LL == g_serialHandle)
+		{
+			r eturn 0;
+		}
+	#endif
 
     va_start(ap, formatString);
     /* format print log first */
     logLength = StrFormatPrintf(formatString, ap, printBuf, DbgConsole_PrintCallback);
     /* print log */
-    dbgResult = DbgConsole_SendDataReliable((uint8_t *)printBuf, (size_t)logLength);
+	#if DspPrintsToMcuThenMcuPrintsToUsbCom==1
+		if(PtrVarBlockSharedByDspAndMcu!=NULL)
+		{
+			if(FreeSpaceOfThePrintBuf(PtrVarBlockSharedByDspAndMcu->DspPrintBufWrIdx, PtrVarBlockSharedByDspAndMcu->DspPrintBufRdIdx, DspPrintBufLength))
+			{
+				memcpy((void *)&PtrVarBlockSharedByDspAndMcu->DspPrintBuf[PtrVarBlockSharedByDspAndMcu->DspPrintBufWrIdx][1], printBuf, logLength);
+				PtrVarBlockSharedByDspAndMcu->DspPrintBuf[PtrVarBlockSharedByDspAndMcu->DspPrintBufWrIdx][0]=logLength;
+				PtrVarBlockSharedByDspAndMcu->DspPrintBufWrIdx=IncreasePrintBufIdx(PtrVarBlockSharedByDspAndMcu->DspPrintBufWrIdx,DspPrintBufLength);
+			}
+		}
+	#else
+		d bgResult = DbgConsole_SendDataReliable((uint8_t *)printBuf, (size_t)logLength);
+	#endif
 
     va_end(ap);
 

@@ -646,7 +646,7 @@ void BOARD_InitHardware(void)
 
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: ----IW611 BT HFP A2DP with Conversa--- \r\n");
-	PRINTF("RT685 MCU: ------------ McuVer 1.6.1 ------------ \r\n");
+	PRINTF("RT685 MCU: ------------ McuVer 1.7.0 ------------ \r\n");
 	PRINTF("RT685 MCU: ----IW611 BT HFP A2DP with Conversa--- \r\n");
 
 	PRINTF("\r\n");

@@ -542,6 +542,7 @@
 								<option id="com.crt.advproject.link.memory.data.323699093" name="Global data placement" superClass="com.crt.advproject.link.memory.data" value="Default" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.crt.advproject.link.memory.sections.1701337996" name="Extra linker script input sections" superClass="com.crt.advproject.link.memory.sections" valueType="stringList">
 									<listOptionValue builtIn="false" value="isd=*(.OpusSbcBin);region=BOARD_FLASH_OpusSbc;type=.text"/>
+									<listOptionValue builtIn="false" value="isd=*(.DspFirmwareBin);region=BOARD_FLASH_DSPBin;type=.text"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="com.crt.advproject.link.gcc.multicore.master.userobjs.1094699468" name="Slave Objects (not visible)" superClass="com.crt.advproject.link.gcc.multicore.master.userobjs" valueType="userObjs"/>
 								<option id="com.crt.advproject.link.arch.1121549139" name="Architecture" superClass="com.crt.advproject.link.arch" value="com.crt.advproject.link.target.cm33" valueType="enumerated"/>
@@ -1974,7 +1975,8 @@
 &lt;vendor&gt;NXP&lt;/vendor&gt;&#13;
 &lt;memory can_program="true" id="Flash" is_ro="true" size="0" type="Flash"/&gt;&#13;
 &lt;memory id="RAM" size="4608" type="RAM"/&gt;&#13;
-&lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="BOARD_FLASH" location="0x8000000" size="0x600000"/&gt;&#13;
+&lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="BOARD_FLASH" location="0x8000000" size="0x300000"/&gt;&#13;
+&lt;memoryInstance derived_from="Flash" edited="true" id="BOARD_FLASH_DSPBin" location="0x8300000" size="0x300000"/&gt;&#13;
 &lt;memoryInstance derived_from="Flash" edited="true" id="BOARD_FLASH_OpusSbc" location="0x8600000" size="0x200000"/&gt;&#13;
 &lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="LITTLEFS_FLASH_region" location="0x8800000" size="0x800000"/&gt;&#13;
 &lt;memoryInstance derived_from="RAM" edited="true" id="SRAM" location="0x80000" size="0x180000"/&gt;&#13;

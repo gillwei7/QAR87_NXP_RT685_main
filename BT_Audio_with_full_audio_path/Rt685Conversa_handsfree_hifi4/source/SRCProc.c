@@ -25,6 +25,7 @@
 #include "fsl_debug_console.h"
 
 #include "GlobalDef.h"
+#include "SubFunc.h"
 #include "SRCProc.h"
 #include "AudioProc_Conversa.h"
 
@@ -95,6 +96,10 @@ VOID xa_src_pp_error_handler_init(void);
 //volatile int AsrcFsInCurrent;
 //volatile int AsrcFsInTarget;
 
+
+#if UseUacDnAudioForConversaTuning_VoiceCall16KHz==1
+TCadenceSRC SRC_ConversaUacDn;
+#endif
 
 TCadenceSRC SRC_ConversaTx1;
 TCadenceSRC SRC_ConversaRx1;
@@ -239,10 +244,8 @@ int InitCadenceAsrc (TCadenceSRC *SRCPtr, int InputBlockSizeInSamples, int inFs,
 			_XA_HANDLE_ERROR(p_proc_err_info, "", err_code);
 
 			/* Display the Tensilica identification message */
-		    //SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
-				PRINTF("\n%s LIB version : %s  API version : %s\n", pb_process_name, pb_lib_version, pb_api_version);
-				PRINTF("Cadence, Inc. https://www.cadence.com\n\n");
-		    //SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
+			PRINTF_M("\n%s LIB version : %s  API version : %s\n", pb_process_name, pb_lib_version, pb_api_version);
+			PRINTF_M("Cadence, Inc. https://www.cadence.com\n\n");
 		#endif  //DISPLAY_MESSAGE
     }
 
@@ -595,13 +598,47 @@ int InitCadenceAsrc (TCadenceSRC *SRCPtr, int InputBlockSizeInSamples, int inFs,
 
     if(NeedToDisplay)
     {
-	    //SEMA42_Lock(APP_SEMA42, SEMA42_GATE, domainId);
-		PRINTF("malloc_count: %d\n", SRCPtr->MemAllocCnt);
-	    //SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
+		PRINTF_M("malloc_count: %d\n", SRCPtr->MemAllocCnt);
     }
 
 	return XA_NO_ERROR;
 }
+
+#if TestAlgoInitAndDeInit==1
+void TestHeap_AsrcInitAndDeInit(int l)
+{
+	void *HeapPtr1;
+	void *HeapPtr2;
+	HeapPtr1=GetCurrentHeapTail(3000);
+	int TestCnt=l;
+
+	while(1)
+	{
+		InitCadenceAsrc(&SRC_ConversaRx1,   AudioFrameSizeInSamplePerCh_16KHz/2,   8000,     16000,      1,           0,             0);
+		InitCadenceAsrc(&SRC_ConversaRx2,   AudioFrameSizeInSamplePerCh_48KHz  ,  48000,     16000,      2,           0,             0);
+		InitCadenceAsrc(&SRC_ConversaTx1,   AudioFrameSizeInSamplePerCh_16KHz  ,  16000,      8000,      1,           0,             0);
+		DeinitCadenceAsrc(&SRC_ConversaRx1);
+		DeinitCadenceAsrc(&SRC_ConversaRx2);
+		DeinitCadenceAsrc(&SRC_ConversaTx1);
+
+		HeapPtr2=GetCurrentHeapTail(3000);
+		if(HeapPtr1!=HeapPtr2)
+		{
+			PRINTF("RT685 DSP: heap base address was, %x\r\n",    (U32)HeapPtr1);
+			PRINTF("RT685 DSP: heap base address now is, %x\r\n", (U32)HeapPtr2);
+			PRINTF("RT685 DSP: DeInitEap is NOT successful \r\n");
+			while(1) {};
+		}
+
+		delay_ms(100);
+		TestCnt--;
+		if(!TestCnt)
+			break;
+	}
+	PRINTF("RT685 DSP: TestHeap_AsrcInitAndDeInit is successful \r\n");
+}
+#endif
+
 //xa_codec_handle_t SRC_process_Mic_handle
 
 int ProcCadenceAsrc(TCadenceSRC *SRCPtr, int *AudioS32DstPtr, int *AudioS32SrcPtr, int InSampleNum, int *OutputSampleNum)

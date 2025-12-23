@@ -33,13 +33,10 @@
 
 #include "CircularBufManagement.h"
 
-#define CORE_DSP
 #include "AudioProc_Conversa.h"
 #include "AudioProc_Vit.h"
 
 
-//#include "VIT_Model_en.h"
-//#include "VIT_Model_en_2.h"
 #include "VIT_Model_en_Quanta.h"
 
 #define MASK_SIE
@@ -70,7 +67,7 @@ PL_UINT16 				g_vitVcDetectionId = 0;     // VIT voice command detection results
 
 volatile uint32_t g_wakeWordLength  = 0;
 PL_UINT32 g_vitFramecount 	 = 0;
-static PL_UINT32 g_vitDetectionFrame = 0;
+//static PL_UINT32 g_vitDetectionFrame = 0;
 VIT_Intent_st SpeechIntent;
 uint32_t g_sampleCount = 0;
 
@@ -554,7 +551,7 @@ static void asr_set_state(asr_session_t state, VIT_Handle_t* VITHandlePtr, VIT_C
     }
 }
 
-static VIT_ReturnStatus_en VIT_Deinit(AUDIO_vit_st* p_definitionVIT)
+VIT_ReturnStatus_en VIT_Deinit(AUDIO_vit_st* p_definitionVIT)
 {
     VIT_ReturnStatus_en VIT_Status = VIT_SUCCESS;
 #if 1
@@ -601,7 +598,6 @@ static VIT_ReturnStatus_en VIT_Deinit(AUDIO_vit_st* p_definitionVIT)
 #endif
     return VIT_Status;
 }
-
 void initCreateVIT( AUDIO_vit_st* p_definitionVIT )
 {
 	status_t   			retStatus 		 	= kStatus_Success;
@@ -827,36 +823,42 @@ void initCreateVIT( AUDIO_vit_st* p_definitionVIT )
 
 void InitVit(void)
 {
-	VIT_ReturnStatus_en 	VIT_Status				= VIT_SUCCESS;
-	#if 0
-		//only a test, can be closed
-		void *HeapPtr1;
-		void *HeapPtr2;
-
-		HeapPtr1=GetCurrentHeapTail(3000);
-		initCreateVIT(&vitPluginParams);
-		VIT_Deinit(&vitPluginParams);
-		HeapPtr2=GetCurrentHeapTail(3000);
-
-		if(HeapPtr1==HeapPtr2)
-		{
-			//PRINTF("RT685 DSP: heap base address was, %x\r\n",    (U32)HeapPtr1);
-			//PRINTF("RT685 DSP: heap base address now is, %x\r\n", (U32)HeapPtr2);
-			PRINTF("RT685 DSP: VIT_Deinit is successful \r\n");
-		}else
-		{
-			PRINTF("RT685 DSP: heap base address was, %x\r\n",    (U32)HeapPtr1);
-			PRINTF("RT685 DSP: heap base address now is, %x\r\n", (U32)HeapPtr2);
-			PRINTF("RT685 DSP: VIT_Deinit is NOT successful \r\n");
-		}
-		PRINTF("RT685 DSP: heap base address, %x\r\n", (U32)HeapPtr2);
-	#endif
-
 	InitalVitMaskSetupIsDone=0;
 	PtrVarBlockSharedByDspAndMcu->CurVoiceMenu=ASR_Menu_Home;
 	PtrVarBlockSharedByDspAndMcu->PreVoiceMenu=ASR_Menu_Home;
 	initCreateVIT(&vitPluginParams);
 }
+
+#if TestAlgoInitAndDeInit==1
+void TestHeap_VitInitAndDeInit(int l)
+{
+	void *HeapPtr1;
+	void *HeapPtr2;
+	HeapPtr1=GetCurrentHeapTail(3000);
+	int TestCnt=l;
+
+	while(1)
+	{
+		initCreateVIT(&vitPluginParams);
+		VIT_Deinit(&vitPluginParams);
+
+		HeapPtr2=GetCurrentHeapTail(3000);
+		if(HeapPtr1!=HeapPtr2)
+		{
+			PRINTF("RT685 DSP: heap base address was, %x\r\n",    (U32)HeapPtr1);
+			PRINTF("RT685 DSP: heap base address now is, %x\r\n", (U32)HeapPtr2);
+			PRINTF("RT685 DSP: DeInitEap is NOT successful \r\n");
+			while(1) {};
+		}
+
+		delay_ms(100);
+		TestCnt--;
+		if(!TestCnt)
+			break;
+	}
+	PRINTF("RT685 DSP: TestHeap_VitInitAndDeInit is successful \r\n");
+}
+#endif
 
 status_t swProcessVIT( AUDIO_vit_st* 			 p_definitionVIT,
 					   PL_INT16*     			 p_inputAudioData,
@@ -1381,10 +1383,10 @@ status_t swProcessVIT( AUDIO_vit_st* 			 p_definitionVIT,
 
 
 
-		if(PtrVarBlockSharedByDspAndMcu->U32ControlPara[0])
+		if(PtrVarBlockSharedByDspAndMcu->U32ControlPara[ControlParaIdx_Btn1])
 		{
 			//user button 1 is pressed --- go to musicplayer menu
-			PtrVarBlockSharedByDspAndMcu->U32ControlPara[0]=0;
+			PtrVarBlockSharedByDspAndMcu->U32ControlPara[ControlParaIdx_Btn1]=0;
 
 			if(PtrVarBlockSharedByDspAndMcu->CurVoiceMenu==ASR_Menu_Home)
 			{
@@ -1408,10 +1410,10 @@ status_t swProcessVIT( AUDIO_vit_st* 			 p_definitionVIT,
 			}
 
 		}
-		if(PtrVarBlockSharedByDspAndMcu->U32ControlPara[1])
+		if(PtrVarBlockSharedByDspAndMcu->U32ControlPara[ControlParaIdx_Btn2])
 		{
 			//user button 2 is pressed --- go to phonecall menu
-			PtrVarBlockSharedByDspAndMcu->U32ControlPara[1]=0;
+			PtrVarBlockSharedByDspAndMcu->U32ControlPara[ControlParaIdx_Btn2]=0;
 
 			if(PtrVarBlockSharedByDspAndMcu->CurVoiceMenu==ASR_Menu_Home)
 			{

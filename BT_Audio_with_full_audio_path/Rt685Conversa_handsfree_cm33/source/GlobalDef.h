@@ -13,7 +13,6 @@
 //------------------------settings can be changed ----------------------
 //sub working modes (work state) enable or disable --- go to WorkStateManager.h to setup
 
-#define EnableUsbComAndAudio								1		//0 or 1 can be selected
 #define LetComConnectTuningTool								1		//0 or 1 can be selected
 #if LetComConnectTuningTool==1
 	#define PRINTF_GoesToUsbCom								0		//must be 0
@@ -33,9 +32,6 @@
 #define	Rt685I2SToNvtIsI2SMaster							1
 #define Rt685I2SToAmpIsI2SMaster							1		//could be 1 or 0, both works
 
-#define NvtI2SFs_16KHz										16000
-#define NvtI2SFs_48KHz										48000
-
 //------------------------settings can be changed ----------------------
 
 
@@ -48,6 +44,10 @@
 
 //-------------------------------------------------------------------------------------
 #if 1	//folding --- general defines --- should not be changed
+
+#define EnableUsbComAndAudio						1		//must be 1
+#define NvtI2SFs_16KHz								16000
+#define NvtI2SFs_48KHz								48000
 
 #define I2SToNvtIntrRecoverWaitTime					100
 
@@ -89,14 +89,22 @@ typedef signed short 		s16;
 typedef signed int 			s32;
 typedef long long			s64;
 
+#define _Value_Pow_2_31_M1	2147483647
+#define _Value_Pow_2_Neg31_	0.0000000004656612873077392578125f
+
+#define _Value_Pow_2_15_M1	32767
+#define _Value_Pow_2_Neg15_	0.000030517578125
+
+//#define Pi_Value            3.14159265353846
+
 
 #define DEMO_DMA			(DMA0)
 
 #define APP_MU MUA
 #define APP_MU_IRQHandler MU_A_IRQHandler
 /* Channel transmit and receive register */
-#define CHN_MU_REG_NUM 0U
-#define BOOT_FLAG 0x01U
+//#define CHN_MU_REG_NUM 0U
+//#define BOOT_FLAG 0x01U
 #endif
 //-------------------------------------------------------------------------------------
 
@@ -172,7 +180,7 @@ SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);			\
 //gill
 #define AUTO_CONNECT_ENABLE     1
 #define BT_CONNECTION_LOG       0
-#define ENABLE_POWER_DOWN       1
+#define ENABLE_POWER_DOWN       0
 
 
 #endif

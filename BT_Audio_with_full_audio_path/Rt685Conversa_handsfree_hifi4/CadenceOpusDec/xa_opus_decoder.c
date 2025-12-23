@@ -235,7 +235,7 @@ static void print_comments(char *comments, int length)
    }
 }
 #endif
-#ifdef EnableOpusDecodingPrint
+#if EnableOpusDecodingPrint==1
 static void print_comments_UsbCom(char *comments, int length)
 {
    char *c=comments;
@@ -508,7 +508,7 @@ int InitOpusDecoder(void)
 		fprintf(stderr, "Cadence Design Systems, Inc. http://www.cadence.com\n");
 		fprintf(stderr, "\n");
 	#endif
-	#ifdef EnableOpusDecodingPrint
+	#if EnableOpusDecodingPrint==1
 		PRINTF("\n");
 		PRINTF("%s library version %s\n", xa_opus_get_lib_name_string(), xa_opus_get_lib_version_string());
 		PRINTF("API version: %s\n", xa_opus_get_lib_api_version_string());
@@ -553,7 +553,7 @@ int InitOpusDecoder(void)
 			fprintf(stdout, "\nPersistent state size: %6d bytes\n", ogg_handle_size);
 			fprintf(stdout, "Scratch buffer size:   %6d bytes\n", ogg_scratch_size);
 		#endif
-		#ifdef EnableOpusDecodingPrint
+		#if EnableOpusDecodingPrint==1
 			PRINTF("\nOgg Parser runtime memory usage:");
 			PRINTF("\nPersistent state size: %6d bytes\n", ogg_handle_size);
 			PRINTF("Scratch buffer size:   %6d bytes\n", ogg_scratch_size);
@@ -573,7 +573,7 @@ int InitOpusDecoder(void)
 			_XA_HANDLE_ERROR(p_proc_testbench_err_info, "API state alloc", XA_TESTBENCH_FATAL_MEM_ALLOC_FAILED);
 		}else
 		{
-			#ifdef EnableOpusDecodingPrint
+			#if EnableOpusDecodingPrint==1
 				PRINTF(" Memory region address %p\n",(unsigned int)ogg_handle);
 			#endif
 		}
@@ -585,7 +585,7 @@ int InitOpusDecoder(void)
 				_XA_HANDLE_ERROR(p_proc_testbench_err_info, "API state alloc", XA_TESTBENCH_FATAL_MEM_ALLOC_FAILED);
 			}else
 			{
-				#ifdef EnableOpusDecodingPrint
+				#if EnableOpusDecodingPrint==1
 					PRINTF(" Memory region address %p\n",(unsigned int)ogg_scratch);
 				#endif
 			}
@@ -596,7 +596,7 @@ int InitOpusDecoder(void)
 			_XA_HANDLE_ERROR(p_proc_testbench_err_info, "API state alloc", XA_TESTBENCH_FATAL_MEM_ALLOC_FAILED);
 		}else
 		{
-			#ifdef EnableOpusDecodingPrint
+			#if EnableOpusDecodingPrint==1
 				PRINTF(" Memory region address %p\n",(unsigned int)p_ogg_inp_buf);
 			#endif
 		}
@@ -689,7 +689,7 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
 						/* Print comments */
 						print_comments((char *)tmp_ogg_out_buf, nBytes);
 					#endif
-					#ifdef EnableOpusDecodingPrint
+					#if EnableOpusDecodingPrint==1
 						PRINTF("\nOgg Stream Comments: \n");
 						/* Print comments */
 						print_comments_UsbCom((char *)tmp_ogg_out_buf, nBytes);
@@ -704,8 +704,8 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
 				#ifdef EnableSimuPrint
 					printf( "Error: Ran out of input without finding header and comment packets");
 				#endif
-				#ifdef EnableOpusDecodingPrint
-					PRINTF( "Error: Ran out of input without finding header and comment packets");
+				#if EnableOpusDecodingPrint==1
+					PRINTF( "Error: Ran out of input without finding header and comment packets\r\n");
 				#endif
                 exit(0);
             }
@@ -734,7 +734,7 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
 		printf( "API sampling rate:                             %d Hz\n",  dec_control.API_sampleRate );
 		printf( "API number of channels:                        %d\n",     dec_control.API_numChannels );
 	#endif
-	#ifdef EnableOpusDecodingPrint
+	#if EnableOpusDecodingPrint==1
 		PRINTF( "API sampling rate:                             %d Hz\n",  dec_control.API_sampleRate );
 		PRINTF( "API number of channels:                        %d\n",     dec_control.API_numChannels );
 	#endif
@@ -759,7 +759,7 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
 		fprintf(stdout, "Input buffer size:     %6d bytes\n", enc_speech_size);
 		fprintf(stdout, "Output buffer size:    %6d bytes\n\n", synth_speech_size);
 	#endif
-	#ifdef EnableOpusDecodingPrint
+	#if EnableOpusDecodingPrint==1
 		PRINTF("\nOpus Decoder runtime memory usage:");
 		PRINTF("\nPersistent state size: %6d bytes\n", handle_size);
 		PRINTF("Scratch buffer size:   %6d bytes\n", scratch_size);
@@ -777,7 +777,7 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
         _XA_HANDLE_ERROR(p_proc_testbench_err_info, "API state alloc", XA_TESTBENCH_FATAL_MEM_ALLOC_FAILED);
 	}else
 	{
-		#ifdef EnableOpusDecodingPrint
+		#if EnableOpusDecodingPrint==1
 			PRINTF(" Memory region address %p\n",(unsigned int)speech_decoder_state);
 		#endif
 	}
@@ -789,7 +789,7 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
         _XA_HANDLE_ERROR(p_proc_testbench_err_info, "API scratch alloc", XA_TESTBENCH_FATAL_MEM_ALLOC_FAILED);
 	}else
 	{
-		#ifdef EnableOpusDecodingPrint
+		#if EnableOpusDecodingPrint==1
 			PRINTF(" Memory region address %p\n",(unsigned int)scratch);
 		#endif
 	}
@@ -817,7 +817,7 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
         _XA_HANDLE_ERROR(p_proc_testbench_err_info, "API input alloc", XA_TESTBENCH_FATAL_MEM_ALLOC_FAILED);
 	}else
 	{
-		#ifdef EnableOpusDecodingPrint
+		#if EnableOpusDecodingPrint==1
 			PRINTF(" Memory region address %p\n",(unsigned int)enc_speech);
 		#endif
 	}
@@ -844,7 +844,7 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
         _XA_HANDLE_ERROR(p_proc_testbench_err_info, "API output alloc", XA_TESTBENCH_FATAL_MEM_ALLOC_FAILED);
 	}else
 	{
-		#ifdef EnableOpusDecodingPrint
+		#if EnableOpusDecodingPrint==1
 			PRINTF(" Memory region address %p\n",(unsigned int)synth_speech);
 		#endif
 	}
@@ -925,7 +925,7 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
 				#ifdef EnableSimuPrint
 					printf( "Error: Ran out of input, no opus packet found \n");
 				#endif
-				#ifdef EnableOpusDecodingPrint
+				#if EnableOpusDecodingPrint==1
 					PRINTF( "Error: Ran out of input, no opus packet found \n");
 				#endif
 				return 0;
@@ -952,7 +952,7 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
 
 	//init SRC
 	//             (ptr to handle.     int InputBlockSizeInSamples,            int inFs,                            int outFs,         int ChNum,  EnableAsrc NeedToDisplay)
-	InitCadenceAsrc(&SRC_DecoderOpus, DecoderOpus_SrcInSizeInSamples,dec_control.API_sampleRate,   PtrVarBlockSharedByDspAndMcu->I2SFs_Amp,  2,        0,           1      );
+	InitCadenceAsrc(&SRC_DecoderOpus, DecoderOpus_SrcInSizeInSamples,dec_control.API_sampleRate,   PtrVarBlockSharedByDspAndMcu->I2SFs_Amp,  2,        0,           0      );
 	//                                   DecoderOpus_SrcInSizeInSamples is to reserve enough space for output, later the input block size in samples will be set again in the src processing
 
 	InitOpusOutputCirBuf(PtrVarBlockSharedByDspAndMcu->I2SFs_Amp,0);
@@ -1038,7 +1038,7 @@ int OpusDecodeProcess(void)
 						#ifdef EnableSimuPrint
 							fprintf(stderr, "End of stream reached\n");
 						#endif
-						#ifdef EnableOpusDecodingPrint
+						#if EnableOpusDecodingPrint==1
 							PRINTF("End of stream reached\n");
 						#endif
 					}
@@ -1317,3 +1317,37 @@ void DeInitOpusDecoderForOneOpusFile(void)
 	OpusDecoderIsRunning=0;
 }
 
+#if TestAlgoInitAndDeInit==1
+void TestHeap_OpusDecodingInitAndDeInit(int l)
+{
+	void *HeapPtr1;
+	void *HeapPtr2;
+	HeapPtr1=GetCurrentHeapTail(3000);
+	int TestCnt=l;
+
+	while(1)
+	{
+
+		InitOpusDecoder();
+		InitOpusDecoderForOneOpusFile(1);
+
+		DeInitOpusDecoderForOneOpusFile();
+		DeInitOpusDecoder();
+
+		HeapPtr2=GetCurrentHeapTail(3000);
+		if(HeapPtr1!=HeapPtr2)
+		{
+			PRINTF("RT685 DSP: heap base address was, %x\r\n",    (U32)HeapPtr1);
+			PRINTF("RT685 DSP: heap base address now is, %x\r\n", (U32)HeapPtr2);
+			PRINTF("RT685 DSP: DeInitEap is NOT successful \r\n");
+			while(1) {};
+		}
+
+		delay_ms(100);
+		TestCnt--;
+		if(!TestCnt)
+			break;
+	}
+	PRINTF("RT685 DSP: TestHeap_OpusDecodingInitAndDeInit is successful \r\n");
+}
+#endif

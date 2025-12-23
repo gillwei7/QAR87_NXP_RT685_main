@@ -159,6 +159,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 	 if (g_connectInitRiderPhone)
 	{
 		PRINTF("Glasses trigger ACL Connection Successful\r\n");
+//		PRINTF("ACL Connection Successful with Rider Phone,Role: %d\n",info.role);
 		g_connectInitRiderPhone = 0U;
 		conn_rider_phone = conn;
 

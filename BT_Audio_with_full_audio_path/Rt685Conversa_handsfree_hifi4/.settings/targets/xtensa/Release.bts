@@ -16,11 +16,11 @@
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/source}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/utilities}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/NatureDspLibary/include}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVitEap}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/nxp_utilities_public}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/hifi4_nn}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit/tuning_files}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit/models}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVitEap/tuning_files}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVitEap/models}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceSRC}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceCommon}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceOpusDec}</ListEntry>
@@ -95,7 +95,7 @@
                         <key>LibrarySearchPath</key>
                         <value flag="-L" inheritance="prepend">
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/NatureDspLibary}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVit}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVitEap}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/hifi4_nn}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceCommon}</ListEntry>
                         </value>
@@ -114,6 +114,7 @@
                         <key>Libraries</key>
                         <value flag="-l" inheritance="prepend">
                             <ListEntry>NXP_Conversa_RT685HiFi4</ListEntry>
+                            <ListEntry>NXP_EAP16_RT685Hifi4</ListEntry>
                             <ListEntry>VIT_v6.6.0_EngineeringRelease</ListEntry>
                             <ListEntry>naturedsp</ListEntry>
                             <ListEntry>xa_asrc_src_pp</ListEntry>

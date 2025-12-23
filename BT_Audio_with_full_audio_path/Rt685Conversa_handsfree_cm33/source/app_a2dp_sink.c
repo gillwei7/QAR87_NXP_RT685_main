@@ -340,7 +340,7 @@ test						CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(CurrentStreamSbc_
 		//ClearAudioCirBuf(0,0,1);			//???
         // TODO gill avrcp not connect so far
 		/*AVRCP Profile level connection*/
-		//avrcp_control_connect(conn_rider_phone);
+		avrcp_control_connect(conn_rider_phone);
         PRINTF("sbc_configured done, Fs: %d\r\n",CurrentStreamSbc_sampleRate_Hz);	//seems to be always 44100Hz Fs
 	}
 	else
@@ -474,6 +474,7 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 			SEMA42_Unlock(APP_SEMA42, SEMA42_GATE1);
 			//DbgPin6Dn();DbgPin5Dn();
 			// Get into MusicPlayer State Only when current state is HomeVitStandby
+			//if(DeviceWorkStateCur!=WorkState_MusicPlayer)
 			if(DeviceWorkStateCur==WorkState_HomeVitStandby || DeviceWorkStateCur==WorkState_Menu || DeviceWorkStateCur==WorkState_About)
 			{
 				//request to get into WorkState_MusicPlayer after SBC buffer is half full

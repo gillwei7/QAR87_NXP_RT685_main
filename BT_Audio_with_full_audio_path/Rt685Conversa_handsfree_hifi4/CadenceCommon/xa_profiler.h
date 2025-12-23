@@ -90,7 +90,7 @@ static inline void xa_compute_mcps(xa_profiler *p_prof, WORD32 samples_decoded, 
 			p_prof->frame_count, gen_strm_pos, minutes, seconds, msec,
 			Curr, Ave, p_prof->Peak, p_prof->Peak_frame, p_prof->id);
 	#endif
-	#ifdef EnableOpusDecodingPrint
+	#if EnableOpusDecodingPrint==1
 			PRINTF("[%d|%lld] %d:%02d.%03d MCPS: %d Average: %d Peak: %d @ [%d] %s\n",
 				p_prof->frame_count, gen_strm_pos, minutes, seconds, msec,
 				(int)(Curr*100), (int)(Ave*100), (int)(p_prof->Peak*100), p_prof->Peak_frame, p_prof->id);

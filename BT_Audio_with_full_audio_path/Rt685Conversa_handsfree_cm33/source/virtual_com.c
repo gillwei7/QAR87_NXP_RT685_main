@@ -644,20 +644,19 @@ void USB_DeviceCdcVcomTask(void)
             case 'A':
             case 'a':
             	VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
-            	VarBlockSharedByDspAndMcu.PlayOpusFileIdx=s_currRecvBuf[0]-'0';
+            	VarBlockSharedByDspAndMcu.PlayOpusFileIdx=s_currRecvBuf[2]-'0';		//idx=0 stands for the first opus file
             	//for now, only 3  opus files are included
-            	if(VarBlockSharedByDspAndMcu.PlayOpusFileIdx > 2)
-            		VarBlockSharedByDspAndMcu.PlayOpusFileIdx = 2;
+            	if(VarBlockSharedByDspAndMcu.PlayOpusFileIdx > 12)
+            		VarBlockSharedByDspAndMcu.PlayOpusFileIdx = 12;
            		ComPrintInfoPtr=ComPrintInfo_Info1[0];
             	break;
             case 'B':
             case 'b':
             	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
-            	VarBlockSharedByDspAndMcu.PlayOpusFileIdx=s_currRecvBuf[0]-'0';
+            	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=s_currRecvBuf[2]-'0';		//idx=0 stands for the first sbc file
             	//for now, only 3  opus files are included
             	if(VarBlockSharedByDspAndMcu.PlaySbcFileIdx > 2)
             		VarBlockSharedByDspAndMcu.PlaySbcFileIdx = 2;
-
            		ComPrintInfoPtr=ComPrintInfo_Info2[0];
             	break;
             case 'C':

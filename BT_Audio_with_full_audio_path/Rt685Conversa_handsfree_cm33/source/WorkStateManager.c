@@ -33,6 +33,8 @@
 
 #include "app_handsfree.h"
 
+extern void PRINTF_UsbCom(uint8_t *data, size_t len);
+
 int AudioPortIsActive_I2SToAmp;
 int AudioPortIsActive_I2SToNvt;
 int AudioPortIsActive_Pdm;
@@ -528,8 +530,16 @@ void VocEvtProc_MusicPlayer(U32 VoiceCmd)
 		case ASR_VoiceCommand_NextSong:
 			break;
 		case ASR_VoiceCommand_VolumeUpMusicplayer:
+		//write a control request to DSP to let EAP change volume --- later to test
+			VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdx_McuCmdToDsp]		=McuToDspReqeust_IncMasterVol;
+			VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdx_McuCmdToDspPara1]	=VarBlockSharedByDspAndMcu.CurrentVoiceCommandIntent;
+			VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdx_McuCmdToDspPara2]	=VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName;
 			break;
 		case ASR_VoiceCommand_VolumeDownMusicplayer:
+		//write a control request to DSP to let EAP change volume --- later to test
+			VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdx_McuCmdToDsp]		=McuToDspReqeust_SetMasterVol;
+			VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdx_McuCmdToDspPara1]	=VarBlockSharedByDspAndMcu.CurrentVoiceCommandIntent;
+			VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdx_McuCmdToDspPara2]	=VarBlockSharedByDspAndMcu.CurrentVoiceCommandTagName;
 			break;
 
 		default:
@@ -634,6 +644,33 @@ void AppEvtProc_VideoAi()
 
 #endif
 
+#if DspPrintsToMcuThenMcuPrintsToUsbCom==1
+int IncreasePrintBufIdx(int Idx, int l)
+{
+	Idx++;
+	if(Idx >= l)
+		Idx=0;
+	return Idx;
+}
+int FreeSpaceOfThePrintBuf(int WIdx, int RIdx, int l)
+{
+	if(WIdx==RIdx)
+		return (l);
+	if(WIdx>RIdx)
+		return(l-(WIdx-RIdx));
+	else
+		return((RIdx-WIdx)-1);
+}
+int UsedSpaceOfThePrintBuf(int WIdx, int RIdx, int l)
+{
+	if(WIdx==RIdx)
+		return (0);
+	if(WIdx>RIdx)
+		return(WIdx-RIdx);
+	else
+		return(l+1-(RIdx-WIdx));
+}
+#endif
 
 void Manager_Task(void *pvParameters)
 {
@@ -678,16 +715,26 @@ void Manager_Task(void *pvParameters)
 
 	while(1)
 	{
-		vTaskDelay(40);
+		vTaskDelay(pdMS_TO_TICKS(40));
 		//wait till everything is ready for manager running
 		if(1)
 			break;
 	}
 
+	MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, 1);		//DSP side waits for 2 MSGs before DSP goes on --- this is the second
+
+	/* Wait DSP core is Boot Up */
+	while (BOOT_FLAG_2 != MU_GetFlags(APP_MU))
+	{
+		delay_ms(1);
+	};
+
+
 	while(1)
 	{
 		//vTaskDelay(40);
-		vTaskDelay(10);
+		//vTaskDelay(10);
+		vTaskDelay(pdMS_TO_TICKS(10));
 
 		//-------------------------------step 0, get APP event: button, SPI, sensors, touch, etc---------------------------------------
 		//---beg---
@@ -738,6 +785,10 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_MusicPlayer)
 						{
+						
+							//DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+							//B36932, Refer to up instruction to modiy following work state index
+							
 							if (ss_get_state() == USAGE_STATE_HOME) {
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							} else if (ss_get_state() == USAGE_STATE_MENU) {
@@ -1323,6 +1374,17 @@ void Manager_Task(void *pvParameters)
 				#endif
 				default:
 					break;
+			}
+		#endif
+
+		#if DspPrintsToMcuThenMcuPrintsToUsbCom==1
+			//check if there is the print request from DSP --- now only USB COM print is available
+			if(UsedSpaceOfThePrintBuf(VarBlockSharedByDspAndMcu.DspPrintBufWrIdx, VarBlockSharedByDspAndMcu.DspPrintBufRdIdx, DspPrintBufLength))
+			{
+				#if PRINTF_GoesToUsbCom==1
+					PRINTF_UsbCom((U8 *)&VarBlockSharedByDspAndMcu.DspPrintBuf[VarBlockSharedByDspAndMcu.DspPrintBufRdIdx][1], VarBlockSharedByDspAndMcu.DspPrintBuf[VarBlockSharedByDspAndMcu.DspPrintBufRdIdx][0]);
+				#endif
+					VarBlockSharedByDspAndMcu.DspPrintBufRdIdx=IncreasePrintBufIdx(VarBlockSharedByDspAndMcu.DspPrintBufRdIdx,DspPrintBufLength);
 			}
 		#endif
 		//---end---

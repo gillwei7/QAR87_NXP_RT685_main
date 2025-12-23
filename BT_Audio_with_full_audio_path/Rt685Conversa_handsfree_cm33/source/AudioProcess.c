@@ -48,36 +48,45 @@ int CycCntInfoIdx;
 
 #if EnableAudioPllAdjustingToSyncBetweenBtFsAndLocalFs==1
 
-//int I2S1InputBufAod;
-//int volatile I2S1InputBufIsHalfFul;
-int I2S1InputBufAodHist[8];
+int PcmRxFrBtBufAodHistory[8];
 
 int AUDIOPLL0NUM_StartingUpValue;
 int AUDIOPLL0NUM_AdjustingValue;
 int AUDIOPLL0NUM_AdjustingValuePre;
-/*
+
+__attribute__((section("CodeQuickAccess")))
 void GraduallySetAudioPllBackToDefault(void)
 {
+
 	CLKCTL1->AUDIOPLL0NUM = AUDIOPLL0NUM_StartingUpValue + AUDIOPLL0NUM_AdjustingValue;
-	//gradually make AUDIOPLL0NUM_AdjustingValue back to 0
-	AUDIOPLL0NUM_AdjustingValue=0.0f*0.1f+0.9f * AUDIOPLL0NUM_AdjustingValuePre;
+
+	if(AUDIOPLL0NUM_AdjustingValue>0)
+	{
+		AUDIOPLL0NUM_AdjustingValue--;
+	}else
+	if(AUDIOPLL0NUM_AdjustingValue<0)
+	{
+		AUDIOPLL0NUM_AdjustingValue++;
+	}
+
 	AUDIOPLL0NUM_AdjustingValuePre=AUDIOPLL0NUM_AdjustingValue;
 }
-*/
-void CheckI2SInputBufAodAndAdjustAudioPll(int AodValue)
+
+__attribute__((section("CodeQuickAccess")))
+void CheckPcmRxFrBtBufAodAndAdjustAudioPll(int AodValue)
 {
 	int Aod=0;
-	I2S1InputBufAodHist[7]=I2S1InputBufAodHist[6];
-	I2S1InputBufAodHist[6]=I2S1InputBufAodHist[5];
-	I2S1InputBufAodHist[5]=I2S1InputBufAodHist[4];
-	I2S1InputBufAodHist[4]=I2S1InputBufAodHist[3];
-	I2S1InputBufAodHist[3]=I2S1InputBufAodHist[2];
-	I2S1InputBufAodHist[2]=I2S1InputBufAodHist[1];
-	I2S1InputBufAodHist[1]=I2S1InputBufAodHist[0];
-	I2S1InputBufAodHist[0]=AodValue;
+	PcmRxFrBtBufAodHistory[7]=PcmRxFrBtBufAodHistory[6];
+	PcmRxFrBtBufAodHistory[6]=PcmRxFrBtBufAodHistory[5];
+	PcmRxFrBtBufAodHistory[5]=PcmRxFrBtBufAodHistory[4];
+	PcmRxFrBtBufAodHistory[4]=PcmRxFrBtBufAodHistory[3];
+	PcmRxFrBtBufAodHistory[3]=PcmRxFrBtBufAodHistory[2];
+	PcmRxFrBtBufAodHistory[2]=PcmRxFrBtBufAodHistory[1];
+	PcmRxFrBtBufAodHistory[1]=PcmRxFrBtBufAodHistory[0];
+	PcmRxFrBtBufAodHistory[0]=AodValue;
 
 	for(int i=0;i<8;i++)
-		Aod+=I2S1InputBufAodHist[i];
+		Aod+=PcmRxFrBtBufAodHistory[i];
 
 	Aod>>=3;
 
@@ -122,7 +131,15 @@ void CheckI2SInputBufAodAndAdjustAudioPll(int AodValue)
 		//no need to inc or dec CLKCTL1->AUDIOPLL0NUM
 		CLKCTL1->AUDIOPLL0NUM = AUDIOPLL0NUM_StartingUpValue + AUDIOPLL0NUM_AdjustingValue;
 		//gradually make AUDIOPLL0NUM_AdjustingValue back to 0
-		AUDIOPLL0NUM_AdjustingValue=0.0f*0.1f+0.9f * AUDIOPLL0NUM_AdjustingValuePre;
+		//AUDIOPLL0NUM_AdjustingValue=0.0f*0.1f+0.9f * AUDIOPLL0NUM_AdjustingValuePre;
+		if(AUDIOPLL0NUM_AdjustingValue>0)
+		{
+			AUDIOPLL0NUM_AdjustingValue--;
+		}else
+		if(AUDIOPLL0NUM_AdjustingValue<0)
+		{
+			AUDIOPLL0NUM_AdjustingValue++;
+		}
 //			PRINTF("0 %d %d\r\n",Aod,AUDIOPLL0NUM_AdjustingValue);
 	}else
 	if(Aod>AodLevel_2_8_LenInSamples)
@@ -150,233 +167,536 @@ void CheckI2SInputBufAodAndAdjustAudioPll(int AodValue)
 
 #if 1	//folding
 #define SinToneTable_CycLenthInSamples		50
-const S16 Table_GenerateSinWav_S16[48+128]=    //cycle count number is 50 --- this is 16000/50=320Hz
+const float Table_GenerateSinWav_Flt[SinToneTable_CycLenthInSamples+AudioFrameSizeInSamplePerCh_48KHz]=    //cycle count number is 50 --- this is 16000/50=320Hz at 16KHz, 48000/50=960Hz at 48KHz
 {
+#if 1	//folding
 		0	,
-		4106.794064	,
-		8148.821533	,
-		12062.33722	,
-		15785.62264	,
-		19259.95936	,
-		22430.55502	,
-		25247.40743	,
-		27666.09313	,
-		29648.46803	,
-		31163.26887	,
-		32186.60634	,
-		32702.34181	,
-		32702.34181	,
-		32186.60634	,
-		31163.26887	,
-		29648.46803	,
-		27666.09314	,
-		25247.40743	,
-		22430.55502	,
-		19259.95936	,
-		15785.62264	,
-		12062.33722	,
-		8148.821535	,
-		4106.794067	,
-		2.94225E-06	,
-		-4106.794061	,
-		-8148.82153	,
-		-12062.33721	,
-		-15785.62264	,
-		-19259.95936	,
-		-22430.55502	,
-		-25247.40742	,
-		-27666.09313	,
-		-29648.46803	,
-		-31163.26887	,
-		-32186.60634	,
-		-32702.34181	,
-		-32702.34181	,
-		-32186.60635	,
-		-31163.26887	,
-		-29648.46803	,
-		-27666.09314	,
-		-25247.40743	,
-		-22430.55502	,
-		-19259.95937	,
-		-15785.62264	,
-		-12062.33722	,
-		-8148.821538	,
-		-4106.79407	,
-		-5.88451E-06	,
-		4106.794058	,
-		8148.821527	,
-		12062.33721	,
-		15785.62263	,
-		19259.95936	,
-		22430.55502	,
-		25247.40742	,
-		27666.09313	,
-		29648.46803	,
-		31163.26887	,
-		32186.60634	,
-		32702.34181	,
-		32702.34181	,
-		32186.60635	,
-		31163.26887	,
-		29648.46803	,
-		27666.09314	,
-		25247.40743	,
-		22430.55503	,
-		19259.95937	,
-		15785.62265	,
-		12062.33723	,
-		8148.821541	,
-		4106.794073	,
-		8.82676E-06	,
-		-4106.794055	,
-		-8148.821524	,
-		-12062.33721	,
-		-15785.62263	,
-		-19259.95935	,
-		-22430.55501	,
-		-25247.40742	,
-		-27666.09313	,
-		-29648.46802	,
-		-31163.26887	,
-		-32186.60634	,
-		-32702.34181	,
-		-32702.34181	,
-		-32186.60635	,
-		-31163.26887	,
-		-29648.46803	,
-		-27666.09314	,
-		-25247.40743	,
-		-22430.55503	,
-		-19259.95937	,
-		-15785.62265	,
-		-12062.33723	,
-		-8148.821544	,
-		-4106.794076	,
-		-1.1769E-05	,
-		4106.794052	,
-		8148.821521	,
-		12062.33721	,
-		15785.62263	,
-		19259.95935	,
-		22430.55501	,
-		25247.40742	,
-		27666.09313	,
-		29648.46802	,
-		31163.26887	,
-		32186.60634	,
-		32702.34181	,
-		32702.34181	,
-		32186.60635	,
-		31163.26887	,
-		29648.46803	,
-		27666.09314	,
-		25247.40743	,
-		22430.55503	,
-		19259.95937	,
-		15785.62265	,
-		12062.33723	,
-		8148.821547	,
-		4106.794079	,
-		1.47113E-05	,
-		-4106.794049	,
-		-8148.821518	,
-		-12062.3372	,
-		-15785.62263	,
-		-19259.95935	,
-		-22430.55501	,
-		-25247.40742	,
-		-27666.09313	,
-		-29648.46802	,
-		-31163.26886	,
-		-32186.60634	,
-		-32702.34181	,
-		-32702.34181	,
-		-32186.60635	,
-		-31163.26887	,
-		-29648.46804	,
-		-27666.09314	,
-		-25247.40744	,
-		-22430.55503	,
-		-19259.95938	,
-		-15785.62265	,
-		-12062.33723	,
-		-8148.82155	,
-		-4106.794082	,
-		-1.76535E-05	,
-		4106.794047	,
-		8148.821515	,
-		12062.3372	,
-		15785.62262	,
-		19259.95935	,
-		22430.55501	,
-		25247.40741	,
-		27666.09312	,
-		29648.46802	,
-		31163.26886	,
-		32186.60634	,
-		32702.34181	,
-		32702.34181	,
-		32186.60635	,
-		31163.26888	,
-		29648.46804	,
-		27666.09315	,
-		25247.40744	,
-		22430.55503	,
-		19259.95938	,
-		15785.62266	,
-		12062.33724	,
-		8148.821552	,
-		4106.794085	,
-		2.05957E-05	,
+		0.125333234	,
+		0.248689887	,
+		0.368124553	,
+		0.481753674	,
+		0.587785252	,
+		0.684547106	,
+		0.770513243	,
+		0.844327925	,
+		0.904827052	,
+		0.951056516	,
+		0.982287251	,
+		0.998026728	,
+		0.998026728	,
+		0.982287251	,
+		0.951056516	,
+		0.904827052	,
+		0.844327926	,
+		0.770513243	,
+		0.684547106	,
+		0.587785252	,
+		0.481753674	,
+		0.368124553	,
+		0.248689887	,
+		0.125333234	,
+		8.97932E-11	,
+		-0.125333233	,
+		-0.248689887	,
+		-0.368124553	,
+		-0.481753674	,
+		-0.587785252	,
+		-0.684547106	,
+		-0.770513243	,
+		-0.844327925	,
+		-0.904827052	,
+		-0.951056516	,
+		-0.982287251	,
+		-0.998026728	,
+		-0.998026728	,
+		-0.982287251	,
+		-0.951056516	,
+		-0.904827053	,
+		-0.844327926	,
+		-0.770513243	,
+		-0.684547106	,
+		-0.587785252	,
+		-0.481753674	,
+		-0.368124553	,
+		-0.248689887	,
+		-0.125333234	,
+		-1.79586E-10	,
+		0.125333233	,
+		0.248689887	,
+		0.368124553	,
+		0.481753674	,
+		0.587785252	,
+		0.684547106	,
+		0.770513243	,
+		0.844327925	,
+		0.904827052	,
+		0.951056516	,
+		0.982287251	,
+		0.998026728	,
+		0.998026728	,
+		0.982287251	,
+		0.951056516	,
+		0.904827053	,
+		0.844327926	,
+		0.770513243	,
+		0.684547106	,
+		0.587785252	,
+		0.481753674	,
+		0.368124553	,
+		0.248689887	,
+		0.125333234	,
+		2.6938E-10	,
+		-0.125333233	,
+		-0.248689887	,
+		-0.368124552	,
+		-0.481753674	,
+		-0.587785252	,
+		-0.684547106	,
+		-0.770513243	,
+		-0.844327925	,
+		-0.904827052	,
+		-0.951056516	,
+		-0.982287251	,
+		-0.998026728	,
+		-0.998026728	,
+		-0.982287251	,
+		-0.951056516	,
+		-0.904827053	,
+		-0.844327926	,
+		-0.770513243	,
+		-0.684547106	,
+		-0.587785253	,
+		-0.481753674	,
+		-0.368124553	,
+		-0.248689888	,
+		-0.125333234	,
+		-3.59173E-10	,
+		0.125333233	,
+		0.248689887	,
+		0.368124552	,
+		0.481753674	,
+		0.587785252	,
+		0.684547106	,
+		0.770513243	,
+		0.844327925	,
+		0.904827052	,
+		0.951056516	,
+		0.982287251	,
+		0.998026728	,
+		0.998026728	,
+		0.982287251	,
+		0.951056516	,
+		0.904827053	,
+		0.844327926	,
+		0.770513243	,
+		0.684547106	,
+		0.587785253	,
+		0.481753674	,
+		0.368124553	,
+		0.248689888	,
+		0.125333234	,
+		4.48966E-10	,
+		-0.125333233	,
+		-0.248689887	,
+		-0.368124552	,
+		-0.481753674	,
+		-0.587785252	,
+		-0.684547106	,
+		-0.770513242	,
+		-0.844327925	,
+		-0.904827052	,
+		-0.951056516	,
+		-0.982287251	,
+		-0.998026728	,
+		-0.998026728	,
+		-0.982287251	,
+		-0.951056516	,
+		-0.904827053	,
+		-0.844327926	,
+		-0.770513243	,
+		-0.684547106	,
+		-0.587785253	,
+		-0.481753675	,
+		-0.368124553	,
+		-0.248689888	,
+		-0.125333234	,
+		-5.38759E-10	,
+		0.125333233	,
+		0.248689887	,
+		0.368124552	,
+		0.481753674	,
+		0.587785252	,
+		0.684547106	,
+		0.770513242	,
+		0.844327925	,
+		0.904827052	,
+		0.951056516	,
+		0.982287251	,
+		0.998026728	,
+		0.998026728	,
+		0.982287251	,
+		0.951056516	,
+		0.904827053	,
+		0.844327926	,
+		0.770513243	,
+		0.684547106	,
+		0.587785253	,
+		0.481753675	,
+		0.368124553	,
+		0.248689888	,
+		0.125333234	,
+		6.28551E-10	,
+		-0.125333233	,
+		-0.248689887	,
+		-0.368124552	,
+		-0.481753674	,
+		-0.587785252	,
+		-0.684547105	,
+		-0.770513242	,
+		-0.844327925	,
+		-0.904827052	,
+		-0.951056516	,
+		-0.982287251	,
+		-0.998026728	,
+		-0.998026728	,
+		-0.982287251	,
+		-0.951056517	,
+		-0.904827053	,
+		-0.844327926	,
+		-0.770513243	,
+		-0.684547106	,
+		-0.587785253	,
+		-0.481753675	,
+		-0.368124553	,
+		-0.248689888	,
+		-0.125333234	,
+		-7.18345E-10	,
+		0.125333233	,
+		0.248689886	,
+		0.368124552	,
+		0.481753673	,
+		0.587785252	,
+		0.684547105	,
+		0.770513242	,
+		0.844327925	,
+		0.904827052	,
+		0.951056516	,
+		0.982287251	,
+		0.998026728	,
+		0.998026728	,
+		0.982287251	,
+		0.951056517	,
+		0.904827053	,
+		0.844327926	,
+		0.770513243	,
+		0.684547107	,
+		0.587785253	,
+		0.481753675	,
+		0.368124553	,
+		0.248689888	,
+		0.125333234	,
+		8.0814E-10	,
+		-0.125333233	,
+		-0.248689886	,
+		-0.368124552	,
+		-0.481753673	,
+		-0.587785252	,
+		-0.684547105	,
+		-0.770513242	,
+		-0.844327925	,
+		-0.904827052	,
+		-0.951056516	,
+		-0.982287251	,
+		-0.998026728	,
+		-0.998026728	,
+		-0.982287251	,
+		-0.951056517	,
+		-0.904827053	,
+		-0.844327926	,
+		-0.770513243	,
+		-0.684547107	,
+		-0.587785253	,
+		-0.481753675	,
+		-0.368124554	,
+		-0.248689888	,
+		-0.125333234	,
+		-8.97932E-10	,
+		0.125333233	,
+		0.248689886	,
+		0.368124552	,
+		0.481753673	,
+		0.587785252	,
+		0.684547105	,
+		0.770513242	,
+		0.844327925	,
+		0.904827052	,
+		0.951056516	,
+		0.982287251	,
+		0.998026728	,
+		0.998026728	,
+		0.982287251	,
+		0.951056517	,
+		0.904827053	,
+		0.844327926	,
+		0.770513243	,
+		0.684547107	,
+		0.587785253	,
+		0.481753675	,
+		0.368124554	,
+		0.248689888	,
+		0.125333235	,
+		9.87723E-10	,
+		-0.125333233	,
+		-0.248689886	,
+		-0.368124552	,
+		-0.481753673	,
+		-0.587785251	,
+		-0.684547105	,
+		-0.770513242	,
+		-0.844327925	,
+		-0.904827052	,
+		-0.951056516	,
+		-0.982287251	,
+		-0.998026728	,
+		-0.998026728	,
+		-0.982287251	,
+		-0.951056517	,
+		-0.904827053	,
+		-0.844327926	,
+		-0.770513243	,
+		-0.684547107	,
+		-0.587785253	,
+		-0.481753675	,
+		-0.368124554	,
+		-0.248689888	,
+		-0.125333235	,
+		-1.07752E-09	,
+		0.125333232	,
+		0.248689886	,
+		0.368124552	,
+		0.481753673	,
+		0.587785251	,
+		0.684547105	,
+		0.770513242	,
+		0.844327925	,
+		0.904827052	,
+		0.951056516	,
+		0.982287251	,
+		0.998026728	,
+		0.998026728	,
+		0.982287251	,
+		0.951056517	,
+		0.904827053	,
+		0.844327926	,
+		0.770513244	,
+		0.684547107	,
+		0.587785253	,
+		0.481753675	,
+		0.368124554	,
+		0.248689888	,
+		0.125333235	,
+		1.16731E-09	,
+		-0.125333232	,
+		-0.248689886	,
+		-0.368124552	,
+		-0.481753673	,
+		-0.587785251	,
+		-0.684547105	,
+		-0.770513242	,
+		-0.844327925	,
+		-0.904827052	,
+		-0.951056516	,
+		-0.982287251	,
+		-0.998026728	,
+		-0.998026729	,
+		-0.982287251	,
+		-0.951056517	,
+		-0.904827053	,
+		-0.844327926	,
+		-0.770513244	,
+		-0.684547107	,
+		-0.587785253	,
+		-0.481753675	,
+		-0.368124554	,
+		-0.248689888	,
+		-0.125333235	,
+		-1.2571E-09	,
+		0.125333232	,
+		0.248689886	,
+		0.368124552	,
+		0.481753673	,
+		0.587785251	,
+		0.684547105	,
+		0.770513242	,
+		0.844327925	,
+		0.904827052	,
+		0.951056516	,
+		0.98228725	,
+		0.998026728	,
+		0.998026729	,
+		0.982287251	,
+		0.951056517	,
+		0.904827053	,
+		0.844327926	,
+		0.770513244	,
+		0.684547107	,
+		0.587785253	,
+		0.481753675	,
+		0.368124554	,
+		0.248689888	,
+		0.125333235	,
+		1.3469E-09	,
+		-0.125333232	,
+		-0.248689886	,
+		-0.368124551	,
+		-0.481753673	,
+		-0.587785251	,
+		-0.684547105	,
+		-0.770513242	,
+		-0.844327925	,
+		-0.904827052	,
+		-0.951056516	,
+		-0.98228725	,
+		-0.998026728	,
+		-0.998026729	,
+		-0.982287251	,
+		-0.951056517	,
+		-0.904827053	,
+		-0.844327926	,
+		-0.770513244	,
+		-0.684547107	,
+		-0.587785253	,
+		-0.481753675	,
+		-0.368124554	,
+		-0.248689889	,
+		-0.125333235	,
+		-1.43669E-09	,
+		0.125333232	,
+		0.248689886	,
+		0.368124551	,
+		0.481753673	,
+		0.587785251	,
+		0.684547105	,
+		0.770513242	,
+		0.844327925	,
+		0.904827052	,
+		0.951056516	,
+		0.98228725	,
+		0.998026728	,
+		0.998026729	,
+		0.982287251	,
+		0.951056517	,
+		0.904827053	,
+		0.844327926	,
+		0.770513244	,
+		0.684547107	,
+		0.587785254	,
+		0.481753675	,
+		0.368124554	,
+		0.248689889	,
+		0.125333235	,
+		1.52649E-09	,
+		-0.125333232	,
+		-0.248689886	,
+		-0.368124551	,
+		-0.481753673	,
+		-0.587785251	,
+		-0.684547105	,
+		-0.770513242	,
+		-0.844327925	,
+#endif
 };
-S16 *GenerateSinWav_Ptr_S16=(S16 *)(Table_GenerateSinWav_S16);
-float Gain_GenerateSinWav_L=0.81f;
-float Gain_GenerateSinWav_R=0.82f;
+const float *GenerateSinWav_Ptr_Flt[10]=
+{
+		Table_GenerateSinWav_Flt+0,
+		Table_GenerateSinWav_Flt+4,
+		Table_GenerateSinWav_Flt+8,
+		Table_GenerateSinWav_Flt+12,
+		Table_GenerateSinWav_Flt+16,
+		Table_GenerateSinWav_Flt+20,
+		Table_GenerateSinWav_Flt+24,
+		Table_GenerateSinWav_Flt+28,
+		Table_GenerateSinWav_Flt+32,
+		Table_GenerateSinWav_Flt+36,
+};
+float Gain_GenerateSinWav  =0.80f;
+float Gain_GenerateSinWav_L=0.80f;
+float Gain_GenerateSinWav_R=0.80f;
 
-void GenerateSinWavFromTable_S32(S32 *DstPtrL,S32 *DstPtrR, int L)	//L should be <=128
+//Note: all the following functions uses GenerateSinWav_Ptr_Flt[10], so they are actually 10 stand alone sin tone generators
+void GenerateSinWavFromTable_S32_DualCh(int WhichOne, S32 *DstPtrL, S32 *DstPtrR, int L)	//L should be <=AudioFrameSizeInSamplePerCh_48KHz
 {
     U16 i;
     for(i=0;i<L;i++)
     {
-        *DstPtrL++=(Gain_GenerateSinWav_L)*((*GenerateSinWav_Ptr_S16)<<16);
-        *DstPtrR++=(Gain_GenerateSinWav_R)*((*GenerateSinWav_Ptr_S16++)<<16);//15);   //right side is half of left side
+        *DstPtrL++=  (Gain_GenerateSinWav_L)*((*GenerateSinWav_Ptr_Flt[WhichOne]  )*_Value_Pow_2_31_M1);
+        *DstPtrR++=0-(Gain_GenerateSinWav_R)*((*GenerateSinWav_Ptr_Flt[WhichOne]++)*_Value_Pow_2_31_M1);
     }
-    while(GenerateSinWav_Ptr_S16>=(Table_GenerateSinWav_S16+SinToneTable_CycLenthInSamples))
-        GenerateSinWav_Ptr_S16-=SinToneTable_CycLenthInSamples;
+    while(GenerateSinWav_Ptr_Flt[WhichOne]>=(Table_GenerateSinWav_Flt+SinToneTable_CycLenthInSamples))
+    	GenerateSinWav_Ptr_Flt[WhichOne]-=SinToneTable_CycLenthInSamples;
 }
-void GenerateSinWavFromTable_S32_SingleCh(S32 *DstPtr, int L)	//L should be <=128
+void GenerateSinWavFromTable_S32_DualCh_LRMixed(int WhichOne, S32 *DstPtr, int L)	//L should be <=AudioFrameSizeInSamplePerCh_48KHz
 {
     U16 i;
     for(i=0;i<L;i++)
     {
-        *DstPtr++=(S32)(*GenerateSinWav_Ptr_S16++<<16);
+        *DstPtr++=  Gain_GenerateSinWav_L*((*GenerateSinWav_Ptr_Flt[WhichOne]  )*_Value_Pow_2_31_M1);
+        *DstPtr++=0-Gain_GenerateSinWav_R*((*GenerateSinWav_Ptr_Flt[WhichOne]++)*_Value_Pow_2_31_M1);
     }
-    while(GenerateSinWav_Ptr_S16>=(Table_GenerateSinWav_S16+SinToneTable_CycLenthInSamples))
-        GenerateSinWav_Ptr_S16-=SinToneTable_CycLenthInSamples;
+    while(GenerateSinWav_Ptr_Flt[WhichOne]>=(Table_GenerateSinWav_Flt+SinToneTable_CycLenthInSamples))
+    	GenerateSinWav_Ptr_Flt[WhichOne]-=SinToneTable_CycLenthInSamples;
 }
+void GenerateSinWavFromTable_S32_SingleCh(int WhichOne, S32 *DstPtr, int L, int PosNeg)	//L should be <=AudioFrameSizeInSamplePerCh_48KHz
+{
+    U16 i;
+    if(PosNeg>0)
+    	PosNeg=1;
+    else
+    	PosNeg=-1;
 
-void GenerateSinWavFromTable_S16_LRMixed(S16 *DstPtr, int L)			//L should be <=128
-{
-    U16 i;
     for(i=0;i<L;i++)
     {
-        //*DstPtr++=(Gain_GenerateSinWav_L)*(*GenerateSinWav_Ptr_S16);
-        //*DstPtr++=(Gain_GenerateSinWav_R)*(*GenerateSinWav_Ptr_S16++);
-        *DstPtr++=(*GenerateSinWav_Ptr_S16);
-        *DstPtr++=(*GenerateSinWav_Ptr_S16++);
+        *DstPtr++=PosNeg*Gain_GenerateSinWav*(S32)(*GenerateSinWav_Ptr_Flt[WhichOne]++)*_Value_Pow_2_31_M1;
     }
-    while(GenerateSinWav_Ptr_S16>=(Table_GenerateSinWav_S16+SinToneTable_CycLenthInSamples))
-        GenerateSinWav_Ptr_S16-=SinToneTable_CycLenthInSamples;
+    while(GenerateSinWav_Ptr_Flt[WhichOne]>=(Table_GenerateSinWav_Flt+SinToneTable_CycLenthInSamples))
+    	GenerateSinWav_Ptr_Flt[WhichOne]-=SinToneTable_CycLenthInSamples;
 }
-void GenerateSinWavFromTable_S16_SingleCh(S16 *DstPtr, int L)		//L should be <=128
+void GenerateSinWavFromTable_S16_DualCh  (int WhichOne, S16 *DstPtrL, S16 *DstPtrR, int L)
 {
     U16 i;
     for(i=0;i<L;i++)
     {
-        *DstPtr++=(Gain_GenerateSinWav_L)*(*GenerateSinWav_Ptr_S16++);
+        *DstPtrL++=  Gain_GenerateSinWav_L*(*GenerateSinWav_Ptr_Flt[WhichOne]  )*_Value_Pow_2_15_M1;
+        *DstPtrR++=0-Gain_GenerateSinWav_R*(*GenerateSinWav_Ptr_Flt[WhichOne]++)*_Value_Pow_2_15_M1;
     }
-    while(GenerateSinWav_Ptr_S16>=(Table_GenerateSinWav_S16+SinToneTable_CycLenthInSamples))
-        GenerateSinWav_Ptr_S16-=SinToneTable_CycLenthInSamples;
+    while(GenerateSinWav_Ptr_Flt[WhichOne]>=(Table_GenerateSinWav_Flt+SinToneTable_CycLenthInSamples))
+    	GenerateSinWav_Ptr_Flt[WhichOne]-=SinToneTable_CycLenthInSamples;
+}
+void GenerateSinWavFromTable_S16_DualCh_LRMixed(int WhichOne, S16 *DstPtr, int L)			//L should be <=AudioFrameSizeInSamplePerCh_48KHz
+{
+    U16 i;
+    for(i=0;i<L;i++)
+    {
+        *DstPtr++=  Gain_GenerateSinWav_L*(*GenerateSinWav_Ptr_Flt[WhichOne]  )*_Value_Pow_2_15_M1;
+        *DstPtr++=0-Gain_GenerateSinWav_R*(*GenerateSinWav_Ptr_Flt[WhichOne]++)*_Value_Pow_2_15_M1;
+    }
+    while(GenerateSinWav_Ptr_Flt[WhichOne]>=(Table_GenerateSinWav_Flt+SinToneTable_CycLenthInSamples))
+    	GenerateSinWav_Ptr_Flt[WhichOne]-=SinToneTable_CycLenthInSamples;
+}
+void GenerateSinWavFromTable_S16_SingleCh(int WhichOne, S16 *DstPtr, int L, int PosNeg)		//L should be <=AudioFrameSizeInSamplePerCh_48KHz
+{
+    U16 i;
+    if(PosNeg>0)
+    	PosNeg=1;
+    else
+    	PosNeg=-1;
+
+    for(i=0;i<L;i++)
+    {
+        *DstPtr++=PosNeg*Gain_GenerateSinWav*(Gain_GenerateSinWav_L)*(*GenerateSinWav_Ptr_Flt[WhichOne]++)*_Value_Pow_2_15_M1;
+    }
+    while(GenerateSinWav_Ptr_Flt[WhichOne]>=(Table_GenerateSinWav_Flt+SinToneTable_CycLenthInSamples))
+    	GenerateSinWav_Ptr_Flt[WhichOne]-=SinToneTable_CycLenthInSamples;
 }
 #endif
 

@@ -15,7 +15,7 @@
 
 #if defined(__GNUC__) || defined(__ARMCC_VERSION)
 
-        .section .OpusSbcBin , "ax" @progbits @preinit_array
+        .section .DspFirmwareBin , "ax" @progbits @preinit_array
         .global dsp_text_image_start
         .type dsp_text_image_start, %object
         .align 4
@@ -141,7 +141,7 @@ dsp_ncache_image_size:
 		.type OpusFileBeg14, %object
 		.type OpusFileEnd14, %object
 
-        //.section OpusSbcBin //,  "ax" @progbits @preinit_array
+        .section .OpusSbcBin ,  "ax" @progbits @preinit_array
 
         .align 4;
 SbcFileBeg1:

@@ -86,7 +86,14 @@ typedef enum
 	HfpRequest_RingToneStop,
 } TBtHfpRequest;
 
+typedef enum
+{
+	DmaAudioIntrRequest_None  = 0,
+	DmaAudioIntrRequest_AllAudioDataIsReady,
+} TDmaAudioRequest;
+
 extern TBtHfpRequest BtHfpRequest;
+extern EventGroupHandle_t EvtGrpHdl_AudioDmaIntrToAudioTask;
 extern EventGroupHandle_t EvtGrpHdl_StateMangerTaskToBtStack;
 
 //---end---

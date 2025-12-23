@@ -644,6 +644,7 @@ void hfp_hf_a2dp_task(void *pvParameters)
 
     PRINTF("Bluetooth Handsfree demo start...\n");
 
+	#if 1	//set to 0 to NOT start BT at all
     /* Initializate BT Host stack */
     err = bt_enable(bt_ready);
     if (err)
@@ -651,6 +652,7 @@ void hfp_hf_a2dp_task(void *pvParameters)
         PRINTF("Bluetooth init failed (err %d)\n", err);
         return;
     }
+	#endif
 #if 0
     if(g_pairedDeviceCount)
     {

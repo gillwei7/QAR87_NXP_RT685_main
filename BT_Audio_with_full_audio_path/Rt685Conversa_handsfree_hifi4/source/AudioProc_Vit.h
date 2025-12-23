@@ -10,10 +10,6 @@
 #ifndef __AudioProcVit_H___
 #define __AudioProcVit_H___
 
-#ifndef CORE_DSP
-#define CORE_DSP
-#endif
-
 // platform types
 #include "PL_platformTypes.h"
 #include "VIT.h"
@@ -133,10 +129,14 @@ extern T_CircularAudioBuf_S16  VitCircBuff_RawMic;
 extern VIT_DetectionStatus_en 	g_vitDetectionResult;   // VIT detection results
 extern PL_UINT16 				g_vitVcDetectionId;     // VIT voice command detection results ID
 
+
+
+extern VIT_ReturnStatus_en VIT_Deinit(AUDIO_vit_st* p_definitionVIT);
+extern void initCreateVIT( AUDIO_vit_st* p_definitionVIT );
+
 extern void CommandToPlayWakeSound(void);
 extern void InitVit(void);
 extern void ConfigAndStartVitTask(void);
-
 
 
 #endif

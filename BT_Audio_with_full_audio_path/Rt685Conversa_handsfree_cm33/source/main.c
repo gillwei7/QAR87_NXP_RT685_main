@@ -48,9 +48,7 @@ int main(void)
 {
     BOARD_InitHardware();
 
-
-    if (xTaskCreate(hfp_hf_a2dp_task, "hfp_hf_a2dp_task", configMINIMAL_STACK_SIZE * 8, NULL,		//was configMINIMAL_STACK_SIZE * 8
-                    tskIDLE_PRIORITY + 1, NULL) != pdPASS)
+    if (xTaskCreate(hfp_hf_a2dp_task, "hfp_hf_a2dp_task", configMINIMAL_STACK_SIZE * 8, NULL,  tskIDLE_PRIORITY + 1, NULL) != pdPASS)
     {
         PRINTF("pherial hrs task creation failed!\r\n");
         while (1)
@@ -118,7 +116,11 @@ it goes back to a2dp play.
 but, the playing is broken. The printing info shows the sbc buffer goes less and less, while 1000 frame period is good --> DSP side is eating sbc too quickly????????  Later to find time to fix !!!
 
 
+known bug 2:
+in bt music playing, say hey quanta, and immediately start a wechat call --> crashes
 
 
+known issue 3 --- not sure:
+Using_UART2ToPrint Using_UART5ToPrint (either in mcu setting or dsp setting) set to 1 may cause a2dp play unstable --- crash in 5~20 minutes ???
 
 */

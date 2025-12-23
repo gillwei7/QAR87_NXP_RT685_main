@@ -38,14 +38,22 @@
 i2s_config_t I2S_Tx_config;
 i2s_config_t I2S_Rx_config;
 
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 dma_handle_t I2STxToAmpDmaHandle;
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 dma_handle_t I2SRxFrAmpDmaHandle;
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 dma_handle_t I2STxToNvtDmaHandle;
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 dma_handle_t I2SRxFrNvtDmaHandle;
 
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 i2s_dma_handle_t I2STxToAmpHandle;
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 i2s_dma_handle_t I2SRxFrAmpHandle;
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 i2s_dma_handle_t I2SRxFrNvtHandle;
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 i2s_dma_handle_t I2STxToNvtHandle;
 
 __attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
@@ -133,13 +141,13 @@ static i2s_transfer_t I2SRxFrNvtTransfer[2]=
     }
 };
 
-unsigned int *DmaDscrPtr_I2S1;
-unsigned int *DmaDscrPtr_I2S3;
+unsigned int *DmaDscrPtr_I2SRxFrAmp;
+unsigned int *DmaDscrPtr_I2STxToAmp;
 unsigned int *DmaDscrPtr_I2SRxFrNvt;
 unsigned int *DmaDscrPtr_I2STxToNvt;
 
-volatile U8 I2S1DmaTransferringIsUsingBufA;
-volatile U8 I2S3DmaTransferringIsUsingBufA;
+volatile U8 I2SFrAmpDmaTransferringIsUsingBufA;
+volatile U8 I2SToAmpDmaTransferringIsUsingBufA;
 volatile U8 I2STxToNvtDmaTransferringIsUsingBufA;
 volatile U8 I2SRxFrNvtDmaTransferringIsUsingBufA;
 
@@ -181,11 +189,11 @@ void ClearDmaBuf_I2SRxFrNvt(void)
 //in fsl_dma.c handle->base->CHANNEL[channel].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK; is removed --- this is to start all the DMA channel at the same time
 void EnableI2SFrAmpDmaChannel(void)
 {
-	((DMA_Type *)(DEMO_DMA))->CHANNEL[I2S_FCTxToAmp_DMA_CHANNEL].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK;
+	((DMA_Type *)(DEMO_DMA))->CHANNEL[I2S_TxToAmp_DMA_CHANNEL].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK;
 }
 void EnableI2SToAmpDmaChannel(void)
 {
-	((DMA_Type *)(DEMO_DMA))->CHANNEL[I2S_FCRxFrAmp_DMA_CHANNEL].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK;
+	((DMA_Type *)(DEMO_DMA))->CHANNEL[I2S_RxFrAmp_DMA_CHANNEL].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK;
 }
 void EnableI2STxToNvtDmaChannel(void)
 {
@@ -196,16 +204,16 @@ void EnableI2SRxFrNvtDmaChannel(void)
 	((DMA_Type *)(DEMO_DMA))->CHANNEL[I2S_RxFrNvt_DMA_CHANNEL].XFERCFG |= DMA_CHANNEL_XFERCFG_SWTRIG_MASK;
 }
 __attribute__((section("CodeQuickAccess")))
-void ImmediatelyStartI2S1Dma(void)
+void ImmediatelyStartI2SFrAmpDma(void)
 {
-	((I2S_Type *)DEMO_I2SRxFrAmp)->FIFOCFG |= I2S_FIFOCFG_DMARX_MASK;
+	((I2S_Type *)I2SRxFrAmpInstance)->FIFOCFG |= I2S_FIFOCFG_DMARX_MASK;
 	NVIC_SetPriority(DMA0_IRQn, (USB_DEVICE_INTERRUPT_PRIORITY + 1U));
 	EnableIRQ(DMA0_IRQn);
 }
 __attribute__((section("CodeQuickAccess")))
-void ImmediatelyStartI2S3Dma(void)
+void ImmediatelyStartI2SToAmpDma(void)
 {
-	((I2S_Type *)DEMO_I2STxToAmp)->FIFOCFG |= I2S_FIFOCFG_DMATX_MASK;
+	((I2S_Type *)I2STxToAmpInstance)->FIFOCFG |= I2S_FIFOCFG_DMATX_MASK;
 	NVIC_SetPriority(DMA0_IRQn, (USB_DEVICE_INTERRUPT_PRIORITY + 1U));
 	EnableIRQ(DMA0_IRQn);
 }
@@ -228,15 +236,15 @@ void ImmediatelyStartI2SRxFrNvtDma(void)
 #if 1	//folding --- init
 void BOARD_Init_DMA_I2S_FcTxToAmp(void)
 {
-	DMA_EnableChannel(DEMO_DMA, I2S_FCTxToAmp_DMA_CHANNEL);
-	DMA_SetChannelPriority(DEMO_DMA, I2S_FCTxToAmp_DMA_CHANNEL, kDMA_ChannelPriority4);
-	DmaDscrPtr_I2S1 =Ptr_dma_descriptor_table0+4*I2S_FCTxToAmp_DMA_CHANNEL;
+	DMA_EnableChannel(DEMO_DMA, I2S_TxToAmp_DMA_CHANNEL);
+	DMA_SetChannelPriority(DEMO_DMA, I2S_TxToAmp_DMA_CHANNEL, kDMA_ChannelPriority4);
+	DmaDscrPtr_I2SRxFrAmp =Ptr_dma_descriptor_table0+4*I2S_TxToAmp_DMA_CHANNEL;
 }
 void BOARD_Init_DMA_I2S_FcRxFrAmp(void)
 {
-	DMA_EnableChannel(DEMO_DMA, I2S_FCRxFrAmp_DMA_CHANNEL);
-	DMA_SetChannelPriority(DEMO_DMA, I2S_FCRxFrAmp_DMA_CHANNEL, kDMA_ChannelPriority5);
-	DmaDscrPtr_I2S3 =Ptr_dma_descriptor_table0+4*I2S_FCRxFrAmp_DMA_CHANNEL;
+	DMA_EnableChannel(DEMO_DMA, I2S_RxFrAmp_DMA_CHANNEL);
+	DMA_SetChannelPriority(DEMO_DMA, I2S_RxFrAmp_DMA_CHANNEL, kDMA_ChannelPriority5);
+	DmaDscrPtr_I2STxToAmp =Ptr_dma_descriptor_table0+4*I2S_RxFrAmp_DMA_CHANNEL;
 }
 void BOARD_Init_DMA_I2S_FcRxFrNvt(void)
 {
@@ -281,7 +289,7 @@ void BOARD_Init_I2S_FcRxFrAmp(int Fs, int BitW)
 	I2S_Tx_config.oneChannel  = false;
 
 	I2S_Tx_config.masterSlave = DEMO_I2SToAmpTx_MODE;
-	I2S_TxInit(DEMO_I2STxToAmp, &I2S_Tx_config);
+	I2S_TxInit(I2STxToAmpInstance, &I2S_Tx_config);
 }
 void BOARD_Init_I2S_FcTxToAmp(int Fs, int BitW)
 {
@@ -314,7 +322,7 @@ void BOARD_Init_I2S_FcTxToAmp(int Fs, int BitW)
 	I2S_Rx_config.oneChannel  = false;
 
 	I2S_Rx_config.masterSlave = DEMO_I2SFrAmpRx_MODE;
-	I2S_RxInit(DEMO_I2SRxFrAmp, &I2S_Rx_config);
+	I2S_RxInit(I2SRxFrAmpInstance, &I2S_Rx_config);
 }
 void BOARD_Init_I2S_FcTxToNvt(int Fs, int BitW)
 {
@@ -386,13 +394,13 @@ void BOARD_Init_I2S_FcRxFrNvt(int Fs, int BitW)
 }
 #endif
 #if 1	//folding --- callback
-int GetI2S1DmaTransferringIsUsingBufAOrB(void)
+int GetI2SFrAmpDmaTransferringIsUsingBufAOrB(void)
 {
-	return (*(DmaDscrPtr_I2S1+3) ==(unsigned int)&I2STxToAmpDmaDescriptors[1]);
+	return (*(DmaDscrPtr_I2SRxFrAmp+3) ==(unsigned int)&I2STxToAmpDmaDescriptors[1]);
 }
-int GetI2S3DmaTransferringIsUsingBufAOrB(void)
+int GetI2SToAmpDmaTransferringIsUsingBufAOrB(void)
 {
-	return (*(DmaDscrPtr_I2S3+3) ==(unsigned int)&I2SRxFrAmpDmaDescriptors[1]);
+	return (*(DmaDscrPtr_I2STxToAmp+3) ==(unsigned int)&I2SRxFrAmpDmaDescriptors[1]);
 }
 int GetI2STxToNvtDmaTransferringIsUsingBufAOrB(void)
 {
@@ -411,7 +419,7 @@ void WaitForLRCKRisingEdge_FcTxToAmp(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2STxToAmp)->STAT) & 0x4) ==0x0	//now it is left channel
+				((((I2S_Type *)I2STxToAmpInstance)->STAT) & 0x4) ==0x0	//now it is left channel
 		  )
 			break;
 	}
@@ -419,7 +427,7 @@ void WaitForLRCKRisingEdge_FcTxToAmp(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2STxToAmp)->STAT) & 0x4) ==0x4	//now it is right channel
+				((((I2S_Type *)I2STxToAmpInstance)->STAT) & 0x4) ==0x4	//now it is right channel
 		  )
 			break;
 	}
@@ -433,7 +441,7 @@ void WaitForLRCKFallingEdge_FcTxToAmp(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2STxToAmp)->STAT) & 0x4) ==0x4	//now it is right channel
+				((((I2S_Type *)I2STxToAmpInstance)->STAT) & 0x4) ==0x4	//now it is right channel
 		  )
 			break;
 	}
@@ -441,7 +449,7 @@ void WaitForLRCKFallingEdge_FcTxToAmp(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2STxToAmp)->STAT) & 0x4) ==0x0	//now it is left channel
+				((((I2S_Type *)I2STxToAmpInstance)->STAT) & 0x4) ==0x0	//now it is left channel
 		  )
 			break;
 	}
@@ -455,7 +463,7 @@ void WaitForLRCKRisingEdge_FcRxFrAmp(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2SRxFrAmp)->STAT) & 0x4) ==0x0	//now it is left channel
+				((((I2S_Type *)I2SRxFrAmpInstance)->STAT) & 0x4) ==0x0	//now it is left channel
 		  )
 			break;
 	}
@@ -463,7 +471,7 @@ void WaitForLRCKRisingEdge_FcRxFrAmp(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2SRxFrAmp)->STAT) & 0x4) ==0x4	//now it is right channel
+				((((I2S_Type *)I2SRxFrAmpInstance)->STAT) & 0x4) ==0x4	//now it is right channel
 		  )
 			break;
 	}
@@ -477,7 +485,7 @@ void WaitForLRCKFallingEdge_FcRxFrAmp(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2SRxFrAmp)->STAT) & 0x4) ==0x4	//now it is right channel
+				((((I2S_Type *)I2SRxFrAmpInstance)->STAT) & 0x4) ==0x4	//now it is right channel
 		  )
 			break;
 	}
@@ -485,7 +493,7 @@ void WaitForLRCKFallingEdge_FcRxFrAmp(void)
 	while(1)
 	{
 		if(
-				((((I2S_Type *)DEMO_I2SRxFrAmp)->STAT) & 0x4) ==0x0	//now it is left channel
+				((((I2S_Type *)I2SRxFrAmpInstance)->STAT) & 0x4) ==0x0	//now it is left channel
 		  )
 			break;
 	}
@@ -585,13 +593,13 @@ void CloseI2sDma(I2S_Type *I2SBase)
 {
 	switch((U32)I2SBase)
 	{
-		case (U32)DEMO_I2SRxFrAmp:
-				I2S_TransferAbortDMA(DEMO_I2SRxFrAmp, &I2SRxFrAmpHandle);
-				DMA_DisableChannel(DEMO_DMA, I2S_FCRxFrAmp_DMA_CHANNEL);
+		case (U32)I2SRxFrAmpInstance:
+				I2S_TransferAbortDMA(I2SRxFrAmpInstance, &I2SRxFrAmpHandle);
+				DMA_DisableChannel(DEMO_DMA, I2S_RxFrAmp_DMA_CHANNEL);
 			break;
-		case (U32)DEMO_I2STxToAmp:
-				I2S_TransferAbortDMA(DEMO_I2STxToAmp, &I2STxToAmpHandle);
-				DMA_DisableChannel(DEMO_DMA, I2S_FCTxToAmp_DMA_CHANNEL);
+		case (U32)I2STxToAmpInstance:
+				I2S_TransferAbortDMA(I2STxToAmpInstance, &I2STxToAmpHandle);
+				DMA_DisableChannel(DEMO_DMA, I2S_TxToAmp_DMA_CHANNEL);
 			break;
 		case (U32)I2STxToNvtInstance:
 			I2S_TransferAbortDMA(I2STxToNvtInstance, &I2STxToNvtHandle);
@@ -612,17 +620,17 @@ void CloseI2sAndI2sIntr(I2S_Type *I2SBase)
 	I2SBase->FIFOSTAT|=0xfb;
 	I2SBase->FIFOCFG |= (1<<17);	//empty RX fifo
 
-	//close I2S1
+	//close I2S selected
 	I2SBase->CFG1&=~0x01;			//disable
 
-	//close I2S1 intr
+	//close I2S intr selected
 	I2S_DisableInterrupts(I2SBase, (uint32_t)kI2S_RxErrorFlag | (uint32_t)kI2S_RxLevelFlag);
 	switch((U32)I2SBase)
 	{
-		case (U32)DEMO_I2SRxFrAmp:
+		case (U32)I2SRxFrAmpInstance:
 			DisableIRQ((IRQn_Type)(FLEXCOMM0_IRQn+FcIdx_RxFrAmp));
 			break;
-		case (U32)DEMO_I2STxToAmp:
+		case (U32)I2STxToAmpInstance:
 			DisableIRQ((IRQn_Type)(FLEXCOMM0_IRQn+FcIdx_TxToAmp));
 			break;
 		case (U32)I2STxToNvtInstance:
@@ -673,15 +681,15 @@ int CheckIfI2SToNvtIsStopped(void)
 {
 	if(I2SToNvtIsStarted)
 	{
-		static int I2S1DmaIsStoppedCnt=0;
+		static int I2SFrNvtDmaIsStoppedCnt=0;
 		if(I2SRxFrNvtDmaIsStopped())
-			I2S1DmaIsStoppedCnt++;
+			I2SFrNvtDmaIsStoppedCnt++;
 		else
-			I2S1DmaIsStoppedCnt=0;
+			I2SFrNvtDmaIsStoppedCnt=0;
 
-		if(I2S1DmaIsStoppedCnt>10)
+		if(I2SFrNvtDmaIsStoppedCnt>10)
 		{
-			//confirmed that I2S1 Dma interrupt is stopped
+			//confirmed that I2SFrNvt Dma interrupt is stopped
 			DisableI2SToNvtAndI2SIntr_AndSetNeedToRestartI2SToNvt();
 			return 1;
 //			AudioSrcEnabledBitMap&=~AudioSrcEnabledBitMapFlag_Fc1;	//if we don't have this line, main loop process will be blocked cause it is waiting for fc1 --- but even add this line, there is still one frame error on fc4 out
@@ -695,7 +703,7 @@ int CheckIfI2SToNvtIsStopped(void)
 __attribute__((section("CodeQuickAccess")))
 void I2SFrAmp_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
 {
-	DbgPin7Up();
+	DbgPin6Up();
 	AllowAudioInterfaceReInit_PdmI2S=0;
 	if(CheckTimePoint_CurrentIntrIsAStartingOne())
 	{
@@ -706,12 +714,12 @@ void I2SFrAmp_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t comple
 
 	if(DmaTxRxIsDone==DmaTxRxIsExpected)
 		SCO_AudioFlow_SemaphorePost();
-	DbgPin7Dn();
+	DbgPin6Dn();
 }
 __attribute__((section("CodeQuickAccess")))
 void I2SToAmp_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
 {
-	DbgPin7Up();
+	DbgPin5Up();
 	AllowAudioInterfaceReInit_PdmI2S=0;
 	if(CheckTimePoint_CurrentIntrIsAStartingOne())
 	{
@@ -722,12 +730,12 @@ void I2SToAmp_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t comple
 
 	if(DmaTxRxIsDone==DmaTxRxIsExpected)
 		SCO_AudioFlow_SemaphorePost();
-	DbgPin7Dn();
+	DbgPin5Dn();
 }
 __attribute__((section("CodeQuickAccess")))
 void I2SRxFrNvt_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
 {
-	DbgPin6Up();
+//	DbgPin6Up();
 	#if Rt685I2SToNvtIsI2SMaster==1
 		AllowAudioInterfaceReInit_PdmI2S=0;
 		if(CheckTimePoint_CurrentIntrIsAStartingOne())
@@ -774,12 +782,12 @@ void I2SRxFrNvt_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t comp
 			CirAudioBuf_WriteSamples_S32(&I2SRxFrNvt_CirBuf, AudioFrameSizeInSamplePerCh_I2SToNvt, (S32 *)SrcPtr);
 		}
 	#endif
-	DbgPin6Dn();
+//	DbgPin6Dn();
 }
 __attribute__((section("CodeQuickAccess")))
 void I2STxToNvt_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t completionStatus, void *userData)
 {
-	DbgPin6Up();
+//	DbgPin6Up();
 	#if Rt685I2SToNvtIsI2SMaster==1
 		AllowAudioInterfaceReInit_PdmI2S=0;
 		if(CheckTimePoint_CurrentIntrIsAStartingOne())
@@ -813,7 +821,7 @@ void I2STxToNvt_Callback(I2S_Type *base, i2s_dma_handle_t *handle, status_t comp
 		}
 		memcpy(DstPtr,SrcPtr,sizeof(S16)*2*AudioFrameSizeInSamplePerCh_I2SToNvt);	//samples to I2S tx DMA buffer
 	#endif
-	DbgPin6Dn();
+//	DbgPin6Dn();
 }
 #endif
 #if 1	//folding --- configure/create and start
@@ -825,10 +833,10 @@ void ConfigI2SRxFrAmpChainedDma(int FrmSizeInSample, int SampleBitW)
 	I2SRxFrAmpTransfer[0].dataSize = FrmSizeInSample*(SampleBitW/8)*2;
 	I2SRxFrAmpTransfer[1].dataSize = FrmSizeInSample*(SampleBitW/8)*2;
 
-	DMA_CreateHandle(&I2SRxFrAmpDmaHandle, DEMO_DMA, I2S_FCRxFrAmp_DMA_CHANNEL);
-	I2S_RxTransferCreateHandleDMA(DEMO_I2SRxFrAmp,  &I2SRxFrAmpHandle, &I2SRxFrAmpDmaHandle, I2SFrAmp_Callback,I2SRxFrAmpTransfer);
+	DMA_CreateHandle(&I2SRxFrAmpDmaHandle, DEMO_DMA, I2S_RxFrAmp_DMA_CHANNEL);
+	I2S_RxTransferCreateHandleDMA(I2SRxFrAmpInstance,  &I2SRxFrAmpHandle, &I2SRxFrAmpDmaHandle, I2SFrAmp_Callback,I2SRxFrAmpTransfer);
 	I2S_TransferInstallLoopDMADescriptorMemory   (&I2SRxFrAmpHandle,  I2SRxFrAmpDmaDescriptors, 2U);
-    if (I2S_TransferReceiveLoopDMA   (DEMO_I2SRxFrAmp, &I2SRxFrAmpHandle, &I2SRxFrAmpTransfer[0], 2U) != kStatus_Success)
+    if (I2S_TransferReceiveLoopDMA   (I2SRxFrAmpInstance, &I2SRxFrAmpHandle, &I2SRxFrAmpTransfer[0], 2U) != kStatus_Success)
     {
         assert(false);
     }
@@ -842,10 +850,10 @@ void ConfigI2STxToAmpChainedDma(int FrmSizeInSample, int SampleBitW)
 	I2STxToAmpTransfer[0].dataSize = FrmSizeInSample*(SampleBitW/8)*2;
 	I2STxToAmpTransfer[1].dataSize = FrmSizeInSample*(SampleBitW/8)*2;
 
-	DMA_CreateHandle(&I2STxToAmpDmaHandle, DEMO_DMA, I2S_FCTxToAmp_DMA_CHANNEL);
-	I2S_TxTransferCreateHandleDMA(DEMO_I2STxToAmp,  &I2STxToAmpHandle, &I2STxToAmpDmaHandle, I2SToAmp_Callback,I2STxToAmpTransfer);
+	DMA_CreateHandle(&I2STxToAmpDmaHandle, DEMO_DMA, I2S_TxToAmp_DMA_CHANNEL);
+	I2S_TxTransferCreateHandleDMA(I2STxToAmpInstance,  &I2STxToAmpHandle, &I2STxToAmpDmaHandle, I2SToAmp_Callback,I2STxToAmpTransfer);
     I2S_TransferInstallLoopDMADescriptorMemory   (&I2STxToAmpHandle,  I2STxToAmpDmaDescriptors, 2U);
-    if (I2S_TransferSendLoopDMA(DEMO_I2STxToAmp, &I2STxToAmpHandle, &I2STxToAmpTransfer[0], 2U) != kStatus_Success)
+    if (I2S_TransferSendLoopDMA(I2STxToAmpInstance, &I2STxToAmpHandle, &I2STxToAmpTransfer[0], 2U) != kStatus_Success)
     {
         assert(false);
     }

@@ -795,7 +795,7 @@ int InitSbcDecoderForOneSbcFile(int SbcFileIdx)
 #endif
 
 	_XA_HANDLE_ERROR(p_proc_err_info, "", err_code);
-	PRINTF("InitSbcDecoderForOneSbcFile %d %d %d %d  \r\n",i_bitrate,i_samp_freq,i_num_chan,i_pcm_wd_sz);
+//	PRINTF("InitSbcDecoderForOneSbcFile %d %d %d %d  \r\n",i_bitrate,i_samp_freq,i_num_chan,i_pcm_wd_sz);
 	//PRINTF("InitSbcDecoderForOneSbcFile read: %d %d %x %x\n", i_bytes_read, i_bytes_consumed, U32ToPrint1, U32ToPrint2);
 
 	//this is to check if the input data is changed or not --- it is not changed
@@ -815,7 +815,7 @@ int InitSbcDecoderForOneSbcFile(int SbcFileIdx)
 
 	//init SRC
 	//             (ptr to handle.     int InputBlockSizeInSamples,  int inFs,                 int outFs,                  int ChNum,  EnableAsrc NeedToDisplay)
-	InitCadenceAsrc(&SRC_DecoderSbc,DecoderSbc_SrcInSizeInSamples, i_samp_freq,   PtrVarBlockSharedByDspAndMcu->I2SFs_Amp,      2,           1,          1     );
+	InitCadenceAsrc(&SRC_DecoderSbc,DecoderSbc_SrcInSizeInSamples, i_samp_freq,   PtrVarBlockSharedByDspAndMcu->I2SFs_Amp,      2,           1,          0     );
 	//                                 DecoderSbc_SrcInSizeInSamples is to reserve enough space for output, later the input block size in samples will be set again in the src processing
 
 	SRC_DecoderSbc.AodTgtValue=((T_CircularAudioBuf_S8 *)&PtrVarBlockSharedByDspAndMcu->CirBuf_SbcRaw)->LengthInSamples/2;
@@ -848,7 +848,7 @@ int InitSbcDecoderForOneSbcFile(int SbcFileIdx)
 int SbcDecodeProcess(int SbcFileIdx)
 {
 	int i;
-	DbgPin8Up();
+//	DbgPin8Up();
 
 	#if 0
 		//empty run
@@ -885,13 +885,13 @@ int SbcDecodeProcess(int SbcFileIdx)
 	int loopTime=0;
 
 	if(i_samp_freq==16000)
-		loopTime=4;		//2*8ms=10mss, this is   > 10ms	--- calling this decoding functions is once every 10ms
+		loopTime=4*2;		//2*8ms=10mss, this is   > 10ms	--- calling this decoding functions is once every 10ms
 
 	if(i_samp_freq==48000)
-		loopTime=6;	//6*2.666ms=15.96ms, this is > 10ms	--- calling this decoding functions is once every 10ms
+		loopTime=6*2;	//6*2.666ms=15.96ms, this is > 10ms	--- calling this decoding functions is once every 10ms
 
 	if(i_samp_freq==44100)
-		loopTime=5;	//5*2.902ms=14.51ms, this is > 10ms	--- calling this decoding functions is once every 10ms
+		loopTime=5*2;	//5*2.902ms=14.51ms, this is > 10ms	--- calling this decoding functions is once every 10ms
 
 	int FreeAod_Audio;
 	int AodSbc;
@@ -950,7 +950,7 @@ int SbcDecodeProcess(int SbcFileIdx)
 					{
 						//not enough data, exit and do nothing
 						//PRINTF("%d, %d,\n",l,i_bytes_consumed);
-						DbgPin8Dn();
+//						DbgPin8Dn();
 						return 123;
 					}
 				}else
@@ -1211,13 +1211,13 @@ int SbcDecodeProcess(int SbcFileIdx)
 			assert(i_bytes_consumed <= i_buff_size);
 			TotalSbcDataBytesConsumed+=i_bytes_consumed;
 
-			DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();
-			DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();
+//			DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();
+//			DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();DbgPin8Dn();
 //			PRINTF("Sbc Packet: %d, %d, %d %d %d H: %x %x Fs: %d %d\n", SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn, SbcFrmSizeToBeProcessed, i_bytes_consumed, U32ToPrint1, U32ToPrint2, i_samp_freq, ui_exec_done);
 			//PRINTF("Sbc Packet: %d, %d, %d %d %d \n",                   SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn, SbcFrmSizeToBeProcessed, i_bytes_consumed);
 			//PRINTF("Sbc Packet: %d, %d, %d \n",                         SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn);
 			//PRINTF("Sbc Packet: %d, %d, %d %d %d \n",                   SbcPacketsDecoded, SbcAudioSamplesGeneratedPerCh, SbcFrmSizeReadIn, TotalAudioDataBytesGenerated, TotalSbcDataBytesConsumed);
-			DbgPin8Up();
+//			DbgPin8Up();
 
 			SbcPacketsDecoded++;
 
@@ -1234,7 +1234,7 @@ int SbcDecodeProcess(int SbcFileIdx)
 
 	}
 
-	DbgPin8Dn();
+//	DbgPin8Dn();
 	return 0;
 }
 
@@ -1252,5 +1252,41 @@ void DeInitSbcDecoderForOneSbcFile(void)
 {
 	DeinitCadenceAsrc(&SRC_DecoderSbc);
 }
+
+
+#if TestAlgoInitAndDeInit==1
+void TestHeap_SbcDecodingInitAndDeInit(int l)
+{
+	void *HeapPtr1;
+	void *HeapPtr2;
+	HeapPtr1=GetCurrentHeapTail(3000);
+	int TestCnt=l;
+
+	while(1)
+	{
+
+		InitSbcDecoder();
+		InitSbcDecoderForOneSbcFile(1);
+
+		DeInitSbcDecoderForOneSbcFile();
+		DeInitSbcDecoder();
+
+		HeapPtr2=GetCurrentHeapTail(3000);
+		if(HeapPtr1!=HeapPtr2)
+		{
+			PRINTF("RT685 DSP: heap base address was, %x\r\n",    (U32)HeapPtr1);
+			PRINTF("RT685 DSP: heap base address now is, %x\r\n", (U32)HeapPtr2);
+			PRINTF("RT685 DSP: DeInitEap is NOT successful \r\n");
+			while(1) {};
+		}
+
+		delay_ms(100);
+		TestCnt--;
+		if(!TestCnt)
+			break;
+	}
+	PRINTF("RT685 DSP: TestHeap_SbcDecodingInitAndDeInit is successful \r\n");
+}
+#endif
 
 

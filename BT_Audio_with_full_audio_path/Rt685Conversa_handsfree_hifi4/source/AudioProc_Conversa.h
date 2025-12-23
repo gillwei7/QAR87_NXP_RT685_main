@@ -9,9 +9,6 @@
 #ifndef __AudioProcConversa_H___
 #define __AudioProcConversa_H___
 
-#ifndef CORE_DSP
-#define CORE_DSP
-#endif
 
 #include "PL_platformTypes.h"
 #include "NxpConversaPlugin.h"
@@ -137,6 +134,7 @@ extern uint8_t domainId;
 extern U32 AudioFrameCnt;
 
 
+extern int ConversaIsNowBeingUsed;
 extern nxp_conversa_plugin_t conversaPluginParams;
 
 extern S32 *RawMic32BitBuf0;
@@ -154,7 +152,6 @@ extern void InitConversa(ConversaTuningCfg_t TuningCfg, int NeedToPrintInfo);
 
 extern void DspMainAudioFlowProcOneFrame_HfpCall_(int OptionWord);
 extern void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord);
-
 
 #endif
 

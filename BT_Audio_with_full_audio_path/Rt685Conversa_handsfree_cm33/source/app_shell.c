@@ -551,16 +551,25 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
     }
     else if(strcmp(argv[1], "playopus") == 0)
     {
-    	int opus_number = atoi(argv[2]);   // convert string to int
-
-		if(opus_number >= 0 && opus_number <= (OPUS_INDEX_MAXIMUM-1))
-		{
-		    startOpusPlayIndex(opus_number);
-		}
-		else
-		{
-			PRINTF("Invalid opus number. Use: 0 ~ %d\r\n",OPUS_INDEX_MAXIMUM-1);
-		}
+    	//start opus play
+    	if(strcmp(argv[2], "1") == 0)
+    	{
+    		//play the first opus file
+    		VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
+    		VarBlockSharedByDspAndMcu.PlayOpusFileIdx=0;
+    	}
+    	if(strcmp(argv[2], "2") == 0)
+    	{
+    		//play the second opus file
+    		VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
+    		VarBlockSharedByDspAndMcu.PlayOpusFileIdx=1;
+    	}
+    	if(strcmp(argv[2], "3") == 0)
+    	{
+    		//play the second opus file
+    		VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
+    		VarBlockSharedByDspAndMcu.PlayOpusFileIdx=2;
+    	}
     }
     else if(strcmp(argv[1], "playsbc") == 0)
     {

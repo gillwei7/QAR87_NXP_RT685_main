@@ -37,82 +37,98 @@
 #if 1 //for folding
 
 #if EnableMic01==1
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dmic_dma_handle_t dmicDmaHandle_0;
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dmic_dma_handle_t dmicDmaHandle_1;
 #endif
 #if EnableMic23==1
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dmic_dma_handle_t dmicDmaHandle_2;
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dmic_dma_handle_t dmicDmaHandle_3;
 #endif
 #if EnableMic45==1
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dmic_dma_handle_t dmicDmaHandle_4;
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dmic_dma_handle_t dmicDmaHandle_5;
 #endif
 #if EnableMic67==1
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dmic_dma_handle_t dmicDmaHandle_6;
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dmic_dma_handle_t dmicDmaHandle_7;
 #endif
 
 #if EnableMic01==1
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dma_handle_t      dmicRxDmaHandle_0;
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dma_handle_t      dmicRxDmaHandle_1;
 #endif
 #if EnableMic23==1
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dma_handle_t      dmicRxDmaHandle_2;
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dma_handle_t      dmicRxDmaHandle_3;
 #endif
 #if EnableMic45==1
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dma_handle_t      dmicRxDmaHandle_4;
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dma_handle_t      dmicRxDmaHandle_5;
 #endif
 #if EnableMic67==1
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dma_handle_t      dmicRxDmaHandle_6;
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	dma_handle_t      dmicRxDmaHandle_7;
 #endif
 
 #if EnableMic01==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	volatile S32 MicInputDmaDualBuf_0[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	volatile S32 MicInputDmaDualBuf_1[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 #if EnableMic23==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	volatile S32 MicInputDmaDualBuf_2[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	volatile S32 MicInputDmaDualBuf_3[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 #if EnableMic45==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	volatile S32 MicInputDmaDualBuf_4[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	volatile S32 MicInputDmaDualBuf_5[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 #if EnableMic67==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	volatile S32 MicInputDmaDualBuf_6[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(8)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(8)))
 	volatile S32 MicInputDmaDualBuf_7[AudioFrameSizeInSamplePerCh_16KHz * PDM_Rx_BUFFER_NUM];
 #endif
 
 #if EnableMic01==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	volatile dma_descriptor_t MicInputDmaPingpongDscr01[2];
 #endif
 #if EnableMic23==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	volatile dma_descriptor_t MicInputDmaPingpongDscr23[2];
 #endif
 #if EnableMic45==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	volatile dma_descriptor_t MicInputDmaPingpongDscr45[2];
 #endif
 #if EnableMic67==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	volatile dma_descriptor_t MicInputDmaPingpongDscr67[2];
 #endif
 
-__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 #if EnableMic01==1
 	dmic_transfer_t MicDmaCfgCh0[2U] = {
 		/* transfer configurations for channel0 */
@@ -132,7 +148,7 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 			.linkTransfer           = &MicDmaCfgCh0[0],
 		},
 	};
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	dmic_transfer_t MicDmaCfgCh1[2U] = {
 		/* transfer configurations for channel1 */
 		{
@@ -153,7 +169,7 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 	};
 #endif
 #if EnableMic23==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	dmic_transfer_t MicDmaCfgCh2[2U] = {
 		/* transfer configurations for channel2 */
 		{
@@ -172,7 +188,7 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 			.linkTransfer           = &MicDmaCfgCh2[0],
 		},
 	};
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	dmic_transfer_t MicDmaCfgCh3[2U] = {
 		/* transfer configurations for channel3 */
 		{
@@ -193,7 +209,7 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 	};
 #endif
 #if EnableMic45==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	dmic_transfer_t MicDmaCfgCh4[2U] = {
 		/* transfer configurations for channel4 */
 		{
@@ -212,7 +228,7 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 			.linkTransfer           = &MicDmaCfgCh4[0],
 		},
 	};
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	dmic_transfer_t MicDmaCfgCh5[2U] = {
 		/* transfer configurations for channel5 */
 		{
@@ -233,7 +249,7 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 	};
 #endif
 #if EnableMic67==1
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	dmic_transfer_t MicDmaCfgCh6[2U] = {
 		/* transfer configurations for channel6 */
 		{
@@ -252,7 +268,7 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 			.linkTransfer           = &MicDmaCfgCh6[0],
 		},
 	};
-	__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+	__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 	dmic_transfer_t MicDmaCfgCh7[2U] = {
 		/* transfer configurations for channel7 */
 		{
@@ -273,7 +289,7 @@ __attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((a
 	};
 #endif
 
-__attribute__((__section__(".data.$Audio_io_data_non_cached"))) __attribute__((aligned(16)))
+__attribute__((__section__(".data.$Audio_IO_Data"))) __attribute__((aligned(16)))
 volatile dma_descriptor_t MicInputDmaPingpongDscr[8][2];
 
 U8 DmicIdxForCheckingDmaDscrPtr;
@@ -705,19 +721,19 @@ void BOARD_Init_DMIC(U8 MicSelectBits, U8 SkipInitGlobalDMIC0, int Fs)
 	{
 		case 16000:
 			dmic_channel_cfg.osr                 = 48U;
-			dmic_channel_cfg.gainshft            = 6U;
+			dmic_channel_cfg.gainshft            = 5U; //6U;
 			break;
 		case 32000:
 			dmic_channel_cfg.osr                 = 48U;
-			dmic_channel_cfg.gainshft            = 6U;
+			dmic_channel_cfg.gainshft            = 5U; //6U;
 			break;
 		case 44100:
 			dmic_channel_cfg.osr                 = 32U;
-			dmic_channel_cfg.gainshft            = 6U;
+			dmic_channel_cfg.gainshft            = 5U; //6U;
 			break;
 		case 48000:
 			dmic_channel_cfg.osr                 = 32U;
-			dmic_channel_cfg.gainshft            = 6U;
+			dmic_channel_cfg.gainshft            = 5U; //6U;
 			break;
 	}
 
@@ -936,101 +952,115 @@ int GetPdmCh6DmaTransferringIsUsingBufAOrB(void)
 	return ((*(DmaDscrPtr_Dmic6+3)==(unsigned int)&MicInputDmaPingpongDscr[6][0]));
 }
 
+void StartI2SToNvtNow(void)
+{
+	//start Rx0 after edge
+	#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
+		WaitForLRCKFallingEdge_FcRxFrNvt();
+	#else
+		WaitForLRCKFallingEdge_FcRxFrNvt();
+	#endif
+
+			((I2S_Type *)I2SRxFrNvtInstance)->FIFOCFG |= (1<<16);	//empty fifo
+			#if 1
+				//this is to ensure rx intr comes after dmic intr --- don't close this part
+				for(int i=0;i<8;i++)
+				{
+					volatile U32 t;
+					t=((I2S_Type *)I2SRxFrNvtInstance)->FIFORD;
+				}
+			#endif
+			ImmediatelyStartI2SRxFrNvtDma();	//after calling this, I2S dma intr occurs one frame later!
+
+	//start tx0 after edge
+	#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
+			WaitForLRCKRisingEdge_FcRxFrNvt();
+	#else
+			WaitForLRCKRisingEdge_FcRxFrNvt();
+	#endif
+			((I2S_Type *)I2STxToNvtInstance)->FIFOCFG |= (1<<16);	//empty fifo
+			#if 1
+				//this is to ensure tx intr comes after dmic intr --- don't close this part
+				for(int i=0;i<8;i++)
+				{
+					((I2S_Type *)I2STxToNvtInstance)->FIFOWR=0;
+					//((I2S_Type *)DEMO_I2S4_TX1)->FIFOWR=i*0x20000;		//full the fifo tx buffer, so that tx intr can be aligned with rx and dmic
+				}
+			#endif
+			ImmediatelyStartI2STxToNvtDma();	//after calling this, I2S dma intr occurs one frame later!
+
+	//set the flag variables to initial value
+	StartI2SToNvtAudioDmaFromDmicDmaIntr_Cnt=0;
+}
+
+void StartI2SToAmpNow(void)
+{
+	WaitForLRCKRisingEdge_FcTxToAmp();
+
+	//start Rx0 after edge
+	DbgPin5Up();
+	#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
+		WaitForLRCKFallingEdge_FcTxToAmp();
+	#else
+		WaitForLRCKFallingEdge_FcTxToAmp();
+	#endif
+	DbgPin5Dn();
+
+			((I2S_Type *)I2SRxFrAmpInstance)->FIFOCFG |= (1<<16);	//empty fifo
+			#if 1
+				//this is to ensure rx intr comes after dmic intr --- don't close this part
+				for(int i=0;i<8;i++)
+				{
+					volatile U32 t;
+					t=((I2S_Type *)I2SRxFrAmpInstance)->FIFORD;
+				}
+			#endif
+			ImmediatelyStartI2SFrAmpDma();	//after calling this, I2S dma intr occurs one frame later!
+
+	//start tx0 after edge
+	DbgPin5Up();
+	#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
+		WaitForLRCKRisingEdge_FcTxToAmp();
+	#else
+		WaitForLRCKRisingEdge_FcTxToAmp();
+	#endif
+	DbgPin5Dn();
+			((I2S_Type *)I2STxToAmpInstance)->FIFOCFG |= (1<<16);	//empty fifo
+			#if 1
+				//this is to ensure tx intr comes after dmic intr --- don't close this part
+				for(int i=0;i<8;i++)
+				{
+					((I2S_Type *)I2STxToAmpInstance)->FIFOWR=0;
+					//((I2S_Type *)DEMO_I2S4_TX1)->FIFOWR=i*0x20000;		//full the fifo tx buffer, so that tx intr can be aligned with rx and dmic
+				}
+			#endif
+			ImmediatelyStartI2SToAmpDma();	//after calling this, I2S dma intr occurs one frame later!
+
+	//set the flag variables to initial value
+	StartI2SToAmpAudioDmaFromDmicDmaIntr_Cnt=0;
+}
+
 #if EnableMic01==1
 __attribute__((section("CodeQuickAccess")))
 void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
 {
-	DbgPin7Up();
+	DbgPin6Up();DbgPin5Up();
 
 	AllowAudioInterfaceReInit_PdmI2S=0;
 	if(DmaTxRxIsExpected & AudioI2sPortsBitMapFlag_FcTxToAmp)	//fc1 and fc3 are to be on/off together
 	{
 		StartI2SToAmpAudioDmaFromDmicDmaIntr_Cnt++;
 		if(StartI2SToAmpAudioDmaFromDmicDmaIntr_Cnt>2)
-		{
-			//start Rx0 after edge
-			#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
-				WaitForLRCKFallingEdge_FcTxToAmp();
-			#else
-				WaitForLRCKRisingEdge_FcTxToAmp();
-			#endif
-
-					((I2S_Type *)DEMO_I2SRxFrAmp)->FIFOCFG |= (1<<16);	//empty fifo
-					#if 1
-						//this is to ensure rx intr comes after dmic intr --- don't close this part
-						for(int i=0;i<8;i++)
-						{
-							volatile U32 t;
-							t=((I2S_Type *)DEMO_I2SRxFrAmp)->FIFORD;
-						}
-					#endif
-					ImmediatelyStartI2S1Dma();	//after calling this, I2S dma intr occurs one frame later!
-
-			//start tx0 after edge
-			#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
-				WaitForLRCKRisingEdge_FcTxToAmp();
-			#else
-				WaitForLRCKFallingEdge_FcTxToAmp();
-			#endif
-					((I2S_Type *)DEMO_I2STxToAmp)->FIFOCFG |= (1<<16);	//empty fifo
-					#if 1
-						//this is to ensure tx intr comes after dmic intr --- don't close this part
-						for(int i=0;i<8;i++)
-						{
-							((I2S_Type *)DEMO_I2STxToAmp)->FIFOWR=0;
-							//((I2S_Type *)DEMO_I2S4_TX1)->FIFOWR=i*0x20000;		//full the fifo tx buffer, so that tx intr can be aligned with rx and dmic
-						}
-					#endif
-					ImmediatelyStartI2S3Dma();	//after calling this, I2S dma intr occurs one frame later!
-
-			//set the flag variables to initial value
-			StartI2SToAmpAudioDmaFromDmicDmaIntr_Cnt=0;
-		}
+			StartI2SToAmpNow();
 	}
 
 	if(DmaTxRxIsExpected & AudioI2sPortsBitMapFlag_FcTxToNvt)	//fc1 and fc3 are to be on/off together
 	{
+		WaitForLRCKRisingEdge_FcRxFrNvt();
+
 		StartI2SToNvtAudioDmaFromDmicDmaIntr_Cnt++;
 		if(StartI2SToNvtAudioDmaFromDmicDmaIntr_Cnt>2)
-		{
-			//start Rx0 after edge
-			#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
-				WaitForLRCKFallingEdge_FcRxFrNvt();
-			#else
-				WaitForLRCKRisingEdge_FcRxFrNvt();
-			#endif
-
-					((I2S_Type *)I2SRxFrNvtInstance)->FIFOCFG |= (1<<16);	//empty fifo
-					#if 1
-						//this is to ensure rx intr comes after dmic intr --- don't close this part
-						for(int i=0;i<8;i++)
-						{
-							volatile U32 t;
-							t=((I2S_Type *)I2SRxFrNvtInstance)->FIFORD;
-						}
-					#endif
-					ImmediatelyStartI2SRxFrNvtDma();	//after calling this, I2S dma intr occurs one frame later!
-
-			//start tx0 after edge
-			#if __OPTIMIZE__==0			//still needs to check and confirm --- maybe no need to separate according to opti level
-					WaitForLRCKRisingEdge_FcRxFrNvt();
-			#else
-					WaitForLRCKFallingEdge_FcRxFrNvt();
-			#endif
-					((I2S_Type *)I2STxToNvtInstance)->FIFOCFG |= (1<<16);	//empty fifo
-					#if 1
-						//this is to ensure tx intr comes after dmic intr --- don't close this part
-						for(int i=0;i<8;i++)
-						{
-							((I2S_Type *)I2STxToNvtInstance)->FIFOWR=0;
-							//((I2S_Type *)DEMO_I2S4_TX1)->FIFOWR=i*0x20000;		//full the fifo tx buffer, so that tx intr can be aligned with rx and dmic
-						}
-					#endif
-					ImmediatelyStartI2STxToNvtDma();	//after calling this, I2S dma intr occurs one frame later!
-
-			//set the flag variables to initial value
-			StartI2SToNvtAudioDmaFromDmicDmaIntr_Cnt=0;
-		}
+			StartI2SToNvtNow();
 	}
 
 	if(CheckTimePoint_CurrentIntrIsAStartingOne())
@@ -1042,7 +1072,7 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	if(DmaTxRxIsDone==DmaTxRxIsExpected)
 		SCO_AudioFlow_SemaphorePost();
 
-	DbgPin7Dn();
+	DbgPin6Dn();DbgPin5Dn();
 	return;
 }
 #endif
@@ -1050,7 +1080,7 @@ void DMicRx_Callback0(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 __attribute__((section("CodeQuickAccess")))
 void DMicRx_Callback2(DMIC_Type *base, dmic_dma_handle_t *handle, status_t status, void *userData)
 {
-	DbgPin7Up();
+	DbgPin6Up();DbgPin5Up();
 	AllowAudioInterfaceReInit_PdmI2S=0;
 	if(CheckTimePoint_CurrentIntrIsAStartingOne())
 	{
@@ -1061,7 +1091,7 @@ void DMicRx_Callback2(DMIC_Type *base, dmic_dma_handle_t *handle, status_t statu
 	if(DmaTxRxIsDone==DmaTxRxIsExpected)
 		SCO_AudioFlow_SemaphorePost();
 
-	DbgPin7Dn();
+	DbgPin6Dn();DbgPin5Dn();
 	return;
 }
 #endif

@@ -3440,8 +3440,8 @@ static int common_init(void)
 	read_supported_commands_complete(rsp);
 	net_buf_unref(rsp);
 
-#if 0
-	if (IS_ENABLED(CONFIG_BT_HOST_CRYPTO_PRNG)) {
+#if 1	//change to if 1, according to Marouane Gaoua --- was: if 0
+	if (IS_ENABLED(CONFIG_BT_HOST_CRYPTO_PRNG))
 #endif
 	{
 		/* Initialize the PRNG so that it is safe to use it later

@@ -37,7 +37,9 @@ typedef struct
 	float KiAccMax;
 }TCadenceSRC;
 
-
+#if UseUacDnAudioForConversaTuning_VoiceCall16KHz==1
+extern TCadenceSRC SRC_ConversaUacDn;
+#endif
 extern TCadenceSRC SRC_ConversaTx1;
 extern TCadenceSRC SRC_ConversaRx1;
 extern TCadenceSRC SRC_ConversaRx2;
@@ -48,5 +50,6 @@ extern void CadenceSrc_UpdateDrifting(TCadenceSRC *SRCPtr, int CurrentAod, int F
 extern void DeinitCadenceAsrc        (TCadenceSRC *SRCPtr);
 extern int InitCadenceAsrc           (TCadenceSRC *SRCPtr, int InputBlockSizeInSamples, int inFs, int outFs, int ChNum,  int EnableAsrc, int NeedToDisplayy);
 extern int ProcCadenceAsrc           (TCadenceSRC *SRCPtr, int *AudioS32DstPtr, int *AudioS32SrcPtr, int InSampleNum, int *OutputSampleNum);
+
 
 #endif  //__WAVEIO_H__

@@ -300,17 +300,17 @@ void SetI2SBufferABSelect(int ToSetI2SAmp, int ToSetI2SNvt)
 {
 	if(ToSetI2SAmp)
 	{
-		I2S1DmaTransferringIsUsingBufA=GetI2S1DmaTransferringIsUsingBufAOrB();
-		I2S3DmaTransferringIsUsingBufA=GetI2S3DmaTransferringIsUsingBufAOrB();
+		I2SFrAmpDmaTransferringIsUsingBufA=GetI2SFrAmpDmaTransferringIsUsingBufAOrB();
+		I2SToAmpDmaTransferringIsUsingBufA=GetI2SToAmpDmaTransferringIsUsingBufAOrB();
 
-		if(I2S1DmaTransferringIsUsingBufA)
+		if(I2SFrAmpDmaTransferringIsUsingBufA)
 		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
 			I2SDmaInCh01Ptr=I2SRxFrAmpCh0And1Mixed_B;
 		}else
 		{	//now DMA is using I2S BufB, the MCU code should use I2S DMA buffer A, which is just ready
 			I2SDmaInCh01Ptr=I2SRxFrAmpCh0And1Mixed_A;
 		}
-		if(I2S3DmaTransferringIsUsingBufA)
+		if(I2SToAmpDmaTransferringIsUsingBufA)
 		{	//now DMA is using I2S BufA, the MCU code should use I2S DMA buffer B, which is just ready
 			I2SDmaOtCh01Ptr=I2STxToAmpCh0And1Mixed_B;
 		}else
@@ -529,7 +529,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_HfpCall(void)
 	OSA_SR_ALLOC();
 
 	//all needed audio src/snk tx/rx are done
-	DbgPin5Up();
+//	DbgPin5Up();
 
 	#if 1	//folding --- prepare mic input pointers, and get int type of mic signal data to DSP shared buffer, get I2S in samples to DSP shared buffer
 		CopyMicAudioDataFromDmaBufferToSharedVarMicBuf(AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23,AudioFrameSizeInSamplePerCh_16KHz,1);
@@ -621,7 +621,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_HfpCall(void)
 	#endif
 
 	DmaTxRxIsDone=0;
-	DbgPin5Dn();
+//	DbgPin5Dn();
 }
 __attribute__((section("CodeQuickAccess")))
 void ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy(void)
@@ -633,7 +633,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy(void)
 	OSA_SR_ALLOC();
 
 	//all needed audio src/snk tx/rx are done
-	DbgPin5Up();
+//	DbgPin5Up();
 
 	#if 1	//folding --- prepare mic input pointers, and get int type of mic signal data
 		//take real mic audio input as incoming data
@@ -667,12 +667,12 @@ void ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy(void)
 	#endif
 
 	DmaTxRxIsDone=0;
-	DbgPin5Dn();
+//	DbgPin5Dn();
 }
 __attribute__((section("CodeQuickAccess")))
 void ProcessAudio_AfterAudioInputBufIsReady_AudioIoDbg(void)
 {
-	DbgPin5Up();
+//	DbgPin5Up();
 
 	OSA_SR_ALLOC();
 
@@ -729,13 +729,13 @@ void ProcessAudio_AfterAudioInputBufIsReady_AudioIoDbg(void)
 	#endif
 
 	DmaTxRxIsDone=0;
-	DbgPin5Dn();
+//	DbgPin5Dn();
 }
 
 __attribute__((section("CodeQuickAccess")))
 void ProcessAudio_AfterAudioInputBufIsReady_VideoRecording(void)
 {
-    DbgPin5Up();
+    //DbgPin5Up();
 
     OSA_SR_ALLOC();
 
@@ -772,7 +772,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_VideoRecording(void)
     #endif
 
     DmaTxRxIsDone=0;
-    DbgPin5Dn();
+    //DbgPin5Dn();
 }
 
 __attribute__((section("CodeQuickAccess")))
@@ -780,7 +780,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_MediaPlayer(void)
 {
 //	ProcessAudio_AfterAudioInputBufIsReady_AudioIoDbg();	//they are the same
 
-	DbgPin5Up();
+	//DbgPin5Up();
 
 	OSA_SR_ALLOC();
 
@@ -829,12 +829,12 @@ void ProcessAudio_AfterAudioInputBufIsReady_MediaPlayer(void)
 	#endif
 
 	DmaTxRxIsDone=0;
-	DbgPin5Dn();
+	//DbgPin5Dn();
 }
 __attribute__((section("CodeQuickAccess")))
 void ProcessAudio_AfterAudioInputBufIsReady_MusicPlayer(void)
 {
-	DbgPin5Up();
+	//DbgPin5Up();
 
 	OSA_SR_ALLOC();
 
@@ -868,12 +868,12 @@ void ProcessAudio_AfterAudioInputBufIsReady_MusicPlayer(void)
 	#endif
 
 	DmaTxRxIsDone=0;
-	DbgPin5Dn();
+	//DbgPin5Dn();
 }
 __attribute__((section("CodeQuickAccess")))
 void ProcessAudio_AfterAudioInputBufIsReady_Translation(void)
 {
-    DbgPin5Up();
+    //DbgPin5Up();
 
     OSA_SR_ALLOC();
 
@@ -910,7 +910,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_Translation(void)
     #endif
 
     DmaTxRxIsDone=0;
-    DbgPin5Dn();
+    //DbgPin5Dn();
 }
 
 __attribute__((section("CodeQuickAccess")))
@@ -921,7 +921,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_AiConversation(void)
 __attribute__((section("CodeQuickAccess")))
 void ProcessAudio_AfterAudioInputBufIsReady_VideoAi(void)
 {
-    DbgPin5Up();
+    //DbgPin5Up();
 
     OSA_SR_ALLOC();
 
@@ -958,7 +958,7 @@ void ProcessAudio_AfterAudioInputBufIsReady_VideoAi(void)
     #endif
 
     DmaTxRxIsDone=0;
-    DbgPin5Dn();
+    //DbgPin5Dn();
 }
 #endif
 
@@ -1168,7 +1168,7 @@ void McuMainAudioFlowFinalize_HfpCall(void)
 				GenerateSineToneSingleFreq_S16_LRMixed(&SineToneGenerator1, TmpRingToneS32_SingleCh, AudioFrameSizeInSamplePerCh_16KHz , 1);
 			#else
 				//generate tone from sin wav table --- much smaller mips, but freq is fixed at 320Hz
-				GenerateSinWavFromTable_S16_SingleCh(TmpRingToneS32_SingleCh, AudioFrameSizeInSamplePerCh_16KHz);
+				GenerateSinWavFromTable_S16_SingleCh(1, TmpRingToneS32_SingleCh, AudioFrameSizeInSamplePerCh_16KHz,1);
 			#endif
 
 			LocalToneGainControlCnt++;
@@ -1348,8 +1348,32 @@ void McuMainAudioFlowFinalize_VideoAi(void)
 #endif
 
 #if 1	//folding --- audio interface init
-extern uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx);
+int WaitForDspFinishesItsJob(int ExpectedReply, int TimeOutInMs)	//0: expected reply received within expected time, 1: wrong reply received within expected time, 2: time out, not received anything in expected time
+{
+	int r=0;
+	int quitCnt=0;
+	while(1)
+	{
+		if(VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdx_DspJobDone])
+		{
+			if(ExpectedReply==VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdx_DspJobDone])
+				r=0;
+			else
+				r=1;
+			VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdx_DspJobDone]=0;
+			return r;
+		}
 
+		vTaskDelay(pdMS_TO_TICKS(1));
+		quitCnt++;
+		if(quitCnt>TimeOutInMs)
+			return 2;
+	}
+}
+
+extern uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx);
+extern void StartI2SToAmpNow(void);
+extern void StartI2SToNvtNow(void);
 void InitPdm(U32 MicActiveBitMap, int FrmSize, int Fs)
 {
 	if(!AudioPortIsActive_Pdm)
@@ -1416,9 +1440,9 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 	if((!AudioPortIsActive_I2SToAmp)||(!AudioPortIsActive_I2SToNvt)||!(AudioPortIsActive_Pdm))
 	{
 		#if UsingQAR87Board == 1
-			MclkFreq=BOARD_SwitchAudioFreq(16000,NvtFc5Fc6_AmpFc1Fc3);
+			MclkFreq=BOARD_SwitchAudioFreq(48000,NvtFc5Fc6_AmpFc1Fc3);
 		#else
-			MclkFreq=BOARD_SwitchAudioFreq(16000,BtPcmFc5Fc2_CodecFc1Fc3);
+			MclkFreq=BOARD_SwitchAudioFreq(48000,BtPcmFc5Fc2_CodecFc1Fc3);
 		#endif
 	}
 
@@ -1436,11 +1460,10 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 	InitAudioCircularBuf(0,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
 	DmaTxRxIsExpected=(
-						AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
-						AudioI2sPortsBitMapFlag_FcTxToNvt|AudioI2sPortsBitMapFlag_FcRxFrNvt|
-						//AudioPdmPortsBitMapFlag_Mic01|AudioPdmPortsBitMapFlag_Mic23|AudioPdmPortsBitMapFlag_Mic45|AudioPdmPortsBitMapFlag_Mic67
+						AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp
+						|AudioI2sPortsBitMapFlag_FcTxToNvt|AudioI2sPortsBitMapFlag_FcRxFrNvt
 						#if EnableMic01==1
-							AudioPdmPortsBitMapFlag_Mic01
+							|AudioPdmPortsBitMapFlag_Mic01
 						#endif
 						#if EnableMic23==1
 							|AudioPdmPortsBitMapFlag_Mic23
@@ -1465,7 +1488,12 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
+
+    int TimeOutInMs=100;
 	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_HfpVoiceCall,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_HfpVoiceCall time out in %d ms\r\n", TimeOutInMs);
+
 	return;
 }
 void InitAudioInterface_HfpCall(int Opt)
@@ -1522,7 +1550,12 @@ void InitAudioInterface_HfpCall(int Opt)
 
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples    =AudioFrameSizeInSamplePerCh_16KHz;
+
+    int TimeOutInMs=100;
 	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_HfpVoiceCall,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_HfpVoiceCall time out in %d ms\r\n", TimeOutInMs);
+
 	return;
 }
 void InitAudioInterface_HomeVitStandby(int Opt)
@@ -1574,7 +1607,12 @@ void InitAudioInterface_HomeVitStandby(int Opt)
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
 	VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
+
+    int TimeOutInMs=100;
 	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_HfpVoiceCall,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_HfpVoiceCall time out in %d ms\r\n", TimeOutInMs);
+
 	return;
 }
 
@@ -1640,7 +1678,15 @@ void InitAudioInterface_VideoRecording(int Opt)
     VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
-    VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	int TimeOutInMs=100;
+    //VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_AdaptiveMode;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_AdaptiveMode,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_AdaptiveMode time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_VideoRecording;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_VideoRecording,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_VideoRecording time out in %d ms\r\n", TimeOutInMs);
 
     return;
 }
@@ -1708,7 +1754,12 @@ void InitAudioInterface_MediaPlayer(int Opt)
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
-	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	//VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+
+	int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_MediaPlay;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_MediaPlay,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_MediaPlay time out in %d ms\r\n", TimeOutInMs);
 	return;
 }
 void InitAudioInterface_MusicPlayer(int Opt)
@@ -1809,7 +1860,16 @@ void InitAudioInterface_MusicPlayer(int Opt)
 
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
-	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+
+    int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_AdaptiveMode;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_AdaptiveMode,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_HfpVoiceCall time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_MusicPlay;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_MusicPlay,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_MusicPlay time out in %d ms\r\n", TimeOutInMs);
+
 	return;
 }
 void InitAudioInterface_Translation(int Opt)
@@ -1880,7 +1940,13 @@ void InitAudioInterface_Translation(int Opt)
     VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
-    VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+    //VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+
+    int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_FarEnd;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_FarEnd,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_FarEnd time out in %d ms\r\n", TimeOutInMs);
+	
 
     // Add for SBC
     VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
@@ -1891,7 +1957,13 @@ void InitAudioInterface_Translation(int Opt)
 
 void InitAudioInterface_AiConversation(int Opt)
 {
+	//VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_NearEnd;
+	int TimeOutInMs=100;
 	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_NearEnd;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_NearEnd,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_NearEnd time out in %d ms\r\n", TimeOutInMs);
+
+	return;
 }
 
 void InitAudioInterface_VideoAi(int Opt)
@@ -1968,6 +2040,7 @@ void InitAudioInterface_VideoAi(int Opt)
     VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
     VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;        //0xffff stands for a2dp sbc stream
 
+	// to add requesting DSP to re-init conversa ...
     return;
 }
 #endif
@@ -1999,13 +2072,21 @@ void Deinit_GeneralAudio(int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm
 	if(ToDeinitAmpI2S)
 		if(AudioPortIsActive_I2SToAmp)
 		{
-			CloseI2sDma((I2S_Type *)DEMO_I2SRxFrAmp);
-			CloseI2sDma((I2S_Type *)DEMO_I2STxToAmp);
-				CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2SRxFrAmp);
-				CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2STxToAmp);
+			CloseI2sDma((I2S_Type *)I2SRxFrAmpInstance);
+			CloseI2sDma((I2S_Type *)I2STxToAmpInstance);
+				CloseI2sAndI2sIntr((I2S_Type *)I2SRxFrAmpInstance);
+				CloseI2sAndI2sIntr((I2S_Type *)I2STxToAmpInstance);
 					ClearDmaBuf_I2SToAmp();
 					ClearDmaBuf_I2SFrAmp();
 			AudioPortIsActive_I2SToAmp=0;
+		}
+
+	//close PDM all channels
+	if(ToDeinitPdm)
+		if(AudioPortIsActive_Pdm)
+		{
+			BOARD_DeInit_DMA_PDM(0xff);
+			AudioPortIsActive_Pdm=0;
 		}
 
 	if(ToDeinitNvtI2S)
@@ -2018,14 +2099,6 @@ void Deinit_GeneralAudio(int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm
 					ClearDmaBuf_I2STxToNvt();
 					ClearDmaBuf_I2SRxFrNvt();
 			AudioPortIsActive_I2SToNvt=0;
-		}
-
-	//close PDM all channels
-	if(ToDeinitPdm)
-		if(AudioPortIsActive_Pdm)
-		{
-			BOARD_DeInit_DMA_PDM(0xff);
-			AudioPortIsActive_Pdm=0;
 		}
 
 	(void)BOARD_SwitchAudioFreq(0U,0);
@@ -2052,10 +2125,10 @@ void DeInitAudioInterface_AudioIoDebug(int Opt)
 
 	if(AudioPortIsActive_I2SToAmp)
 	{
-		CloseI2sDma((I2S_Type *)DEMO_I2SRxFrAmp);
-		CloseI2sDma((I2S_Type *)DEMO_I2STxToAmp);
-			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2SRxFrAmp);
-			CloseI2sAndI2sIntr((I2S_Type *)DEMO_I2STxToAmp);
+		CloseI2sDma((I2S_Type *)I2SRxFrAmpInstance);
+		CloseI2sDma((I2S_Type *)I2STxToAmpInstance);
+			CloseI2sAndI2sIntr((I2S_Type *)I2SRxFrAmpInstance);
+			CloseI2sAndI2sIntr((I2S_Type *)I2STxToAmpInstance);
 				ClearDmaBuf_I2SToAmp();
 				ClearDmaBuf_I2SFrAmp();
 		AudioPortIsActive_I2SToAmp=0;
@@ -2082,17 +2155,53 @@ void DeInitAudioInterface_AudioIoDebug(int Opt)
 
     CirUacUpAudioBuf_ClearAllSamples_MultiCh(&UacUpAudioBuf_MCh);
     CirUacDnAudioBuf_ClearAllSamples_MultiCh(&UacDnAudioBuf_MCh);
+
+    int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_ShutDownConversa;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_ShutDownConversa,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_ShutDownConversa time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_ShutDownEap;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_ShutDownEap,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_ShutDownEap time out in %d ms\r\n", TimeOutInMs);
+
+	return;
 }
 void DeInitAudioInterface_HfpCall(int Opt)
 {
 	Deinit_GeneralAudio(1,0,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
 	ClearAudioCirBuf(1,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
 	DeinitHfpVariables();
+
+    int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_ShutDownConversa;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_ShutDownConversa,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_ShutDownConversa time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_ShutDownEap;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_ShutDownEap,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_ShutDownEap time out in %d ms\r\n", TimeOutInMs);
+
+	return;
 }
 void DeInitAudioInterface_HomeVitStandby(int Opt)
 {
 	Deinit_GeneralAudio(1,0,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
 	ClearAudioCirBuf(0,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+
+    int TimeOutInMs=100;
+
+	PRINTF_M("DeInitAudioInterface_HomeVitStandby ConversaTuningCfg_ShutDownConversa \r\n");
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_ShutDownConversa;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_ShutDownConversa,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_ShutDownConversa time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_ShutDownEap;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_ShutDownEap,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_ShutDownEap time out in %d ms\r\n", TimeOutInMs);
+
+	return;
 }
 
 void DeInitAudioInterface_VideoRecording(int Opt)
@@ -2100,6 +2209,16 @@ void DeInitAudioInterface_VideoRecording(int Opt)
    // VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
     Deinit_GeneralAudio(1,1,1,1);   //int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
     ClearAudioCirBuf(0,1,0);        //int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+
+    int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_ShutDownConversa;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_ShutDownConversa,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_ShutDownConversa time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_ShutDownEap;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_ShutDownEap,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_ShutDownEap time out in %d ms\r\n", TimeOutInMs);
+
     return;
 }
 
@@ -2108,17 +2227,37 @@ void DeInitAudioInterface_MediaPlayer(int Opt)
     //May be need it //VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
 	Deinit_GeneralAudio(1,1,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
 	ClearAudioCirBuf(0,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+
+    int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_ShutDownConversa;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_ShutDownConversa,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_ShutDownConversa time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_ShutDownEap;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_ShutDownEap,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_ShutDownEap time out in %d ms\r\n", TimeOutInMs);
+
 	return;
 
 }
 void DeInitAudioInterface_MusicPlayer(int Opt)
 {
-	//return;
+    int TimeOutInMs=100;
+
     VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
 	Deinit_GeneralAudio(1,0,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
 	ClearAudioCirBuf(0,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+	PRINTF_M("DeInitAudioInterface_MusicPlayer ConversaTuningCfg_ShutDownConversa \r\n");
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_ShutDownConversa;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_ShutDownConversa,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_ShutDownConversa time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_ShutDownEap;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_ShutDownEap,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_ShutDownEap time out in %d ms\r\n", TimeOutInMs);
 	return;
 
+#if 0
 	if(Opt&0b0001)
 	{
 		//sleep AMP ...
@@ -2146,22 +2285,54 @@ void DeInitAudioInterface_MusicPlayer(int Opt)
 
     CirUacUpAudioBuf_ClearAllSamples_MultiCh(&UacUpAudioBuf_MCh);
     CirUacDnAudioBuf_ClearAllSamples_MultiCh(&UacDnAudioBuf_MCh);
+	
+#endif
 }
 void DeInitAudioInterface_Translation(int Opt)
 {
     VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
     Deinit_GeneralAudio(1,1,1,1);   //int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
     ClearAudioCirBuf(0,1,0);        //int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+
+    int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_ShutDownConversa;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_ShutDownConversa,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_ShutDownConversa time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_ShutDownEap;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_ShutDownEap,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_ShutDownEap time out in %d ms\r\n", TimeOutInMs);
+
     return;
 }
 void DeInitAudioInterface_AiConversation(int Opt)
 {
+    int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_ShutDownConversa;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_ShutDownConversa,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_ShutDownConversa time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_ShutDownEap;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_ShutDownEap,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_ShutDownEap time out in %d ms\r\n", TimeOutInMs);
+
+	return;
 }
 void DeInitAudioInterface_VideoAi(int Opt)
 {
     VarBlockSharedByDspAndMcu.NeedToStopA2dpSbc=1;
     Deinit_GeneralAudio(1,1,1,1);   //int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
     ClearAudioCirBuf(0,1,0);        //int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
+
+    int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_ShutDownConversa;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_ShutDownConversa,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_ShutDownConversa time out in %d ms\r\n", TimeOutInMs);
+
+	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_ShutDownEap;
+	if(WaitForDspFinishesItsJob(EapTuningCfg_ShutDownEap,TimeOutInMs))
+		PRINTF_M("set EapTuningCfg_ShutDownEap time out in %d ms\r\n", TimeOutInMs);
+
     return;
 }
 #endif

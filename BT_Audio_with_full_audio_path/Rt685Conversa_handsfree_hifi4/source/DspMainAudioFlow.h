@@ -59,7 +59,62 @@ extern S16 AudioOneFrameBuf_48KHz_14 [AudioFrameSizeInSamplePerCh_48KHz];
 extern S16 AudioOneFrameBuf_48KHz_15 [AudioFrameSizeInSamplePerCh_48KHz];
 extern S16 AudioOneFrameBuf_48KHz_16 [AudioFrameSizeInSamplePerCh_48KHz];
 
+extern S32 AudioOneFrameBuf_48KHz_AllZeros [AudioFrameSizeInSamplePerCh_48KHz];
+
+
+
+#if TestAlgoInitAndDeInit==1
+extern S32 *SrcPtrS32_Mic0;
+extern S32 *SrcPtrS32_Mic1;
+extern S32 *SrcPtrS32_Mic2;
+extern S32 *SrcPtrS32_Mic3;
+//S32 *SrcPtrS32_Mic4;
+//S32 *SrcPtrS32_Mic5;
+//S32 *SrcPtrS32_Mic6;
+//S32 *SrcPtrS32_Mic7;
+extern S16 *SrcPtrS16_I2SAmpL;
+extern S16 *SrcPtrS16_I2SAmpR;
+extern S16 *SrcPtrS16_I2SNvtL;
+extern S16 *SrcPtrS16_I2SNvtR;
+extern S32 *SrcPtrS32_UacL;
+extern S32 *SrcPtrS32_UacR;
+
+extern S16 *DstPtrS16_I2SAmpL;
+extern S16 *DstPtrS16_I2SAmpR;
+extern S16 *DstPtrS16_I2SNvtL;
+extern S16 *DstPtrS16_I2SNvtR;
+
+extern float *SrcPtrFlt_DmicIn0;
+extern float *SrcPtrFlt_DmicIn1;
+extern float *SrcPtrFlt_DmicIn2;
+extern float *SrcPtrFlt_DmicIn3;
+extern float *SrcPtrFlt_I2SInAmpL;
+extern float *SrcPtrFlt_I2SInAmpR;
+extern float *SrcPtrFlt_I2SInNvtL;
+extern float *SrcPtrFlt_I2SInNvtR;
+extern float *SrcPtrFlt_UacDnL;
+extern float *SrcPtrFlt_UacDnR;
+
+extern float *FltPtr_GeneratedToneL;
+extern float *FltPtr_GeneratedToneR;
+extern float *FltPtr_Tmp1L;
+extern float *FltPtr_Tmp1R;
+extern float *FltPtr_Tmp2L;
+extern float *FltPtr_Tmp2R;
+extern S32	*S32Ptr_Tmp1L;
+extern S32 *S32Ptr_Tmp1R;
+extern S32 *S32Ptr_Tmp2L;
+extern S32 *S32Ptr_Tmp2R;
+
+extern S16 *S16Ptr_Tmp1L;
+extern S16 *S16Ptr_Tmp1R;
+extern S16 *S16Ptr_Tmp2L;
+extern S16 *S16Ptr_Tmp2R;
+#endif
+
 extern ConversaTuningCfg_t CurrentConversaTuningCfg;
+extern EapTuningCfg_t      CurrentEAPTuningCfg;
+
 
 extern void DspMainAudioFlowProcOneFrame_AudioIoDbg(int OptionWord);
 extern void DspMainAudioFlowProcOneFrame_VideoRecording(int OptionWord);
@@ -73,7 +128,8 @@ extern void DspMainAudioFlowProcOneFrame_VideoAi(int OptionWord);
 extern void SimpleSrc3xUp(S32 *DstPtr, S32 *SrcPtr, int LenOfInput);
 extern void SimpleSrc3xDn(S32 *DstPtr, S32 *SrcPtr, int LenOfOutput);
 
-extern void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float **PtrArray_OutSignals, S16 *RawMicSigForVitRef);
+extern void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float **PtrArray_OutSignals, S16 *RawMicSigForVitRef, int ToByPassConversa);
+extern void InitDspMainAudioFlow(void);
 
 #endif
 
