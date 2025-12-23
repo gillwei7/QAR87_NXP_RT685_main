@@ -1825,6 +1825,7 @@
 								<option id="com.crt.advproject.link.memory.data.984894458" name="Global data placement" superClass="com.crt.advproject.link.memory.data" value="Default" valueType="string"/>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="false" id="com.crt.advproject.link.memory.sections.2047402830" name="Extra linker script input sections" superClass="com.crt.advproject.link.memory.sections" valueType="stringList">
 									<listOptionValue builtIn="false" value="isd=*(.OpusSbcBin);region=BOARD_FLASH_OpusSbc;type=.text"/>
+									<listOptionValue builtIn="false" value="isd=*(.DspFirmwareBin);region=BOARD_FLASH_DSPBin;type=.text"/>
 								</option>
 								<option IS_BUILTIN_EMPTY="false" IS_VALUE_EMPTY="true" id="com.crt.advproject.link.gcc.multicore.master.userobjs.2085858556" name="Slave Objects (not visible)" superClass="com.crt.advproject.link.gcc.multicore.master.userobjs" valueType="userObjs"/>
 								<option id="com.crt.advproject.link.arch.838334920" name="Architecture" superClass="com.crt.advproject.link.arch" value="com.crt.advproject.link.target.cm33" valueType="enumerated"/>
@@ -1937,21 +1938,6 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="Rt685Conversa_handsfree_cm33.null.807993743" name="Rt685Conversa_handsfree_cm33" projectType="com.crt.advproject.projecttype.exe"/>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598;com.crt.advproject.config.exe.debug.306811598.;com.crt.advproject.gcc.exe.debug.1671029631;com.crt.advproject.compiler.input.1657461406">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.160562080;com.crt.advproject.config.exe.release.160562080.;com.crt.advproject.gcc.exe.release.1548558788;com.crt.advproject.compiler.input.762896290">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.160562080;com.crt.advproject.config.exe.release.160562080.;com.crt.advproject.gas.exe.release.1797469943;com.crt.advproject.assembler.input.525774891">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598;com.crt.advproject.config.exe.debug.306811598.;com.crt.advproject.gas.exe.debug.2056495810;com.crt.advproject.assembler.input.905149956">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="com.nxp.mcuxpresso.core.datamodels">
 		<sdkName>SDK_2.x_EVK-MIMXRT685</sdkName>
@@ -1976,8 +1962,8 @@
 &lt;memory can_program="true" id="Flash" is_ro="true" size="0" type="Flash"/&gt;&#13;
 &lt;memory id="RAM" size="4608" type="RAM"/&gt;&#13;
 &lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="BOARD_FLASH" location="0x8000000" size="0x300000"/&gt;&#13;
-&lt;memoryInstance derived_from="Flash" edited="true" id="BOARD_FLASH_DSPBin" location="0x8300000" size="0x300000"/&gt;&#13;
-&lt;memoryInstance derived_from="Flash" edited="true" id="BOARD_FLASH_OpusSbc" location="0x8600000" size="0x200000"/&gt;&#13;
+&lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="BOARD_FLASH_DSPBin" location="0x8300000" size="0x300000"/&gt;&#13;
+&lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="BOARD_FLASH_OpusSbc" location="0x8600000" size="0x200000"/&gt;&#13;
 &lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="LITTLEFS_FLASH_region" location="0x8800000" size="0x800000"/&gt;&#13;
 &lt;memoryInstance derived_from="RAM" edited="true" id="SRAM" location="0x80000" size="0x180000"/&gt;&#13;
 &lt;memoryInstance derived_from="RAM" edited="true" id="Audio_IO_Data" location="0x20000000" size="0x40000"/&gt;&#13;
@@ -2002,4 +1988,25 @@
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598.1952887512;com.crt.advproject.config.exe.debug.306811598.1952887512.;com.crt.advproject.gcc.exe.debug.1723677607;com.crt.advproject.compiler.input.1874456991">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.crt.advproject.GCCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598;com.crt.advproject.config.exe.debug.306811598.;com.crt.advproject.gcc.exe.debug.1671029631;com.crt.advproject.compiler.input.1657461406">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598.1952887512;com.crt.advproject.config.exe.debug.306811598.1952887512.;com.crt.advproject.gas.exe.debug.721249685;com.crt.advproject.assembler.input.2035441075">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.crt.advproject.GCCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.160562080;com.crt.advproject.config.exe.release.160562080.;com.crt.advproject.gcc.exe.release.1548558788;com.crt.advproject.compiler.input.762896290">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.160562080;com.crt.advproject.config.exe.release.160562080.;com.crt.advproject.gas.exe.release.1797469943;com.crt.advproject.assembler.input.525774891">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598;com.crt.advproject.config.exe.debug.306811598.;com.crt.advproject.gas.exe.debug.2056495810;com.crt.advproject.assembler.input.905149956">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>
