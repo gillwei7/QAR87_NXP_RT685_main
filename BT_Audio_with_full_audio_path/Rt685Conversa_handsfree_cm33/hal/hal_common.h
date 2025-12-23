@@ -56,15 +56,14 @@
  ******************************************************************************/
 
 // SW Version
-/* Rule of Version: [based version]_[commit_date]_[commit_time]_[sub_item] */
 #if HAL_MCU_APP_RELEASE
 static uint8_t sw_version[40] = "R01.QAR88n.01.01.251205";
 #else
 #if UsingQAR87BoardHwVersion == 0 // Dev Board
-static uint8_t sw_version[40] = "T02.QAR88n.01.01.251216";
+static uint8_t sw_version[50] = "T03.QAR88n.01.01.251223.Standalone";
 #endif
 #if UsingQAR87BoardHwVersion == 1 // Actual Board
-static uint8_t sw_version[40] = "T02.QAR88n.02.01.251216";
+static uint8_t sw_version[50] = "T03.QAR88n.02.01.251223.Standalone";
 #endif
 
 #endif
