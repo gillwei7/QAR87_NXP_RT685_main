@@ -68,14 +68,16 @@ static void Determine_pca9422_enter_ship_mode(void)
 				/* 沒達到 2 秒長按 → 進入 ship mode */
 				PRINTF("[PCA9422] Power key (press < %u ms)\r\n", LONG_PRESS_MS);
 				//hal_pmic_pca9422_enter_ship_mode();
-				hal_pmic_pca9422_power_down();
+				//hal_pmic_pca9422_power_down();
+				bq256xx_enter_ship_mode();
 			}
 		}
 		else
 		{
 			/* 沒有按住按鍵（高電位）→ 直接進入 ship mode */
 			//hal_pmic_pca9422_enter_ship_mode();
-			hal_pmic_pca9422_power_down();
+			//hal_pmic_pca9422_power_down();
+			bq256xx_enter_ship_mode();
 		}
 }
 
@@ -395,7 +397,8 @@ void I2C_Task(void *pvParameters)
                         break;
                     case LED_EVT_POWER_OFF_PROGRESS:
                     	hal_led_set_indicator_status(HAL_LED_POWER_OFF);
-                    	hal_pmic_pca9422_power_down();
+                    	//hal_pmic_pca9422_power_down();
+                    	bq256xx_enter_ship_mode();
                         break;
                     case LED_EVT_CHARGING:
                     	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_ENABLE);

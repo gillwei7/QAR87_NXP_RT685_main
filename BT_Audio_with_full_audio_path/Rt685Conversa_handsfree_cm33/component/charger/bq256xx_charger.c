@@ -90,8 +90,6 @@ status_t bq256xx_init(const bq256xx_cfg_t *cfg)
     ret = bq256xx_set_wdt(cfg->wdt_ms);
     if (ret != kStatus_Success) return ret;
 
-    // Disable JEITA VSET
-    ret = bq256xx_update_bits(BQ256XX_REG_CHG_CTRL3, BQ256XX_JEITA_VSET_DIS, BQ256XX_JEITA_VSET_DIS);
     return ret;
 }
 
@@ -197,5 +195,32 @@ status_t bq256xx_poll_status(bq256xx_status_t *stat)
     stat->vbus_good = vbus_st;
 
     return kStatus_Success;
+}
+
+status_t bq256xx_enter_ship_mode(void)
+{
+    status_t ret;
+
+    // [1] 一律先允許在 VBUS present 時也能關閉/重設 BATFET
+    ret = bq256xx_update_bits(BQ256XX_REG_CHG_CTRL3,
+                              BQ256XX_BATFET_RST_WVBUS,
+                              BQ256XX_BATFET_RST_WVBUS);
+    if (ret != kStatus_Success) return ret;
+
+    // [2] 取消延遲 → 立即關閉 BATFET
+    ret = bq256xx_update_bits(BQ256XX_REG_CHG_CTRL3,
+                              BQ256XX_BATFET_DLY,
+                              0);  // 0 = 立即，1 = 延遲 ~10–15s
+    if (ret != kStatus_Success) return ret;
+
+    // [3] 關閉 BATFET → 進入/準備進入 ship mode（不插 adapter 時立刻生效）
+    ret = bq256xx_update_bits(BQ256XX_REG_CHG_CTRL3,
+                              BQ256XX_BATFET_DIS,
+                              BQ256XX_BATFET_DIS);
+    if (ret != kStatus_Success) return ret;
+
+    PRINTF("[Charger] bq256xx ship mode \r\n");
+
+    return ret;
 }
 

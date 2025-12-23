@@ -185,7 +185,8 @@ static void PowerOffChargingTask(void *pvParameters)
             hal_led_ktd2027_off();
             PRINTF("[System] power off charging -> power down \r\n");
             vTaskDelay(pdMS_TO_TICKS(100));
-            hal_pmic_pca9422_power_down();
+            //hal_pmic_pca9422_power_down();
+            bq256xx_enter_ship_mode();
             vTaskSuspend(NULL);
         }
         vTaskDelay(pdMS_TO_TICKS(1000));
@@ -265,7 +266,8 @@ void hal_power_go_to_power_off_charging(void)
             PRINTF("[System] power off charging -> power down \r\n");
             vTaskDelay(pdMS_TO_TICKS(100));
 
-            hal_pmic_pca9422_power_down();
+            //hal_pmic_pca9422_power_down();
+            bq256xx_enter_ship_mode();
             vTaskSuspend(NULL);
 
         }

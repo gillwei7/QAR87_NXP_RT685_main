@@ -79,11 +79,13 @@
 /* REG04 (VBAT LIMIT) */
 #define BQ256XX_VBATREG_MASK      0xF8        // bits[7:3]
 
-/* REG07 (CHG_CTRL3) */
-#define BQ256XX_JEITA_VSET_DIS    (1 << 4)
-
 /* REG0B (PART_INFO) */
 #define BQ256XX_REG_RST           (1 << 7)
+
+// ---- REG07: Charger Control 3 ----
+#define BQ256XX_BATFET_DIS        (1 << 5)  // 關閉 BATFET -> 進入/準備進入 ship mode
+#define BQ256XX_BATFET_RST_WVBUS  (1 << 4)  // 允許在 VBUS 插著時也執行 BATFET 關閉/重設
+#define BQ256XX_BATFET_DLY        (1 << 3)  // 關閉 BATFET 延遲 (~10-15s)；0=立即、1=延遲
 
 /* Charger configuration */
 typedef struct {
@@ -122,5 +124,7 @@ status_t bq256xx_set_wdt(uint32_t ms);
 
 status_t bq256xx_poll_status(bq256xx_status_t *stat);
 status_t bq256xx_chip_reset(void);
+
+status_t bq256xx_enter_ship_mode(void);
 
 #endif /* CHARGER_BQ256XX_CHARGER_H_ */
