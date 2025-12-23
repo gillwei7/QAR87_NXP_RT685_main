@@ -544,6 +544,10 @@ static void execute_active_spi_transmission(uint8_t hex_value)
 
 }
 
+static inline int is_nova_active(void) {
+    return GPIO_PinRead(GPIO, 1U, 10U); // Nova忙線
+}
+
 /**
  * @brief Unified SPI handler task.
  * @details This FreeRTOS task integrates both active and passive SPI flows:
@@ -558,6 +562,8 @@ void spi_handler_task(void *pvParameters)
 {
     uint8_t received_value;
 
+	gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
+	GPIO_PinInit(GPIO, 1U, 10U, &input_pin_config);
 
     passive_evt_t  passive_evt;
     QueueSetMemberHandle_t activated;
@@ -625,6 +631,12 @@ void spi_handler_task(void *pvParameters)
 					vTaskDelay(pdMS_TO_TICKS(100));
 					continue;
 				}
+		        if (is_nova_active()) {
+		            PRINTF("[Active] Nova active (PIO1_10=HIGH), deferring active request 0x%02X\r\n", received_value);
+		            (void)xQueueSend(spi_request_queue, &received_value, 0);
+		            vTaskDelay(pdMS_TO_TICKS(100));
+		            continue;
+		        }
                 execute_active_spi_transmission(received_value);
             }
         }
