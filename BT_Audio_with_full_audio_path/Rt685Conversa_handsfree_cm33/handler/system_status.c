@@ -10,6 +10,7 @@
 #include "spi_handler.h"
 #include "WorkStateManager.h"
 #include "app_handsfree.h"
+#include "board.h"
 
 extern RingtoneState general_RingtoneState;
 
@@ -86,7 +87,9 @@ void ss_set_state(uint8_t state)
 
 			RequestToGetOutofTakePhoto = 1;
 
-		} else if (current_usage_state == USAGE_STATE_ABOUT) {
+		}
+#if ABOUT_STATE_ENABLE
+		else if (current_usage_state == USAGE_STATE_ABOUT) {
 			current_usage_state = state;
 			need_send_state = 1;
 
@@ -97,7 +100,10 @@ void ss_set_state(uint8_t state)
 
 			RequestToGetOutofAbout = 1;
 
-		} else if (current_usage_state == USAGE_STATE_MENU) {
+		}
+#endif
+#if MENU_STATE_ENABLE
+		else if (current_usage_state == USAGE_STATE_MENU) {
 			current_usage_state = state;
 			need_send_state = 1;
 
@@ -109,8 +115,10 @@ void ss_set_state(uint8_t state)
 			RequestToGetOutofMenu = 1;
 
 		}
-
-	} else if (state == USAGE_STATE_MENU && current_usage_state == USAGE_STATE_HOME) {
+#endif
+	}
+#if MENU_STATE_ENABLE
+	else if (state == USAGE_STATE_MENU && current_usage_state == USAGE_STATE_HOME) {
 		current_usage_state = state;
 		need_send_state = 1;
 
@@ -121,7 +129,10 @@ void ss_set_state(uint8_t state)
 
 		RequestToGetIntoMenu = 1;
 
-	} else if (state == USAGE_STATE_ABOUT && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
+	}
+#endif
+#if ABOUT_STATE_ENABLE
+	else if (state == USAGE_STATE_ABOUT && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
 		current_usage_state = state;
 		need_send_state = 1;
 
@@ -132,24 +143,54 @@ void ss_set_state(uint8_t state)
 
 		RequestToGetIntoAbout = 1;
 
-	} else if (state == USAGE_STATE_MUSIC_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
+	}
+#endif
+	else if (state == USAGE_STATE_MUSIC_PLAYER && (current_usage_state == USAGE_STATE_HOME
+#if MENU_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_MENU
+#endif
+#if ABOUT_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_ABOUT
+#endif
+			)) {
 //		RequestToGetIntoA2dpPlay = 1;
 //		current_usage_state = state;
 //		need_send_music_status = 1;
 //		music_status = 1;
 
 
-	} else if (state == USAGE_STATE_MEDIA_PLAYER && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
+	} else if (state == USAGE_STATE_MEDIA_PLAYER && (current_usage_state == USAGE_STATE_HOME
+#if MENU_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_MENU
+#endif
+#if ABOUT_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_ABOUT
+#endif
+			)) {
 		RequestToGetIntoMediaPlayer = 1;
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_VIDEO_RECORDING && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
+	} else if (state == USAGE_STATE_VIDEO_RECORDING && (current_usage_state == USAGE_STATE_HOME
+#if MENU_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_MENU
+#endif
+#if ABOUT_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_ABOUT
+#endif
+			)) {
 		RequestToGetIntoVideoRecording = 1;
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_TAKE_PHOTO && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
+	} else if (state == USAGE_STATE_TAKE_PHOTO && (current_usage_state == USAGE_STATE_HOME
+#if MENU_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_MENU
+#endif
+#if ABOUT_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_ABOUT
+#endif
+			)) {
 		current_usage_state = state;
 		need_send_state = 1;
 
@@ -160,12 +201,26 @@ void ss_set_state(uint8_t state)
 
 		RequestToGetIntoTakePhoto = 1;
 
-	} else if (state == USAGE_STATE_VIDEO_AI && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
+	} else if (state == USAGE_STATE_VIDEO_AI && (current_usage_state == USAGE_STATE_HOME
+#if MENU_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_MENU
+#endif
+#if ABOUT_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_ABOUT
+#endif
+			)) {
 		RequestToGetIntoVideoAI = 1;
 		current_usage_state = state;
 		need_send_state = 1;
 
-	} else if (state == USAGE_STATE_TRANSLATION && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU || current_usage_state == USAGE_STATE_ABOUT)) {
+	} else if (state == USAGE_STATE_TRANSLATION && (current_usage_state == USAGE_STATE_HOME
+#if MENU_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_MENU
+#endif
+#if ABOUT_STATE_ENABLE
+			 || current_usage_state == USAGE_STATE_ABOUT
+#endif
+			)) {
 		RequestToGetIntoTranslation = 1;
 		current_usage_state = state;
 		need_send_state = 1;

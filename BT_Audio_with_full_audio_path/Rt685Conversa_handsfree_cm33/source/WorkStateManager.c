@@ -741,9 +741,9 @@ void Manager_Task(void *pvParameters)
 							if (ss_get_state() == USAGE_STATE_HOME) {
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							} else if (ss_get_state() == USAGE_STATE_MENU) {
-								DeviceWorkStateCur=WorkState_Menu_Pre;		//this gives _pre
+								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
 							} else if (ss_get_state() == USAGE_STATE_ABOUT) {
-								DeviceWorkStateCur=WorkState_About_Pre;		//this gives _pre
+								DeviceWorkStateCur=WorkState_About;		//this gives _pre
 							} else if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
 								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
 							} else if (ss_get_state() == USAGE_STATE_VIDEO_RECORDING) {

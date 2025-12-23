@@ -448,6 +448,8 @@
 #define LED_KTD2027_ENABLE            1
 #define AMP_AW88166_ENABLE            1
 #define SOC_SPI_ENABLE                1
+#define MENU_STATE_ENABLE             0
+#define ABOUT_STATE_ENABLE            0
 
 #endif
 
