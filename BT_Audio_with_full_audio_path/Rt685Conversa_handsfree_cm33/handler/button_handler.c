@@ -38,6 +38,8 @@ static uint8_t       sChg5Clicks = 0;         /* 視窗內的短按次數 */
 static TickType_t    sChg5WindowStart = 0;    /* 視窗開始 Tick */
 
 extern volatile SystemStatus ss;
+extern uint8_t Novatek_boot_completed;
+
 #if UsingQAR87BoardHwVersion == 1 // Actual Board
 static uint8_t current_usb_output = 0;
 #endif
@@ -211,7 +213,7 @@ void button_task(void *pvParameters)
 				{
 					PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
 #if SOC_SPI_ENABLE
-					if ((ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
+					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
 							ss_get_state() == USAGE_STATE_VIDEO_RECORDING || ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
 						send_spi_request(SHORT_PRESS_HEX_VALUE);
 					}
@@ -276,7 +278,7 @@ void button_task(void *pvParameters)
                 PRINTF("[Button] Long Press (hold) detected. Sending 0x%02X\r\n",
                        LONG_PRESS_HEX_VALUE);
 #if SOC_SPI_ENABLE
-				if (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT) {
+				if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT)) {
 					send_spi_request(LONG_PRESS_HEX_VALUE);
 				}
 #endif
@@ -362,8 +364,8 @@ void button_task(void *pvParameters)
                             } else if (current_usb_output == 1) {
                                 PRINTF("[USB] NXP USB.\r\n");
                                 current_usb_output++;
-                                GPIO_PinWrite(GPIO, NXP_532_USB_SWITCH_PORT, NXP_532_USB_SWITCH_PIN, 1U);
-                                GPIO_PinWrite(GPIO, USB_SWDIO_SWITCH_PORT, USB_SWDIO_SWITCH_PIN, 0U);
+                                GPIO_PinWrite(GPIO, NXP_532_USB_SWITCH_PORT, NXP_532_USB_SWITCH_PIN, 0U);
+                                GPIO_PinWrite(GPIO, USB_SWDIO_SWITCH_PORT, USB_SWDIO_SWITCH_PIN, 1U);
 
                             } else if (current_usb_output == 2) {
                                 PRINTF("[USB] NXP SWD.\r\n");
@@ -421,7 +423,9 @@ void button_task(void *pvParameters)
                         /* 長按（放開才觸發） */
                         PRINTF("[PWR] Long Press (>=%ums) detected.\r\n", (unsigned)PWR_LONG_MS);
 #if SOC_SPI_ENABLE
-                        send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
+                        if (Novatek_boot_completed) {
+                            send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
+                        }
 #endif
                         led_post_event(LED_EVT_POWER_OFF_PROGRESS);
                         /* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
@@ -433,7 +437,10 @@ void button_task(void *pvParameters)
                         PRINTF("[PWR] Short Press detected.\r\n");
 #if SOC_SPI_ENABLE
 #if 1
-                        send_spi_request(POWER_SHORT_PRESS_HEX_VALUE);
+                        if (Novatek_boot_completed) {
+                            send_spi_request(POWER_SHORT_PRESS_HEX_VALUE);
+
+                        }
 #else // use button to switch state
 //                        RequestToGetIntoMediaPlayer = 1;
                         //RequestToGetIntoTranslation = 1;

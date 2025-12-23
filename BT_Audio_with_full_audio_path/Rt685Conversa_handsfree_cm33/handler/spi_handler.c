@@ -388,12 +388,27 @@ static void execute_active_spi_transmission(uint8_t hex_value)
 {
     PRINTF("\n--- Executing Active SPI for value: 0x%02X ---\r\n", hex_value);
 
+    const TickType_t timeout = pdMS_TO_TICKS(500);
+    TickType_t start = xTaskGetTickCount();
+
+    while (passive_mode_busy)
+    {
+        vTaskDelay(pdMS_TO_TICKS(5));
+        if ((xTaskGetTickCount() - start) > timeout)
+        {
+            PRINTF("[Active] Timeout waiting passive ACK. Force re-init passive.\r\n");
+
+            // 逾時時，用最安全的方式把 PASSIVE 狀態 reset
+            passive_mode_busy = false;
+            operation_mode = MODE_PASSIVE_IDLE;
+            init_passive_mode();  // 重新預載 0xFF 並確保 IRQ 開啟
+            break;
+        }
+    }
+
     /* ============= 進入主動模式 ============= */
     operation_mode = MODE_ACTIVE;
     SPI_DisableRxTxInterrupt();
-    while (passive_mode_busy) {
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
 
     // NEW: 確保主動傳輸完成事件佇列存在
     if (transfer_evt_queue == NULL) {
@@ -529,6 +544,10 @@ static void execute_active_spi_transmission(uint8_t hex_value)
 
 }
 
+static inline int is_nova_active(void) {
+    return GPIO_PinRead(GPIO, 1U, 10U); // Nova忙線
+}
+
 /**
  * @brief Unified SPI handler task.
  * @details This FreeRTOS task integrates both active and passive SPI flows:
@@ -543,6 +562,8 @@ void spi_handler_task(void *pvParameters)
 {
     uint8_t received_value;
 
+	gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
+	GPIO_PinInit(GPIO, 1U, 10U, &input_pin_config);
 
     passive_evt_t  passive_evt;
     QueueSetMemberHandle_t activated;
@@ -603,7 +624,19 @@ void spi_handler_task(void *pvParameters)
             }
         } else if (activated == spi_request_queue) {
             if (xQueueReceive(spi_request_queue, &received_value, 0) == pdPASS) {
-                // 主動請求：執行主動 SPI 傳輸（內部以 transfer_evt_queue 等待每個 frame 完成）
+            	//若 PASSIVE 還在忙，延後執行或重丟回 queue 等待下一輪 */
+				if (passive_mode_busy || operation_mode == MODE_PASSIVE_ACK) {
+					PRINTF("[Active] Passive ACK busy, deferring active request 0x%02X\r\n", received_value);
+					(void)xQueueSend(spi_request_queue, &received_value, 0); // 丟回去，下一輪再試
+					vTaskDelay(pdMS_TO_TICKS(100));
+					continue;
+				}
+		        if (is_nova_active()) {
+		            PRINTF("[Active] Nova active (PIO1_10=HIGH), deferring active request 0x%02X\r\n", received_value);
+		            (void)xQueueSend(spi_request_queue, &received_value, 0);
+		            vTaskDelay(pdMS_TO_TICKS(100));
+		            continue;
+		        }
                 execute_active_spi_transmission(received_value);
             }
         }
