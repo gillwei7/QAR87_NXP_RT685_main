@@ -26,6 +26,8 @@ TaskHandle_t       sI2CTaskHandle  = NULL;
 
 extern QueueHandle_t spi_request_queue ;
 
+extern SemaphoreHandle_t sys_bus_mutex;
+
 extern volatile bq256xx_status_t charger_status;
 extern volatile BatteryInfo battery_info;
 volatile led_event_t g_led_event = LED_EVT_NONE;
@@ -39,8 +41,6 @@ extern uint8_t Novatek_boot_completed;
 battery_state_t battery_state = BATTERY_STATE_NORMAL;
 
 extern uint32_t s_bq256xx_iindpm_target_ua;
-
-
 
 static void BatteryReadTimerCb(TimerHandle_t xTimer)
 {
@@ -159,7 +159,6 @@ void led_post_event(led_event_t e)
     g_led_event = e;
     if (i2c_event_group) {
         xEventGroupSetBits(i2c_event_group, LED_EVENT_BIT);
-
     }
 }
 
@@ -182,6 +181,11 @@ void I2C_Task(void *pvParameters)
             vTaskDelay(1); /* 確保 g_amp_event 已更新 */
             amp_event_t evt = g_amp_event;
 
+            if (sys_bus_mutex != NULL)
+            	{
+            		xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+            	}
+
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE) {
 #if AMP_AW88166_ENABLE
                 switch (evt) {
@@ -203,12 +207,21 @@ void I2C_Task(void *pvParameters)
 #endif
                 xSemaphoreGive(i2c_mutex);
             }
+
+            if (sys_bus_mutex != NULL) {
+            	xSemaphoreGive(sys_bus_mutex);
+            }
         }
 
 
         /* --- TOUCH event --- */
         if ((bits & TOUCH_EVENT_BIT) != 0)
         {
+        	if (sys_bus_mutex != NULL)
+        		{
+					xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+        		}
+
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
 #if TOUCH_AW93305_ENABLE
@@ -290,6 +303,10 @@ void I2C_Task(void *pvParameters)
 
             }
 
+            if (sys_bus_mutex != NULL) {
+            	xSemaphoreGive(sys_bus_mutex);
+            }
+
             /* 任務側重新啟用觸控中斷（先清旗標再開） */
             GPIO_PinClearInterruptFlag(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
             GPIO_PinEnableInterrupt(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
@@ -298,6 +315,11 @@ void I2C_Task(void *pvParameters)
         /* --- CHARGER event --- */
         if ((bits & CHARGER_EVENT_BIT) != 0)
         {
+        	if (sys_bus_mutex != NULL) {
+        		xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+        	}
+
+
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
 #if CHG_BQ25618_ENABLE
@@ -339,6 +361,10 @@ void I2C_Task(void *pvParameters)
                 xSemaphoreGive(i2c_mutex);
             }
 
+            if (sys_bus_mutex != NULL) {
+            	xSemaphoreGive(sys_bus_mutex);
+            }
+
             GPIO_PinClearInterruptFlag(GPIO, CHG_INT_N_R_PORT, CHG_INT_N_R_PIN, kGPIO_InterruptA);
             GPIO_PinEnableInterrupt(GPIO, CHG_INT_N_R_PORT, CHG_INT_N_R_PIN, kGPIO_InterruptA);
 
@@ -347,6 +373,11 @@ void I2C_Task(void *pvParameters)
         /* --- GAUGE event --- */
         if ((bits & GAUGE_EVENT_BIT) != 0)
         {
+
+        	if (sys_bus_mutex != NULL) {
+        		xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+        	}
+
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
 #if FG_GLF70302_ENABLE
@@ -373,6 +404,10 @@ void I2C_Task(void *pvParameters)
                 xSemaphoreGive(i2c_mutex);
             }
 
+            if (sys_bus_mutex != NULL) {
+            	xSemaphoreGive(sys_bus_mutex);
+            }
+
             GPIO_PinClearInterruptFlag(GPIO, FG_INT_GLF70302_PORT, FG_INT_GLF70302_PIN, kGPIO_InterruptA);
             GPIO_PinEnableInterrupt(GPIO, FG_INT_GLF70302_PORT, FG_INT_GLF70302_PIN, kGPIO_InterruptA);
 
@@ -380,6 +415,11 @@ void I2C_Task(void *pvParameters)
 
         /*--- LED event --- */
         if ((bits & LED_EVENT_BIT) != 0) {
+
+        		if (sys_bus_mutex != NULL) {
+        			xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+        		}
+
                 vTaskDelay(1); /* 確保 g_led_event 已更新 */
                 led_event_t evt = g_led_event;
 
@@ -454,6 +494,10 @@ void I2C_Task(void *pvParameters)
 #endif
                     xSemaphoreGive(i2c_mutex);
                 }
+
+                if (sys_bus_mutex != NULL) {
+                	xSemaphoreGive(sys_bus_mutex);
+                }
             }
 
         if(System_Status && Novatek_boot_completed)
@@ -463,28 +507,6 @@ void I2C_Task(void *pvParameters)
         	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
         }
-#if LED_KTD2027_ENABLE && CHG_BQ25618_ENABLE
-        //Confirm the final status
-        if(led_status==0) // When other events are executed, causing the LED to turn off
-        {
-        	if(ss_is_charging())
-        	{
-            	if(battery_state==BATTERY_STATE_FULL)
-            		led_post_event(LED_EVT_FULL_CHARGERED);
-            	else
-                	led_post_event(LED_EVT_CHARGING);
-        	}
-        	else
-        	{
-        		if (battery_state==BATTERY_STATE_LOW) {
-        			led_post_event(LED_EVT_LOW_BATTERY);
-        		} else if (battery_state == BATTERY_STATE_NORMAL) {
-        			led_post_event(LED_EVT_NORMAL_BATTERY);
-        		}
-        	}
-
-        }
-#endif
 
     }
 }
