@@ -62,6 +62,7 @@ QueueHandle_t spi_request_queue = NULL;
 EventGroupHandle_t spi_event_group = NULL;
 SemaphoreHandle_t spi_semaphore = NULL;
 
+SemaphoreHandle_t sys_bus_mutex = NULL;
 
 // NEW: 被動模式事件佇列與事件型別
 typedef enum {
@@ -386,6 +387,10 @@ void SPI_SLAVE_IRQHandler(void)
  */
 static void execute_active_spi_transmission(uint8_t hex_value)
 {
+    if (sys_bus_mutex != NULL) {
+        xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+    }
+
     PRINTF("\n--- Executing Active SPI for value: 0x%02X ---\r\n", hex_value);
 
     const TickType_t timeout = pdMS_TO_TICKS(500);
@@ -542,6 +547,10 @@ static void execute_active_spi_transmission(uint8_t hex_value)
 		(void)xQueueSend(passive_evt_queue, &evt, 0);
 	}
 
+    if (sys_bus_mutex != NULL) {
+        xSemaphoreGive(sys_bus_mutex);
+    }
+
 }
 
 static inline int is_nova_active(void) {
@@ -568,6 +577,10 @@ void spi_handler_task(void *pvParameters)
     passive_evt_t  passive_evt;
     QueueSetMemberHandle_t activated;
 
+    if (sys_bus_mutex == NULL) {
+        sys_bus_mutex = xSemaphoreCreateMutex();
+        configASSERT(sys_bus_mutex != NULL);
+    }
 
     // 初始化 SPI frame 的 checksum
     dataFrame1[3] = calculateChecksum(dataFrame1, 3);
