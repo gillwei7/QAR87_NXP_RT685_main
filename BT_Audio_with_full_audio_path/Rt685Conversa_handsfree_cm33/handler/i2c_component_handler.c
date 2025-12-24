@@ -226,7 +226,7 @@ void I2C_Task(void *pvParameters)
                 	if(btn_event==1)
                 	{
 #if SOC_SPI_ENABLE
-                        if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
+                        if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
                         		ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_HOME)) {
                 	        send_spi_request(ONE_TOUCH_HEX_VALUE);
                         }
@@ -235,7 +235,7 @@ void I2C_Task(void *pvParameters)
                 	else if(btn_event==2)
                 	{
 #if SOC_SPI_ENABLE
-                        if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
+                        if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
                             send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
                         }
 #endif
@@ -246,7 +246,7 @@ void I2C_Task(void *pvParameters)
                 {
                 	PRINTF("[Touch] press \n");
 #if SOC_SPI_ENABLE
-                    if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
+                    if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
                     		ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT)) {
                         send_spi_request(PRESS_TOUCH_HEX_VALUE);
                     }
@@ -264,7 +264,7 @@ void I2C_Task(void *pvParameters)
                 {
                 	PRINTF("[Touch] slide_right \n");
 #if SOC_SPI_ENABLE
-                    if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_MENU)) {
+                    if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
                         send_spi_request(FORWARD_SLIDE_HEX_VALUE);
                     }
 #endif
@@ -278,7 +278,7 @@ void I2C_Task(void *pvParameters)
                 {
                 	PRINTF("[Touch] slide_left \n");
 #if SOC_SPI_ENABLE
-                    if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_MENU)) {
+                    if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
                         send_spi_request(BACK_SLIDE_HEX_VALUE);
                     }
 #endif
