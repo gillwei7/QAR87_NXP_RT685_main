@@ -537,6 +537,7 @@ void DspMainAudioFlowProcOneFrame_VideoRecording(int OptionWord)
 			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
 			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
 			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
 
@@ -595,7 +596,7 @@ void DspMainAudioFlowProcOneFrame_VideoRecording(int OptionWord)
 		}
 	#endif
 
-//	DbgPin7Dn();	
+//	DbgPin7Dn();
 }
 
 __attribute__((__section__(".iram.text")))
@@ -1223,6 +1224,7 @@ void DspMainAudioFlowProcOneFrame_Translation(int OptionWord)
 			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
 			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
 			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
 
@@ -1404,6 +1406,7 @@ void DspMainAudioFlowProcOneFrame_VideoAi(int OptionWord)
 			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
 			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
 			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
 
