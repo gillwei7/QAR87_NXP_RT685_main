@@ -263,7 +263,10 @@ void I2C_Task(void *pvParameters)
                 	PRINTF("[Touch] press \n");
 #if SOC_SPI_ENABLE
                     if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
-                    		ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT)) {
+                    		ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
+                    		ss_get_state() == USAGE_STATE_ABOUT)) {
+                    	// Media Player: Go Home (if the OE is on), Wake Up (if the OE is off)
+                    	// Home: Wake Up (if the OE is off)
                         send_spi_request(PRESS_TOUCH_HEX_VALUE);
                     }
 #endif

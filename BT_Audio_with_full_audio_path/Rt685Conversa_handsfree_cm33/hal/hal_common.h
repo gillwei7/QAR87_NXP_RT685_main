@@ -39,6 +39,7 @@
  * User/UserDebug Build: 01: UserDebug, 02: User
  * Build Date: YYMMDD
  * Purposes: Power / Demo
+ * CommitTime: Commit Date and Time
  *
  * Example:
  *   R01.QAR87.01.01.251122
@@ -60,10 +61,10 @@
 static uint8_t sw_version[40] = "R01.QAR88n.01.01.251205";
 #else
 #if UsingQAR87BoardHwVersion == 0 // Dev Board
-static uint8_t sw_version[50] = "T03.QAR88n.01.01.251223.Standalone";
+static uint8_t sw_version[60] = "T03.QAR88n.01.01.251223.Standalone.2512261922";
 #endif
 #if UsingQAR87BoardHwVersion == 1 // Actual Board
-static uint8_t sw_version[50] = "T03.QAR88n.02.01.251223.Standalone";
+static uint8_t sw_version[60] = "T03.QAR88n.02.01.251223.Standalone.2512261922";
 #endif
 
 #endif
