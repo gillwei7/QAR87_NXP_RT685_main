@@ -48,7 +48,7 @@ static uint8_t* currentSrcBuff = NULL;
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
-static void execute_active_spi_transmission(uint8_t hex_value); // <<< NEW: 獨立的 SPI 執行函式
+static uint8_t execute_active_spi_transmission(uint8_t hex_value); // <<< NEW: 獨立的 SPI 執行函式
 static void SPI_StartFrame_PreloadTX(uint8_t* srcBuff, uint32_t frameSize);
 static inline void SPI_EnableRxTxInterrupt(void);
 static inline void SPI_DisableRxTxInterrupt(void);
@@ -385,13 +385,15 @@ void SPI_SLAVE_IRQHandler(void)
  * 並在完成後將 GPIO 拉低，最後將 SPI 切換回被動模式。
  * @param hex_value 要放入第二個數據幀的特定十六進制值 (例如，按鍵事件)。
  */
-static void execute_active_spi_transmission(uint8_t hex_value)
+static uint8_t execute_active_spi_transmission(uint8_t hex_value)
 {
     if (sys_bus_mutex != NULL) {
         xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
     }
 
     PRINTF("\n--- Executing Active SPI for value: 0x%02X ---\r\n", hex_value);
+
+	uint8_t execute_active_spi_transmission_completed = kStatus_Fail;
 
     const TickType_t timeout = pdMS_TO_TICKS(500);
     TickType_t start = xTaskGetTickCount();
@@ -526,13 +528,16 @@ static void execute_active_spi_transmission(uint8_t hex_value)
         }
         currentFrame++;
         if (currentFrame < frames_to_send) {
-            if (currentFrame == 1)
+            if (currentFrame == 1) {
                 SPI_StartFrame_PreloadTX(frame2_ptr, frame2_size);
-            else if (currentFrame == 2)
+            } else if (currentFrame == 2) {
                 SPI_StartFrame_PreloadTX(dataFrame3, FIXED_BUFFER_SIZE);
+            }
             if (!spi_irq_enabled) {
                 SPI_EnableRxTxInterrupt();
             }
+        } else {
+        	execute_active_spi_transmission_completed = kStatus_Success;
         }
     }
 
@@ -550,7 +555,7 @@ static void execute_active_spi_transmission(uint8_t hex_value)
     if (sys_bus_mutex != NULL) {
         xSemaphoreGive(sys_bus_mutex);
     }
-
+    return execute_active_spi_transmission_completed;
 }
 
 static inline int is_nova_active(void) {
@@ -650,10 +655,15 @@ void spi_handler_task(void *pvParameters)
 		            vTaskDelay(pdMS_TO_TICKS(100));
 		            continue;
 		        }
-                execute_active_spi_transmission(received_value);
+
+		        for (int i = 0; i < SPI_ACTIVE_RETRY_TIME; i++) {
+	                if (execute_active_spi_transmission(received_value) == kStatus_Success) {
+	                	break;
+	                }
+	                vTaskDelay(pdMS_TO_TICKS(100));
+		        }
             }
         }
-
     }
 }
 
