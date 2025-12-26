@@ -15,6 +15,7 @@
 #include "hal_led.h"
 #include "hal_amp.h"
 #include "WorkStateManager.h"
+#include "app_handsfree.h"
 
 #define BATTERY_READ_PERIOD_MS  (60000U)
 static TimerHandle_t s_battery_timer = NULL;
@@ -41,6 +42,8 @@ extern uint8_t Novatek_boot_completed;
 battery_state_t battery_state = BATTERY_STATE_NORMAL;
 
 extern uint32_t s_bq256xx_iindpm_target_ua;
+
+extern RingtoneState general_RingtoneState;
 
 static void BatteryReadTimerCb(TimerHandle_t xTimer)
 {
@@ -402,6 +405,17 @@ void I2C_Task(void *pvParameters)
                 	led_post_event(LED_EVT_NORMAL_BATTERY);
                 }
             	ss_set_battery(battery_info.soc);
+            	if(battery_info.voltage<=3500 && ss_is_charging() == false)//Automatic shutdown when battery voltage drops below 3.5V
+            	{
+            		PRINTF("[Gauge] Low battery, so it shuts down. \r\n");
+#if SOC_SPI_ENABLE
+                        if (Novatek_boot_completed) {
+                            send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
+                        }
+#endif
+                        led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+                        general_RingtoneState = Ringtone_PowerOFF;
+            	}
 #endif
                 xSemaphoreGive(i2c_mutex);
             }
