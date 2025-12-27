@@ -440,7 +440,6 @@ void button_task(void *pvParameters)
                             send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
                         }
 #endif
-                        led_post_event(LED_EVT_POWER_OFF_PROGRESS);
                         /* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
                         general_RingtoneState = Ringtone_PowerOFF;
                     }
