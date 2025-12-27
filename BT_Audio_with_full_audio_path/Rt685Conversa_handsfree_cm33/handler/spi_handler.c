@@ -660,7 +660,7 @@ void spi_handler_task(void *pvParameters)
 	                if (execute_active_spi_transmission(received_value) == kStatus_Success) {
 	                	break;
 	                }
-	                vTaskDelay(pdMS_TO_TICKS(100));
+	                vTaskDelay(pdMS_TO_TICKS(200));
 		        }
 		        if (received_value == POWER_LONG_PRESS_HEX_VALUE) {
 		        	led_post_event(LED_EVT_POWER_OFF_PROGRESS);
