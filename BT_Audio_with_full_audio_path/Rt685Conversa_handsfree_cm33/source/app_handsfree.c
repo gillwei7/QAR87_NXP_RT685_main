@@ -550,6 +550,7 @@ void startOpusPlayIndex(int opus_index){
 static void app_task(void *pvParameters)
 {
     while(1){
+#if !CES_DEMO
 #if AUTO_CONNECT_ENABLE
         if(connection_timer_count < (CONNECTION_TIMER_TIMEOUT_MILLISECOND/CONNECTION_TIMER_TASK_DELAY) && (conn_rider_phone == NULL)){
             connection_timer_count++;
@@ -562,6 +563,7 @@ static void app_task(void *pvParameters)
                 app_auto_connect_paired_devices();
             }
         }
+#endif
 #endif
         if(general_RingtoneState == Ringtone_StartVideoAI && DeviceWorkStateCur == WorkState_VideoAi){
             general_RingtoneState = Ringtone_No;
@@ -642,6 +644,7 @@ void hfp_hf_a2dp_task(void *pvParameters)
 
     hal_board_init();
 
+#if !CES_DEMO
     PRINTF("Bluetooth Handsfree demo start...\n");
 
     /* Initializate BT Host stack */
@@ -651,6 +654,7 @@ void hfp_hf_a2dp_task(void *pvParameters)
         PRINTF("Bluetooth init failed (err %d)\n", err);
         return;
     }
+#endif
 #if 0
     if(g_pairedDeviceCount)
     {
@@ -682,21 +686,21 @@ void hfp_hf_a2dp_task(void *pvParameters)
 	assert(pdPASS == result);
 #if UsingQAR87Board == 1
 
-    if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 1000, NULL,
-                    tskIDLE_PRIORITY + 2, NULL) != pdPASS)
+    if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 1024, NULL,
+                    tskIDLE_PRIORITY + 4, NULL) != pdPASS)
     {
         PRINTF("Task creation failed!.\r\n");
         while (1);
     }
 
-	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 1000, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
+	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 1024, NULL, tskIDLE_PRIORITY + 5, NULL)!= pdPASS)
     {
         PRINTF(" BUTTON Task creation failed!.\r\n");
         while (1);
     }
 
 	if (xTaskCreate(I2C_Task, "I2C_TASK",
-	                configMINIMAL_STACK_SIZE + 1000,
+	                configMINIMAL_STACK_SIZE + 1024,
 	                NULL,
 	                tskIDLE_PRIORITY + 3,
 	                &sI2CTaskHandle) != pdPASS)
@@ -706,9 +710,9 @@ void hfp_hf_a2dp_task(void *pvParameters)
 	}
 
 	if (xTaskCreate(app_task, "APP_TASK",
-	                    configMINIMAL_STACK_SIZE + 1000,
+	                    configMINIMAL_STACK_SIZE + 1024,
 	                    NULL,
-	                    tskIDLE_PRIORITY + 2,
+	                    tskIDLE_PRIORITY + 6,
 	                    &appTaskHandle) != pdPASS)
     {
         PRINTF("app_task creation failed!\r\n");

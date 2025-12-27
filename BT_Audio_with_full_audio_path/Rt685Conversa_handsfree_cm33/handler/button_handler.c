@@ -110,6 +110,7 @@ static void vBtnDblTimerCb(TimerHandle_t xTimer)
     }
 }
 
+#if !CES_DEMO
 /* [Funkey Hold] FunKey 長按「按住不放 1 秒」計時器回呼：只通知 unified 任務 */
 static void vBtnHoldTimerCb(TimerHandle_t xTimer)
 {
@@ -118,7 +119,9 @@ static void vBtnHoldTimerCb(TimerHandle_t xTimer)
         (void)xTaskNotify(sKeysTaskHandle, FUNK_NOTIFY_HOLD, eSetBits);
     }
 }
+#endif
 
+#if !CES_DEMO
 /* === [Funkey charging 5clicks] 視窗到期回呼：重置狀態，避免「卡住」 === */
 static void vChg5TimerCb(TimerHandle_t xTimer)
 {
@@ -126,6 +129,7 @@ static void vChg5TimerCb(TimerHandle_t xTimer)
     sChg5WindowStart = 0;
     PRINTF("[Button] Charging mode: 5-click 6s window expired -> reset.\r\n");
 }
+#endif
 
 /**
  * @brief Unified button_key task (FunKey + PowerKey)
@@ -152,6 +156,7 @@ void button_task(void *pvParameters)
                                 vBtnDblTimerCb);
     configASSERT(sBtnDblTimer);
 
+#if !CES_DEMO
     /* [Funkey Hold] FunKey 的「按住不放 1 秒即觸發」單次定時器 */
     sBtnHoldTimer = xTimerCreate("btn_hold",
                                  btn_holdTicks, /* 一次性 1 秒（或外部定義） */
@@ -159,7 +164,9 @@ void button_task(void *pvParameters)
                                  NULL,
                                  vBtnHoldTimerCb);
     configASSERT(sBtnHoldTimer);
+#endif
 
+#if !CES_DEMO
     /* === [Funkey charging 5clicks] 充電模式 6 秒視窗定時器 === */
     sChg5Timer = xTimerCreate("chg_5click_window",
                               pdMS_TO_TICKS(BTN_5TIMES_IN_LIMIT), /* 6 秒 */
@@ -167,6 +174,7 @@ void button_task(void *pvParameters)
                               NULL,
                               vChg5TimerCb);
     configASSERT(sChg5Timer);
+#endif
 
     /* -------- FunKey state -------- */
     uint8_t    btn_stable_level      = btn_raw_read();
@@ -213,12 +221,15 @@ void button_task(void *pvParameters)
 				{
 					PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
 #if SOC_SPI_ENABLE
+#if !CES_DEMO
 					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
 							ss_get_state() == USAGE_STATE_VIDEO_RECORDING || ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
 						send_spi_request(SHORT_PRESS_HEX_VALUE); // Stop Recording and Take Photo
 					}
 #endif
+#endif
 				}
+#if !CES_DEMO
 				else
 				{
 		            /* === [Funkey charging 5clicks] 充電模式下的「6 秒內按五下」計數（只在此區塊處理） === */
@@ -255,7 +266,7 @@ void button_task(void *pvParameters)
 		            }
 				}
 				/* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
-
+#endif
             }
             /* 若此時已經在第二次按壓中（btn_is_pressed==true），不回報短按，
              * 等放開時再判斷是雙擊或長按（第二次按壓可能超過長按門檻）。 */
@@ -278,9 +289,11 @@ void button_task(void *pvParameters)
                 PRINTF("[Button] Long Press (hold) detected. Sending 0x%02X\r\n",
                        LONG_PRESS_HEX_VALUE);
 #if SOC_SPI_ENABLE
+#if !CES_DEMO
 				if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT)) {
 					send_spi_request(LONG_PRESS_HEX_VALUE); // Start Recording
 				}
+#endif
 #endif
                 }
 
