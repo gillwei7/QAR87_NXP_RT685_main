@@ -663,6 +663,8 @@ void spi_handler_task(void *pvParameters)
 	                vTaskDelay(pdMS_TO_TICKS(200));
 		        }
 		        if (received_value == POWER_LONG_PRESS_HEX_VALUE) {
+		            general_RingtoneState = Ringtone_PowerOFF;
+		            vTaskDelay(pdMS_TO_TICKS(200));
 		        	led_post_event(LED_EVT_POWER_OFF_PROGRESS);
 		        }
             }

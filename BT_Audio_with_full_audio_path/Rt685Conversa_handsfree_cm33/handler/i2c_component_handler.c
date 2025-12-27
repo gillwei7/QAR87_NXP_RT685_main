@@ -197,14 +197,20 @@ void I2C_Task(void *pvParameters)
                     case AMP_EVT_MUSIC_START:
                         hal_amp_aw88166_left_start("Music");
                         hal_amp_aw88166_right_start("Music");
+                        AmpState=AmpState_ConfiguredAndActive;
+                        PRINTF("AMP_EVT_MUSIC_START done\r\n");
                         break;
                     case AMP_EVT_RECEIVER_START:
                         hal_amp_aw88166_left_start("Receiver");
                         hal_amp_aw88166_right_start("Receiver");
+                        AmpState=AmpState_ConfiguredAndActive;
+                        PRINTF("AMP_EVT_RECEIVER_START done\r\n");
                         break;
                     case AMP_EVT_STOP:
                     	hal_amp_aw88166_left_stop();
                     	hal_amp_aw88166_right_stop();
+                    	AmpState=AmpState_UnConfigured;
+                    	PRINTF("AMP_EVT_STOP done\r\n");
                         break;
                     default:
                         break;
@@ -417,8 +423,8 @@ void I2C_Task(void *pvParameters)
                             send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
                         }
 #endif
-                        led_post_event(LED_EVT_POWER_OFF_PROGRESS);
-                        general_RingtoneState = Ringtone_PowerOFF;
+//                        led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+//                        general_RingtoneState = Ringtone_PowerOFF;
             	}
 #endif
                 xSemaphoreGive(i2c_mutex);

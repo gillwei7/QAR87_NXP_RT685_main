@@ -52,6 +52,7 @@
 #define Manager_TASK_PRIORITY				2			//this is low
 #define CONNECTION_TIMER_TASK_DELAY              10
 #define CONNECTION_TIMER_TIMEOUT_MILLISECOND     20000
+#define RINGTONE_TIME_DELAY                      5000
 
 #define APP_HFP_HF_INITIAL_VGS_GAIN 12
 #define APP_HFP_HF_INITIAL_VGM_GAIN 12
@@ -66,7 +67,8 @@ extern TaskHandle_t       sI2CTaskHandle  ;
 #endif
 
 static TaskHandle_t       appTaskHandle  = NULL;
-
+static uint32_t           ringtone_time_count = 0;
+static uint8_t            ringtone_is_played = 0;
 hfp_hf_get_config hfp_hf_config = {
     .bt_hfp_hf_vgs             = APP_HFP_HF_INITIAL_VGS_GAIN,
     .bt_hfp_hf_vgm             = APP_HFP_HF_INITIAL_VGM_GAIN,
@@ -142,6 +144,8 @@ static struct bt_sdp_record hfp_hf_rec = BT_SDP_RECORD(hfp_hf_attrs);
 
 RingtoneState general_RingtoneState = Ringtone_No;
 extern TDeviceWorkState DeviceWorkStateCur;
+extern void InitAndStartCodec(int fs, int bits);
+extern void DeInitCodec();
 
 void hfp_hf_register_service()
 {
@@ -586,8 +590,18 @@ static void app_task(void *pvParameters)
         }
 
         if(general_RingtoneState == Ringtone_PowerON && DeviceWorkStateCur == WorkState_HomeVitStandby){
-            general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_PowerON-1);
+            if(AmpState==AmpState_UnConfigured){
+                InitAndStartCodec(16000, 16);
+            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 0){
+                ringtone_time_count = (RINGTONE_TIME_DELAY/CONNECTION_TIMER_TASK_DELAY);
+                ringtone_is_played = 1;
+                startOpusPlayIndex(Ringtone_PowerON-1);
+            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count > 0){
+                ringtone_time_count--;
+            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count == 0){
+                DeInitCodec();
+                general_RingtoneState = Ringtone_No;
+            }
         }
 
         if(general_RingtoneState == Ringtone_StartRecording  && DeviceWorkStateCur == WorkState_VideoRecording){
@@ -600,10 +614,14 @@ static void app_task(void *pvParameters)
                 startOpusPlayIndex(Ringtone_StopRecording-1);
         }
 
-        // TODO No matter on what state, need to play Power Off, Wifi disconnected,  ringtone
+        // No matter on what state, need to play Power Off, Wifi disconnected,  ringtone
         if(general_RingtoneState == Ringtone_PowerOFF){
+            if(AmpState==AmpState_UnConfigured){
+                InitAndStartCodec(16000, 16);
+            }else if(AmpState==AmpState_ConfiguredAndActive){
                 general_RingtoneState = Ringtone_No;
                 startOpusPlayIndex(Ringtone_PowerOFF-1);
+            }
         }
 
         if(general_RingtoneState == Ringtone_WiFi_Disconnected){
@@ -624,15 +642,28 @@ static void app_task(void *pvParameters)
             }
         }
 
-        if(general_RingtoneState == Ringtone_LowBattery){
-                general_RingtoneState = Ringtone_No;
+        if(general_RingtoneState == Ringtone_LowBattery && DeviceWorkStateCur == WorkState_HomeVitStandby){
+            if(AmpState==AmpState_UnConfigured){
+                InitAndStartCodec(16000, 16);
+            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 0){
+                ringtone_time_count = (RINGTONE_TIME_DELAY/CONNECTION_TIMER_TASK_DELAY);
+                ringtone_is_played = 1;
                 startOpusPlayIndex(Ringtone_LowBattery-1);
+            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count > 0){
+                ringtone_time_count--;
+            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count == 0){
+                DeInitCodec();
+                general_RingtoneState = Ringtone_No;
+            }
         }
 
         if(general_RingtoneState == Ringtone_BT_Connected){
 				general_RingtoneState = Ringtone_No;
 				startOpusPlayIndex(Ringtone_BT_Connected-1);
 		}
+
+
+
 
         vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
     }

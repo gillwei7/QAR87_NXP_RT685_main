@@ -289,9 +289,9 @@ void DeInitCodec(void)
 	//	PRINTF("DeInitCodec is failed, %d \r\n",r);
 	//	return;
 	//}
-	AmpState=AmpState_UnConfigured;
+	//AmpState=AmpState_UnConfigured;
 }
-void InitAndStartCodec(int fs, int bits, int Mfreq)
+void InitAndStartCodec(int fs, int bits)
 {
 	int r;
 
@@ -310,7 +310,7 @@ void InitAndStartCodec(int fs, int bits, int Mfreq)
 		// gill modify to amp_post_event, align with I2C task control the I2C write function
 		amp_post_event(AMP_EVT_RECEIVER_START);
 	}
-	AmpState=AmpState_ConfiguredAndActive;
+	//AmpState=AmpState_ConfiguredAndActive;
 }
 
 #else
@@ -570,7 +570,7 @@ void StartAudioTask(void)
 	BaseType_t result = 0;
 
 
-	AmpState==AmpState_UnConfigured;
+	AmpState=AmpState_UnConfigured;
 
 	VarBlockSharedByDspAndMcu.I2SFs_Nvt=NvtI2SFs_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFs_Amp=16000;

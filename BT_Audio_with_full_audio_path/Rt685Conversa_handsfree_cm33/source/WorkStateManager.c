@@ -672,7 +672,6 @@ void Manager_Task(void *pvParameters)
 	AudioPortIsActive_I2SToNvt=0;
 	AudioPortIsActive_Pdm=0;
 	AudioPortIsActive_PcmToBt=0;
-	AmpState=AmpState_UnConfigured;
 
 	VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;		//must set an initial value
 

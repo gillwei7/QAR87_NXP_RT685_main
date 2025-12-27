@@ -1431,7 +1431,7 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 	#endif
 
 	//configure AMP
-	InitAndStartCodec(48000, 16, MclkFreq);
+	InitAndStartCodec(48000, 16);
 
 	InitAudioCircularBuf(0,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
@@ -1496,7 +1496,7 @@ void InitAudioInterface_HfpCall(int Opt)
 
 	InitPdm(0xff, AudioFrameSizeInSamplePerCh_16KHz, 16000);
 	InitAmpI2S(AudioFrameSizeInSamplePerCh_16KHz,    16000, 16);			//no matter BT side is 16KHz or 8KHz, CODEC is always 16KHz
-	InitAndStartCodec(16000, 16, MclkFreq);
+	InitAndStartCodec(16000, 16);
 	InitAudioCircularBuf(1,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
 
@@ -1546,7 +1546,7 @@ void InitAudioInterface_HomeVitStandby(int Opt)
 	InitPdm(0xff, AudioFrameSizeInSamplePerCh_16KHz, 16000);
 	VarBlockSharedByDspAndMcu.BtHfpFs=8000;	//dsp may check this value, need to set it to either 8000 or 16000
 	InitAmpI2S(AudioFrameSizeInSamplePerCh_16KHz,    16000, 16);			//no matter BT side is 16KHz or 8KHz, CODEC is always 16KHz
-	InitAndStartCodec(16000, 16, MclkFreq);
+	//InitAndStartCodec(16000, 16, MclkFreq);
 	InitAudioCircularBuf(0,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
 	DmaTxRxIsExpected=(
@@ -1606,7 +1606,7 @@ void InitAudioInterface_VideoRecording(int Opt)
     #endif
 
     //configure AMP
-    InitAndStartCodec(48000, 16, MclkFreq);
+    InitAndStartCodec(48000, 16);
 
     InitAudioCircularBuf(0,1,0);    //int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
@@ -1674,7 +1674,7 @@ void InitAudioInterface_MediaPlayer(int Opt)
 	#endif
 
 	//configure AMP
-	InitAndStartCodec(48000, 16, MclkFreq);
+	InitAndStartCodec(48000, 16);
 
 	InitAudioCircularBuf(0,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 
@@ -1765,22 +1765,9 @@ void InitAudioInterface_MusicPlayer(int Opt)
 
 	InitPdm(0xff, FrmSizeInMs*16, 16000);
 	InitAmpI2S(frmsizeInSamples_I2S, fs_I2S, 16);
-	InitAndStartCodec(fs_I2S, bits_I2S, MclkFreq); //smart amp MUST start after I2S clock ready
+	InitAndStartCodec(fs_I2S, bits_I2S); //smart amp MUST start after I2S clock ready
 
 	InitAudioCircularBuf(0,1,0);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
-
-
-	if(AmpState==AmpState_UnConfigured)
-	{
-		//configure AMP
-		//...
-		//...
-		//...
-		//start smart amp
-		//hal_amp_aw88166_left_start("Music");
-		//hal_amp_aw88166_right_start("Music");
-		AmpState==AmpState_ConfiguredAndSleep;
-	}
 
 	DmaTxRxIsExpected=(
 						AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
@@ -1840,15 +1827,9 @@ void InitAudioInterface_Translation(int Opt)
     #endif
 
     //configure AMP
-    InitAndStartCodec(48000, 16, MclkFreq);
+    InitAndStartCodec(48000, 16);
 
     InitAudioCircularBuf(0,1,0);    //int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
-
-    // May not needed
-    if(AmpState==AmpState_UnConfigured)
-    {
-        AmpState==AmpState_ConfiguredAndSleep;
-    }
 
     DmaTxRxIsExpected=(
                         AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
@@ -1922,15 +1903,9 @@ void InitAudioInterface_VideoAi(int Opt)
     #endif
 
     //configure AMP
-    InitAndStartCodec(48000, 16, MclkFreq);
+    InitAndStartCodec(48000, 16);
 
     InitAudioCircularBuf(0,1,0);    //int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
-
-    // May not needed
-    if(AmpState==AmpState_UnConfigured)
-    {
-        AmpState==AmpState_ConfiguredAndSleep;
-    }
 
     DmaTxRxIsExpected=(
                         AudioI2sPortsBitMapFlag_FcTxToAmp|AudioI2sPortsBitMapFlag_FcRxFrAmp|
@@ -2051,12 +2026,6 @@ void DeInitAudioInterface_AudioIoDebug(int Opt)
 
 	return;
 
-	if(Opt&0b0001)
-	{
-		//sleep AMP ...
-		AmpState=AmpState_ConfiguredAndSleep;
-	}
-
 	DeInitCodec();
 
 	if(AudioPortIsActive_I2SToAmp)
@@ -2127,12 +2096,6 @@ void DeInitAudioInterface_MusicPlayer(int Opt)
 	Deinit_GeneralAudio(1,0,1,1);	//int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm, int ToDeinitCodec
 	ClearAudioCirBuf(0,1,0);		//int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir
 	return;
-
-	if(Opt&0b0001)
-	{
-		//sleep AMP ...
-		AmpState=AmpState_ConfiguredAndSleep;
-	}
 
 	if(AudioPortIsActive_I2SToAmp)
 	{

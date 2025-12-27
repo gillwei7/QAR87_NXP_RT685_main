@@ -62,7 +62,7 @@ extern U32 PdmInputMuteCnt;
 
 extern void InitHfpAudioIntfToBT(int MclkFreq, int Fs);
 extern void DeInitCodec(void);
-extern void InitAndStartCodec(int fs, int bits, int Mfreq);
+extern void InitAndStartCodec(int fs, int bits);
 extern int CheckTimePoint_CurrentIntrIsAStartingOne(void);
 
 extern void CloseAllActivedPDMPorts(void);

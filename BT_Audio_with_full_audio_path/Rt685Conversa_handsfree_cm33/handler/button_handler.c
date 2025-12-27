@@ -441,7 +441,7 @@ void button_task(void *pvParameters)
                         }
 #endif
                         /* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
-                        general_RingtoneState = Ringtone_PowerOFF;
+                        //general_RingtoneState = Ringtone_PowerOFF;
                     }
                     else if (press_dur >= pwr_minShortTicks)
                     {
