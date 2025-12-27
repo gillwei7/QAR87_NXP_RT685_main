@@ -36,8 +36,8 @@
  * delay
  *******************************************/
 // Keep SDK_DelayAtLeastUs for AMP to avoid SPI transmission failures
-#define AW_MS_DELAY(time) SDK_DelayAtLeastUs((time) * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk))
-//#define AW_MS_DELAY(time) vTaskDelay(pdMS_TO_TICKS(time))
+//#define AW_MS_DELAY(time) SDK_DelayAtLeastUs((time) * 1000U, CLOCK_GetFreq(kCLOCK_CoreSysClk))
+#define AW_MS_DELAY(time) vTaskDelay(pdMS_TO_TICKS(time))
 
 /********************************************
  * print information control
