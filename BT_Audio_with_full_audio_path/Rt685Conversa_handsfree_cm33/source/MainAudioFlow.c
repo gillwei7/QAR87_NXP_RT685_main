@@ -1982,6 +1982,15 @@ void Deinit_GeneralAudio(int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm
 			hal_amp_aw88166_left_stop();
 			hal_amp_aw88166_right_stop();
 		#endif
+
+		    //close PDM all channels
+		    if(ToDeinitPdm)
+		        if(AudioPortIsActive_Pdm)
+		        {
+		            BOARD_DeInit_DMA_PDM(0xff);
+		            AudioPortIsActive_Pdm=0;
+		        }
+
 		if(ToDeinitCodec)
 		{
 			DeInitCodec();
@@ -2020,13 +2029,13 @@ void Deinit_GeneralAudio(int ToDeinitAmpI2S, int ToDeinitNvtI2S, int ToDeinitPdm
 			AudioPortIsActive_I2SToNvt=0;
 		}
 
-	//close PDM all channels
-	if(ToDeinitPdm)
-		if(AudioPortIsActive_Pdm)
-		{
-			BOARD_DeInit_DMA_PDM(0xff);
-			AudioPortIsActive_Pdm=0;
-		}
+//	//close PDM all channels
+//	if(ToDeinitPdm)
+//		if(AudioPortIsActive_Pdm)
+//		{
+//			BOARD_DeInit_DMA_PDM(0xff);
+//			AudioPortIsActive_Pdm=0;
+//		}
 
 	(void)BOARD_SwitchAudioFreq(0U,0);
 
