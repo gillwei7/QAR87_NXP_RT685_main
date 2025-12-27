@@ -920,7 +920,7 @@ status_t swProcessVIT( AUDIO_vit_st* 			 p_definitionVIT,
             else if (s_WakeWord.Id > 0)
             {
             	//this is to start playing an OPUS file as the WW detecting prompt sound --- a short quick OPUS sound
-            	CommandToPlayWakeSound();
+            	//CommandToPlayWakeSound();
 				//this is to let MCU side print the WW detected event
 				PtrVarBlockSharedByDspAndMcu->WWIsDetected=1;
 
