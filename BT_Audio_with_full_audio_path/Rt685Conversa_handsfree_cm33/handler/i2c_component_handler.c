@@ -288,9 +288,10 @@ void I2C_Task(void *pvParameters)
                     }
 #endif
                     if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
-                        // Volume up
-                    	ChangeMasterVolumeLevel15_UpDown(1); // pass positive value to increase volume
-                        PRINTF("[Touch] Volume up\r\n");
+                        // Volume down
+                    	ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
+                        PRINTF("[Touch] Volume down\r\n");
+
                     }
                 }
                 else if(aw933xx.event.left_wareds)
@@ -302,9 +303,9 @@ void I2C_Task(void *pvParameters)
                     }
 #endif
                     if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
-                        // Volume down
-                    	ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
-                        PRINTF("[Touch] Volume down\r\n");
+                        // Volume up
+                    	ChangeMasterVolumeLevel15_UpDown(1); // pass positive value to increase volume
+                        PRINTF("[Touch] Volume up\r\n");
                     }
                 }
 #endif
