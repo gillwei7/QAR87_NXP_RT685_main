@@ -110,7 +110,7 @@ static void vBtnDblTimerCb(TimerHandle_t xTimer)
     }
 }
 
-#if !CES_DEMO
+#if 1//!CES_DEMO
 /* [Funkey Hold] FunKey 長按「按住不放 1 秒」計時器回呼：只通知 unified 任務 */
 static void vBtnHoldTimerCb(TimerHandle_t xTimer)
 {
@@ -121,7 +121,7 @@ static void vBtnHoldTimerCb(TimerHandle_t xTimer)
 }
 #endif
 
-#if !CES_DEMO
+#if 1//!CES_DEMO
 /* === [Funkey charging 5clicks] 視窗到期回呼：重置狀態，避免「卡住」 === */
 static void vChg5TimerCb(TimerHandle_t xTimer)
 {
@@ -156,7 +156,7 @@ void button_task(void *pvParameters)
                                 vBtnDblTimerCb);
     configASSERT(sBtnDblTimer);
 
-#if !CES_DEMO
+#if 1//!CES_DEMO
     /* [Funkey Hold] FunKey 的「按住不放 1 秒即觸發」單次定時器 */
     sBtnHoldTimer = xTimerCreate("btn_hold",
                                  btn_holdTicks, /* 一次性 1 秒（或外部定義） */
@@ -166,7 +166,7 @@ void button_task(void *pvParameters)
     configASSERT(sBtnHoldTimer);
 #endif
 
-#if !CES_DEMO
+#if 1//!CES_DEMO
     /* === [Funkey charging 5clicks] 充電模式 6 秒視窗定時器 === */
     sChg5Timer = xTimerCreate("chg_5click_window",
                               pdMS_TO_TICKS(BTN_5TIMES_IN_LIMIT), /* 6 秒 */
