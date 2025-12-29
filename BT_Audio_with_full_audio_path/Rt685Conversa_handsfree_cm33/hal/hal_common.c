@@ -78,10 +78,6 @@ static void hal_gpio_pin_init(void)
 {
     /* Define the init structure for the input switch pin */
     gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
-    gpio_interrupt_config_t interrupt_config = {kGPIO_PinIntEnableEdge, kGPIO_PinIntEnableLowOrFall};
-    NVIC_SetPriority(GPIO_INTA_IRQn, configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY);
-    /* Init input switch GPIO. */
-    EnableIRQ(GPIO_INTA_IRQn);
 
     /* Define the init structure for the output low pin */
     gpio_pin_config_t output_low_pin_config = {kGPIO_DigitalOutput, 0};
@@ -105,18 +101,6 @@ static void hal_gpio_pin_init(void)
     /* BT Reset GPIO */
     GPIO_PinInit(GPIO, BT_RST_PORT, BT_RST_PIN, &output_high_pin_config);
 #endif
-    /* Touch INT GPIO*/
-    GPIO_PinInit(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, &input_pin_config);
-    GPIO_SetPinInterruptConfig(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, &interrupt_config);
-    GPIO_PinEnableInterrupt(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
-    /* Charger INT GPIO */
-    GPIO_PinInit(GPIO, CHG_INT_N_R_PORT, CHG_INT_N_R_PIN, &input_pin_config);
-    GPIO_SetPinInterruptConfig(GPIO, CHG_INT_N_R_PORT, CHG_INT_N_R_PIN, &interrupt_config);
-    GPIO_PinEnableInterrupt(GPIO, CHG_INT_N_R_PORT, CHG_INT_N_R_PIN, kGPIO_InterruptA);
-    /* Gauge INT GPIO */
-    GPIO_PinInit(GPIO, FG_INT_GLF70302_PORT, FG_INT_GLF70302_PIN, &input_pin_config);
-    GPIO_SetPinInterruptConfig(GPIO, FG_INT_GLF70302_PORT, FG_INT_GLF70302_PIN, &interrupt_config);
-    GPIO_PinEnableInterrupt(GPIO, FG_INT_GLF70302_PORT, FG_INT_GLF70302_PIN, kGPIO_InterruptA);
 
     /* Initialize PINT */ /* Init FUN_KEY1 & Power_Key*/
     PINT_Init(BUTTON_PINT_BASE);
@@ -167,6 +151,8 @@ void hal_gpio_interrupt_init(void)
     };
 
     /* workaround for calling GPIO_PortInit may reset the configuration already done for the port */
+    CLOCK_EnableClock(kCLOCK_HsGpio0);
+    RESET_ClearPeripheralReset(kHSGPIO0_RST_SHIFT_RSTn);
     CLOCK_EnableClock(kCLOCK_HsGpio1);
     RESET_ClearPeripheralReset(kHSGPIO1_RST_SHIFT_RSTn);
     CLOCK_EnableClock(kCLOCK_HsGpio2);
