@@ -47,11 +47,9 @@ extern RingtoneState general_RingtoneState;
 
 static void BatteryReadTimerCb(TimerHandle_t xTimer)
 {
-
     if (i2c_event_group) {
         xEventGroupSetBits(i2c_event_group, GAUGE_EVENT_BIT);
     }
-
 }
 
 static void Determine_pca9422_enter_ship_mode(void)
@@ -147,7 +145,6 @@ void Init_I2C_Component(void)
 	    xTimerStart(s_battery_timer, 0);
 	}
 #endif
-
 }
 
 void amp_post_event(amp_event_t e)
@@ -327,13 +324,13 @@ void I2C_Task(void *pvParameters)
             GPIO_PinEnableInterrupt(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
         }
 
+
         /* --- CHARGER event --- */
         if ((bits & CHARGER_EVENT_BIT) != 0)
         {
         	if (sys_bus_mutex != NULL) {
         		xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
         	}
-
 
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
@@ -348,18 +345,23 @@ void I2C_Task(void *pvParameters)
     				PRINTF("\n");
     				if(charger_status.vbus_good)
     				{
-    					led_post_event(LED_EVT_CHARGING);
+    					hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_ENABLE);
+    					led_post_event(LED_EVT_REFRESH);
     					ss_set_charging(true);
     				}
     				else
     				{
-    					led_post_event(LED_EVT_NOT_CHARGING);
+    					hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
+    					hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
+    					led_post_event(LED_EVT_REFRESH);
     					ss_set_charging(false);
     				}
     				if(charger_status.chg_stat==0x03)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
     				{
     					battery_state = BATTERY_STATE_FULL;
-    					led_post_event(LED_EVT_FULL_CHARGERED);
+    					hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
+    					hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
+    					led_post_event(LED_EVT_REFRESH);
     				}
     				/*
     			    uint8_t val;
@@ -402,17 +404,25 @@ void I2C_Task(void *pvParameters)
                 if(battery_info.soc >= FULLY_CHARGE_PERCENTAGE && ss_is_charging())
                 {
                 	battery_state = BATTERY_STATE_FULL;
-                	led_post_event(LED_EVT_FULL_CHARGERED);
+                	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
+                	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
+                	led_post_event(LED_EVT_REFRESH);
                 }
                 else if (battery_info.soc <= LOW_POWER_PERCENTAGE && ss_is_charging() == false)
                 {
                 	battery_state = BATTERY_STATE_LOW;
-                	led_post_event(LED_EVT_LOW_BATTERY);
+                	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
+                	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
+                	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
+                	led_post_event(LED_EVT_REFRESH);
                 }
                 else
                 {
                 	battery_state = BATTERY_STATE_NORMAL;
-                	led_post_event(LED_EVT_NORMAL_BATTERY);
+                	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
+                	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
+                	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
+                	led_post_event(LED_EVT_REFRESH);
                 }
             	ss_set_battery(battery_info.soc);
             	if(battery_info.voltage<=3500 && ss_is_charging() == false)//Automatic shutdown when battery voltage drops below 3.5V
@@ -439,99 +449,56 @@ void I2C_Task(void *pvParameters)
 
         }
 
+
         /*--- LED event --- */
         if ((bits & LED_EVENT_BIT) != 0) {
-
-        		if (sys_bus_mutex != NULL) {
-        			xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
-        		}
-
-                vTaskDelay(1); /* 確保 g_led_event 已更新 */
-                led_event_t evt = g_led_event;
-
-                if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE) {
-                    /* 根據事件控制 LED */
-#if LED_KTD2027_ENABLE
-                    switch (evt) {
-                    case LED_EVT_POWER_ON_PROGRESS:
-                    	hal_led_set_indicator_status(HAL_LED_POWER_ON);
-                        break;
-                    case LED_EVT_REFRESH:
-                    	hal_led_set_indicator_status(HAL_LED_REFRESH);
-                        break;
-                    case LED_EVT_POWER_OFF_PROGRESS:
-                    	hal_led_set_indicator_status(HAL_LED_POWER_OFF);
-                    	//hal_pmic_pca9422_power_down();
-                    	bq256xx_enter_ship_mode();
-                        break;
-                    case LED_EVT_CHARGING:
-                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_ENABLE);
-                        break;
-                    case LED_EVT_NOT_CHARGING:
-                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISENABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
-                        break;
-                    case LED_EVT_LOW_BATTERY:
-                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISENABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
-                        break;
-                    case LED_EVT_NORMAL_BATTERY:
-                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISENABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISENABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISENABLE);
-                        break;
-                    case LED_EVT_FULL_CHARGERED:
-                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISENABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
-                        break;
-                    case LED_EVT_PHOTO_CAPTURE:
-                    	hal_led_set_indicator_status(HAL_LED_TAKE_PHOTO);
-                        break;
-                    case LED_EVT_RECORDING_START:
-                    	hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
-                        break;
-                    case LED_EVT_RECORDING_COMPLETED:
-                    	hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISENABLE);
-                        break;
-                    case LED_EVT_PAIRING_MODE_START:
-                    	hal_led_set_situation(HAL_LED_EVENT_PAIRING, SITUATION_ENABLE);
-                        break;
-                    case LED_EVT_PAIRING_MODE_STOP:
-                    	hal_led_set_situation(HAL_LED_EVENT_PAIRING, SITUATION_DISENABLE);
-                        break;
-                    case LED_EVT_OTA_PROGRESS:
-                    	hal_led_set_situation(HAL_LED_EVENT_OTA, SITUATION_ENABLE);
-                        break;
-                    case LED_EVT_OTA_SUCCESS:
-                    	hal_led_set_situation(HAL_LED_EVENT_OTA_SUCCESS, SITUATION_ENABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_OTA, SITUATION_DISENABLE);
-                        break;
-                    case LED_EVT_OTA_FAIL:
-                    	hal_led_set_situation(HAL_LED_EVENT_OTA_FAILED, SITUATION_ENABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_OTA, SITUATION_DISENABLE);
-                        break;
-                    case LED_EVT_ALL_OFF:
-                    	hal_led_set_indicator_status(HAL_LED_OFF);
-                        break;
-                    default:
-                        break;
-                    }
-                    hal_led_status_handler();
-#endif
-                    xSemaphoreGive(i2c_mutex);
-                }
-
-                if (sys_bus_mutex != NULL) {
-                	xSemaphoreGive(sys_bus_mutex);
-                }
+            if (sys_bus_mutex != NULL) {
+                xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
             }
+
+            vTaskDelay(1); /* 確保 g_led_event 已更新 */
+            led_event_t evt = g_led_event;
+
+            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE) {
+                /* 根據事件控制 LED */
+#if LED_KTD2027_ENABLE
+                switch (evt) {
+                case LED_EVT_POWER_ON_PROGRESS:
+                    hal_led_set_indicator_status(HAL_LED_POWER_ON);
+                    break;
+                case LED_EVT_POWER_OFF_PROGRESS:
+                    hal_led_set_indicator_status(HAL_LED_POWER_OFF);
+                    //hal_pmic_pca9422_power_down();
+                    bq256xx_enter_ship_mode();
+                    break;
+                case LED_EVT_PHOTO_CAPTURE:
+                    hal_led_set_indicator_status(HAL_LED_TAKE_PHOTO);
+                    break;
+                case LED_EVT_REFRESH:
+//                  hal_led_set_indicator_status(HAL_LED_REFRESH);
+                    hal_led_status_handler();
+                    break;
+                case LED_EVT_ALL_OFF:
+                    hal_led_set_indicator_status(HAL_LED_OFF);
+                    break;
+                default:
+                    break;
+                }
+#endif
+                xSemaphoreGive(i2c_mutex);
+            }
+
+            if (sys_bus_mutex != NULL) {
+                xSemaphoreGive(sys_bus_mutex);
+            }
+        }
+
 
         if(System_Status && Novatek_boot_completed)
         {
-        	System_Status=0;
+            System_Status=0;
 #if SOC_SPI_ENABLE
-        	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+            send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
         }
 

@@ -37,6 +37,7 @@ void hal_led_ktd2027_init(void);
 hal_led_indicator_status_t hal_led_get_indicator_status (void);
 void hal_led_set_indicator_status (hal_led_indicator_status_t status);
 void hal_led_set_situation (uint8_t situation, uint8_t enable);
+void hal_led_refresh (void);
 void hal_led_status_handler (void);
 
 void hal_led_ktd2027_power_on_indicator(void);

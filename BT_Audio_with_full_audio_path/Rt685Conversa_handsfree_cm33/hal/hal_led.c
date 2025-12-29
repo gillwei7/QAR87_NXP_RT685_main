@@ -11,7 +11,7 @@
 
 static hal_led_indicator_status_t led_indicator_status_t = HAL_LED_OFF;
 static uint8_t led_situation = HAL_LED_EVENT_OFF;
-static uint8_t led_has_new_situation = 0;
+static uint8_t led_has_new_situation = 1;
 
 
 void hal_led_ktd2027_power_on_indicator(void)
@@ -157,6 +157,11 @@ void hal_led_set_indicator_status (hal_led_indicator_status_t status)
 	}
 }
 
+void hal_led_refresh (void)
+{
+	led_has_new_situation = 1;
+}
+
 void hal_led_status_handler (void) {
 
 	if (!led_has_new_situation) {
@@ -209,13 +214,13 @@ void hal_led_set_situation (uint8_t situation, uint8_t enable) {
 		if (led_situation != (led_situation | situation)) {
 			led_situation = led_situation | situation;
 			led_has_new_situation = 1;
-			PRINTF("[HAL_LED] led_situation: 0x%02x\n", led_situation);
+			PRINTF("[HAL_LED] led_situation: 0x%02x\r\n", led_situation);
 		}
-	} else if (enable == SITUATION_DISENABLE) {
+	} else if (enable == SITUATION_DISABLE) {
 		if (led_situation != (led_situation & ~situation)) {
 			led_situation = led_situation & ~situation;
 			led_has_new_situation = 1;
-			PRINTF("[HAL_LED] led_situation: 0x%02x\n", led_situation);
+			PRINTF("[HAL_LED] led_situation: 0x%02x\r\n", led_situation);
 		}
 	}
 }

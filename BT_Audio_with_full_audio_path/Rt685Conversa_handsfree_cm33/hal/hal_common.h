@@ -50,7 +50,7 @@
 
 
 #define SITUATION_ENABLE           1
-#define SITUATION_DISENABLE        0
+#define SITUATION_DISABLE          0
 
 /*******************************************************************************
  * Prototypes and Variables

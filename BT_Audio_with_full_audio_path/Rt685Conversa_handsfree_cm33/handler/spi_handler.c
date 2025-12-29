@@ -9,6 +9,7 @@
 #include "i2c_component_handler.h"
 #include "system_status.h"
 #include "app_handsfree.h"
+#include "hal_led.h"
 
 /* ============= 被動模式相關定義 ============= */
 typedef enum {
@@ -108,7 +109,8 @@ static void handle_active_ack_frame(const uint8_t *frame)
         case 0x00:
             if (val == 0x00) {
                 PRINTF("[Active] ACK:[00 00] Nova close all component(led,Dmic,AMP) \r\n");
-                led_post_event(LED_EVT_RECORDING_COMPLETED);
+                hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
+                led_post_event(LED_EVT_REFRESH); //While LED ON
                 // TODO: Dmic,AMP
             }
             break;
@@ -137,7 +139,8 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 		case 0x00:
 			if (val == 0x00) {
 				PRINTF("[Passive] ACK:[00 %02X] Nova do nothing \r\n",val);
-				led_post_event(LED_EVT_RECORDING_COMPLETED);
+				hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
+				led_post_event(LED_EVT_REFRESH); //While LED ON
 			}
 			else if (val == 0x01) {
 				PRINTF("[Passive] ACK:[00 %02X] Capture Start \r\n",val);
@@ -152,13 +155,15 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 			}
 			else if (val == 0x04) {
 				PRINTF("[Passive] ACK:[00 %02X] Recording Start \r\n",val);
-				led_post_event(LED_EVT_RECORDING_START);//While LED ON
+				hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
+				led_post_event(LED_EVT_REFRESH); //While LED ON
 				// ToDo:使NXP發出 "登登"聲音
 				ss_set_recording_status(COMPONENT_START);
 			}
 			else if (val == 0x05) {
 				PRINTF("[Passive] ACK:[00 %02X] Recording Completed \r\n",val);
-				led_post_event(LED_EVT_RECORDING_COMPLETED);
+				hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
+				led_post_event(LED_EVT_REFRESH); //While LED ON
 				// ToDo:使NXP發出 "等登"聲音
 				ss_set_recording_status(COMPONENT_END);
 			}
@@ -176,7 +181,7 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 			if (val == 0x11) {
 				PRINTF("[Passive] ACK:[11 11] Nova boot completed\r\n");
 				Novatek_boot_completed = 1;
-				led_post_event(LED_EVT_REFRESH);
+				hal_led_refresh();
 				general_RingtoneState = Ringtone_PowerON;
 			}
 			break;
