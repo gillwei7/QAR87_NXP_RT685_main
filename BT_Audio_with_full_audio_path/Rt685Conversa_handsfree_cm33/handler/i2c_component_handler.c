@@ -415,28 +415,30 @@ void I2C_Task(void *pvParameters)
             	glf70302_polling(&battery_info);
             	//battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
                 PRINTF("[Battery] SOC: %d%%\r\n",battery_info.soc);
-                if(battery_info.soc >= FULLY_CHARGE_PERCENTAGE && ss_is_charging())
-                {
-                	battery_state = BATTERY_STATE_FULL;
-                	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-                	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
-                	led_post_event(LED_EVT_REFRESH);
-                }
-                else if (battery_info.soc <= LOW_POWER_PERCENTAGE && ss_is_charging() == false)
-                {
-                	battery_state = BATTERY_STATE_LOW;
-                	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
-                	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-                	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
-                	led_post_event(LED_EVT_REFRESH);
-                }
-                else
-                {
-                	battery_state = BATTERY_STATE_NORMAL;
-                	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
-                	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-                	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
-                	led_post_event(LED_EVT_REFRESH);
+                if (ss_is_charging()) {
+                	if (battery_info.soc >= FULLY_CHARGE_PERCENTAGE) {
+                    	battery_state = BATTERY_STATE_FULL;
+                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
+                    	led_post_event(LED_EVT_REFRESH);
+                	}
+                } else {
+                    if (battery_info.soc <= LOW_POWER_PERCENTAGE)
+                    {
+                    	battery_state = BATTERY_STATE_LOW;
+                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
+                    	led_post_event(LED_EVT_REFRESH);
+                    }
+                    else
+                    {
+                    	battery_state = BATTERY_STATE_NORMAL;
+                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
+                    	led_post_event(LED_EVT_REFRESH);
+                    }
                 }
             	ss_set_battery(battery_info.soc);
             	if(battery_info.voltage<=3500 && ss_is_charging() == false)//Automatic shutdown when battery voltage drops below 3.5V
