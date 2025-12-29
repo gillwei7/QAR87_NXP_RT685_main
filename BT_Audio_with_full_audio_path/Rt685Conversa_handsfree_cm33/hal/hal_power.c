@@ -14,6 +14,7 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include <stdint.h>
 
 
 #define EN_HIZ_BIT      7
@@ -104,6 +105,7 @@ void hal_power_gauge_glf70302_get_battery_level(void)
 #endif
 }
 
+#if 0
 uint8_t hal_power_get_battery_percentage (uint32_t mv)
 {
     // 邊界保護
@@ -119,6 +121,26 @@ uint8_t hal_power_get_battery_percentage (uint32_t mv)
 
     return soc;   // 0~100
 }
+#endif
+
+// Correct the battery percentage by mapping 90% to 100%
+uint8_t hal_power_get_battery_percentage(uint8_t soc) {
+
+    if (soc > 90) {
+    	soc = 90;
+    }
+
+    uint32_t battery_level = ((uint32_t)soc * 100 + 45) / 90;
+    if (battery_level < 0) {
+    	return 0;
+    }
+    if (battery_level > 100) {
+    	return 100;
+    }
+
+    return (uint8_t)battery_level;
+}
+
 
 uint8_t hal_power_is_power_off_charging_mode(void) {
 	if (is_booting) {
@@ -168,7 +190,8 @@ static void PowerOffChargingTask(void *pvParameters)
                     break;
 
                 case 1:
-                    if (battery_info.soc >= FULLY_CHARGE_PERCENTAGE)
+                	uint8_t battery_level = hal_power_get_battery_percentage(battery_info.soc);
+                    if (battery_level >= FULLY_CHARGE_PERCENTAGE)
                     {
                         hal_led_ktd2027_off();
                         hal_led_ktd2027_full_charged_indicator();
@@ -248,7 +271,8 @@ void hal_power_go_to_power_off_charging(void)
                     break;
 
                 case 1:
-                    if (battery_info.soc >= FULLY_CHARGE_PERCENTAGE)
+                	uint8_t battery_level = hal_power_get_battery_percentage(battery_info.soc);
+                    if (battery_level >= FULLY_CHARGE_PERCENTAGE)
                     {
                         hal_led_ktd2027_off();
                         hal_led_ktd2027_full_charged_indicator();

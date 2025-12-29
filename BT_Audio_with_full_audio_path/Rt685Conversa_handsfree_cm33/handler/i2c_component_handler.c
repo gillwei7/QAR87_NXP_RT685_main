@@ -123,8 +123,10 @@ void Init_I2C_Component(void)
 #endif
 #if FG_GLF70302_ENABLE
 	hal_power_gauge_glf70302_get_battery_level(); //Read the battery level after powering on
+#if 0
 	//battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
-	ss_set_battery(battery_info.soc);
+#endif
+	ss_set_battery(hal_power_get_battery_percentage(battery_info.soc));
 #endif
 
 #if AMP_AW88166_ENABLE
@@ -413,17 +415,20 @@ void I2C_Task(void *pvParameters)
             {
 #if FG_GLF70302_ENABLE
             	glf70302_polling(&battery_info);
+#if 0
             	//battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
-                PRINTF("[Battery] SOC: %d%%\r\n",battery_info.soc);
+#endif
+            	uint8_t battery_level = hal_power_get_battery_percentage(battery_info.soc);
+                PRINTF("[Battery] SOC: %d%%, battery_level: %d%%\r\n",battery_info.soc, battery_level);
                 if (ss_is_charging()) {
-                	if (battery_info.soc >= FULLY_CHARGE_PERCENTAGE) {
+                	if (battery_level >= FULLY_CHARGE_PERCENTAGE) {
                     	battery_state = BATTERY_STATE_FULL;
                     	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
                     	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
                     	led_post_event(LED_EVT_REFRESH);
                 	}
                 } else {
-                    if (battery_info.soc <= LOW_POWER_PERCENTAGE)
+                    if (battery_level <= LOW_POWER_PERCENTAGE)
                     {
                     	battery_state = BATTERY_STATE_LOW;
                     	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
@@ -440,7 +445,7 @@ void I2C_Task(void *pvParameters)
                     	led_post_event(LED_EVT_REFRESH);
                     }
                 }
-            	ss_set_battery(battery_info.soc);
+            	ss_set_battery(battery_level);
             	if(battery_info.voltage<=3500 && ss_is_charging() == false)//Automatic shutdown when battery voltage drops below 3.5V
             	{
             		PRINTF("[Gauge] Low battery, so it shuts down. \r\n");
