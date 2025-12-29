@@ -348,6 +348,7 @@ void I2C_Task(void *pvParameters)
             if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
             {
 #if CHG_BQ25618_ENABLE
+                vTaskDelay(10); // Wait for the charger to become ready
             	(void)bq256xx_set_iindpm(s_bq256xx_iindpm_target_ua);
     			if (bq256xx_poll_status(&charger_status) == kStatus_Success) {
     				PRINTF("[Charger] Power Good: %s\n", charger_status.power_good ? "Yes" : "No");
