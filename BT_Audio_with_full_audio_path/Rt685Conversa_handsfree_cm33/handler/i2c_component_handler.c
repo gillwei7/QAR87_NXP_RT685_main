@@ -18,6 +18,7 @@
 #include "app_handsfree.h"
 
 #define BATTERY_READ_PERIOD_MS  (60000U)
+#define FIRST_BATTERY_READ_PERIOD_MS  (6000U)
 static TimerHandle_t s_battery_timer = NULL;
 
 /* ===== I2C synchronization objects ===== */
@@ -40,6 +41,7 @@ extern volatile uint8_t System_Status ;
 extern uint8_t Novatek_boot_completed;
 
 battery_state_t battery_state = BATTERY_STATE_NORMAL;
+uint8_t is_first_read_battery_level = 1;
 
 extern uint32_t s_bq256xx_iindpm_target_ua;
 
@@ -47,6 +49,10 @@ extern RingtoneState general_RingtoneState;
 
 static void BatteryReadTimerCb(TimerHandle_t xTimer)
 {
+    if (is_first_read_battery_level) {
+        xTimerChangePeriod(s_battery_timer, pdMS_TO_TICKS(BATTERY_READ_PERIOD_MS), 0);
+        is_first_read_battery_level = 0;
+    }
     if (i2c_event_group) {
         xEventGroupSetBits(i2c_event_group, GAUGE_EVENT_BIT);
     }
@@ -137,10 +143,17 @@ void Init_I2C_Component(void)
 
 #if FG_GLF70302_ENABLE
 	s_battery_timer = xTimerCreate("BattTimer",
-	                               pdMS_TO_TICKS(BATTERY_READ_PERIOD_MS),
+	                               pdMS_TO_TICKS(FIRST_BATTERY_READ_PERIOD_MS),
 	                               pdTRUE,     // auto-reload
 	                               NULL,
 	                               BatteryReadTimerCb);
+#endif
+
+}
+
+void battery_timer_start(void)
+{
+#if FG_GLF70302_ENABLE
 	if (s_battery_timer != NULL) {
 	    xTimerStart(s_battery_timer, 0);
 	}
