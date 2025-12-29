@@ -7,12 +7,12 @@
 #if UsingQAR87Board == 1
 #include "hal_led.h"
 #include "ktd202x_leds.h"
-
+#include "app_handsfree.h"
 
 static hal_led_indicator_status_t led_indicator_status_t = HAL_LED_OFF;
 static uint8_t led_situation = HAL_LED_EVENT_OFF;
 static uint8_t led_has_new_situation = 1;
-
+extern RingtoneState general_RingtoneState;
 
 void hal_led_ktd2027_power_on_indicator(void)
 {
@@ -51,7 +51,7 @@ static void hal_led_ktd2027_low_battery_indicator(void)
 {
     ktd202x_led_off();
     ktd202x_ch2_led_blink(500, 4500, TIM_1);
-
+    general_RingtoneState = Ringtone_LowBattery;
 }
 
 void hal_led_ktd2027_full_charged_indicator(void)

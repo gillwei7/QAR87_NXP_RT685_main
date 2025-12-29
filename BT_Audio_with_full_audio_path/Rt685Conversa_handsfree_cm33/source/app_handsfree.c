@@ -599,6 +599,7 @@ static void app_task(void *pvParameters)
             }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count > 0){
                 ringtone_time_count--;
             }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count == 0){
+                ringtone_is_played = 0;
                 DeInitCodec();
                 general_RingtoneState = Ringtone_No;
             }
@@ -642,7 +643,7 @@ static void app_task(void *pvParameters)
             }
         }
 
-        if(general_RingtoneState == Ringtone_LowBattery && DeviceWorkStateCur == WorkState_HomeVitStandby){
+        if(general_RingtoneState == Ringtone_LowBattery){
             if(AmpState==AmpState_UnConfigured){
                 InitAndStartCodec(16000, 16);
             }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 0){
@@ -652,6 +653,7 @@ static void app_task(void *pvParameters)
             }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count > 0){
                 ringtone_time_count--;
             }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count == 0){
+                ringtone_is_played = 0;
                 DeInitCodec();
                 general_RingtoneState = Ringtone_No;
             }
