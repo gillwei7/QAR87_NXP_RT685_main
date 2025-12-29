@@ -221,7 +221,7 @@ void button_task(void *pvParameters)
 				{
 					PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
 #if SOC_SPI_ENABLE
-#if !CES_DEMO
+#if !CES_DEMO || CES_DEMO_FOR_NOVATEK
 					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
 							ss_get_state() == USAGE_STATE_VIDEO_RECORDING || ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
 						send_spi_request(SHORT_PRESS_HEX_VALUE); // Stop Recording and Take Photo
@@ -289,7 +289,7 @@ void button_task(void *pvParameters)
                 PRINTF("[Button] Long Press (hold) detected. Sending 0x%02X\r\n",
                        LONG_PRESS_HEX_VALUE);
 #if SOC_SPI_ENABLE
-#if !CES_DEMO
+#if !CES_DEMO || CES_DEMO_FOR_NOVATEK
 				if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT)) {
 					send_spi_request(LONG_PRESS_HEX_VALUE); // Start Recording
 				}
