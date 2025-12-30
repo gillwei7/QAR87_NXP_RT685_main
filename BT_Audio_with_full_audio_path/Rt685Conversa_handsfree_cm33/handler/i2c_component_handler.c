@@ -451,6 +451,10 @@ void I2C_Task(void *pvParameters)
 #if SOC_SPI_ENABLE
                         if (Novatek_boot_completed) {
                             send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
+                        } else {
+        		            general_RingtoneState = Ringtone_PowerOFF;
+        		            vTaskDelay(pdMS_TO_TICKS(200));
+        		        	led_post_event(LED_EVT_POWER_OFF_PROGRESS);
                         }
 #endif
 //                        led_post_event(LED_EVT_POWER_OFF_PROGRESS);
