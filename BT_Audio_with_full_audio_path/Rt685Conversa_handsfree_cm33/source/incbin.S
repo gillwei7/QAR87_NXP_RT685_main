@@ -174,7 +174,7 @@ OpusFileEnd2:
 
         .align 4;
 OpusFileBeg3:
-		.incbin "3.Low Battery.opus"
+		.incbin "3.Low Battery_cut_20251230.opus"
 OpusFileEnd3:
 		.int 0
 
