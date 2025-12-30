@@ -51,7 +51,6 @@ static void BatteryReadTimerCb(TimerHandle_t xTimer)
 {
     if (is_first_read_battery_level) {
         xTimerChangePeriod(s_battery_timer, pdMS_TO_TICKS(BATTERY_READ_PERIOD_MS), 0);
-        is_first_read_battery_level = 0;
     }
     if (i2c_event_group) {
         xEventGroupSetBits(i2c_event_group, GAUGE_EVENT_BIT);
@@ -458,6 +457,11 @@ void I2C_Task(void *pvParameters)
 //                        general_RingtoneState = Ringtone_PowerOFF;
             	}
 #endif
+                if (is_first_read_battery_level) {
+            		Novatek_boot_completed = 1;
+            		is_first_read_battery_level = 0;
+                }
+
                 xSemaphoreGive(i2c_mutex);
             }
 

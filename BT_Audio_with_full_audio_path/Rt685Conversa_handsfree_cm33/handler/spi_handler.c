@@ -180,7 +180,6 @@ static void handle_passive_ack_frame(const uint8_t *frame)
         case 0x11: //Nova boot completed
 			if (val == 0x11) {
 				PRINTF("[Passive] ACK:[11 11] Nova boot completed\r\n");
-				Novatek_boot_completed = 1;
 				hal_led_refresh();
 				battery_timer_start();
 				general_RingtoneState = Ringtone_PowerON;
