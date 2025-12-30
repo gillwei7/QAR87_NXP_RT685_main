@@ -19,7 +19,7 @@
 #define COMPONENT_START        2
 #define COMPONENT_END          3
 
-#define FULLY_CHARGE_PERCENTAGE	90
+#define FULLY_CHARGE_PERCENTAGE	100
 #define LOW_POWER_PERCENTAGE	30
 
 typedef enum {
