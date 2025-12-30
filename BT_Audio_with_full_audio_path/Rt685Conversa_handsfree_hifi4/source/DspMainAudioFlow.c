@@ -831,7 +831,8 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 		S32 TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[AudioFrameSizeInSamplePerCh_16KHz*2];
 		float *ConversaRefIn;
 
-		#if EAP_ENABLE==1
+		//#if EAP_ENABLE==1
+		#if 0
 			S16 *EapInPtrs[LVM_MAX_STREAMS*2];	//this is LVM_MAX_STREAMS stereo channels
 			S16 *EapOtPtrs[2];					//this is 1 stereo channel
 
@@ -866,6 +867,13 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 		//master volume control ---  in and out are both S32 --- change PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1 in MCU side to set new volume target
 		SoftGainControl_MasterLAndR.TargetGain=PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1;
 		AudioProcOneFrameS32_Gain(&SoftGainControl_MasterLAndR, TmpS32Buf_LRMixed_SrcInput, S32Ptr_Tmp1L, AudioFrameSizeInSamplePerCh_48KHz*2);	//FltPtr_Tmp1L together with FltPtr_Tmp1R is used as LRMixed buffer
+
+		//gill
+//		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+//		{
+//			DstPtrS16_I2SAmpL[i] =  i * 20;
+//			DstPtrS16_I2SAmpR[i] = -i * 20;
+//		}
 
 		for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
 		{
@@ -924,13 +932,13 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 
 		for(int i=0; i < AudioFrameSizeInSamplePerCh_16KHz; i++ ) //16KHz to 48KHz
 		{
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L++;
+			DstPtrS16_I2SNvtL[3*i+0] = *S16Ptr_Tmp1L;
+			DstPtrS16_I2SNvtL[3*i+1] = *S16Ptr_Tmp1L;
+			DstPtrS16_I2SNvtL[3*i+2] = *S16Ptr_Tmp1L++;
 
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R++;
+			DstPtrS16_I2SNvtR[3*i+0] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+1] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+2] = *S16Ptr_Tmp1R++;
 		}
 
 	#endif
@@ -1343,18 +1351,19 @@ void DspMainAudioFlowProcOneFrame_Translation(int OptionWord)
 		//fill AMP I2S out buffer with FltPtr_Tmp1L (SBC + OPUS mixed audio)
 		//this is aready done when mixing opus and sbc
 
-		ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], AudioFrameSizeInSamplePerCh_16KHz);
+		//ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], AudioFrameSizeInSamplePerCh_16KHz);
+
+		//ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_AecOut], AudioFrameSizeInSamplePerCh_16KHz);
 		ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], AudioFrameSizeInSamplePerCh_16KHz);
 
 		for(int i=0; i < AudioFrameSizeInSamplePerCh_16KHz; i++ ) //16KHz to 48KHz
 		{
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L++;
-
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R++;
+			DstPtrS16_I2SNvtL[3*i+0] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtL[3*i+1] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtL[3*i+2] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+0] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+1] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+2] = *S16Ptr_Tmp1R++;
 		}
 
 	#endif
@@ -1384,9 +1393,9 @@ void DspMainAudioFlowProcOneFrame_Translation(int OptionWord)
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
 
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic0[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic1[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic2[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic3[i];
 		}
 	#endif
 
@@ -1525,18 +1534,19 @@ void DspMainAudioFlowProcOneFrame_VideoAi(int OptionWord)
 		//fill AMP I2S out buffer with FltPtr_Tmp1L (SBC + OPUS mixed audio)
 		//this is aready done when mixing opus and sbc
 
-		ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], AudioFrameSizeInSamplePerCh_16KHz);
-		ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], AudioFrameSizeInSamplePerCh_16KHz);
+		//ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], AudioFrameSizeInSamplePerCh_16KHz);
+
+		ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_AecOut], AudioFrameSizeInSamplePerCh_16KHz);
+		//ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], AudioFrameSizeInSamplePerCh_16KHz);
 
 		for(int i=0; i < AudioFrameSizeInSamplePerCh_16KHz; i++ ) //16KHz to 48KHz
 		{
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L++;
-
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R++;
+			DstPtrS16_I2SNvtL[3*i+0] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtL[3*i+1] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtL[3*i+2] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+0] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+1] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+2] = *S16Ptr_Tmp1R++;
 		}
 
 	#endif
@@ -1566,13 +1576,14 @@ void DspMainAudioFlowProcOneFrame_VideoAi(int OptionWord)
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
 
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic0[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic1[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic2[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic3[i];
 		}
 	#endif
 
 //	DbgPin7Dn();
+
 }
 #endif
 
