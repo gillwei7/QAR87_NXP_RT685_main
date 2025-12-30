@@ -150,10 +150,10 @@ uint8_t hal_power_is_power_off_charging_mode(void) {
 //		SDK_DelayAtLeastUs(100 * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk)); //Delay 100ms
 		vTaskDelay(pdMS_TO_TICKS(100));
 
-		is_charging = (uint8_t)GPIO_PinRead(GPIO, 0U, 19U); // VBUS detection
-		if(is_charging)
-//		hal_power_charger_bq25618_get_charging_status();
-//		if(charger_status.vbus_good)
+//		is_charging = (uint8_t)GPIO_PinRead(GPIO, 0U, 19U); // VBUS detection
+//		if(is_charging)
+		hal_power_charger_bq25618_get_charging_status();
+		if(charger_status.vbus_good)
 		{
 			is_power_off_charging_mode = 1;
 		}
@@ -175,10 +175,10 @@ static void PowerOffChargingTask(void *pvParameters)
 
     for (;;)
     {
-        //hal_power_charger_bq25618_get_charging_status();
-        //if (charger_status.vbus_good)
-        uint8_t charger_status = (uint8_t)GPIO_PinRead(GPIO, 0U, 19U);
-        if(charger_status==1)
+        hal_power_charger_bq25618_get_charging_status();
+        if (charger_status.vbus_good)
+//        uint8_t charger_status = (uint8_t)GPIO_PinRead(GPIO, 0U, 19U);
+//        if(charger_status==1)
         {
         	vTaskDelay(pdMS_TO_TICKS(100));
             hal_power_gauge_glf70302_get_battery_level();
@@ -253,10 +253,10 @@ void hal_power_go_to_power_off_charging(void)
 
     for (;;)
     {
-        //hal_power_charger_bq25618_get_charging_status();
-        //if (charger_status.vbus_good)
-        uint8_t charger_status = (uint8_t)GPIO_PinRead(GPIO, 0U, 19U);
-        if(charger_status==1)
+        hal_power_charger_bq25618_get_charging_status();
+        if (charger_status.vbus_good)
+//        uint8_t charger_status = (uint8_t)GPIO_PinRead(GPIO, 0U, 19U);
+//        if(charger_status==1)
         {
 //        	vTaskDelay(pdMS_TO_TICKS(100));
             if (battery_level_delay > 300 || battery_level_delay == 0) {
