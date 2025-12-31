@@ -51,7 +51,8 @@
 #include "AudioProcess.h"
 #include "SubFunc.h"
 
-
+#include "AudioIoCfg_I2s.h"
+#include "Sweep.h"
 #if EnableUsbComAndAudio==1
 #include "usb_device_config.h"
 #include "usb.h"
@@ -62,10 +63,10 @@
 #include "usb_device_descriptor.h"
 #include "audio_unified.h"
 
-#include "AudioIoCfg_I2s.h"
+
 
 #include "UsbApp.h"
-#include "Sweep.h"
+
 
 
 #endif

@@ -83,8 +83,10 @@ void ClearAudioCirBuf(int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir)
 	}
 	if(ToClrUacCir)
 	{
+#if EnableUsbComAndAudio
 		CirUacUpAudioBuf_ClearAllSamples_MultiCh(&UacUpAudioBuf_MCh);
 		CirUacDnAudioBuf_ClearAllSamples_MultiCh(&UacDnAudioBuf_MCh);
+#endif
 	}
 	if(ToClrSbcCir)
 	{

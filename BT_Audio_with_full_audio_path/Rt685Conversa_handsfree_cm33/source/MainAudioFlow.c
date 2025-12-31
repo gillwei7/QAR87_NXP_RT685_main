@@ -339,6 +339,7 @@ void SetI2SBufferABSelect(int ToSetI2SAmp, int ToSetI2SNvt)
 		}
 	}
 }
+#if EnableUsbComAndAudio
 __attribute__((section("CodeQuickAccess")))
 void MoveUacAudioToDspSharedUacDnBuf(int FrmSize, int ToDoDeci)
 {
@@ -449,6 +450,7 @@ void MoveUacAudioToDspSharedUacDnBuf(int FrmSize, int ToDoDeci)
 		OSA_EXIT_CRITICAL();
 	#endif
 }
+#endif
 __attribute__((section("CodeQuickAccess")))
 void PrintWatchToUartComAndUsbCom(int Cnt, int PrintFreqAmpScale)
 {
@@ -968,6 +970,7 @@ extern volatile uint8_t NowInIncomingCallRingTone;
 int LocalToneGainControlCnt=0;
 float LocalToneGainCurrent=0.0f;
 float LocalToneGainTarget=0.0f;
+#if EnableUsbComAndAudio
 __attribute__((section("CodeQuickAccess")))
 void PutAudioDataFromDspToUacUpCirBuffer(int FrmSize)	//audio in this fucntion is always 16KHz, cause the UAC up inteface is 16KHz
 {
@@ -1036,6 +1039,7 @@ void MoveAudioDataFromDspToUacUpCirBuf(int FrmSize)
 			VarBlockSharedByDspAndMcu.MonitorInfoArray1[8]=AODOfUacUpBuf+FrmSize;
 	#endif
 }
+#endif
 __attribute__((section("CodeQuickAccess")))
 void MoveAudioDataFromDspToI2SDmaBufAmp(int FrmSize, int ToUseStartingMute)
 {
@@ -1459,9 +1463,10 @@ void InitAudioInterface_AudioIoDebug(int Opt)
 	VarBlockSharedByDspAndMcu.I2SFs_Nvt=NvtI2SFs_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFs_Amp=48000;
 	VarBlockSharedByDspAndMcu.PdmFs=16000;
+#if EnableUsbComAndAudio
 	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
 	VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
-
+#endif
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
@@ -1517,9 +1522,10 @@ void InitAudioInterface_HfpCall(int Opt)
 
 	VarBlockSharedByDspAndMcu.I2SFs_Amp=16000;
 	VarBlockSharedByDspAndMcu.PdmFs    =16000;
+#if EnableUsbComAndAudio
 	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
 	VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
-
+#endif
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples    =AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
@@ -1572,8 +1578,9 @@ void InitAudioInterface_HomeVitStandby(int Opt)
 	VarBlockSharedByDspAndMcu.I2SFs_Amp=16000;
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_16KHz;
+#if EnableUsbComAndAudio
 	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
-	VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
+#endif
 	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
 	return;
 }
@@ -1634,9 +1641,10 @@ void InitAudioInterface_VideoRecording(int Opt)
     VarBlockSharedByDspAndMcu.I2SFs_Nvt=NvtI2SFs_48KHz;
     VarBlockSharedByDspAndMcu.I2SFs_Amp=48000;
     VarBlockSharedByDspAndMcu.PdmFs=16000;
+#if EnableUsbComAndAudio
     VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
     VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
-
+#endif
     VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
@@ -1702,9 +1710,10 @@ void InitAudioInterface_MediaPlayer(int Opt)
 	VarBlockSharedByDspAndMcu.I2SFs_Nvt=NvtI2SFs_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFs_Amp=48000;
 	VarBlockSharedByDspAndMcu.PdmFs=16000;
+#if EnableUsbComAndAudio
 	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
 	VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
-
+#endif
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
@@ -1789,9 +1798,10 @@ void InitAudioInterface_MusicPlayer(int Opt)
 
 	VarBlockSharedByDspAndMcu.I2SFs_Amp=fs_I2S;
 	VarBlockSharedByDspAndMcu.PdmFs=16000;
+#if EnableUsbComAndAudio
 	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
 	VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
-
+#endif
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=frmsizeInSamples_I2S;
 
 	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
@@ -1855,9 +1865,10 @@ void InitAudioInterface_Translation(int Opt)
     VarBlockSharedByDspAndMcu.I2SFs_Nvt=NvtI2SFs_48KHz;
     VarBlockSharedByDspAndMcu.I2SFs_Amp=48000;
     VarBlockSharedByDspAndMcu.PdmFs=16000;
+#if EnableUsbComAndAudio
     VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
     VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
-
+#endif
     VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
@@ -1931,9 +1942,10 @@ void InitAudioInterface_VideoAi(int Opt)
     VarBlockSharedByDspAndMcu.I2SFs_Nvt=NvtI2SFs_48KHz;
     VarBlockSharedByDspAndMcu.I2SFs_Amp=48000;
     VarBlockSharedByDspAndMcu.PdmFs=16000;
+#if EnableUsbComAndAudio
     VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
     VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
-
+#endif
     VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
@@ -2057,9 +2069,10 @@ void DeInitAudioInterface_AudioIoDebug(int Opt)
 	}
 
 	(void)BOARD_SwitchAudioFreq(0U,0);
-
+#if EnableUsbComAndAudio
     CirUacUpAudioBuf_ClearAllSamples_MultiCh(&UacUpAudioBuf_MCh);
     CirUacDnAudioBuf_ClearAllSamples_MultiCh(&UacDnAudioBuf_MCh);
+#endif
 }
 void DeInitAudioInterface_HfpCall(int Opt)
 {
@@ -2115,9 +2128,10 @@ void DeInitAudioInterface_MusicPlayer(int Opt)
 	}
 
 	(void)BOARD_SwitchAudioFreq(0U,0);
-
+#if EnableUsbComAndAudio
     CirUacUpAudioBuf_ClearAllSamples_MultiCh(&UacUpAudioBuf_MCh);
     CirUacDnAudioBuf_ClearAllSamples_MultiCh(&UacDnAudioBuf_MCh);
+#endif
 }
 void DeInitAudioInterface_Translation(int Opt)
 {

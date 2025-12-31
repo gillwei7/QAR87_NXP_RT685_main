@@ -575,9 +575,10 @@ void StartAudioTask(void)
 	VarBlockSharedByDspAndMcu.I2SFs_Nvt=NvtI2SFs_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFs_Amp=16000;
 	VarBlockSharedByDspAndMcu.PdmFs=16000;
+#if EnableUsbComAndAudio
 	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
 	VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
-
+#endif
 	InitAudioCircularBuf(1,1,1);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 	//InitAndStartPdm();		//if use this , it init dma again, cause BT firmware downloading fail
 

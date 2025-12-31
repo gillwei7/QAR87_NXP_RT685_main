@@ -199,6 +199,7 @@ status_t bq256xx_poll_status(bq256xx_status_t *stat)
 
 status_t bq256xx_enter_ship_mode(void)
 {
+#if ENABLE_POWER_DOWN
     status_t ret;
 
     // [1] 一律先允許在 VBUS present 時也能關閉/重設 BATFET
@@ -222,5 +223,9 @@ status_t bq256xx_enter_ship_mode(void)
     PRINTF("[Charger] bq256xx ship mode \r\n");
 
     return ret;
+#else
+    PRINTF("For debug, disable power down\r\n");
+    return kStatus_Success;
+#endif
 }
 
