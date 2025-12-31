@@ -11,6 +11,7 @@
 #include "WorkStateManager.h"
 #include "app_handsfree.h"
 #include "board.h"
+#include "hal_amp.h"
 
 extern RingtoneState general_RingtoneState;
 
@@ -57,6 +58,8 @@ void ss_set_state(uint8_t state)
 
 		} else
 		if (current_usage_state == USAGE_STATE_MEDIA_PLAYER) {
+			hal_amp_aw88166_left_stop(); //workaround for noise
+			hal_amp_aw88166_right_stop(); //workaround for noise
 			RequestToGetOutofMediaPlayer = 1;
 			current_usage_state = state;
 			need_send_state = 1;
