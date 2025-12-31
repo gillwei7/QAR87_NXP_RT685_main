@@ -424,6 +424,13 @@ void I2C_Task(void *pvParameters)
                     	battery_state = BATTERY_STATE_FULL;
                     	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
                     	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
+                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
+                    	led_post_event(LED_EVT_REFRESH);
+                	}
+                	else if (battery_level > LOW_POWER_PERCENTAGE)
+                	{
+                    	battery_state = BATTERY_STATE_NORMAL;
+                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
                     	led_post_event(LED_EVT_REFRESH);
                 	}
                 } else {

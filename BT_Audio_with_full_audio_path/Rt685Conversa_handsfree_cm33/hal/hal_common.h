@@ -45,7 +45,7 @@
  *   R01.QAR87.01.01.251122
  *   T01.QAR87.01.01.251122.Power
  ******************************************************************************/
-#define HAL_MCU_APP_RELEASE        1
+#define HAL_MCU_APP_RELEASE        0
 #define HAL_MCU_APP_VERSION        sw_version
 
 
@@ -71,10 +71,10 @@ static uint8_t sw_version[40] = "R02.QAR88n.02.01.251230.Standalone";
 
 #else
 #if UsingQAR87BoardHwVersion == 0 // Dev Board
-static uint8_t sw_version[60] = "T03.QAR88n.01.01.251223.Standalone.2512310945";
+static uint8_t sw_version[60] = "T03.QAR88n.01.01.251223.Standalone.2512311015";
 #endif
 #if UsingQAR87BoardHwVersion == 1 // Actual Board
-static uint8_t sw_version[60] = "T03.QAR88n.02.01.251223.Standalone.2512310945";
+static uint8_t sw_version[60] = "T03.QAR88n.02.01.251223.Standalone.2512311015";
 #endif
 
 #endif

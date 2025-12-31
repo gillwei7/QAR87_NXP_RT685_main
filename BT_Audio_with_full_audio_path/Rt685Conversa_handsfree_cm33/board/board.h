@@ -453,7 +453,7 @@
 #define CES_DEMO                      1
 
 #if CES_DEMO
-#define CES_DEMO_FOR_NOVATEK          1
+#define CES_DEMO_FOR_NOVATEK          0
 #else
 #define CES_DEMO_FOR_NOVATEK          0
 #endif
