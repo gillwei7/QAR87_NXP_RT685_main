@@ -22,6 +22,9 @@
 #define FULLY_CHARGE_PERCENTAGE	100
 #define LOW_POWER_PERCENTAGE	30
 
+#define MUSIC_PLAYING          1
+#define MUSIC_PAUSE            0
+
 typedef enum {
     BATTERY_STATE_NORMAL = 0,       // 一般狀態
     BATTERY_STATE_LOW,              // 電量過低
@@ -108,6 +111,8 @@ uint8_t ss_get_battery();
 uint8_t ss_get_state(void);
 void ss_set_state(uint8_t state);//Change the usage state and send a notification back to Novatek.
 
+uint8_t get_media_status(void);
+void set_media_status(uint8_t status);
 uint8_t get_music_status(void);
 void set_music_status(uint8_t status);
 

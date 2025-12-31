@@ -27,6 +27,7 @@ static volatile uint8_t music_status = 0; // 0: off, 1: on
 static volatile uint8_t is_turning_on_camera = 0;
 static volatile uint8_t need_send_state = 0;
 static volatile uint8_t need_send_music_status = 0;
+static volatile uint8_t is_media_playing = 0;
 
 static uint8_t bt_addr_0 = 0;
 static uint8_t bt_addr_1 = 0;
@@ -173,6 +174,7 @@ void ss_set_state(uint8_t state)
 		RequestToGetIntoMediaPlayer = 1;
 		current_usage_state = state;
 		need_send_state = 1;
+		is_media_playing = 1;
 
 	} else if (state == USAGE_STATE_VIDEO_RECORDING && (current_usage_state == USAGE_STATE_HOME
 #if MENU_STATE_ENABLE
@@ -230,6 +232,24 @@ void ss_set_state(uint8_t state)
 
 	}
 
+}
+
+uint8_t get_media_status(void)
+{
+	return is_media_playing;
+}
+
+void set_media_status(uint8_t status)
+{
+	is_media_playing = status;
+
+	if (is_media_playing == MUSIC_PLAYING) {
+		hal_amp_aw88166_left_start("Music");
+		hal_amp_aw88166_right_start("Music");
+	} else {
+		hal_amp_aw88166_left_stop();
+		hal_amp_aw88166_right_stop();
+	}
 }
 
 uint8_t get_music_status(void)

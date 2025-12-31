@@ -167,6 +167,18 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 				// ToDo:使NXP發出 "等登"聲音
 				ss_set_recording_status(COMPONENT_END);
 			}
+			else if (val == 0x06) {
+				PRINTF("[Passive] ACK:[00 %02X] Media Playing \r\n",val);
+				if (get_media_status() == MUSIC_PAUSE) {
+					set_media_status(MUSIC_PLAYING);
+				}
+			}
+			else if (val == 0x07) {
+				PRINTF("[Passive] ACK:[00 %02X] Media Pause \r\n",val);
+				if (get_media_status() == MUSIC_PLAYING) {
+					set_media_status(MUSIC_PAUSE);
+				}
+			}
 			else if (val == 0x08) {
 				PRINTF("[Passive] ACK:[00 %02X] Wi-Fi connection \r\n",val);
 				// ToDo:手機Wi-Fi連線時，發出提示聲音
