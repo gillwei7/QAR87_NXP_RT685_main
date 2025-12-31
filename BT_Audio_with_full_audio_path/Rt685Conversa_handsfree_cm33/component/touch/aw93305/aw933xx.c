@@ -1920,7 +1920,7 @@ AW_S32 aw933xx_init(const struct aw_func_t *aw_func)
 		return ret;
 	}
 
-	if (aw933xx.chip_id == AW93307_CHIP_ID)
+//	if (aw933xx.chip_id == AW93307_CHIP_ID)
 		aw933xx_set_cs_as_irq(AW933XX_CSX_TO_IRQ);
 
 #if defined(AW933XX_OS_USED) && (AW933XX_OS_USED == 1)
