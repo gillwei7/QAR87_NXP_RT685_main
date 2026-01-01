@@ -37,6 +37,7 @@
 #define GAUGE_EVENT_BIT      (1UL << 2)
 #define LED_EVENT_BIT        (1UL << 3)   /* LED task wake-up flag */
 #define AMP_EVENT_BIT     	 (1UL << 4)
+#define GAUGE_2_EVENT_BIT      (1UL << 5)
 
 /*===== AMP ===== */
 typedef enum {

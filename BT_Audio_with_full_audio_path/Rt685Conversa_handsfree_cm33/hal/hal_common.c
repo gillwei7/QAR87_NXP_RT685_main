@@ -168,7 +168,7 @@ void hal_gpio_interrupt_init(void)
 
     HAL_GpioInstallCallback(s_TouchIntGpioHandle, hal_gpio_interrupt_callback, (void *)TOUCH_EVENT_BIT);
     HAL_GpioInstallCallback(s_ChargerIntGpioHandle, hal_gpio_interrupt_callback, (void *)CHARGER_EVENT_BIT);
-    HAL_GpioInstallCallback(s_GaugeIntGpioHandle, hal_gpio_interrupt_callback, (void *)GAUGE_EVENT_BIT);
+    HAL_GpioInstallCallback(s_GaugeIntGpioHandle, hal_gpio_interrupt_callback, (void *)GAUGE_2_EVENT_BIT);
 
 }
 
