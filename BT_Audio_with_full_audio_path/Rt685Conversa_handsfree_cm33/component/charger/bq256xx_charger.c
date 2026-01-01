@@ -203,6 +203,8 @@ status_t bq256xx_enter_ship_mode(void)
 #if ENABLE_POWER_DOWN
     status_t ret;
 
+    GPIO_PinWrite(GPIO, NXP_532_PWR_PMIC1_PORT, NXP_532_PWR_PMIC1_PIN, 0); //Disable GLF70583
+
     // [1] 一律先允許在 VBUS present 時也能關閉/重設 BATFET
     ret = bq256xx_update_bits(BQ256XX_REG_CHG_CTRL3,
                               BQ256XX_BATFET_RST_WVBUS,

@@ -86,6 +86,7 @@
 #define BQ256XX_BATFET_DIS        (1 << 5)  // 關閉 BATFET -> 進入/準備進入 ship mode
 #define BQ256XX_BATFET_RST_WVBUS  (1 << 4)  // 允許在 VBUS 插著時也執行 BATFET 關閉/重設
 #define BQ256XX_BATFET_DLY        (1 << 3)  // 關閉 BATFET 延遲 (~10-15s)；0=立即、1=延遲
+#define BQ256XX_BATFET_RST_EN     (1 << 2)  // Enable BATFET full system reset
 
 /* Charger configuration */
 typedef struct {
