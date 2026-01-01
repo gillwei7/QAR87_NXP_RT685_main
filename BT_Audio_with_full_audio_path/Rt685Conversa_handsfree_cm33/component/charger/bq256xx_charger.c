@@ -7,6 +7,7 @@
 
 #include "bq256xx_charger.h"
 #include "fsl_debug_console.h"
+#include "GlobalDef.h"
 
 status_t  bq256xx_write_reg(uint8_t reg, uint8_t cmd)
 {
