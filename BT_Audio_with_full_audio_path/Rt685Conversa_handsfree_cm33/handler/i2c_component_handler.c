@@ -189,7 +189,7 @@ void I2C_Task(void *pvParameters)
             TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT | LED_EVENT_BIT | AMP_EVENT_BIT,
             pdTRUE,     /* clear on exit */
             pdFALSE,    /* wait for any bit */
-            portMAX_DELAY);
+            pdMS_TO_TICKS(500));
 
 
         /* --- AMP event --- */
@@ -199,10 +199,10 @@ void I2C_Task(void *pvParameters)
 
             if (sys_bus_mutex != NULL)
             	{
-            		xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+            		xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
             	}
 
-            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE) {
+            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
 #if AMP_AW88166_ENABLE
                 switch (evt) {
                     case AMP_EVT_MUSIC_START:
@@ -241,10 +241,10 @@ void I2C_Task(void *pvParameters)
         {
         	if (sys_bus_mutex != NULL)
         		{
-					xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+					xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
         		}
 
-            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
+            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE)
             {
 #if TOUCH_AW93305_ENABLE
             	AW93305_EXTI_Callback();
@@ -343,10 +343,10 @@ void I2C_Task(void *pvParameters)
         if ((bits & CHARGER_EVENT_BIT) != 0)
         {
         	if (sys_bus_mutex != NULL) {
-        		xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+        		xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
         	}
 
-            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
+            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE)
             {
 #if CHG_BQ25618_ENABLE
                 vTaskDelay(100); // Wait for the charger to be ready
@@ -407,10 +407,10 @@ void I2C_Task(void *pvParameters)
         {
 
         	if (sys_bus_mutex != NULL) {
-        		xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+        		xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(1000));
         	}
 
-            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE)
+            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE)
             {
 #if FG_GLF70302_ENABLE
             	glf70302_polling(&battery_info);
@@ -489,13 +489,13 @@ void I2C_Task(void *pvParameters)
         /*--- LED event --- */
         if ((bits & LED_EVENT_BIT) != 0) {
             if (sys_bus_mutex != NULL) {
-                xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+                xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
             }
 
             vTaskDelay(1); /* 確保 g_led_event 已更新 */
             led_event_t evt = g_led_event;
 
-            if (xSemaphoreTake(i2c_mutex, portMAX_DELAY) == pdTRUE) {
+            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
                 /* 根據事件控制 LED */
 #if LED_KTD2027_ENABLE
                 switch (evt) {

@@ -690,7 +690,7 @@ API_RESULT sco_audio_start_pl_ext(void)
 
 	BtHfpRequest=HfpRequest_AudioStart;
 	//block till workstate is WorkState_HfpCall and after HfpRequest_AudioStart is done (audio interface is running)
-	xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_AudioStart, pdTRUE, pdFALSE, portMAX_DELAY);
+	xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_AudioStart, pdTRUE, pdFALSE, pdMS_TO_TICKS(500));
 	xEventGroupClearBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_AudioStart);
 
 	return API_SUCCESS;
@@ -723,7 +723,7 @@ API_RESULT sco_audio_set_speaker_volume_ext(UCHAR volume)
 		BtHfpRequest=HfpRequest_SetCodecAmpVolume;
 	BtHfpAudioVolume=volume;
 		//block till workstate is WorkState_HfpCall and after HfpRequest_AudioStart is done (audio interface is running)
-		xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_SetCodecAmpVolume, pdTRUE, pdFALSE, portMAX_DELAY);
+		xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_SetCodecAmpVolume, pdTRUE, pdFALSE, pdMS_TO_TICKS(500));
 		xEventGroupClearBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_SetCodecAmpVolume);
 
 		return API_SUCCESS;

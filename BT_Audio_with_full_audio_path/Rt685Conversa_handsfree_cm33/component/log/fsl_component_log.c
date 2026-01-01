@@ -533,7 +533,7 @@ void LOG_Printf(log_module_t const *module, log_level_t level, unsigned int time
     }
 
 #ifdef SDK_OS_FREE_RTOS
-    if (((BaseType_t)0) == (BaseType_t)xSemaphoreTakeRecursive(s_logContext.mutex, portMAX_DELAY))
+    if (((BaseType_t)0) == (BaseType_t)xSemaphoreTakeRecursive(s_logContext.mutex, pdMS_TO_TICKS(500)))
     {
         return;
     }

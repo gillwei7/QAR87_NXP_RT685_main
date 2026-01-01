@@ -208,7 +208,7 @@ void button_task(void *pvParameters)
     for (;;)
     {
         uint32_t notifyBits = 0;
-        (void)xTaskNotifyWait(0, 0xFFFFFFFFu, &notifyBits, portMAX_DELAY);
+        (void)xTaskNotifyWait(0, 0xFFFFFFFFu, &notifyBits, pdMS_TO_TICKS(500));
 
         /* A) FunKey 雙擊窗口到期：若仍在等待第二下且目前沒有按住 → 單擊成立 */
         if (notifyBits & FUNK_NOTIFY_DBL)

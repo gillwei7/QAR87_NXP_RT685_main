@@ -405,7 +405,7 @@ void SPI_SLAVE_IRQHandler(void)
 static uint8_t execute_active_spi_transmission(uint8_t hex_value)
 {
     if (sys_bus_mutex != NULL) {
-        xSemaphoreTake(sys_bus_mutex, portMAX_DELAY);
+        xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
     }
 
     PRINTF("\n--- Executing Active SPI for value: 0x%02X ---\r\n", hex_value);
@@ -489,11 +489,11 @@ static uint8_t execute_active_spi_transmission(uint8_t hex_value)
     }
 
     for (int i = 0; i < frames_to_send; i++) {
-        //xEventGroupWaitBits(spi_event_group, EVT_TRANSFER_DONE, pdTRUE, pdFALSE, portMAX_DELAY);
+        //xEventGroupWaitBits(spi_event_group, EVT_TRANSFER_DONE, pdTRUE, pdFALSE, pdMS_TO_TICKS(500));
 
         // NEW: 用 Queue 等待 ISR 通知「一個 frame 傳完」
         transfer_evt_t tevt;
-        if (xQueueReceive(transfer_evt_queue, &tevt, 500) != pdPASS) {
+        if (xQueueReceive(transfer_evt_queue, &tevt, pdMS_TO_TICKS(500)) != pdPASS) {
             // 若 queue 接收失敗，直接跳出（防守性處理）
             break;
         }
@@ -638,7 +638,7 @@ void spi_handler_task(void *pvParameters)
     while (1)
     {
         // NEW: 以 QueueSet 同步等待兩個來源的事件
-        activated = xQueueSelectFromSet(spi_evt_set, portMAX_DELAY);
+        activated = xQueueSelectFromSet(spi_evt_set, pdMS_TO_TICKS(500));
         if (activated == passive_evt_queue) {
             if (xQueueReceive(passive_evt_queue, &passive_evt, 0) == pdPASS) {
                 switch (passive_evt) {

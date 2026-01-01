@@ -71,10 +71,10 @@ static uint8_t sw_version[40] = "R03.QAR88n.02.01.251231.Standalone";
 
 #else
 #if UsingQAR87BoardHwVersion == 0 // Dev Board
-static uint8_t sw_version[60] = "T03.QAR88n.01.01.251223.Standalone.2601011515";
+static uint8_t sw_version[60] = "T03.QAR88n.01.01.251223.Standalone.2601011523";
 #endif
 #if UsingQAR87BoardHwVersion == 1 // Actual Board
-static uint8_t sw_version[60] = "T03.QAR88n.02.01.251223.Standalone.2601011515";
+static uint8_t sw_version[60] = "T03.QAR88n.02.01.251223.Standalone.2601011523";
 #endif
 
 #endif
