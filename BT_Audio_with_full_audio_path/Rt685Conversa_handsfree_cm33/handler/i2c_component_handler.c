@@ -42,6 +42,7 @@ extern uint8_t Novatek_boot_completed;
 
 battery_state_t battery_state = BATTERY_STATE_NORMAL;
 uint8_t is_first_read_battery_level = 1;
+static power_on_reason_t power_on_reason = POWER_ON_UNEXPECTED;
 
 extern uint32_t s_bq256xx_iindpm_target_ua;
 
@@ -57,7 +58,7 @@ static void BatteryReadTimerCb(TimerHandle_t xTimer)
     }
 }
 
-static void Determine_pca9422_enter_ship_mode(void)
+static power_on_reason_t get_power_on_reason(void)
 {
 	/* 讀取當下按鍵狀態 */
 	uint8_t pin_state = (uint8_t)GPIO_PinRead(GPIO, NXP_BQ_MR_N_PORT, NXP_BQ_MR_N_PIN);
@@ -68,6 +69,11 @@ static void Determine_pca9422_enter_ship_mode(void)
 			if (power_key_low_for_ms(LONG_PRESS_MS))
 			{
 				PRINTF("[PCA9422] PCA9422 leave ship mode (press >= %u ms)\r\n", LONG_PRESS_MS);
+
+				if (hal_power_is_power_off_charging_mode()) {
+					return POWER_ON_BUTTON_AND_CHARGER;
+				}
+				return POWER_ON_BUTTON;
 			}
 			else
 			{
@@ -75,7 +81,11 @@ static void Determine_pca9422_enter_ship_mode(void)
 				PRINTF("[PCA9422] Power key (press < %u ms)\r\n", LONG_PRESS_MS);
 				//hal_pmic_pca9422_enter_ship_mode();
 				//hal_pmic_pca9422_power_down();
-				bq256xx_enter_ship_mode();
+//				bq256xx_enter_ship_mode();
+				if (hal_power_is_power_off_charging_mode()) {
+					return POWER_ON_CHARGER;
+				}
+				return POWER_ON_UNEXPECTED;
 			}
 		}
 		else
@@ -83,7 +93,12 @@ static void Determine_pca9422_enter_ship_mode(void)
 			/* 沒有按住按鍵（高電位）→ 直接進入 ship mode */
 			//hal_pmic_pca9422_enter_ship_mode();
 			//hal_pmic_pca9422_power_down();
-			bq256xx_enter_ship_mode();
+//			bq256xx_enter_ship_mode();
+			if (hal_power_is_power_off_charging_mode()) {
+				return POWER_ON_CHARGER;
+			}
+			return POWER_ON_UNEXPECTED;
+
 		}
 }
 
@@ -101,11 +116,13 @@ void Init_I2C_Component(void)
 #if CHG_BQ25618_ENABLE
 	hal_power_charger_bq25618_init();
 #endif
+	power_on_reason = get_power_on_reason();
 
-	if (hal_power_is_power_off_charging_mode()) {
+	if (power_on_reason == POWER_ON_CHARGER) {
 		hal_power_go_to_power_off_charging();
+	} else if (power_on_reason == POWER_ON_UNEXPECTED) {
+		bq256xx_enter_ship_mode();
 	}
-	Determine_pca9422_enter_ship_mode();
 
 #if PMIC_GLF70583_ENABLE
 	hal_pmic_glf70583_actual_board_init();

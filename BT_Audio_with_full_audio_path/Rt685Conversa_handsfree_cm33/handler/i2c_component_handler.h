@@ -64,6 +64,14 @@ typedef enum {
 } led_event_t;
 
 
+typedef enum {
+    POWER_ON_BUTTON = 0,
+    POWER_ON_CHARGER,
+    POWER_ON_BUTTON_AND_CHARGER,
+    POWER_ON_UNEXPECTED,
+} power_on_reason_t;
+
+
 
 //void pca9422_ship_mode(void);
 //void pca9422_power_down(void);

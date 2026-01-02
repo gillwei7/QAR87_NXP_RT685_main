@@ -245,6 +245,7 @@ void hal_power_go_to_power_off_charging(void)
     uint8_t LED_state = 0; //1->charging, 2->full-charge
 
     uint16_t battery_level_delay = 0;
+    uint8_t button_count = 0;
 
 	gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
 	GPIO_PinInit(GPIO, 0U, 19U, &input_pin_config);
@@ -254,11 +255,19 @@ void hal_power_go_to_power_off_charging(void)
     for (;;)
     {
         hal_power_charger_bq25618_get_charging_status();
+        if (GPIO_PinRead(GPIO, NXP_BQ_MR_N_PORT, NXP_BQ_MR_N_PIN) == 0) {
+        	button_count++; //Press Button
+        } else {
+        	button_count = 0; //Release
+        }
         if (charger_status.vbus_good)
 //        uint8_t charger_status = (uint8_t)GPIO_PinRead(GPIO, 0U, 19U);
 //        if(charger_status==1)
         {
 //        	vTaskDelay(pdMS_TO_TICKS(100));
+        	if (button_count > 10) { //Press and hold the button for 10 seconds
+        		NVIC_SystemReset(); //Reboot
+        	}
             if (battery_level_delay > 300 || battery_level_delay == 0) {
         		battery_level_delay = 0;
                 hal_power_gauge_glf70302_get_battery_level();
