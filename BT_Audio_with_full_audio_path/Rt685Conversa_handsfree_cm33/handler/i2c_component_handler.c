@@ -506,6 +506,9 @@ void I2C_Task(void *pvParameters)
                     hal_led_set_indicator_status(HAL_LED_POWER_OFF);
                     //hal_pmic_pca9422_power_down();
                     bq256xx_enter_ship_mode();
+                    // Reset the system if the device is charging
+                    vTaskDelay(1000);
+                    NVIC_SystemReset();
                     break;
                 case LED_EVT_PHOTO_CAPTURE:
                     hal_led_set_indicator_status(HAL_LED_TAKE_PHOTO);

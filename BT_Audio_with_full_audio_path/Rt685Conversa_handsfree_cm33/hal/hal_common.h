@@ -45,7 +45,7 @@
  *   R01.QAR87.01.01.251122
  *   T01.QAR87.01.01.251122.Power
  ******************************************************************************/
-#define HAL_MCU_APP_RELEASE        1
+#define HAL_MCU_APP_RELEASE        0
 #define HAL_MCU_APP_VERSION        sw_version
 
 
