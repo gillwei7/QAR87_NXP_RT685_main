@@ -13,7 +13,7 @@
 //------------------------settings can be changed ----------------------
 //sub working modes (work state) enable or disable --- go to WorkStateManager.h to setup
 
-#define EnableUsbComAndAudio								1		//0 or 1 can be selected
+#define EnableUsbComAndAudio								0		//0 or 1 can be selected
 #define LetComConnectTuningTool								1		//0 or 1 can be selected
 #if LetComConnectTuningTool==1
 	#define PRINTF_GoesToUsbCom								0		//must be 0
