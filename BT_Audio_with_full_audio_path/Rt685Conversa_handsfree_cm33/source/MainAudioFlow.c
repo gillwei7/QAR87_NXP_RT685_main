@@ -1612,6 +1612,8 @@ void InitAudioInterface_HomeVitStandby(int Opt)
 	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
 	if(WaitForDspFinishesItsJob(ConversaTuningCfg_HfpVoiceCall,TimeOutInMs))
 		PRINTF_M("set ConversaTuningCfg_HfpVoiceCall time out in %d ms\r\n", TimeOutInMs);
+	else
+		PRINTF_M("set ConversaTuningCfg_NearEnd is successful\r\n");
 
 	return;
 }
@@ -1754,12 +1756,21 @@ void InitAudioInterface_MediaPlayer(int Opt)
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
-	//VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
 
-	int TimeOutInMs=100;
+    int TimeOutInMs=100;
+    //VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_FarEnd;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_FarEnd,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_FarEnd time out in %d ms\r\n", TimeOutInMs);
+	else
+		PRINTF_M("set ConversaTuningCfg_FarEnd is successful\r\n");
+
+	//int TimeOutInMs=100;
 	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_MediaPlay;
 	if(WaitForDspFinishesItsJob(EapTuningCfg_MediaPlay,TimeOutInMs))
 		PRINTF_M("set EapTuningCfg_MediaPlay time out in %d ms\r\n", TimeOutInMs);
+	else
+		PRINTF_M("set EapTuningCfg_MediaPlay is successful\r\n");
 	return;
 }
 void InitAudioInterface_MusicPlayer(int Opt)
@@ -1862,9 +1873,9 @@ void InitAudioInterface_MusicPlayer(int Opt)
 	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
 
     int TimeOutInMs=100;
-	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_AdaptiveMode;
-	if(WaitForDspFinishesItsJob(ConversaTuningCfg_AdaptiveMode,TimeOutInMs))
-		PRINTF_M("set ConversaTuningCfg_HfpVoiceCall time out in %d ms\r\n", TimeOutInMs);
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_NearEnd;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_NearEnd,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_NearEnd time out in %d ms\r\n", TimeOutInMs);
 
 	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_MusicPlay;
 	if(WaitForDspFinishesItsJob(EapTuningCfg_MusicPlay,TimeOutInMs))
@@ -2041,6 +2052,10 @@ void InitAudioInterface_VideoAi(int Opt)
     VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;        //0xffff stands for a2dp sbc stream
 
 	// to add requesting DSP to re-init conversa ...
+    int TimeOutInMs=100;
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_NearEnd;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_NearEnd,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_NearEnd time out in %d ms\r\n", TimeOutInMs);
     return;
 }
 #endif

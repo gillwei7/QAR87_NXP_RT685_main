@@ -1980,6 +1980,9 @@
 	</storageModule>
 	<storageModule moduleId="openCmsis"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Actual_Board_Debug">
+			<resource resourceType="PROJECT" workspacePath="/Rt685Conversa_handsfree_cm33"/>
+		</configuration>
 		<configuration configurationName="Debug">
 			<resource resourceType="PROJECT" workspacePath="/Rt685Conversa_handsfree_cm33"/>
 		</configuration>
