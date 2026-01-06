@@ -15,7 +15,7 @@
 
 //conversa tuning is in homeVit standby
 //set UseUacDnAudioForConversaTuning_VoiceCall16KHz to 1 to do voice call tuning, set both to 1 to do farBF tuning
-#define UseUacDnAudioForConversaTuning_VoiceCall16KHz	0
+#define UseUacDnAudioForConversaTuning_VoiceCall16KHz	1
 #define UseUacDnAudioForConversaTuning_FarBf16KHz		0
 #if UseUacDnAudioForConversaTuning_FarBf16KHz==1
 	#undef UseUacDnAudioForConversaTuning_VoiceCall16KHz
