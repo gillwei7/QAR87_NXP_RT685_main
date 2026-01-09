@@ -624,11 +624,17 @@ void DspMainAudioFlowProcOneFrame_VideoRecording(int OptionWord)
 		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
 		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
 
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
 		#if 1
-			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
-			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3; //
+			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
 
@@ -740,6 +746,7 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 			unsigned short *OtPtrS16_Opus;
 
 			#if EAP_ENABLE==1
+
 				if(EapAllowsWritingStrm1AsPromptAudio)
 				{
 					xos_mutex_lock(&g_audio_OpusDecoderMutex);
@@ -831,14 +838,14 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 		S32 TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[AudioFrameSizeInSamplePerCh_16KHz*2];
 		float *ConversaRefIn;
 
-		//#if EAP_ENABLE==1
-		#if 0
+		#if EAP_ENABLE==1
+
 			S16 *EapInPtrs[LVM_MAX_STREAMS*2];	//this is LVM_MAX_STREAMS stereo channels
 			S16 *EapOtPtrs[2];					//this is 1 stereo channel
 
 			//input stream[0] for EAP
-			EapInPtrs[0]=AudioOneFrameBuf_SbcDecodedL;
-			EapInPtrs[1]=AudioOneFrameBuf_SbcDecodedR;
+			EapInPtrs[0]=SrcPtrS16_I2SNvtL;
+			EapInPtrs[1]=SrcPtrS16_I2SNvtR;
 			//input stream[1] for EAP
 			EapInPtrs[2]=AudioOneFrameBuf_OpusDecodedL;
 			EapInPtrs[3]=AudioOneFrameBuf_OpusDecodedR;
@@ -899,11 +906,17 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
 		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
 
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
 		#if 1
-			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
-			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3; //
+			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
 
@@ -965,11 +978,14 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 		{
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+0];
 			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+1];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=DstPtrS16_I2SNvtL[i*3]<<16; //to Nvt L
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=DstPtrS16_I2SNvtR[i*3]<<16; //to Nvt R
-
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp1L[i];	//conversa Tx out
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=DstPtrS16_I2SNvtL[i*3]<<16; //to Nvt L
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=DstPtrS16_I2SNvtR[i*3]<<16; //to Nvt R
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=SrcPtrS16_I2SNvtL[i*3]<<16;	//48K16bit
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=SrcPtrS16_I2SNvtR[i*3]<<16;
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=DstPtrS16_I2SAmpL[i*3]<<16; //48K16bit
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=DstPtrS16_I2SAmpR[i*3]<<16;
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp1L[i];	//conversa Tx out
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
 
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=SrcPtrS32_Mic0[i];
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic0[i];
@@ -1180,11 +1196,17 @@ void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
 		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
 		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
 
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
 		#if 1
-			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
-			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3; //
+			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
 
@@ -1335,10 +1357,16 @@ void DspMainAudioFlowProcOneFrame_Translation(int OptionWord)
 		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
 		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
 
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
 		#if 1
-			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
+			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
 			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
@@ -1518,10 +1546,16 @@ void DspMainAudioFlowProcOneFrame_VideoAi(int OptionWord)
 		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
 		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
 
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
 		#if 1
-			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
+			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
 			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif

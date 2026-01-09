@@ -280,9 +280,15 @@ void DryRunAllAlgo(int l)
 			RawMicSignal16BitForVitRef[i]=i*i;
 		}
 
-		pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-		pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-		pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
+		pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+		pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+		pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
 		pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 
 		//dry run conversa

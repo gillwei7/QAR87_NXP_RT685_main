@@ -1760,6 +1760,8 @@ void InitAudioInterface_MediaPlayer(int Opt)
 	VarBlockSharedByDspAndMcu.NeedToSwitchEapTuningCfg=EapTuningCfg_MediaPlay;
 	if(WaitForDspFinishesItsJob(EapTuningCfg_MediaPlay,TimeOutInMs))
 		PRINTF_M("set EapTuningCfg_MediaPlay time out in %d ms\r\n", TimeOutInMs);
+	else
+		PRINTF_M("set EapTuningCfg_MediaPlay is successful\r\n");
 	return;
 }
 void InitAudioInterface_MusicPlayer(int Opt)
