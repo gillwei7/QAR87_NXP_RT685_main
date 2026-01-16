@@ -719,12 +719,12 @@ void hfp_hf_a2dp_task(void *pvParameters)
 	assert(pdPASS == result);
 #if UsingQAR87Board == 1
 
-    if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 1024, NULL,
-                    tskIDLE_PRIORITY + 4, NULL) != pdPASS)
-    {
-        PRINTF("Task creation failed!.\r\n");
-        while (1);
-    }
+//    if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 1024, NULL,
+//                    tskIDLE_PRIORITY + 4, NULL) != pdPASS)
+//    {
+//        PRINTF("Task creation failed!.\r\n");
+//        while (1);
+//    }
 
 	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 1024, NULL, tskIDLE_PRIORITY + 5, NULL)!= pdPASS)
     {
@@ -742,15 +742,15 @@ void hfp_hf_a2dp_task(void *pvParameters)
 	    while (1) { ; }
 	}
 
-	if (xTaskCreate(app_task, "APP_TASK",
-	                    configMINIMAL_STACK_SIZE + 1024,
-	                    NULL,
-	                    tskIDLE_PRIORITY + 6,
-	                    &appTaskHandle) != pdPASS)
-    {
-        PRINTF("app_task creation failed!\r\n");
-        while (1) { ; }
-    }
+//	if (xTaskCreate(app_task, "APP_TASK",
+//	                    configMINIMAL_STACK_SIZE + 1024,
+//	                    NULL,
+//	                    tskIDLE_PRIORITY + 6,
+//	                    &appTaskHandle) != pdPASS)
+//    {
+//        PRINTF("app_task creation failed!\r\n");
+//        while (1) { ; }
+//    }
 #endif
 
 	// gill

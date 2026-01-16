@@ -56,9 +56,9 @@ static const SX9324_RegCfg_t sx9324_default_regs[] = {
 
 	    {0x30, 0x0B},              // 更新：原 0x09
 	    {0x31, 0x0B},              // 更新：原 0x09
-	    {0x32, 0x20},              // 更新：原 0x08
+	    {0x32, 0x30},              // 更新：原 0x08
 	    {0x33, 0x20},
-	    {0x34, 0x0C},
+	    {0x34, 0x20},
 	    {0x35, 0x00},
 	    {0x36, 0x20},              // 更新：原 0x1B
 	    {0x37, 0xC0},              // 更新：原 0x1B
@@ -88,7 +88,7 @@ static const SX9324_RegCfg_t sx9324_default_regs[] = {
 	    {0x11, 0x21},              // 更新：原 0x24（保留最後寫入）
 #endif
 
-#if 1
+#if 0
 	{SX932x_IRQ_ENABLE_REG, 0x70},
 	{0x06, 0x00}, {0x07, 0x00}, {0x08, 0x00},
 
@@ -133,10 +133,10 @@ static const SX9324_RegCfg_t sx9324_default_regs[] = {
 	{0x54, 0xF0},
 
 	/* [修改點] Enable Phases: PH0 & PH1 */
-	{SX932x_CTRL1_REG, 0x2F}
+	{SX932x_CTRL1_REG, 0x21}
 #endif
 
-#if 0
+#if 1
     {0x05, 0x70},
     {0x06, 0x00}, {0x07, 0x00}, {0x08, 0x00},
     {0x10, 0x0A},
@@ -227,7 +227,7 @@ void SX9324_Process(SX9324_Handle_t *dev) {
 
 
     uint8_t whoami = 0;
-    status_t result = SX9324_ReadRegs(dev, SX932x_WHOAMI_REG, &whoami, 1);
+//    status_t result = SX9324_ReadRegs(dev, SX932x_WHOAMI_REG, &whoami, 1);
 
 //    if (result != kStatus_Success) {
 //        PRINTF("I2C Read Failed! Error Code: %d\r\n", result);
@@ -248,6 +248,30 @@ void SX9324_Process(SX9324_Handle_t *dev) {
     PRINTF("Reg 0x02 : 0x%02X\r\n",body_stat);
 #endif
 
+	dev->status.irq_stat = irq_src;
+	dev->status.prox_stat = prox_stat;
+	dev->status.body_stat = body_stat;
+
+	if ((dev->status.irq_stat & SX932x_IRQ_TOUCH)){
+
+		//SX9324_ReadRegs(dev, SX932x_STAT0_REG, &dev->status.prox_stat, 1);
+		//SX9324_ReadRegs(dev, SX932x_STAT1_REG, &dev->status.body_stat, 1);
+
+		if(dev->status.prox_stat !=0 && dev->status.body_stat!=0)
+			{
+				PRINTF("[SAR] HUMAN BODY Detected! \r\n");
+			}
+		else if (dev->status.prox_stat !=0)
+			{
+				PRINTF("[SAR] Detecte near \r\n");
+			}
+	}
+	else if ((irq_src & SX932x_IRQ_RELEASE)){
+
+				PRINTF("[SAR] Detecte leave \r\n");
+	}
+    PRINTF("\n");
+
 #if 0
     // RT685 GPIO Read: GPIO_PinRead(Base, Port, Pin)
     if (GPIO_PinRead(dev->gpio_base, dev->nirq_port, dev->nirq_pin) == 0) {
@@ -263,6 +287,10 @@ void SX9324_Process(SX9324_Handle_t *dev) {
                 PRINTF("Reg 0x01 prox_stat: 0x%02X\r\n",dev->status.prox_stat);
                 SX9324_ReadRegs(dev, SX932x_STAT1_REG, &dev->status.body_stat, 1);
                 PRINTF("Reg 0x02 body_stat: 0x%02X\r\n",dev->status.body_stat);
+            }
+            else{
+            	dev->status.prox_stat = 0;
+            	dev->status.body_stat = 0;
             }
         }
     }

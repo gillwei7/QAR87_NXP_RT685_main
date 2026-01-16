@@ -146,9 +146,11 @@ void hal_gpio_interrupt_init(void)
     hal_gpio_pin_config_t gauge_int_config = {
         kHAL_GpioDirectionIn,
         0,
-        FG_INT_GLF70302_PORT,
-        FG_INT_GLF70302_PIN,
+        2U,//FG_INT_GLF70302_PORT,
+        14U,//FG_INT_GLF70302_PIN,
     };
+
+
 
     /* workaround for calling GPIO_PortInit may reset the configuration already done for the port */
     CLOCK_EnableClock(kCLOCK_HsGpio0);
@@ -267,37 +269,39 @@ void hal_board_init(void)
 	Init_I2C_Component();
 	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
 
-	SX9324_Handle_t hSAR;             // Sensor Handle
-	SX9324_ChannelData_t rawData;     // 用來存放 Raw Data 的變數
+//	SX9324_Handle_t hSAR;             // Sensor Handle
+//	SX9324_ChannelData_t rawData;     // 用來存放 Raw Data 的變數
+//
+//	gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
+//	GPIO_PinInit(GPIO, 2U, 14U, &input_pin_config);
+//
+//   PRINTF("Initializing Sensor...\r\n");
+//	if (SX9324_Init(&hSAR, BOARD_PMIC_I3C_BASEADDR, 2U, 14U))
+//	{
+//		PRINTF("SX9324 Init Success! (ID: 0x%02X)\r\n", SX932x_WHOAMI_VALUE);
+//	}
+//	else
+//	{
+//		PRINTF("SX9324 Init Failed! Check I2C wiring.\r\n");
+//	}
 
-	gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
-	GPIO_PinInit(GPIO, 2U, 14U, &input_pin_config);
-
-   PRINTF("Initializing Sensor...\r\n");
-	if (SX9324_Init(&hSAR, BOARD_PMIC_I3C_BASEADDR, 2U, 14U))
-	{
-		PRINTF("SX9324 Init Success! (ID: 0x%02X)\r\n", SX932x_WHOAMI_VALUE);
-	}
-	else
-	{
-		PRINTF("SX9324 Init Failed! Check I2C wiring.\r\n");
-	}
-
+#if 0
 	while(1)
 	{
 
 	       SX9324_Process(&hSAR);
 
-#if 1
+#if 0
 	       memset(&rawData, 0, sizeof(rawData));
 
            // 讀取 Channel 0 (PH0) 的數據
            SX9324_ReadRawData(&hSAR, 0, &rawData);
            PRINTF("Raw0: Useful=%d, Diff=%d\r\n", rawData.useful, rawData.diff);
+           PRINTF("\n");
 
            // 讀取 Channel 1 (PH1) 的數據
-           SX9324_ReadRawData(&hSAR, 1, &rawData);
-           PRINTF("Raw1: Useful=%d, Diff=%d\r\n", rawData.useful, rawData.diff);
+           //SX9324_ReadRawData(&hSAR, 1, &rawData);
+           //PRINTF("Raw1: Useful=%d, Diff=%d\r\n", rawData.useful, rawData.diff);
 #endif
 
 #if 0
@@ -328,10 +332,10 @@ void hal_board_init(void)
 	        }
 #endif
 	        /* 簡單延遲 50ms (避免 Printf 刷太快) */
-	        hal_delay_ms(50);
+	        hal_delay_ms(100);
 
 	}
-
+#endif
 }
 
 #endif
