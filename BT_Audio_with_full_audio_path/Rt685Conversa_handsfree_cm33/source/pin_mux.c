@@ -4314,7 +4314,7 @@ void BOARD_InitActualGpioPins(void)
                                          /* Enable pull-down function */
                                          IOPCTL_PIO_PULLDOWN_EN |
                                          /* Disable input buffer function */
-                                         IOPCTL_PIO_INBUF_DI |
+                                         IOPCTL_PIO_INBUF_EN |
                                          /* Normal mode */
                                          IOPCTL_PIO_SLEW_RATE_NORMAL |
                                          /* Normal drive */

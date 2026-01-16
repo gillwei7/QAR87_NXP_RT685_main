@@ -26,6 +26,7 @@
 #include "bq256xx_charger.h"
 #include "glf70302_driver.h"
 #include "aw88166.h"
+#include "sx9324.h"
 
 
 #define SCAN_I2C_ADDRESS_ENABLE 1
