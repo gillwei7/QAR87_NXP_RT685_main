@@ -123,6 +123,18 @@ void Init_I2C_Component(void)
 	hal_amp_aw88166_init(); // Init AMP
 #endif
 
+// TODO gill test read Atlas SOC and drive Xmems speaker
+status_t ret_xmems_init = 0;
+uint8_t pdata = 0x02;
+
+ret_xmems_init = BOARD_I3C_Send(BOARD_PMIC_I3C_BASEADDR,
+	                          (uint8_t)0x28,
+	                          (uint32_t)0x00,
+	                          1,
+							  &pdata,
+	                          1);
+PRINTF("ret_xmems_init:%d\r\n", ret_xmems_init);
+
 #if CHG_BQ25618_ENABLE
 
 	hal_power_charger_bq25618_get_charging_status();
