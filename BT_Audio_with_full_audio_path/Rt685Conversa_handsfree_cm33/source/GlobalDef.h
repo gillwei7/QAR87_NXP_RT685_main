@@ -178,7 +178,7 @@ SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);			\
 } while(0)
 
 //gill
-#define AUTO_CONNECT_ENABLE     1
+#define AUTO_CONNECT_ENABLE     0
 #define BT_CONNECTION_LOG       0
 #define ENABLE_POWER_DOWN       0
 
