@@ -126,6 +126,7 @@ void Init_I2C_Component(void)
 // TODO gill test read Atlas SOC and drive Xmems speaker
 status_t ret_xmems_init = 0;
 uint8_t pdata = 0x02;
+uint8_t read_data = 0;
 
 ret_xmems_init = BOARD_I3C_Send(BOARD_PMIC_I3C_BASEADDR,
 	                          (uint8_t)0x28,
@@ -133,7 +134,15 @@ ret_xmems_init = BOARD_I3C_Send(BOARD_PMIC_I3C_BASEADDR,
 	                          1,
 							  &pdata,
 	                          1);
-PRINTF("ret_xmems_init:%d\r\n", ret_xmems_init);
+PRINTF("Send to Alta-S reg 0x00 active mode result:%d\r\n", ret_xmems_init);
+
+ret_xmems_init = BOARD_I3C_Receive(BOARD_PMIC_I3C_BASEADDR,
+        (uint8_t)0x28,
+        (uint32_t)0x00,
+        1,
+		&read_data,
+        1);
+PRINTF("Read Alta-S reg 0x00 action:%d result:%d\r\n", ret_xmems_init,read_data);
 
 #if CHG_BQ25618_ENABLE
 
