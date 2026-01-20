@@ -62,9 +62,9 @@ typedef struct {
 } SX9324_Handle_t;
 
 /* API Prototypes */
-bool SX9324_Init(SX9324_Handle_t *dev, I3C_Type *i3c_base, uint32_t port, uint32_t pin);
-void SX9324_Process(SX9324_Handle_t *dev);
-void SX9324_ReadRawData(SX9324_Handle_t *dev, uint8_t channel, SX9324_ChannelData_t *data);
-void SX9324_ManualCalibration(SX9324_Handle_t *dev);
+bool sx9324_init(SX9324_Handle_t *dev, I3C_Type *i3c_base, uint32_t port, uint32_t pin);
+void sx9324_process(SX9324_Handle_t *dev);
+void sx9324_readrawdata(SX9324_Handle_t *dev, uint8_t channel, SX9324_ChannelData_t *data);
+void sx9324_manualcalibration(SX9324_Handle_t *dev);
 
 #endif /* SAR_SX9324_H_ */

@@ -11,7 +11,7 @@
 
 /* Delay Helper (RT685 is Cortex-M33, usually running fast) */
 extern void SDK_DelayAtLeastUs(uint32_t delay_us, uint32_t coreClock_Hz);
-#define SX9324_DelayMs(ms) SDK_DelayAtLeastUs((ms) * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk))
+#define SX9324_DELAY_MS(ms) SDK_DelayAtLeastUs((ms) * 1000, CLOCK_GetFreq(kCLOCK_CoreSysClk))
 
 /* Register Config Struct */
 typedef struct {
@@ -155,24 +155,38 @@ static const SX9324_RegCfg_t sx9324_default_regs[] = {
     {0x54, 0xF0},
     {0x11, 0x21}
 #endif
+
+#if 0
+    {0x10,0x0A}, {0x11,0x21}, {0x14,0x00}, {0x15,0x00},
+    {0x20,0x20}, {0x23,0x00}, {0x24,0x47},
+    {0x26,0x00}, {0x27,0x47}, {0x28,0x2D}, {0x29,0x1B},
+    {0x2A,0x1F}, {0x2B,0x3D}, {0x2C,0x12}, {0x2D,0x08},
+    {0x30,0x0B}, {0x31,0x0B}, {0x32,0x20}, {0x33,0x20}, {0x34,0x0C},
+    {0x35,0x00}, {0x36,0x20}, {0x37,0xC0},
+    {0x40,0x00}, {0x41,0x00}, {0x42,0x00}, {0x43,0x00}, {0x44,0x00},
+    {0x45,0x05}, {0x46,0x00}, {0x47,0x00}, {0x48,0x00}, {0x49,0x00},
+    {0x4A,0x40}, {0x4B,0x31}, {0x4C,0x00}, {0x4D,0x00}, {0x4E,0x00}, {0x4F,0x00},
+    {0x50,0x00}, {0x51,0x00}, {0x52,0x00}, {0x53,0x00}, {0x54,0x00},
+    {0x02,0x00}, {0x03,0x00}, {0x05,0x00}, {0x06,0x00}, {0x07,0x00}, {0x08,0x00}, {0x00,0x00},
+#endif
 };
 
 /*
  * Flexcomm I2C Wrapper
  */
-static status_t SX9324_WriteReg(SX9324_Handle_t *dev, uint8_t reg, uint8_t val) {
+static status_t sx9324_writereg(SX9324_Handle_t *dev, uint8_t reg, uint8_t val) {
 
     return BOARD_I3C_Send(dev->i3c_base, SX9324_I2C_ADDR, (uint32_t)reg, 1, &val, 1);
 }
 
-static status_t SX9324_ReadRegs(SX9324_Handle_t *dev, uint8_t reg, uint8_t *buffer, size_t len) {
+static status_t sx9324_readregs(SX9324_Handle_t *dev, uint8_t reg, uint8_t *buffer, size_t len) {
 
     return BOARD_I3C_Receive(dev->i3c_base, SX9324_I2C_ADDR, (uint32_t)reg, 1, buffer, (uint8_t)len);
 }
 
 /* API Implementation */
 
-bool SX9324_Init(SX9324_Handle_t *dev, I3C_Type *i3c_base, uint32_t port, uint32_t pin) {
+bool sx9324_init(SX9324_Handle_t *dev, I3C_Type *i3c_base, uint32_t port, uint32_t pin) {
     dev->i3c_base = i3c_base;
     dev->gpio_base = GPIO; // RT685 Global GPIO Base
     dev->nirq_port = port;
@@ -181,12 +195,12 @@ bool SX9324_Init(SX9324_Handle_t *dev, I3C_Type *i3c_base, uint32_t port, uint32
     uint8_t whoami = 0;
 
     // 1. Soft Reset
-    if(SX9324_WriteReg(dev, SX932x_SOFTRESET_REG, SX932x_SOFTRESET)!= kStatus_Success)
+    if(sx9324_writereg(dev, SX932x_SOFTRESET_REG, SX932x_SOFTRESET)!= kStatus_Success)
         return false;
-    SX9324_DelayMs(100);
+    SX9324_DELAY_MS(100);
 
     // 2. Check Connection
-    if (SX9324_ReadRegs(dev, SX932x_WHOAMI_REG, &whoami, 1) != kStatus_Success) {
+    if (sx9324_readregs(dev, SX932x_WHOAMI_REG, &whoami, 1) != kStatus_Success) {
         return false;
     }
 
@@ -195,23 +209,23 @@ bool SX9324_Init(SX9324_Handle_t *dev, I3C_Type *i3c_base, uint32_t port, uint32
     // 3. Write Config
     uint32_t num_regs = sizeof(sx9324_default_regs) / sizeof(SX9324_RegCfg_t);
     for (uint32_t i = 0; i < num_regs; i++) {
-    	if(SX9324_WriteReg(dev, sx9324_default_regs[i].reg, sx9324_default_regs[i].val)!=kStatus_Success)
+    	if(sx9324_writereg(dev, sx9324_default_regs[i].reg, sx9324_default_regs[i].val)!=kStatus_Success)
     		 return false;
     }
-    SX9324_DelayMs(50);
+    SX9324_DELAY_MS(50);
 
     // 4. Calibration
-    SX9324_ManualCalibration(dev);
-    SX9324_DelayMs(100);
+    sx9324_manualcalibration(dev);
+    SX9324_DELAY_MS(100);
 
     // 5. Clear Initial IRQ
     uint8_t dummy;
-    if(SX9324_ReadRegs(dev, SX932x_IRQSTAT_REG, &dummy, 1)!=kStatus_Success)
+    if(sx9324_readregs(dev, SX932x_IRQSTAT_REG, &dummy, 1)!=kStatus_Success)
 		 return false;
 
 
     uint8_t stat2;
-    if(SX9324_ReadRegs(dev, SX932x_STAT2_REG, &stat2, 1)!=kStatus_Success)
+    if(sx9324_readregs(dev, SX932x_STAT2_REG, &stat2, 1)!=kStatus_Success)
 		 return false;
     PRINTF("[SAR] Calib Status (STAT2): 0x%02X\r\n", stat2);
 
@@ -219,15 +233,15 @@ bool SX9324_Init(SX9324_Handle_t *dev, I3C_Type *i3c_base, uint32_t port, uint32
     return true;
 }
 
-void SX9324_ManualCalibration(SX9324_Handle_t *dev) {
-    SX9324_WriteReg(dev, SX932x_STAT2_REG, 0x0F);
+void sx9324_manualcalibration(SX9324_Handle_t *dev) {
+    sx9324_writereg(dev, SX932x_STAT2_REG, 0x0F);
 }
 
-void SX9324_Process(SX9324_Handle_t *dev) {
+void sx9324_process(SX9324_Handle_t *dev) {
 
 
     uint8_t whoami = 0;
-//    status_t result = SX9324_ReadRegs(dev, SX932x_WHOAMI_REG, &whoami, 1);
+//    status_t result = sx9324_readregs(dev, SX932x_WHOAMI_REG, &whoami, 1);
 
 //    if (result != kStatus_Success) {
 //        PRINTF("I2C Read Failed! Error Code: %d\r\n", result);
@@ -240,11 +254,11 @@ void SX9324_Process(SX9324_Handle_t *dev) {
 
 #if 1
     uint8_t irq_src=0 ,prox_stat =0 ,body_stat= 0;
-    SX9324_ReadRegs(dev, SX932x_IRQSTAT_REG, &irq_src, 1);
+    sx9324_readregs(dev, SX932x_IRQSTAT_REG, &irq_src, 1);
     PRINTF("Reg 0x00 : 0x%02X\r\n",irq_src);
-    SX9324_ReadRegs(dev, SX932x_STAT0_REG, &prox_stat, 1);
+    sx9324_readregs(dev, SX932x_STAT0_REG, &prox_stat, 1);
     PRINTF("Reg 0x01 : 0x%02X\r\n",prox_stat);
-    SX9324_ReadRegs(dev, SX932x_STAT1_REG, &body_stat, 1);
+    sx9324_readregs(dev, SX932x_STAT1_REG, &body_stat, 1);
     PRINTF("Reg 0x02 : 0x%02X\r\n",body_stat);
 #endif
 
@@ -297,21 +311,21 @@ void SX9324_Process(SX9324_Handle_t *dev) {
 #endif
 }
 
-void SX9324_ReadRawData(SX9324_Handle_t *dev, uint8_t channel, SX9324_ChannelData_t *data) {
+void sx9324_readrawdata(SX9324_Handle_t *dev, uint8_t channel, SX9324_ChannelData_t *data) {
     uint8_t buf[2];
 
-    SX9324_WriteReg(dev, 0x60, channel); // CPSRD
+    sx9324_writereg(dev, 0x60, channel); // CPSRD
 
-    SX9324_ReadRegs(dev, 0x61, buf, 2);
+    sx9324_readregs(dev, 0x61, buf, 2);
     data->useful = (int32_t)((buf[0] << 8) | buf[1]);
 
-    SX9324_ReadRegs(dev, 0x63, buf, 2);
+    sx9324_readregs(dev, 0x63, buf, 2);
     data->average = (int32_t)((buf[0] << 8) | buf[1]);
 
-    SX9324_ReadRegs(dev, 0x65, buf, 2);
+    sx9324_readregs(dev, 0x65, buf, 2);
     data->diff = (int32_t)((buf[0] << 8) | buf[1]);
 
-    SX9324_ReadRegs(dev, 0x67, buf, 2);
+    sx9324_readregs(dev, 0x67, buf, 2);
     data->offset = (uint16_t)((buf[0] << 8) | buf[1]);
 
     if (data->useful > 32767) data->useful -= 65536;

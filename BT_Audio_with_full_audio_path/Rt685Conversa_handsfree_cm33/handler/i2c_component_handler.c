@@ -202,11 +202,11 @@ void I2C_Task(void *pvParameters)
 	SX9324_Handle_t hSAR;             // Sensor Handle
 	SX9324_ChannelData_t rawData;     // 用來存放 Raw Data 的變數
 
-	gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
-	GPIO_PinInit(GPIO, 2U, 14U, &input_pin_config);
+	//gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
+	//GPIO_PinInit(GPIO, 2U, 14U, &input_pin_config);
 
    PRINTF("Initializing Sensor...\r\n");
-	if (SX9324_Init(&hSAR, BOARD_PMIC_I3C_BASEADDR, 2U, 14U))
+	if (sx9324_init(&hSAR, BOARD_PMIC_I3C_BASEADDR, 2U, 14U))
 	{
 		PRINTF("SX9324 Init Success! (ID: 0x%02X)\r\n", SX932x_WHOAMI_VALUE);
 	}
@@ -215,7 +215,7 @@ void I2C_Task(void *pvParameters)
 		PRINTF("SX9324 Init Failed! Check I2C wiring.\r\n");
 	}
 
-#if 1
+#if 0
     for (;;)
     {
         EventBits_t bits = xEventGroupWaitBits(
@@ -234,16 +234,58 @@ void I2C_Task(void *pvParameters)
             GPIO_PinEnableInterrupt(GPIO, 2U, 14U, kGPIO_InterruptA);
         }
 
+        /* --- TOUCH event --- */
+        if ((bits & TOUCH_EVENT_BIT) != 0)
+        {
+
+            	AW93305_EXTI_Callback();
+
+                if(aw933xx.event.click >0)
+                {
+                	unsigned int btn_event = aw933xx.event.click;
+                	PRINTF("[Touch] click= %d \n",btn_event);
+                }
+                else if(aw933xx.event.press)
+                {
+                	PRINTF("[Touch] press \n");
+                }
+                else if(aw933xx.event.long_press)
+                {
+                	PRINTF("[Touch] long_press \n");
+                }
+                else if(aw933xx.event.super_long_press)
+                {
+                	PRINTF("[Touch] super_long_press \n");
+                }
+                else if(aw933xx.event.right_wareds)
+                {
+                	PRINTF("[Touch] slide_right \n");
+                }
+                else if(aw933xx.event.left_wareds)
+                {
+                	PRINTF("[Touch] slide_left \n");
+                }
+
+
+
+            /* 任務側重新啟用觸控中斷（先清旗標再開） */
+            GPIO_PinClearInterruptFlag(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
+            GPIO_PinEnableInterrupt(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
+        }
+
     }
 #endif
 
-#if 0
+#if 1
     while(1){
 	    memset(&rawData, 0, sizeof(rawData));
 
+	    PRINTF("GPIO_PinRead -> PIO2_14: %d \r\n",GPIO_PinRead(GPIO, 2U, 14U));
         // 讀取 Channel 0 (PH0) 的數據
-        SX9324_ReadRawData(&hSAR, 0, &rawData);
-        PRINTF("Raw0: Useful=%d, Diff=%d, Offset=%d, Avg=%d, \r\n", rawData.useful, rawData.diff, rawData.offset, rawData.average);
+        sx9324_readrawdata(&hSAR, 0, &rawData);
+        //PRINTF("Raw0: Useful=%d, Diff=%d, Offset=%d, Avg=%d, \r\n", rawData.useful, rawData.diff, rawData.offset, rawData.average);
+        PRINTF("Raw0: Useful=%d, Diff=%d \r\n", rawData.useful, rawData.diff);
+        sx9324_process(&hSAR);
         PRINTF("\n");
 
         hal_delay_ms(100);

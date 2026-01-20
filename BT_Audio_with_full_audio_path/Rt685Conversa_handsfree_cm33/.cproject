@@ -1563,6 +1563,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/source/impl/ethermind/controller/configs/mbedtls}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template/ARM_CM33_3_priority_bits}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/sar}&quot;"/>
 								</option>
 								<option id="gnu.c.compiler.option.include.files.1795161511" name="Include files (-include)" superClass="gnu.c.compiler.option.include.files" useByScannerDiscovery="false"/>
 								<option id="com.crt.advproject.gcc.exe.debug.option.optimization.level.295117110" name="Optimization Level" superClass="com.crt.advproject.gcc.exe.debug.option.optimization.level" useByScannerDiscovery="true" value="gnu.c.optimization.level.none" valueType="enumerated"/>
@@ -1734,6 +1735,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/source/source/impl/ethermind/controller/configs/mbedtls}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/freertos/freertos-kernel/template/ARM_CM33_3_priority_bits}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/component/sar}&quot;"/>
 								</option>
 								<option id="gnu.both.asm.option.warnings.nowarn.993246800" name="Suppress warnings (-W)" superClass="gnu.both.asm.option.warnings.nowarn"/>
 								<option id="gnu.both.asm.option.version.1543047991" name="Announce version (-v)" superClass="gnu.both.asm.option.version"/>
@@ -1936,21 +1938,6 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="Rt685Conversa_handsfree_cm33.null.807993743" name="Rt685Conversa_handsfree_cm33" projectType="com.crt.advproject.projecttype.exe"/>
 	</storageModule>
-	<storageModule moduleId="scannerConfiguration">
-		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598;com.crt.advproject.config.exe.debug.306811598.;com.crt.advproject.gcc.exe.debug.1671029631;com.crt.advproject.compiler.input.1657461406">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.160562080;com.crt.advproject.config.exe.release.160562080.;com.crt.advproject.gcc.exe.release.1548558788;com.crt.advproject.compiler.input.762896290">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.160562080;com.crt.advproject.config.exe.release.160562080.;com.crt.advproject.gas.exe.release.1797469943;com.crt.advproject.assembler.input.525774891">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598;com.crt.advproject.config.exe.debug.306811598.;com.crt.advproject.gas.exe.debug.2056495810;com.crt.advproject.assembler.input.905149956">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		</scannerConfigBuildInfo>
-	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="com.nxp.mcuxpresso.core.datamodels">
 		<sdkName>SDK_2.x_EVK-MIMXRT685</sdkName>
@@ -2000,4 +1987,25 @@
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598.1952887512;com.crt.advproject.config.exe.debug.306811598.1952887512.;com.crt.advproject.gcc.exe.debug.1723677607;com.crt.advproject.compiler.input.1874456991">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.crt.advproject.GCCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598;com.crt.advproject.config.exe.debug.306811598.;com.crt.advproject.gcc.exe.debug.1671029631;com.crt.advproject.compiler.input.1657461406">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598.1952887512;com.crt.advproject.config.exe.debug.306811598.1952887512.;com.crt.advproject.gas.exe.debug.721249685;com.crt.advproject.assembler.input.2035441075">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.crt.advproject.GCCManagedMakePerProjectProfile"/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.160562080;com.crt.advproject.config.exe.release.160562080.;com.crt.advproject.gcc.exe.release.1548558788;com.crt.advproject.compiler.input.762896290">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.release.160562080;com.crt.advproject.config.exe.release.160562080.;com.crt.advproject.gas.exe.release.1797469943;com.crt.advproject.assembler.input.525774891">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="com.crt.advproject.config.exe.debug.306811598;com.crt.advproject.config.exe.debug.306811598.;com.crt.advproject.gas.exe.debug.2056495810;com.crt.advproject.assembler.input.905149956">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
 </cproject>
