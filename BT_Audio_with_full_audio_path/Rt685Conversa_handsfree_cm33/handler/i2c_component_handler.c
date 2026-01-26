@@ -202,20 +202,17 @@ void I2C_Task(void *pvParameters)
 	SX9324_Handle_t hSAR;             // Sensor Handle
 	SX9324_ChannelData_t rawData;     // 用來存放 Raw Data 的變數
 
-	//gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
-	//GPIO_PinInit(GPIO, 2U, 14U, &input_pin_config);
-
    PRINTF("Initializing Sensor...\r\n");
-	if (sx9324_init(&hSAR, BOARD_PMIC_I3C_BASEADDR, 2U, 14U))
+	if (sx9324_init(&hSAR, BOARD_PMIC_I3C_BASEADDR))
 	{
-		PRINTF("SX9324 Init Success! (ID: 0x%02X)\r\n", SX932x_WHOAMI_VALUE);
+		PRINTF("SX9324 Init Success! \r\n");
 	}
 	else
 	{
 		PRINTF("SX9324 Init Failed! Check I2C wiring.\r\n");
 	}
 
-#if 0
+#if 1
     for (;;)
     {
         EventBits_t bits = xEventGroupWaitBits(
@@ -228,7 +225,7 @@ void I2C_Task(void *pvParameters)
         if ((bits & GAUGE_2_EVENT_BIT) != 0)
         {
         	PRINTF("[SAR]PIO2_14 INT \r\n ");
-        	SX9324_Process(&hSAR);
+        	sx9324_process(&hSAR);
 
             GPIO_PinClearInterruptFlag(GPIO, 2U, 14U, kGPIO_InterruptA);
             GPIO_PinEnableInterrupt(GPIO, 2U, 14U, kGPIO_InterruptA);
@@ -276,7 +273,7 @@ void I2C_Task(void *pvParameters)
     }
 #endif
 
-#if 1
+#if 0
     while(1){
 	    memset(&rawData, 0, sizeof(rawData));
 
