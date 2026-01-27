@@ -42,6 +42,7 @@ extern SemaphoreHandle_t spi_semaphore ;
 GPIO_HANDLE_DEFINE(s_TouchIntGpioHandle);
 GPIO_HANDLE_DEFINE(s_ChargerIntGpioHandle);
 GPIO_HANDLE_DEFINE(s_GaugeIntGpioHandle);
+GPIO_HANDLE_DEFINE(s_SARIntGpioHandle);
 
 
 /**
@@ -146,11 +147,16 @@ void hal_gpio_interrupt_init(void)
     hal_gpio_pin_config_t gauge_int_config = {
         kHAL_GpioDirectionIn,
         0,
-        2U,//FG_INT_GLF70302_PORT,
-        14U,//FG_INT_GLF70302_PIN,
+        FG_INT_GLF70302_PORT,
+        FG_INT_GLF70302_PIN,
     };
 
-
+    hal_gpio_pin_config_t sar_int_config = {
+        kHAL_GpioDirectionIn,
+        0,
+		PROX1_INT_N_PORT,
+		PROX1_INT_N_PIN,
+    };
 
     /* workaround for calling GPIO_PortInit may reset the configuration already done for the port */
     CLOCK_EnableClock(kCLOCK_HsGpio0);
@@ -163,14 +169,17 @@ void hal_gpio_interrupt_init(void)
     HAL_GpioInit(s_TouchIntGpioHandle, &touch_int_config);
     HAL_GpioInit(s_ChargerIntGpioHandle, &charger_int_config);
     HAL_GpioInit(s_GaugeIntGpioHandle, &gauge_int_config);
+    HAL_GpioInit(s_SARIntGpioHandle, &sar_int_config);
 
     HAL_GpioSetTriggerMode(s_TouchIntGpioHandle, kHAL_GpioInterruptFallingEdge);
     HAL_GpioSetTriggerMode(s_ChargerIntGpioHandle, kHAL_GpioInterruptFallingEdge);
     HAL_GpioSetTriggerMode(s_GaugeIntGpioHandle, kHAL_GpioInterruptFallingEdge);
+    HAL_GpioSetTriggerMode(s_SARIntGpioHandle, kHAL_GpioInterruptFallingEdge);
 
     HAL_GpioInstallCallback(s_TouchIntGpioHandle, hal_gpio_interrupt_callback, (void *)TOUCH_EVENT_BIT);
     HAL_GpioInstallCallback(s_ChargerIntGpioHandle, hal_gpio_interrupt_callback, (void *)CHARGER_EVENT_BIT);
     HAL_GpioInstallCallback(s_GaugeIntGpioHandle, hal_gpio_interrupt_callback, (void *)GAUGE_2_EVENT_BIT);
+    HAL_GpioInstallCallback(s_SARIntGpioHandle, hal_gpio_interrupt_callback, (void *)SAR_EVENT_BIT);
 
 }
 
@@ -268,74 +277,6 @@ void hal_board_init(void)
 	hal_spi_init();
 	Init_I2C_Component();
 	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
-
-//	SX9324_Handle_t hSAR;             // Sensor Handle
-//	SX9324_ChannelData_t rawData;     // 用來存放 Raw Data 的變數
-//
-//	gpio_pin_config_t input_pin_config    = {kGPIO_DigitalInput, 0};
-//	GPIO_PinInit(GPIO, 2U, 14U, &input_pin_config);
-//
-//   PRINTF("Initializing Sensor...\r\n");
-//	if (SX9324_Init(&hSAR, BOARD_PMIC_I3C_BASEADDR, 2U, 14U))
-//	{
-//		PRINTF("SX9324 Init Success! (ID: 0x%02X)\r\n", SX932x_WHOAMI_VALUE);
-//	}
-//	else
-//	{
-//		PRINTF("SX9324 Init Failed! Check I2C wiring.\r\n");
-//	}
-
-#if 0
-	while(1)
-	{
-
-	       SX9324_Process(&hSAR);
-
-#if 0
-	       memset(&rawData, 0, sizeof(rawData));
-
-           // 讀取 Channel 0 (PH0) 的數據
-           SX9324_ReadRawData(&hSAR, 0, &rawData);
-           PRINTF("Raw0: Useful=%d, Diff=%d\r\n", rawData.useful, rawData.diff);
-           PRINTF("\n");
-
-           // 讀取 Channel 1 (PH1) 的數據
-           //SX9324_ReadRawData(&hSAR, 1, &rawData);
-           //PRINTF("Raw1: Useful=%d, Diff=%d\r\n", rawData.useful, rawData.diff);
-#endif
-
-#if 0
-	        /* 6. 判斷是否有接近事件 */
-	        if (hSAR.status.prox_stat != 0)
-	        {
-	            /* 有物體靠近! */
-	            PRINTF("Object Detected! [Prox Status: 0x%02X] ", hSAR.status.prox_stat);
-
-	            /* 7. 判斷是否為人體 (SAR Logic) */
-	            if (hSAR.status.body_stat != 0)
-	            {
-	                PRINTF("-> HUMAN BODY Detected! (Reduce RF Power)\r\n");
-	            }
-	            else
-	            {
-	                PRINTF("-> Inanimate Object (Table/Stand)\r\n");
-	            }
-
-	            /* (Optional) 讀取 Raw Data 做 Debug */
-	            // 讀取 Channel 0 (PH0) 的數據
-	            SX9324_ReadRawData(&hSAR, 0, &rawData);
-	            PRINTF("Raw0: Useful=%d, Diff=%d\r\n", rawData.useful, rawData.diff);
-
-	            // 讀取 Channel 1 (PH1) 的數據
-	            SX9324_ReadRawData(&hSAR, 1, &rawData);
-	            PRINTF("Raw1: Useful=%d, Diff=%d\r\n", rawData.useful, rawData.diff);
-	        }
-#endif
-	        /* 簡單延遲 50ms (避免 Printf 刷太快) */
-	        hal_delay_ms(100);
-
-	}
-#endif
 }
 
 #endif

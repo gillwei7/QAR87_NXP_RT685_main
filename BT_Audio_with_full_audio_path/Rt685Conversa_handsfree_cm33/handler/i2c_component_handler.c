@@ -214,18 +214,18 @@ void I2C_Task(void *pvParameters)
     {
         EventBits_t bits = xEventGroupWaitBits(
             i2c_event_group,
-            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_2_EVENT_BIT | LED_EVENT_BIT | AMP_EVENT_BIT,
+            TOUCH_EVENT_BIT | SAR_EVENT_BIT,
             pdTRUE,     /* clear on exit */
             pdFALSE,    /* wait for any bit */
             pdMS_TO_TICKS(500));
 
-        if ((bits & GAUGE_2_EVENT_BIT) != 0)
+        if ((bits & SAR_EVENT_BIT) != 0)
         {
         	SAR_EVENT_t sae_event ;
         	sae_event = sx9324_process();
 
-            GPIO_PinClearInterruptFlag(GPIO, 2U, 14U, kGPIO_InterruptA);
-            GPIO_PinEnableInterrupt(GPIO, 2U, 14U, kGPIO_InterruptA);
+            GPIO_PinClearInterruptFlag(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
+            GPIO_PinEnableInterrupt(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
         }
 
         /* --- TOUCH event --- */
