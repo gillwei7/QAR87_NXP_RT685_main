@@ -199,11 +199,8 @@ void I2C_Task(void *pvParameters)
 {
     (void)pvParameters;
 
-	SX9324_Handle_t hSAR;             // Sensor Handle
-	SX9324_ChannelData_t rawData;     // 用來存放 Raw Data 的變數
-
-   PRINTF("Initializing Sensor...\r\n");
-	if (sx9324_init(&hSAR, BOARD_PMIC_I3C_BASEADDR))
+    PRINTF("Initializing Sensor...\r\n");
+	if (sx9324_init())
 	{
 		PRINTF("SX9324 Init Success! \r\n");
 	}
@@ -224,8 +221,8 @@ void I2C_Task(void *pvParameters)
 
         if ((bits & GAUGE_2_EVENT_BIT) != 0)
         {
-        	PRINTF("[SAR]PIO2_14 INT \r\n ");
-        	sx9324_process(&hSAR);
+        	SAR_EVENT_t sae_event ;
+        	sae_event = sx9324_process();
 
             GPIO_PinClearInterruptFlag(GPIO, 2U, 14U, kGPIO_InterruptA);
             GPIO_PinEnableInterrupt(GPIO, 2U, 14U, kGPIO_InterruptA);
@@ -272,23 +269,6 @@ void I2C_Task(void *pvParameters)
 
     }
 #endif
-
-#if 0
-    while(1){
-	    memset(&rawData, 0, sizeof(rawData));
-
-	    PRINTF("GPIO_PinRead -> PIO2_14: %d \r\n",GPIO_PinRead(GPIO, 2U, 14U));
-        // 讀取 Channel 0 (PH0) 的數據
-        sx9324_readrawdata(&hSAR, 0, &rawData);
-        //PRINTF("Raw0: Useful=%d, Diff=%d, Offset=%d, Avg=%d, \r\n", rawData.useful, rawData.diff, rawData.offset, rawData.average);
-        PRINTF("Raw0: Useful=%d, Diff=%d \r\n", rawData.useful, rawData.diff);
-        sx9324_process(&hSAR);
-        PRINTF("\n");
-
-        hal_delay_ms(100);
-    }
-#endif
-
 
 #if 0
     (void)pvParameters;

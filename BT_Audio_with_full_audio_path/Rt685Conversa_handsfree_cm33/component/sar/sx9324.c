@@ -75,30 +75,28 @@ static const SX9324_RegCfg_t sx9324_default_regs[] = {
 /*
  * Flexcomm I2C Wrapper
  */
-static status_t sx9324_writereg(SX9324_Handle_t *dev, uint8_t reg, uint8_t val) {
+static status_t sx9324_writereg(uint8_t reg, uint8_t val) {
 
-    return BOARD_I3C_Send(dev->i3c_base, SX9324_I2C_ADDR, (uint32_t)reg, 1, &val, 1);
+    return BOARD_I3C_Send(BOARD_PMIC_I3C_BASEADDR, SX9324_I2C_ADDR, (uint32_t)reg, 1, &val, 1);
 }
 
-static status_t sx9324_readregs(SX9324_Handle_t *dev, uint8_t reg, uint8_t *buffer, size_t len) {
+static status_t sx9324_readregs(uint8_t reg, uint8_t *buffer, size_t len) {
 
-    return BOARD_I3C_Receive(dev->i3c_base, SX9324_I2C_ADDR, (uint32_t)reg, 1, buffer, (uint8_t)len);
+    return BOARD_I3C_Receive(BOARD_PMIC_I3C_BASEADDR, SX9324_I2C_ADDR, (uint32_t)reg, 1, buffer, (uint8_t)len);
 }
 
 /* API Implementation */
 
-bool sx9324_init(SX9324_Handle_t *dev, I3C_Type *i3c_base) {
-    dev->i3c_base = i3c_base;
-
+bool sx9324_init() {
     uint8_t whoami = 0;
 
     // 1. Soft Reset
-    if(sx9324_writereg(dev, SX932x_SOFTRESET_REG, SX932x_SOFTRESET)!= kStatus_Success)
+    if(sx9324_writereg(SX932x_SOFTRESET_REG, SX932x_SOFTRESET)!= kStatus_Success)
         return false;
     SX9324_DELAY_MS(100);
 
     // 2. Check Connection
-    if (sx9324_readregs(dev, SX932x_WHOAMI_REG, &whoami, 1) != kStatus_Success) {
+    if (sx9324_readregs(SX932x_WHOAMI_REG, &whoami, 1) != kStatus_Success) {
         return false;
     }
 
@@ -107,34 +105,34 @@ bool sx9324_init(SX9324_Handle_t *dev, I3C_Type *i3c_base) {
     // 3. Write Config
     uint32_t num_regs = sizeof(sx9324_default_regs) / sizeof(SX9324_RegCfg_t);
     for (uint32_t i = 0; i < num_regs; i++) {
-    	if(sx9324_writereg(dev, sx9324_default_regs[i].reg, sx9324_default_regs[i].val)!=kStatus_Success)
+    	if(sx9324_writereg(sx9324_default_regs[i].reg, sx9324_default_regs[i].val)!=kStatus_Success)
     		 return false;
     }
     SX9324_DELAY_MS(50);
 
     // 4. Calibration
-    sx9324_manualcalibration(dev);
+    sx9324_manualcalibration();
     SX9324_DELAY_MS(100);
 
     // 5. Clear Initial IRQ
     uint8_t dummy;
-    if(sx9324_readregs(dev, SX932x_IRQSTAT_REG, &dummy, 1)!=kStatus_Success)
+    if(sx9324_readregs(SX932x_IRQSTAT_REG, &dummy, 1)!=kStatus_Success)
 		 return false;
 
     return true;
 }
 
-void sx9324_manualcalibration(SX9324_Handle_t *dev) {
-    sx9324_writereg(dev, SX932x_STAT2_REG, 0x0F);
+void sx9324_manualcalibration() {
+    sx9324_writereg(SX932x_STAT2_REG, 0x0F);
 }
 
-void sx9324_process(SX9324_Handle_t *dev) {
+SAR_EVENT_t sx9324_process() {
 
-    uint8_t irq_src=0 ,prox_stat =0 ,body_stat= 0;
+    uint8_t irq_stat=0 ,prox_stat =0 ,body_stat= 0;
 
-    sx9324_readregs(dev, SX932x_IRQSTAT_REG, &irq_src, 1);
-    sx9324_readregs(dev, SX932x_STAT0_REG, &prox_stat, 1);
-    sx9324_readregs(dev, SX932x_STAT1_REG, &body_stat, 1);
+    sx9324_readregs(SX932x_IRQSTAT_REG, &irq_stat, 1);
+    sx9324_readregs(SX932x_STAT0_REG, &prox_stat, 1);
+    sx9324_readregs(SX932x_STAT1_REG, &body_stat, 1);
 
 #if 0
     PRINTF("Reg 0x00 : 0x%02X\r\n",irq_src);
@@ -142,44 +140,45 @@ void sx9324_process(SX9324_Handle_t *dev) {
     PRINTF("Reg 0x02 : 0x%02X\r\n",body_stat);
 #endif
 
-	dev->status.irq_stat = irq_src;
-	dev->status.prox_stat = prox_stat;
-	dev->status.body_stat = body_stat;
+	if ((irq_stat & SX932x_IRQ_TOUCH)){
 
-	if ((dev->status.irq_stat & SX932x_IRQ_TOUCH)){
-
-		if(dev->status.prox_stat !=0 && dev->status.body_stat!=0)
+		if(prox_stat !=0 && body_stat!=0)
 			{
 				PRINTF("[SAR] HUMAN BODY Detected! \r\n");
+				return SAR_EVENT_BODY;
 			}
-		else if (dev->status.prox_stat !=0)
+		else if (prox_stat !=0)
 			{
 				PRINTF("[SAR] Detecte near \r\n");
+				return SAR_EVENT_APPROACH;
 			}
 	}
-	else if ((irq_src & SX932x_IRQ_RELEASE)){
-
+	else if ((irq_stat & SX932x_IRQ_RELEASE))
+			{
 				PRINTF("[SAR] Detecte leave \r\n");
+				return SAR_EVENT_DEPART;
+			}
+	else{
+				return SAR_EVENT_NONE;
 	}
-    PRINTF("\n");
 
 }
 
-void sx9324_readrawdata(SX9324_Handle_t *dev, uint8_t channel, SX9324_ChannelData_t *data) {
+void sx9324_readrawdata(uint8_t channel, SX9324_ChannelData_t *data) {
     uint8_t buf[2];
 
-    sx9324_writereg(dev, 0x60, channel); // CPSRD
+    sx9324_writereg(0x60, channel); // CPSRD
 
-    sx9324_readregs(dev, 0x61, buf, 2);
+    sx9324_readregs(0x61, buf, 2);
     data->useful = (int32_t)((buf[0] << 8) | buf[1]);
 
-    sx9324_readregs(dev, 0x63, buf, 2);
+    sx9324_readregs(0x63, buf, 2);
     data->average = (int32_t)((buf[0] << 8) | buf[1]);
 
-    sx9324_readregs(dev, 0x65, buf, 2);
+    sx9324_readregs(0x65, buf, 2);
     data->diff = (int32_t)((buf[0] << 8) | buf[1]);
 
-    sx9324_readregs(dev, 0x67, buf, 2);
+    sx9324_readregs(0x67, buf, 2);
     data->offset = (uint16_t)((buf[0] << 8) | buf[1]);
 
     if (data->useful > 32767) data->useful -= 65536;

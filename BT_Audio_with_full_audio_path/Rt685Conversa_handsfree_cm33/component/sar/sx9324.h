@@ -52,19 +52,19 @@ typedef struct {
     uint8_t irq_stat;
 } SX9324_Status_t;
 
-/* Driver Handle for RT685 */
-typedef struct {
-	I3C_Type    *i3c_base;    // Flexcomm Base (e.g., I2C0, I2C1...)
-    GPIO_Type *gpio_base;   // Global GPIO Base (usually GPIO)
-    uint32_t   nirq_port;   // GPIO Port (0 or 1 on RT685)
-    uint32_t   nirq_pin;    // GPIO Pin
-    SX9324_Status_t status;
-} SX9324_Handle_t;
+
+typedef enum {
+    SAR_EVENT_NONE = 0,     // 無事件或無效中斷
+    SAR_EVENT_APPROACH,     // 接近（near）
+    SAR_EVENT_DEPART,       // 遠離（leave）
+    SAR_EVENT_BODY          // 人體靠近（human body detected）
+} SAR_EVENT_t;
+
 
 /* API Prototypes */
-bool sx9324_init(SX9324_Handle_t *dev, I3C_Type *i3c_base);
-void sx9324_process(SX9324_Handle_t *dev);
-void sx9324_readrawdata(SX9324_Handle_t *dev, uint8_t channel, SX9324_ChannelData_t *data);
-void sx9324_manualcalibration(SX9324_Handle_t *dev);
+bool sx9324_init();
+SAR_EVENT_t sx9324_process();
+void sx9324_readrawdata(uint8_t channel, SX9324_ChannelData_t *data);
+void sx9324_manualcalibration();
 
 #endif /* SAR_SX9324_H_ */
