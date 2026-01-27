@@ -167,6 +167,18 @@ void Init_I2C_Component(void)
 	                               BatteryReadTimerCb);
 #endif
 
+#if SAR_SX9324_ENABLE
+	if (sx9324_init())
+	{
+		PRINTF("SX9324 Init Success! \r\n");
+	}
+	else
+	{
+		PRINTF("SX9324 Init Failed! Check I2C wiring.\r\n");
+	}
+
+#endif
+
 }
 
 void battery_timer_start(void)
@@ -199,89 +211,39 @@ void I2C_Task(void *pvParameters)
 {
     (void)pvParameters;
 
-    PRINTF("Initializing Sensor...\r\n");
-	if (sx9324_init())
-	{
-		PRINTF("SX9324 Init Success! \r\n");
-	}
-	else
-	{
-		PRINTF("SX9324 Init Failed! Check I2C wiring.\r\n");
-	}
-
-#if 1
     for (;;)
     {
         EventBits_t bits = xEventGroupWaitBits(
             i2c_event_group,
-            TOUCH_EVENT_BIT | SAR_EVENT_BIT,
+            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT | LED_EVENT_BIT | AMP_EVENT_BIT | SAR_EVENT_BIT,
             pdTRUE,     /* clear on exit */
             pdFALSE,    /* wait for any bit */
             pdMS_TO_TICKS(500));
 
+        /* --- SAR event --- */
         if ((bits & SAR_EVENT_BIT) != 0)
         {
+        	if (sys_bus_mutex != NULL)
+        		{
+					xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
+        		}
+
+            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE)
+            {
+
         	SAR_EVENT_t sae_event ;
         	sae_event = sx9324_process();
+
+        	xSemaphoreGive(i2c_mutex);
+            }
+
+            if (sys_bus_mutex != NULL) {
+            	xSemaphoreGive(sys_bus_mutex);
+            }
 
             GPIO_PinClearInterruptFlag(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
             GPIO_PinEnableInterrupt(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
         }
-
-        /* --- TOUCH event --- */
-        if ((bits & TOUCH_EVENT_BIT) != 0)
-        {
-
-            	AW93305_EXTI_Callback();
-
-                if(aw933xx.event.click >0)
-                {
-                	unsigned int btn_event = aw933xx.event.click;
-                	PRINTF("[Touch] click= %d \n",btn_event);
-                }
-                else if(aw933xx.event.press)
-                {
-                	PRINTF("[Touch] press \n");
-                }
-                else if(aw933xx.event.long_press)
-                {
-                	PRINTF("[Touch] long_press \n");
-                }
-                else if(aw933xx.event.super_long_press)
-                {
-                	PRINTF("[Touch] super_long_press \n");
-                }
-                else if(aw933xx.event.right_wareds)
-                {
-                	PRINTF("[Touch] slide_right \n");
-                }
-                else if(aw933xx.event.left_wareds)
-                {
-                	PRINTF("[Touch] slide_left \n");
-                }
-
-
-
-            /* 任務側重新啟用觸控中斷（先清旗標再開） */
-            GPIO_PinClearInterruptFlag(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
-            GPIO_PinEnableInterrupt(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
-        }
-
-    }
-#endif
-
-#if 0
-    (void)pvParameters;
-
-    for (;;)
-    {
-        EventBits_t bits = xEventGroupWaitBits(
-            i2c_event_group,
-            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT | LED_EVENT_BIT | AMP_EVENT_BIT,
-            pdTRUE,     /* clear on exit */
-            pdFALSE,    /* wait for any bit */
-            pdMS_TO_TICKS(500));
-
 
         /* --- AMP event --- */
         if ((bits & AMP_EVENT_BIT) != 0) {
@@ -633,6 +595,6 @@ void I2C_Task(void *pvParameters)
         }
 
     }
-#endif
+
 }
 
