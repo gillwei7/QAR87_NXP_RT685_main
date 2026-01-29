@@ -1,0 +1,12 @@
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:877:19:rfcomm_control_callback	40	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:541:31:rfcomm_dlcs_remove_dlc.isra	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:610:19:rfcomm_callback	80	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:1046:5:bt_rfcomm_server_register	32	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:1092:5:bt_rfcomm_dlc_connect	48	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:1180:5:bt_rfcomm_dlc_send	32	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:1210:5:bt_rfcomm_dlc_disconnect	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:1243:17:bt_rfcomm_create_pdu	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:1255:5:bt_rfcomm_register_control_callback	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:1275:5:bt_rfcomm_unregister_control_callback	8	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:1826:5:bt_rfcomm_send_control	48	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rfcomm.c:1879:6:bt_rfcomm_init	0	static

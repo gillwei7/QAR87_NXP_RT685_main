@@ -27,6 +27,7 @@ int scratch_new_size = 0;
 #endif
 
 #include "GlobalDef.h"
+#include "SubFunc.h"
 
 /* Tensilica specific includes. */
 #include "xa_opus_codec_api.h"
@@ -637,14 +638,18 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
             counter = 0;
             if(read_ogg_inp && !input_over)
             {
+            	//PRINTF( "OPUS Decode 1\r\n");
+            	//PRINTF( "input_over =%x, read_ogg_inp = %x\r\n", input_over, read_ogg_inp);
                 //counter = fread(p_ogg_inp_buf, sizeof(WORD8), OGG_INP_SIZE, bitInFile);
                 counter = freadFromFlashBin(p_ogg_inp_buf, sizeof(WORD8)*OGG_INP_SIZE, &OpusFileCurrentPtr, OpusFileEndPtr);
                 read_ogg_inp = 0;
                 if(counter < OGG_INP_SIZE)
                 {
+                	//PRINTF( "counter < OGG_INP_SIZE");
                     input_over = 1;
                 }
             }
+            //PRINTF( "OPUS Decode 2\r\n");
             error_code = xa_ogg_parse_process(ogg_handle,
                                               p_ogg_inp_buf,
                                               (pUWORD8)tmp_ogg_out_buf,
@@ -653,7 +658,10 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
             _XA_HANDLE_ERROR(p_proc_ogg_err_info, "", error_code);
 
             if(error_code == XA_OGG_EXECUTE_NONFATAL_INSUFFICIENT_DATA)
+            {
+            	//PRINTF( "error_code == XA_OGG_EXECUTE_NONFATAL_INSUFFICIENT_DATA\r\n");
                 read_ogg_inp = 1;
+            }
 
             if(nBytes > 0)
             {
@@ -706,6 +714,7 @@ int InitOpusDecoderForOneOpusFile(int OpusFileIdx)
 				#endif
 				#if EnableOpusDecodingPrint==1
 					PRINTF( "Error: Ran out of input without finding header and comment packets\r\n");
+					PRINTF( "Error: input_over =%x, read_ogg_inp = %x\r\n", input_over, read_ogg_inp);
 				#endif
                 exit(0);
             }

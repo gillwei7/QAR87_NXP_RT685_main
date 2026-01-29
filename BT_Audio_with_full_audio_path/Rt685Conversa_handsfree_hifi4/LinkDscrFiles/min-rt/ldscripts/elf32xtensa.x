@@ -2,7 +2,7 @@
 /* Linker Script for default link */
 MEMORY
 {
-  dsp_core_seg :                      	org = 0x00200000, len = 0x280000 /*1.0M space*/
+  dsp_core_seg :                      	org = 0x00180000, len = 0x300000 /*1.0M space*/
   dsp_uncached_seg :                  	org = 0x20040000, len = 0x20000
   dsp_uncached_seg_shared :             org = 0x20060000, len = 0x1FFF0  
   control_seg :                       	org = 0x2007FFF0, len = 0x10

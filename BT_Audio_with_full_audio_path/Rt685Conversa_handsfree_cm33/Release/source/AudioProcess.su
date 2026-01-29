@@ -1,0 +1,8 @@
+../source/AudioProcess.c:58:6:GraduallySetAudioPllBackToDefault	0	static
+../source/AudioProcess.c:76:6:CheckPcmRxFrBtBufAodAndAdjustAudioPll	4	static
+../source/AudioProcess.c:627:6:GenerateSinWavFromTable_S32_DualCh	16	static
+../source/AudioProcess.c:638:6:GenerateSinWavFromTable_S32_DualCh_LRMixed	12	static
+../source/AudioProcess.c:649:6:GenerateSinWavFromTable_S32_SingleCh	12	static
+../source/AudioProcess.c:664:6:GenerateSinWavFromTable_S16_DualCh	20	static
+../source/AudioProcess.c:675:6:GenerateSinWavFromTable_S16_DualCh_LRMixed	12	static
+../source/AudioProcess.c:686:6:GenerateSinWavFromTable_S16_SingleCh	12	static

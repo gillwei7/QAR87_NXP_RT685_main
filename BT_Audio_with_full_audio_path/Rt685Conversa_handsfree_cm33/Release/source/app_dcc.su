@@ -1,0 +1,3 @@
+../source/app_dcc.c:46:13:passkey_display	0	static
+../source/app_dcc.c:37:13:auth_cancel	88	static
+../source/app_dcc.c:70:6:bt_ready	16	static

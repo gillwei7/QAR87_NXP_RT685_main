@@ -1,0 +1,11 @@
+../source/audio_unified.c:89:14:USB_DeviceAudioRequest	0	static
+../source/audio_unified.c:496:5:USB_AudioSpeakerBufferSpaceUsed	0	static
+../source/audio_unified.c:512:6:USB_AudioFeedbackDataUpdate	4	static
+../source/audio_unified.c:637:6:USB_MicUpStreamDataRateControl_AdjustPacketLength	0	static
+../source/audio_unified.c:718:14:USB_DeviceAudioCompositeCallback	32	static
+../source/audio_unified.c:879:6:USB_DeviceAudioSpeakerStatusReset	4	static
+../source/audio_unified.c:914:14:USB_DeviceAudioCompositeSetConfigure	0	static
+../source/audio_unified.c:925:14:USB_DeviceAudioRecorderSetInterface	24	static
+../source/audio_unified.c:962:14:USB_DeviceAudioSpeakerSetInterface	24	static
+../source/audio_unified.c:1018:14:USB_DeviceAudioCompositeInit	8	static
+../source/audio_unified.c:1122:6:USB_AudioSpeakerResetTask	4	static

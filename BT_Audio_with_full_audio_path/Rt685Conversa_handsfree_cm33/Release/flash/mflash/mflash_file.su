@@ -1,0 +1,4 @@
+../flash/mflash/mflash_file.c:78:6:mflash_is_initialized	0	static
+../flash/mflash/mflash_file.c:549:10:mflash_init	48	static
+../flash/mflash/mflash_file.c:650:10:mflash_file_save	48	static
+../flash/mflash/mflash_file.c:711:10:mflash_file_mmap	24	static

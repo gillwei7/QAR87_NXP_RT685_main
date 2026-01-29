@@ -1,0 +1,7 @@
+../flash/mflash/mimxrt685/mflash_drv.c:362:16:mflash_drv_init_internal	376	static
+../flash/mflash/mimxrt685/mflash_drv.c:420:9:mflash_drv_init	0	static
+../flash/mflash/mimxrt685/mflash_drv.c:453:9:mflash_drv_sector_erase	56	static
+../flash/mflash/mimxrt685/mflash_drv.c:517:9:mflash_drv_page_program	64	static
+../flash/mflash/mimxrt685/mflash_drv.c:526:9:mflash_drv_read	56	static
+../flash/mflash/mimxrt685/mflash_drv.c:536:7:mflash_drv_phys2log	0	static
+../flash/mflash/mimxrt685/mflash_drv.c:543:10:mflash_drv_log2phys	0	static

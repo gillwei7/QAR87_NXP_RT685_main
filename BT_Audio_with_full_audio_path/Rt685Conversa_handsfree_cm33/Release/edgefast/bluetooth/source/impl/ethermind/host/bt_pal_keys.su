@@ -1,0 +1,15 @@
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:455:12:keys_commit	8	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:49:13:find_key_in_use	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:87:6:bt_keys_reset	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:92:17:bt_keys_get_addr	32	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:359:12:keys_set	112	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:163:6:bt_foreach_bond	32	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:187:6:bt_keys_foreach_type	4	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:201:17:bt_keys_find	8	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:219:17:bt_keys_get_type	24	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:242:17:bt_keys_find_irk	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:293:17:bt_keys_find_addr	8	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:311:6:bt_keys_add_type	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:318:6:bt_keys_clear	8	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:341:5:bt_keys_store	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_keys.c:475:6:bt_keys_update_usage	8	static

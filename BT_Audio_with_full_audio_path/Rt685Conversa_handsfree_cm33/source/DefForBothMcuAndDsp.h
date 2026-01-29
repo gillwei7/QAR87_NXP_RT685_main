@@ -126,7 +126,6 @@
 #define SEMA42_GATE0							SEMA42_ID_PrintProtect
 #define SEMA42_GATE1							SEMA42_ID_SbcRawCirBufferProtect
 
-//Quanta seems define in other file
 #define CHN_MU_REG_NUM 	0U
 #define BOOT_FLAG 		0x01U
 #define BOOT_FLAG_2 	0x02U
@@ -145,8 +144,7 @@
 #define AUDIO_OUT_TRANSFER_LENGTH_ONE_FRAME (AUDIO_OUT_SAMPLING_RATE_KHZ * AUDIO_OUT_FORMAT_CHANNELS * AUDIO_OUT_FORMAT_SIZE)
 
 #endif
-//gill
-#define OPUS_INDEX_MAXIMUM 14
+
 
 typedef enum _VoiceCommandMenu
 {

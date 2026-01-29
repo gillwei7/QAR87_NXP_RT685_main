@@ -1,0 +1,6 @@
+../usb/usb_device_class.c:287:14:USB_DeviceClassGetDeviceHandle	24	static
+../usb/usb_device_class.c:321:14:USB_DeviceClassEvent	40	static
+../usb/usb_device_class.c:382:14:USB_DeviceClassCallback	32	static
+../usb/usb_device_class.c:426:14:USB_DeviceClassInit	40	static
+../usb/usb_device_class.c:490:14:USB_DeviceClassDeinit	32	static
+../usb/usb_device_class.c:541:14:USB_DeviceClassGetSpeed	24	static

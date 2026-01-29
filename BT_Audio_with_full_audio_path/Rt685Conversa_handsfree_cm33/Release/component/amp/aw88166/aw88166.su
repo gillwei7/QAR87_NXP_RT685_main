@@ -1,0 +1,6 @@
+../component/amp/aw88166/aw88166.c:57:13:aw_dev0_reset_gpio_ctl	0	static
+../component/amp/aw88166/aw88166.c:23:17:aw_dev0_i2c_write_func	16	static
+../component/amp/aw88166/aw88166.c:40:17:aw_dev0_i2c_read_func	16	static
+../component/amp/aw88166/aw88166.c:98:6:init_aw88166	8	static
+../component/amp/aw88166/aw88166.c:113:6:start_aw88166_pa	16	static
+../component/amp/aw88166/aw88166.c:124:6:close_aw88166_pa	0	static

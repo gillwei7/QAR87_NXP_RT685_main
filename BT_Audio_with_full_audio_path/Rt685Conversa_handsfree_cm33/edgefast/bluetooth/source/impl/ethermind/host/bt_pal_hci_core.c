@@ -3440,7 +3440,7 @@ static int common_init(void)
 	read_supported_commands_complete(rsp);
 	net_buf_unref(rsp);
 
-#if 1	//change to if 1, according to Marouane Gaoua --- was: if 0
+#if 0 //B36932 change to 0	//change to if 1, according to Marouane Gaoua --- was: if 0
 	if (IS_ENABLED(CONFIG_BT_HOST_CRYPTO_PRNG))
 #endif
 	{

@@ -34,24 +34,16 @@
 #include "app_connect.h"
 #include "sco_audio_pl.h"
 #include "app_a2dp_sink.h"
+#include <peripheral_gls.h>
 
 #include "GlobalDef.h"
 #include "WorkStateManager.h"
 
-#if UsingQAR87Board == 1
-#include "spi_handler.h"
-#include "button_handler.h"
-#include "i2c_component_handler.h"
-#include "hal_common.h"
-#include "app_connect.h"
-#include "system_status.h"
-#include "WorkStateManager.h"
-#include "DefForBothMcuAndDsp.h"
-#endif
+//CRH
+#include <app_avrcp.h>
+
 
 #define Manager_TASK_PRIORITY				2			//this is low
-#define CONNECTION_TIMER_TASK_DELAY              10
-#define CONNECTION_TIMER_TIMEOUT_MILLISECOND     20000
 
 #define APP_HFP_HF_INITIAL_VGS_GAIN 12
 #define APP_HFP_HF_INITIAL_VGM_GAIN 12
@@ -59,13 +51,6 @@
 struct bt_conn *conn_rider_phone = NULL;
 static volatile uint8_t s_call_status = 0;
 static  uint8_t s_call_setup_status = 0;
-static uint16_t connection_timer_count = 0;
-
-#if UsingQAR87Board == 1
-extern TaskHandle_t       sI2CTaskHandle  ;
-#endif
-
-static TaskHandle_t       appTaskHandle  = NULL;
 
 hfp_hf_get_config hfp_hf_config = {
     .bt_hfp_hf_vgs             = APP_HFP_HF_INITIAL_VGS_GAIN,
@@ -140,9 +125,6 @@ static struct bt_sdp_attribute hfp_hf_attrs[] = {
 };
 static struct bt_sdp_record hfp_hf_rec = BT_SDP_RECORD(hfp_hf_attrs);
 
-RingtoneState general_RingtoneState = Ringtone_No;
-extern TDeviceWorkState DeviceWorkStateCur;
-
 void hfp_hf_register_service()
 {
 	bt_sdp_register_service(&hfp_hf_rec);
@@ -178,6 +160,7 @@ static struct bt_conn_auth_cb auth_cb_display = {
     .cancel = auth_cancel, .passkey_display = passkey_display, /* Passkey display callback */
                                                                //  .passkey_confirm = passkey_confirm,
 };
+
 static void connected(struct bt_conn *conn, int err)
 {
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
@@ -190,13 +173,11 @@ static void connected(struct bt_conn *conn, int err)
         return;
     }
     conn_rider_phone = conn;
-
-    ss_bt_on();
-    
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
     bt_conn_get_info(conn, &info);
    // app_auto_connect_save_addr(info.br.dst);
 #endif
+    avrcp_control_connect(conn); //B36932 for testing
 }
 
 static void disconnected(struct bt_conn *conn)
@@ -207,7 +188,6 @@ static void disconnected(struct bt_conn *conn)
     {
         conn_rider_phone = NULL;
     }
-    ss_bt_off();
 }
 
 static void service(struct bt_conn *conn, uint32_t value)
@@ -530,198 +510,53 @@ extern void StartMicSpkTest(void);
 extern void Manager_Task(void *pvParameters);
 extern void connect_paired_device(uint8_t device_index);
 
-void startOpusPlayIndex(int opus_index){
-    int play_opus_index  = 0;
-    if(opus_index < 0){
-        PRINTF("startOpusPlay: opus index < 0\r\n");
-        return;
-    } else if (opus_index > (OPUS_INDEX_MAXIMUM-1)){
-        play_opus_index = OPUS_INDEX_MAXIMUM;
-        PRINTF("startOpusPlay: opus index > %d\r\n", OPUS_INDEX_MAXIMUM-1);
-    } else {
-        play_opus_index = opus_index;
-        PRINTF("startOpusPlay: opus index %d\r\n", play_opus_index);
-    }
-    VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
-    VarBlockSharedByDspAndMcu.PlayOpusFileIdx=play_opus_index;
-}
-
-
-static void app_task(void *pvParameters)
-{
-    while(1){
-#if AUTO_CONNECT_ENABLE
-        if(connection_timer_count < (CONNECTION_TIMER_TIMEOUT_MILLISECOND/CONNECTION_TIMER_TASK_DELAY) && (conn_rider_phone == NULL)){
-            connection_timer_count++;
-        }else{
-            connection_timer_count = 0;
-            if((g_pairedDeviceCount > 0) && (conn_rider_phone == NULL)){
-#if BT_CONNECTION_LOG
-                PRINTF("Connection timeout. Connect previous paired device\r\n");
-#endif
-                app_auto_connect_paired_devices();
-            }
-        }
-#endif
-        if(general_RingtoneState == Ringtone_StartVideoAI && DeviceWorkStateCur == WorkState_VideoAi){
-            general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_StartVideoAI-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StopVideoAI && DeviceWorkStateCur == WorkState_HomeVitStandby){
-            general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_StopVideoAI-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StartTranslation && DeviceWorkStateCur == WorkState_Translation){
-            general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_StartTranslation-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StopTranslation && DeviceWorkStateCur == WorkState_HomeVitStandby){
-            general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_StopTranslation-1);
-        }
-
-        if(general_RingtoneState == Ringtone_PowerON && DeviceWorkStateCur == WorkState_HomeVitStandby){
-            general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_PowerON-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StartRecording  && DeviceWorkStateCur == WorkState_VideoRecording){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_StartRecording-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StopRecording  && DeviceWorkStateCur == WorkState_HomeVitStandby){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_StopRecording-1);
-        }
-
-        // TODO No matter on what state, need to play Power Off, Wifi disconnected,  ringtone
-        if(general_RingtoneState == Ringtone_PowerOFF){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_PowerOFF-1);
-        }
-
-        if(general_RingtoneState == Ringtone_WiFi_Disconnected){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_WiFi_Disconnected-1);
-        }
-
-        if(general_RingtoneState == Ringtone_BT_Disconnected){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_BT_Disconnected-1);
-        }
-
-        if (general_RingtoneState == Ringtone_PhotoCapture) {
-            general_RingtoneState = Ringtone_No;
-            // If not in recording state, play photo capture ringtone
-            if (DeviceWorkStateCur != WorkState_VideoRecording) {
-                startOpusPlayIndex(Ringtone_PhotoCapture - 1);
-            }
-        }
-
-        if(general_RingtoneState == Ringtone_LowBattery){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_LowBattery-1);
-        }
-
-        if(general_RingtoneState == Ringtone_BT_Connected){
-				general_RingtoneState = Ringtone_No;
-				startOpusPlayIndex(Ringtone_BT_Connected-1);
-		}
-
-        vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
-    }
-}
-
 void hfp_hf_a2dp_task(void *pvParameters)
 {
     int err = 0;
 
-    hal_board_init();
-
     PRINTF("Bluetooth Handsfree demo start...\n");
-
+	
 	#if 1	//set to 0 to NOT start BT at all
-    /* Initializate BT Host stack */
-    err = bt_enable(bt_ready);
-    if (err)
-    {
-        PRINTF("Bluetooth init failed (err %d)\n", err);
-        return;
-    }
+	    /* Initializate BT Host stack */
+	    err = bt_enable(bt_ready);
+	    if (err)
+	    {
+	        PRINTF("Bluetooth init failed (err %d)\n", err);
+	        return;
+	    }
 	#endif
-#if 0
-    if(g_pairedDeviceCount)
-    {
-    	//try to connect paired device at startup
-    	connect_paired_device(1);
-    }else
-    {
-		//configure BT discoverable and connectable at startup
-		bt_br_set_connectable(false);
-		if (bt_br_set_connectable(true))
+
+	#if 0
+		if(g_pairedDeviceCount)
 		{
-		   PRINTF("BR/EDR set/reset connectable failed\n");
-		   return;
-		}
-		if (bt_br_set_discoverable(true))
+			//try to connect paired device at startup
+			connect_paired_device(1);
+		}else
 		{
-		  PRINTF("BR/EDR set discoverable failed\n");
-		   return;
+			//configure BT discoverable and connectable at startup
+			bt_br_set_connectable(false);
+			if (bt_br_set_connectable(true))
+			{
+			   PRINTF("BR/EDR set/reset connectable failed\n");
+			   return;
+			}
+			if (bt_br_set_discoverable(true))
+			{
+			  PRINTF("BR/EDR set discoverable failed\n");
+			   return;
+			}
+			PRINTF("BR/EDR set connectable and discoverable done\n");
 		}
-		PRINTF("BR/EDR set connectable and discoverable done\n");
-    }
-#endif
+	#endif
+
+    xTaskCreate(peripheral_gls_task, "peripheral_gls_task", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
 
     DeviceWorkStateCur=WorkState_Void;
     StartAudioTask();
 
 	BaseType_t result = 0;
-	result = xTaskCreate(Manager_Task, "Manager_40ms", 1024, NULL, Manager_TASK_PRIORITY, NULL);
+	result = xTaskCreate(Manager_Task,   "Manager_40ms", 1024, NULL, Manager_TASK_PRIORITY, NULL);
 	assert(pdPASS == result);
-#if UsingQAR87Board == 1
-
-    if (xTaskCreate(spi_handler_task, "SPI_HANDLER", configMINIMAL_STACK_SIZE + 1000, NULL,
-                    tskIDLE_PRIORITY + 2, NULL) != pdPASS)
-    {
-        PRINTF("Task creation failed!.\r\n");
-        while (1);
-    }
-
-	if (xTaskCreate(button_task, "BUTTON", configMINIMAL_STACK_SIZE + 1000, NULL, tskIDLE_PRIORITY + 2, NULL)!= pdPASS)
-    {
-        PRINTF(" BUTTON Task creation failed!.\r\n");
-        while (1);
-    }
-
-	if (xTaskCreate(I2C_Task, "I2C_TASK",
-	                configMINIMAL_STACK_SIZE + 1000,
-	                NULL,
-	                tskIDLE_PRIORITY + 3,
-	                &sI2CTaskHandle) != pdPASS)
-	{
-	    PRINTF("I2C_TASK creation failed!\r\n");
-	    while (1) { ; }
-	}
-
-	if (xTaskCreate(app_task, "APP_TASK",
-	                    configMINIMAL_STACK_SIZE + 1000,
-	                    NULL,
-	                    tskIDLE_PRIORITY + 2,
-	                    &appTaskHandle) != pdPASS)
-    {
-        PRINTF("app_task creation failed!\r\n");
-        while (1) { ; }
-    }
-#endif
-
-	// gill
-	// If add while loop on here and not delete task, Can not connect BT
-	// May cause by Bluetooth stack init bt_enable() not finished, or bt_ready() not finished
-	// Only see log "ACL Disconnected"
 
     vTaskDelete(NULL);
 }

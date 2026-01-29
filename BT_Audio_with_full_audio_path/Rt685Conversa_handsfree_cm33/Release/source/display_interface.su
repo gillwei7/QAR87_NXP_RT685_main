@@ -1,0 +1,14 @@
+../source/display_interface.c:430:13:bond_info	0	static
+../source/display_interface.c:38:13:br_device_found	336	static
+../source/display_interface.c:85:6:set_br_discover_result_count	0	static
+../source/display_interface.c:90:10:get_br_discover_result_count	0	static
+../source/display_interface.c:95:9:get_device_type_from_cod	0	static
+../source/display_interface.c:122:6:br_discovery_complete	32	static
+../source/display_interface.c:149:6:print_paired_devices	48	static
+../source/display_interface.c:169:6:save_new_paired_device	152	static
+../source/display_interface.c:258:6:read_paired_dev_from_memory	0	static
+../source/display_interface.c:265:5:remove_paired_device	32	static
+../source/display_interface.c:310:5:delete_device	56	static
+../source/display_interface.c:370:6:connect_paired_device	56	static
+../source/display_interface.c:410:6:is_valid_device	24	static
+../source/display_interface.c:436:6:check_and_clear_bonded_devices	16	static

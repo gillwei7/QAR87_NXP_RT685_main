@@ -1,0 +1,4 @@
+../drivers/fsl_inputmux.c:98:6:INPUTMUX_Init	0	static
+../drivers/fsl_inputmux.c:133:6:INPUTMUX_AttachSignal	0	static
+../drivers/fsl_inputmux.c:158:6:INPUTMUX_EnableSignal	0	static
+../drivers/fsl_inputmux.c:202:6:INPUTMUX_Deinit	0	static

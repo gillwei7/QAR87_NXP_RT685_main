@@ -1,0 +1,6 @@
+../drivers/fsl_sema42.c:60:10:SEMA42_GetInstance	0	static
+../drivers/fsl_sema42.c:98:6:SEMA42_Init	0	static
+../drivers/fsl_sema42.c:116:6:SEMA42_Deinit	0	static
+../drivers/fsl_sema42.c:137:10:SEMA42_TryLock	0	static
+../drivers/fsl_sema42.c:183:10:SEMA42_Lock	0	static
+../drivers/fsl_sema42.c:213:10:SEMA42_ResetGate	0	static

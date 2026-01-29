@@ -1,0 +1,9 @@
+../wifi/sdio_nxp_abs/mlan_sdio.c:315:13:SDIO_CardInterruptCallBack	0	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:105:5:sdio_drv_creg_read	24	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:130:5:sdio_drv_creg_write	40	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:154:5:sdio_drv_read	32	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:237:5:sdio_drv_write	32	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:321:6:sdio_enable_interrupt	0	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:329:6:sdio_disable_interrupt	0	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:465:5:sdio_drv_init	32	static
+../wifi/sdio_nxp_abs/mlan_sdio.c:493:6:sdio_drv_deinit	8	static

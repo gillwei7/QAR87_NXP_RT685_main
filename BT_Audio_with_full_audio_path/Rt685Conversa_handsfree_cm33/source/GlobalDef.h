@@ -13,7 +13,7 @@
 //------------------------settings can be changed ----------------------
 //sub working modes (work state) enable or disable --- go to WorkStateManager.h to setup
 
-#define LetComConnectTuningTool								1		//0 or 1 can be selected
+#define LetComConnectTuningTool								0		//0 or 1 can be selected
 #if LetComConnectTuningTool==1
 	#define PRINTF_GoesToUsbCom								0		//must be 0
 #else
@@ -95,7 +95,7 @@ typedef long long			s64;
 #define _Value_Pow_2_15_M1	32767
 #define _Value_Pow_2_Neg15_	0.000030517578125
 
-//#define Pi_Value            3.14159265353846
+#define Pi_Value            3.14159265353846
 
 
 #define DEMO_DMA			(DMA0)
@@ -103,8 +103,6 @@ typedef long long			s64;
 #define APP_MU MUA
 #define APP_MU_IRQHandler MU_A_IRQHandler
 /* Channel transmit and receive register */
-//#define CHN_MU_REG_NUM 0U
-//#define BOOT_FLAG 0x01U
 #endif
 //-------------------------------------------------------------------------------------
 
@@ -176,11 +174,6 @@ SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);	\
 	PRINTF(x, ##__VA_ARGS__);					\
 SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);			\
 } while(0)
-
-//gill
-#define AUTO_CONNECT_ENABLE     0
-#define BT_CONNECTION_LOG       0
-#define ENABLE_POWER_DOWN       0
 
 
 #endif

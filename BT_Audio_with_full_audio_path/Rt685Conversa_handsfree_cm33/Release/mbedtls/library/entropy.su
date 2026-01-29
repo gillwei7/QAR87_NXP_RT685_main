@@ -1,0 +1,10 @@
+../mbedtls/library/entropy.c:553:12:entropy_dummy_source	16	static
+../mbedtls/library/entropy.c:249:12:entropy_gather_internal.part.0	256	static
+../mbedtls/library/entropy.c:41:6:mbedtls_entropy_init	16	static
+../mbedtls/library/entropy.c:98:6:mbedtls_entropy_free	8	static
+../mbedtls/library/entropy.c:125:5:mbedtls_entropy_add_source	8	static
+../mbedtls/library/entropy.c:224:5:mbedtls_entropy_update_manual	104	static
+../mbedtls/library/entropy.c:300:5:mbedtls_entropy_gather	0	static
+../mbedtls/library/entropy.c:321:5:mbedtls_entropy_func	96	static
+../mbedtls/library/entropy.c:618:5:mbedtls_entropy_source_self_test	72	static
+../mbedtls/library/entropy.c:671:5:mbedtls_entropy_self_test	872	static

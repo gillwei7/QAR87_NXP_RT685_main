@@ -1,0 +1,4 @@
+../edgefast/bluetooth/source/porting/slab/slab.c:39:5:k_mem_slab_init	24	static
+../edgefast/bluetooth/source/porting/slab/slab.c:104:5:k_mem_slab_alloc	32	static
+../edgefast/bluetooth/source/porting/slab/slab.c:189:6:k_mem_slab_free	24	static
+../edgefast/bluetooth/source/porting/slab/slab.c:247:5:k_mem_slab_runtime_stats_get	4	static

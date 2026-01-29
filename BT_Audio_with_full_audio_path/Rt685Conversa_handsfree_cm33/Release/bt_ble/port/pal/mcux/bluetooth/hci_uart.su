@@ -1,0 +1,9 @@
+../bt_ble/port/pal/mcux/bluetooth/hci_uart.c:735:35:hci_uart_read_task	80	static
+../bt_ble/port/pal/mcux/bluetooth/hci_uart.c:323:6:hci_uart_transmit_cb	24	static
+../bt_ble/port/pal/mcux/bluetooth/hci_uart.c:128:6:hci_uart_set_serial_settings	0	static
+../bt_ble/port/pal/mcux/bluetooth/hci_uart.c:133:6:hci_uart_init	32	static
+../bt_ble/port/pal/mcux/bluetooth/hci_uart.c:436:6:hci_uart_bt_init	56	static
+../bt_ble/port/pal/mcux/bluetooth/hci_uart.c:637:6:hci_uart_bt_shutdown	8	static
+../bt_ble/port/pal/mcux/bluetooth/hci_uart.c:869:12:hci_uart_send_data	24	static
+../bt_ble/port/pal/mcux/bluetooth/hci_uart.c:1032:6:hci_uart_write_data	0	static
+../bt_ble/port/pal/mcux/bluetooth/hci_uart.c:1100:12:hci_transport_write_data	24	static

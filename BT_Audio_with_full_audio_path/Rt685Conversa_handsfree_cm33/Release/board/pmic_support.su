@@ -1,0 +1,6 @@
+../board/pmic_support.c:79:13:InitPCA9422Regulators	280	static
+../board/pmic_support.c:101:6:BOARD_InitPmic	0	static
+../board/pmic_support.c:113:6:BOARD_SetPmicVoltageForFreq	48	static
+../board/pmic_support.c:167:6:BOARD_SetPmicVoltageBeforeDeepSleep	40	static
+../board/pmic_support.c:187:6:BOARD_RestorePmicVoltageAfterDeepSleep	40	static
+../board/pmic_support.c:202:6:BOARD_SetPmicVoltageBeforeDeepPowerDown	40	static

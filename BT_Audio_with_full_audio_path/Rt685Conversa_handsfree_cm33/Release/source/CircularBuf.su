@@ -1,0 +1,2 @@
+../source/CircularBuf.c:78:6:ClearAudioCirBuf	16	static
+../source/CircularBuf.c:95:6:InitAudioCircularBuf	16	static

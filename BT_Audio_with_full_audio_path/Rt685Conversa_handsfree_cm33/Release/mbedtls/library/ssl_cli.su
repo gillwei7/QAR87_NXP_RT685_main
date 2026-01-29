@@ -1,0 +1,2 @@
+../mbedtls/library/ssl_cli.c:2768:12:ssl_write_encrypted_pms	48	static
+../mbedtls/library/ssl_cli.c:4253:5:mbedtls_ssl_handshake_client_step	152	static

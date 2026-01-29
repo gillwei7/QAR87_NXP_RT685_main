@@ -1,0 +1,11 @@
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:47:12:BT_map_create_xml_folder_listing_pl	488	static
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:382:12:BT_map_update_inbox_pl	456	static
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:512:12:BT_map_push_message_pl	184	static
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:585:12:map_get_message_attributes_pl	168	static
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:172:12:BT_map_create_xml_messages_listing_pl	712	static
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:880:12:BT_map_set_message_status_pl	968	static
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:1105:12:BT_map_get_message_file_pl	848	static
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:1226:12:BT_map_build_event_report_file_pl	216	static
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:1330:12:BT_map_add_participant_to_conversation_pl	168	static
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:1472:12:BT_map_check_conversation_id_pl	120	static
+../bt_ble/port/pal/mcux/bluetooth/map_pl.c:1559:12:BT_map_update_conversation_participant_fields_pl	272	static

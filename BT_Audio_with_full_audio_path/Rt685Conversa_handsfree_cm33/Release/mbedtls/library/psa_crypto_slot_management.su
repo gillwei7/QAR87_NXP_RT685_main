@@ -1,0 +1,12 @@
+../mbedtls/library/psa_crypto_slot_management.c:71:5:psa_is_valid_key_id	0	static
+../mbedtls/library/psa_crypto_slot_management.c:166:14:psa_initialize_key_slots	0	static
+../mbedtls/library/psa_crypto_slot_management.c:175:6:psa_wipe_all_key_slots	24	static
+../mbedtls/library/psa_crypto_slot_management.c:187:14:psa_get_empty_key_slot	24	static
+../mbedtls/library/psa_crypto_slot_management.c:364:14:psa_get_and_lock_key_slot	8	static
+../mbedtls/library/psa_crypto_slot_management.c:424:14:psa_unlock_key_slot	0	static
+../mbedtls/library/psa_crypto_slot_management.c:449:14:psa_validate_key_location	0	static
+../mbedtls/library/psa_crypto_slot_management.c:480:14:psa_validate_key_persistence	0	static
+../mbedtls/library/psa_crypto_slot_management.c:499:14:psa_open_key	0	static
+../mbedtls/library/psa_crypto_slot_management.c:527:14:psa_close_key	4	static
+../mbedtls/library/psa_crypto_slot_management.c:551:14:psa_purge_key	4	static
+../mbedtls/library/psa_crypto_slot_management.c:569:6:mbedtls_psa_get_stats	16	static

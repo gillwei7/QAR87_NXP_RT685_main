@@ -39,10 +39,6 @@
 #include "CircularBufManagement.h"
 #include "CircularBuf.h"
 #include "SubFunc.h"
-#include "WorkStateManager.h"
-#include "app_handsfree.h"
-#include "system_status.h"
-#include "DefForBothMcuAndDsp.h"
 
 /*******************************************************************************
  * Definitions
@@ -60,7 +56,7 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
 SHELL_COMMAND_DEFINE(bt,
 					 "playopus 1~3"
 					 "playsbc  1~3"
-                     "\r\n\"bt\": BT related function\r\n"
+					 "\r\n\"bt\": BT related function\r\n"
                      "  USAGE: bt [dial|aincall|eincall]\r\n"
                      "    dial          dial out call.\r\n"
                      "    aincall       accept the incoming call.\r\n"
@@ -137,7 +133,6 @@ static uint32_t hfp_get_value_from_str(char *ch)
               return kStatus_SHELL_Error;
           }
       }
-
       if (selectIndex == 0U)
       {
           PRINTF("The Dial parameter is wrong\r\n");
@@ -152,7 +147,6 @@ static uint32_t hfp_get_value_from_str(char *ch)
       }
       return value;
 }
-
 
 static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **argv)
 {
@@ -295,7 +289,6 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
     				"H or h to disconnect rider headset\n"
     				"PH or ph to disconnect passenger headset\n");
     	}
-
     }
 //**************AVRCP commands start ***************
     else if (strcmp(argv[1], "play") == 0)
@@ -575,43 +568,24 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
     {
     	//start sbc play
     	if(strcmp(argv[2], "1") == 0)
-        {
+    	{
     		//play the first sbc file
     		VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
     		VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0;
-        }
+    	}
     	if(strcmp(argv[2], "2") == 0)
-        {
+    	{
     		//play the second sbc file
     		VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
     		VarBlockSharedByDspAndMcu.PlaySbcFileIdx=1;
-        }
+    	}
     	if(strcmp(argv[2], "3") == 0)
-        {
+    	{
     		//play the second sbc file
     		VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
     		VarBlockSharedByDspAndMcu.PlaySbcFileIdx=2;
-        }
-    }
-    else if(strcmp(argv[1], "mvol") == 0)
-	{
-    	int level = atoi(argv[2]);   // convert string to int
-
-		if(level >= 0 && level <= 14)
-		{
-			ChangeMasterVolumeLevel15(level);
-		}
-		else
-		{
-			PRINTF("Invalid volume level. Use: 0 ~ 14\r\n");
-		}
-	}
-    else if(strcmp(argv[1], "ss_get_state") == 0)
-    {
-        int current_usage_state = ss_get_state();
-        PRINTF("current_usage_state:%d\r\n", current_usage_state);
-    }
-    else
+    	}
+    }else
     {
     	PRINTF("invalid parameter\n");
     }

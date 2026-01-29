@@ -46,6 +46,7 @@ T_MCh32BitUacUpAudioSample UacUpAudioBuf_MCh_DataArea
     UacUpBuf_LengthInSamples + UacUpBuf_MaxReadLengthInSamples
 ];
 
+
 #if Rt685I2SToNvtIsI2SMaster==0
 	//only when NT is I2S master, we use cir buffer
 	T_CircularAudioBuf_S32 I2SRxFrNvt_CirBuf;

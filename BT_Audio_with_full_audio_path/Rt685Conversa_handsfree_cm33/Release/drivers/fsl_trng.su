@@ -1,0 +1,4 @@
+../drivers/fsl_trng.c:1418:10:TRNG_GetDefaultConfig	8	static
+../drivers/fsl_trng.c:1920:10:TRNG_Init	12	static
+../drivers/fsl_trng.c:1999:6:TRNG_Deinit	0	static
+../drivers/fsl_trng.c:2034:10:TRNG_GetRandomData	56	static

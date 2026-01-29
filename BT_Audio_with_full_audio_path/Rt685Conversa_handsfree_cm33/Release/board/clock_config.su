@@ -1,0 +1,4 @@
+../board/clock_config.c:56:29:BOARD_FlexspiClockSafeConfig	0	static
+../board/clock_config.c:69:29:BOARD_SetFlexspiClock	0	static
+../board/clock_config.c:158:6:BOARD_BootClockRUN	8	static
+../board/clock_config.c:82:6:BOARD_InitBootClocks	0	static

@@ -31,10 +31,6 @@ status_t  glf70583_i2c_read(uint8_t addr,uint8_t reg, uint8_t *buf, uint8_t len)
 							1,
                             buf,
 							len);
-    if (ret != kStatus_Success) {
-        PRINTF("[Error] glf70583_i2c_read BOARD_I3C_Send FAILED! ret:%d \r\n",ret);
-        while (1); // Avoid outputting incorrect power
-    }
     //PRINTF("[Debug] glf70583_i2c_read BOARD_I3C_Send ret:%d \r\n",ret);
 
     return ret;

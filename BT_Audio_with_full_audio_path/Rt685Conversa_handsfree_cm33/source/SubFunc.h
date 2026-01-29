@@ -169,7 +169,8 @@ extern int OpusFileBeg12;
 extern int OpusFileEnd12;
 extern int OpusFileBeg13;
 extern int OpusFileEnd13;
-extern int OpusFileBeg14;
-extern int OpusFileEnd14;
+
+
+
 #endif
 

@@ -88,7 +88,7 @@ dsp_ncache_image_size:
 		.global OpusFileEnd5
 		.global OpusFileBeg6
 		.global OpusFileEnd6
-	    .global OpusFileBeg7
+		.global OpusFileBeg7
 		.global OpusFileEnd7
 		.global OpusFileBeg8
 		.global OpusFileEnd8
@@ -102,8 +102,6 @@ dsp_ncache_image_size:
 		.global OpusFileEnd12
 		.global OpusFileBeg13
 		.global OpusFileEnd13
-		.global OpusFileBeg14
-		.global OpusFileEnd14
 
 		.type SbcFileBeg1, %object
 		.type SbcFileEnd1, %object
@@ -138,10 +136,30 @@ dsp_ncache_image_size:
 		.type OpusFileEnd12, %object
 		.type OpusFileBeg13, %object
 		.type OpusFileEnd13, %object
-		.type OpusFileBeg14, %object
-		.type OpusFileEnd14, %object
 
-        .section .OpusSbcBin ,  "ax" @progbits @preinit_array
+        .section .OpusSbcBin , "ax" @progbits @preinit_array
+
+
+#if 0
+        .align 4;
+SbcFileBeg1:
+SbcFileEnd1:
+SbcFileBeg2:
+SbcFileEnd2:
+SbcFileBeg3:
+SbcFileEnd3:
+OpusFileBeg1:
+OpusFileEnd1:
+OpusFileBeg2:
+OpusFileEnd2:
+OpusFileBeg3:
+OpusFileEnd3:
+
+		.int 0
+
+        .end
+#endif
+
 
         .align 4;
 SbcFileBeg1:
@@ -158,77 +176,155 @@ SbcFileBeg3:
 SbcFileEnd3:
 		.int 0
 
-
-		//bigger, higher bit rate
+#if 0
+#if 1
+		//smaller, lower bit rate
         .align 4;
 OpusFileBeg1:
-		.incbin "1.PowerON.opus"
+		.incbin "Beep1_16KHz_1Ch_16Kbps.opus"
 OpusFileEnd1:
 		.int 0
 
         .align 4;
 OpusFileBeg2:
-		.incbin "2.PowerOff.opus"
+		.incbin "Beep2_48KHz_1Ch_80Kbps.opus"
 OpusFileEnd2:
 		.int 0
 
         .align 4;
 OpusFileBeg3:
-		.incbin "3.Low Battery.opus"
+		.incbin "Speech_16KHz_1Ch_12Kbps.opus"
 OpusFileEnd3:
 		.int 0
-
+#if 0
         .align 4;
 OpusFileBeg4:
-		.incbin "4.WiFi_DisCN.opus"
+		.incbin "Speech_16KHz_1Ch_16Kbps.opus"
 OpusFileEnd4:
 		.int 0
 
         .align 4;
 OpusFileBeg5:
-		.incbin "5.BT_DisCN.opus"
+		.incbin "Sweep_48KHz_1Ch_80Kbps.opus"
 OpusFileEnd5:
 		.int 0
 
         .align 4;
 OpusFileBeg6:
-		.incbin "6.start_recording.opus"
+		.incbin "Music_48Khz_2Ch_80Kbps.opus"
+OpusFileEnd6:
+		.int 0
+#endif
+#else
+		//bigger, higher bit rate
+        .align 4;
+OpusFileBeg1:
+		.incbin "Beep1_16KHz_1Ch_32Kbps.opus"
+OpusFileEnd1:
+		.int 0
+
+        .align 4;
+OpusFileBeg2:
+		.incbin "Beep2_48KHz_1Ch_180Kbps.opus"
+OpusFileEnd2:
+		.int 0
+
+        .align 4;
+OpusFileBeg3:
+		.incbin "Speech_16KHz_1Ch_16Kbps.opus"
+OpusFileEnd3:
+		.int 0
+
+        .align 4;
+OpusFileBeg4:
+		.incbin "Speech_16KHz_1Ch_32Kbps.opus"
+OpusFileEnd4:
+		.int 0
+
+        .align 4;
+OpusFileBeg5:
+		.incbin "Sweep_48KHz_1Ch_180Kbps.opus"
+OpusFileEnd5:
+		.int 0
+
+        .align 4;
+OpusFileBeg6:
+		.incbin "Music_48Khz_2Ch_180Kbps.opus"
+OpusFileEnd6:
+		.int 0
+
+#endif
+#else
+
+        .align 4;
+OpusFileBeg1:
+		.incbin "1_PowerON.opus"
+OpusFileEnd1:
+		.int 0
+
+        .align 4;
+OpusFileBeg2:
+		.incbin "2_PowerOff.opus"
+OpusFileEnd2:
+		.int 0
+
+        .align 4;
+OpusFileBeg3:
+		.incbin "3_Low Battery.opus"
+OpusFileEnd3:
+		.int 0
+
+        .align 4;
+OpusFileBeg4:
+		.incbin "4_WiFi_DisCN.opus"
+OpusFileEnd4:
+		.int 0
+
+        .align 4;
+OpusFileBeg5:
+		.incbin "5_BT_DisCN.opus"
+OpusFileEnd5:
+		.int 0
+
+        .align 4;
+OpusFileBeg6:
+		.incbin "6_Start_Recording.opus"
 OpusFileEnd6:
 		.int 0
 
         .align 4;
 OpusFileBeg7:
-		.incbin "7.Cam_Rec_Stop.opus"
+		.incbin "7_Cam_Rec_Stop.opus"
 OpusFileEnd7:
 		.int 0
 
         .align 4;
 OpusFileBeg8:
-		.incbin "8.photo_Capture.opus"
+		.incbin "8_photo_Capture.opus"
 OpusFileEnd8:
 		.int 0
 
         .align 4;
 OpusFileBeg9:
-		.incbin "9.StartVideoAI.opus"
+		.incbin "9_StartVideoAI.opus"
 OpusFileEnd9:
 		.int 0
 
         .align 4;
 OpusFileBeg10:
-		.incbin "10.StopVideoAI.opus"
+		.incbin "10_StopVideoAI.opus"
 OpusFileEnd10:
 		.int 0
 
         .align 4;
 OpusFileBeg11:
-		.incbin "11.StartTranslation.opus"
+		.incbin "11_StartTranslation.opus"
 OpusFileEnd11:
 		.int 0
 
         .align 4;
 OpusFileBeg12:
-		.incbin "12.StopTranslation.opus"
+		.incbin "12_StopTranslation.opus"
 OpusFileEnd12:
 		.int 0
 
@@ -237,11 +333,8 @@ OpusFileBeg13:
 		.incbin "Beep1_16KHz_1Ch_16Kbps.opus"
 OpusFileEnd13:
 		.int 0
+		
+#endif
 
-        .align 4;
-OpusFileBeg14:
-		.incbin "14.bt_connected.opus"
-OpusFileEnd14:
-		.int 0
 
         .end

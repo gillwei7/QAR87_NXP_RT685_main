@@ -1,0 +1,4 @@
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_aes_ccm.c:98:12:ccm_auth	104	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_aes_ccm.c:154:12:ccm_crypt	88	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_aes_ccm.c:193:5:bt_ccm_decrypt	64	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_aes_ccm.c:221:5:bt_ccm_encrypt	48	static

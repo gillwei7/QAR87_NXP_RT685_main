@@ -1,0 +1,7 @@
+../mbedtls/library/psa_crypto_rsa.c:58:14:mbedtls_psa_rsa_load_representation	56	static
+../mbedtls/library/psa_crypto_rsa.c:155:14:mbedtls_psa_rsa_export_key	40	static
+../mbedtls/library/psa_crypto_rsa.c:118:14:mbedtls_psa_rsa_import_key	40	static
+../mbedtls/library/psa_crypto_rsa.c:208:14:mbedtls_psa_rsa_export_public_key	32	static
+../mbedtls/library/psa_crypto_rsa.c:264:14:mbedtls_psa_rsa_generate_key	208	static
+../mbedtls/library/psa_crypto_rsa.c:340:14:mbedtls_psa_rsa_sign_hash	56	static
+../mbedtls/library/psa_crypto_rsa.c:436:14:mbedtls_psa_rsa_verify_hash	64	static

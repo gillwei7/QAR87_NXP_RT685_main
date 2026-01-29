@@ -1,0 +1,11 @@
+../usb/usb_device_lpcip3511.c:349:21:USB_DeviceLpc3511IpEndpointPrime.isra	32	static
+../usb/usb_device_lpcip3511.c:1499:21:USB_DeviceLpc3511IpGetActualBufferAndPrime	40	static
+../usb/usb_device_lpcip3511.c:1636:21:USB_DeviceLpc3511IpTransaction	48	static
+../usb/usb_device_lpcip3511.c:1290:14:USB_DeviceLpc3511IpInit	16	static
+../usb/usb_device_lpcip3511.c:1463:14:USB_DeviceLpc3511IpDeinit	0	static
+../usb/usb_device_lpcip3511.c:1749:14:USB_DeviceLpc3511IpSend	16	static
+../usb/usb_device_lpcip3511.c:1783:14:USB_DeviceLpc3511IpRecv	16	static
+../usb/usb_device_lpcip3511.c:1791:14:USB_DeviceLpc3511IpCancel	48	static
+../usb/usb_device_lpcip3511.c:591:21:USB_DeviceLpc3511IpEndpointDeinit.isra	40	static
+../usb/usb_device_lpcip3511.c:1944:14:USB_DeviceLpc3511IpControl	40	static
+../usb/usb_device_lpcip3511.c:2153:6:USB_DeviceLpcIp3511IsrFunction	88	static

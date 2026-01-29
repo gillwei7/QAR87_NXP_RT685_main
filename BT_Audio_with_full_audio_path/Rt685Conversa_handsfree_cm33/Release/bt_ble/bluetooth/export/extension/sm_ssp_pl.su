@@ -1,0 +1,8 @@
+../bt_ble/bluetooth/export/extension/sm_ssp_pl.c:60:12:BT_sm_set_local_io_cap	8	static
+../bt_ble/bluetooth/export/extension/sm_ssp_pl.c:104:12:BT_sm_set_device_oob_data	16	static
+../bt_ble/bluetooth/export/extension/sm_ssp_pl.c:136:12:BT_sm_get_remote_io_cap	8	static
+../bt_ble/bluetooth/export/extension/sm_ssp_pl.c:183:12:BT_sm_set_local_authreq	16	static
+../bt_ble/bluetooth/export/extension/sm_ssp_pl.c:216:12:BT_sm_get_remote_iocaps_pl	24	static
+../bt_ble/bluetooth/export/extension/sm_ssp_pl.c:277:34:sm_pairing_accept	0	static
+../bt_ble/bluetooth/export/extension/sm_ssp_pl.c:284:12:sm_get_io_capability_pl	40	static
+../bt_ble/bluetooth/export/extension/sm_ssp_pl.c:525:12:sm_get_remote_oob_data_pl	24	static

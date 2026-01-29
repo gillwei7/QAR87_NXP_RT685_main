@@ -1,0 +1,17 @@
+../component/amp/aw88166/aw883xx_pid_2066_init.c:125:12:aw_pid_2066_get_reg_num	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:130:21:aw_pid_2066_reg_val_to_db	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:86:13:aw_pid_2066_i2s_tx_enable	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:62:12:aw883xx_dev_reg_write_bits	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:171:12:aw_pid_2066_get_volume	32	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:46:12:aw883xx_dev_reg_read	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:140:12:aw_pid_2066_set_volume	40	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:54:12:aw883xx_dev_reg_write	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:70:12:aw883xx_dev_dsp_write	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:78:12:aw883xx_dev_dsp_read	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:37:12:aw883xx_dev_i2c_read	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:29:12:aw883xx_dev_i2c_write	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:21:12:aw883xx_dev_i2c_writes	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:103:13:aw_pid_2066_check_rd_access	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:114:13:aw_pid_2066_check_wr_access	0	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:277:12:aw_pid_2066_set_vcalb	32	static
+../component/amp/aw88166/aw883xx_pid_2066_init.c:325:5:aw883xx_pid_2066_dev_init	40	static

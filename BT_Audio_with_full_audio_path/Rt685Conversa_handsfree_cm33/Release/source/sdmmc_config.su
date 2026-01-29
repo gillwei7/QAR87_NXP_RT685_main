@@ -1,0 +1,8 @@
+../source/sdmmc_config.c:119:6:BOARD_SDCardIoVoltageControl	0	static
+../source/sdmmc_config.c:155:6:BOARD_SDCardPowerControl	0	static
+../source/sdmmc_config.c:50:10:BOARD_USDHC0ClockConfiguration	8	static
+../source/sdmmc_config.c:68:6:BOARD_SDCardDAT3PullFunction	0	static
+../source/sdmmc_config.c:80:6:BOARD_SDCardDetectInit	4	static
+../source/sdmmc_config.c:97:6:BOARD_SDCardIoVoltageControlInit	64	static
+../source/sdmmc_config.c:139:6:BOARD_SDCardPowerResetInit	16	static
+../source/sdmmc_config.c:192:6:BOARD_SDIO_Config	80	static

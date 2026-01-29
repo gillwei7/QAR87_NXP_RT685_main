@@ -1080,7 +1080,7 @@ int DbgConsole_Vprintf(const char *fmt_s, va_list formatStringArg)
 			//result = DbgConsole_SendDataReliable((uint8_t *)printBuf, (size_t)logLength);
 		#else
 			#if(Using_UART5ToPrint)||(Using_UART2ToPrint)
-        result = DbgConsole_SendDataReliable((uint8_t *)printBuf, (size_t)logLength);
+				result = DbgConsole_SendDataReliable((uint8_t *)printBuf, (size_t)logLength);
 			#endif
 		#endif
 

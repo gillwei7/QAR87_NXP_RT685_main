@@ -16,7 +16,7 @@
 #include "fsl_debug_console.h"
 #include "ringtone.h"
 #include <sys/atomic.h>
-#include "i2c_component_handler.h"
+
 
 /*******************************************************************************
  * Definitions
@@ -80,7 +80,9 @@ extern hal_audio_config_t rxSpeakerConfig;
 /* --------------------------------------------- Static Global Variables */
 
 
-	EventGroupHandle_t EvtGrpHdl_StateMangerTaskToBtStack;
+EventGroupHandle_t EvtGrpHdl_StateMangerTaskToBtStack;
+//EventGroupHandle_t EvtGrpHdl_AudioDmaIntrToAudioTask;
+
 extern uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx);
 
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(tx_speaker_handle), 4);
@@ -131,8 +133,9 @@ AT_NONCACHEABLE_SECTION_ALIGN(static uint8_t OneBlockTxBufToBT    [BUFFER_SIZE],
 S16 TmpDbgSigalBuf[BUFFER_SIZE/2];
 void SCO_AudioFlow_SemaphorePost(void)
 {
-		OSA_SemaphorePost(xSemaphoreDmaAudioDataReady);
-	}
+	OSA_SemaphorePost(xSemaphoreDmaAudioDataReady);
+	//xEventGroupSetBits(EvtGrpHdl_AudioDmaIntrToAudioTask,DmaAudioIntrRequest_AllAudioDataIsReady);
+}
 
 static void txMicCallback(hal_audio_handle_t handle, hal_audio_status_t completionStatus, void *callbackParam)
 {
@@ -215,7 +218,7 @@ static void rxSpeakerCallback(hal_audio_handle_t handle, hal_audio_status_t comp
 			{
 				rxSpeaker_index++;
 			}
-			if (rxSpeaker_index == 2)
+			if (rxSpeaker_index >= 2)
 			{
 				rxSpeaker_index = 0U;
 			}
@@ -281,8 +284,8 @@ void DeInitCodec(void)
 	//to do...... deinit codec //B36932
 	//r = deinit codec
 	//Not sure if "stop" same with Deinit //B36932
-	// gill modify to amp_post_event, align with I2C task control the I2C write function
-	amp_post_event(AMP_EVT_STOP);
+	hal_amp_aw88166_left_stop();
+	hal_amp_aw88166_right_stop();
 	
 	//if(r!=kStatus_Success)
 	//{
@@ -302,13 +305,13 @@ void InitAndStartCodec(int fs, int bits, int Mfreq)
 	//r = initial codec or start codec
 	if(fs==48000)
 	{
-		// gill modify to amp_post_event, align with I2C task control the I2C write function
-		amp_post_event(AMP_EVT_MUSIC_START);
+		hal_amp_aw88166_left_start ("Music");
+		hal_amp_aw88166_right_start("Music");
 	}else
 	if(fs==16000)
 	{
-		// gill modify to amp_post_event, align with I2C task control the I2C write function
-		amp_post_event(AMP_EVT_RECEIVER_START);
+		hal_amp_aw88166_left_start ("Receiver");
+		hal_amp_aw88166_right_start("Receiver");
 	}
 	AmpState=AmpState_ConfiguredAndActive;
 }
@@ -518,12 +521,15 @@ void AudioFlow_Task(void *handle)
     {
         OSA_SemaphoreWait(xSemaphoreDmaAudioDataReady, osaWaitForever_c);
 
+    	//xEventGroupWaitBits(EvtGrpHdl_AudioDmaIntrToAudioTask, DmaAudioIntrRequest_AllAudioDataIsReady, pdTRUE, pdFALSE, portMAX_DELAY);
+    	//xEventGroupClearBits(EvtGrpHdl_AudioDmaIntrToAudioTask,DmaAudioIntrRequest_AllAudioDataIsReady);
+
         DbgPin5Up();
 		switch(DeviceWorkStateCur)
 		{
-				case WorkState_HfpCall:
-					ProcessAudio_AfterAudioInputBufIsReady_HfpCall();
-					break;
+			case WorkState_HfpCall:
+				ProcessAudio_AfterAudioInputBufIsReady_HfpCall();
+				break;
 			case WorkState_HomeVitStandby:
 				ProcessAudio_AfterAudioInputBufIsReady_HomeVitStandBy();
 				break;
@@ -584,14 +590,16 @@ void StartAudioTask(void)
 	
 	#if UsingQAR87Board == 1
 		//Initial Smart Amplifier
-	    //B36932 Quanta don't do it here, hal_amp_aw88166_power_on();
-	    //B36932 Quanta don't do it here, hal_amp_aw88166_init();
+	    hal_amp_aw88166_power_on();
+	    hal_amp_aw88166_init();
 	#endif
 
 	if (taskCreated == 0)
 	{
 
 		EvtGrpHdl_StateMangerTaskToBtStack=xEventGroupCreate();
+
+		//EvtGrpHdl_AudioDmaIntrToAudioTask=xEventGroupCreate();
 		OSA_SemaphoreCreate(xSemaphoreDmaAudioDataReady, 0);
 
 		result = xTaskCreate(AudioFlow_Task, "VitStandBy", 1024*10, NULL, HFP_STREAMER_TASK_PRIORITY, NULL);
@@ -627,7 +635,7 @@ API_RESULT sco_audio_setup_pl_ext(SCO_AUDIO_EP_INFO *ep_info)
     WasInInComingRingTone=NowInIncomingCallRingTone;
     RequestToGetIntoHfp=1;
 
-		return API_SUCCESS;
+    return API_SUCCESS;
 }
 
 
@@ -725,25 +733,25 @@ API_RESULT sco_audio_set_speaker_volume_ext(UCHAR volume)
 	if(DeviceWorkStateCur!=WorkState_HfpCall)
 	{
 		return API_FAILURE;
-		}
+	}
 
-		BtHfpRequest=HfpRequest_SetCodecAmpVolume;
+	BtHfpRequest=HfpRequest_SetCodecAmpVolume;
 	BtHfpAudioVolume=volume;
-		//block till workstate is WorkState_HfpCall and after HfpRequest_AudioStart is done (audio interface is running)
-		xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_SetCodecAmpVolume, pdTRUE, pdFALSE, portMAX_DELAY);
-		xEventGroupClearBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_SetCodecAmpVolume);
+	//block till workstate is WorkState_HfpCall and after HfpRequest_AudioStart is done (audio interface is running)
+	xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_SetCodecAmpVolume, pdTRUE, pdFALSE, portMAX_DELAY);
+	xEventGroupClearBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_SetCodecAmpVolume);
 
-		return API_SUCCESS;
+	return API_SUCCESS;
 }
 void sco_audio_play_ringtone_pl_ext(void)
-    {
+{
 if (NowInIncomingCallRingTone == 0)
-    {
+{
 	BtHfpAudioFs=16000;
 	BtHfpAudioBitWidth=16;
 	NowInIncomingCallRingTone = 1;
 	RequestToGetIntoHfp=1;
-    }
+}
 
 PRINTF_M("sco_audio_play_ringtone_pl_ext, NowInIncomingCallRingTone=%d\r\n",NowInIncomingCallRingTone);
 return;
@@ -758,9 +766,9 @@ void sco_audio_play_ringtone_exit_pl_ext(void)
     }else
     {
     	if(WasInInComingRingTone)
-        {
+    	{
     		RequestToGetOutofHfp=1;
     		PRINTF_M("sco_audio_play_ringtone_exit_pl_ext RequestToGetOutofHfp=1\r\n");
-        }
+    	}
     }
 }

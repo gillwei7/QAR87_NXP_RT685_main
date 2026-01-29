@@ -1,0 +1,15 @@
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:50:10:SDMMCHOST_CardIntInit	0	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:57:10:SDMMCHOST_CardDetectInit	0	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:76:10:SDMMCHOST_CardDetectStatus	16	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:113:10:SDMMCHOST_PollingCardDetectStatus	24	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:160:10:SDMMCHOST_TransferFunction	32	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:234:6:SDMMCHOST_SetCardPower	0	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:239:6:SDMMCHOST_SetCardBusWidth	0	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:248:6:SDMMCHOST_ConvertDataToLittleEndian	0	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:284:10:SDMMCHOST_Init	24	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:352:6:SDMMCHOST_Reset	16	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:379:6:SDMMCHOST_Deinit	16	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:386:6:SDMMCHOST_SwitchToVoltage	0	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:612:10:SDMMCHOST_ExecuteTuning	128	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:626:10:SDMMCHOST_StartBoot	72	static
+../sdmmc/host/usdhc/blocking/fsl_sdmmc_host.c:655:10:SDMMCHOST_ReadBootData	112	static

@@ -17,13 +17,10 @@
 #include "fsl_adapter_uart.h"
 #include "controller_hci_uart.h"
 #include "fsl_power.h"
-#include "fsl_inputmux.h"
-#include "fsl_pint.h"
 
 #if UsingQAR87Board == 1
 #include "hal_amp.h"
 #include "hal_pmic.h"
-
 #endif
 
 #if CONFIG_BT_HOST_USB_ENABLE==1
@@ -133,10 +130,10 @@ codec_config_t boardCodecConfig = {.codecDevType = kCODEC_WM8904, .codecDevConfi
  */
 /*setting for multiple of 8Khz,such as 48Khz/16Khz/32KHz*/
 const clock_audio_pll_config_t audioPllConfig_48K = {
-    .audio_pll_src  = kCLOCK_AudioPllXtalIn, /* OSC clock */
+    .audio_pll_src 	= kCLOCK_AudioPllXtalIn,   /* OSC clock */
     .numerator 		= 5280,                         /* Numerator of the Audio PLL fractional loop divider is null */
     .denominator 	= 10000,                      /* Denominator of the Audio PLL fractional loop divider is null */
-    .audio_pll_mult = kCLOCK_AudioPllMult22  /* Divide by 22 */
+    .audio_pll_mult = kCLOCK_AudioPllMult22   /* Divide by 22 */
 };
 //should be used together with CLOCK_SetClkDiv(kCLOCK_DivAudioPllClk, 18U); /* Set AUDIOPLLCLKDIV divider to value 18 */
 //and CLOCK_InitAudioPfd(kCLOCK_Pfd0, 22);
@@ -166,7 +163,7 @@ wm8904_config_t wm8904ScoConfig = {
     .playSource         = kWM8904_PlaySourceDAC,
     .slaveAddress       = WM8904_I2C_ADDRESS,
     .protocol           = kWM8904_ProtocolI2S,
-		.format             = {.sampleRate = kWM8904_SampleRate16kHz, .bitWidth = kWM8904_BitWidth32},
+	.format             = {.sampleRate = kWM8904_SampleRate16kHz, .bitWidth = kWM8904_BitWidth32},
     .mclk_HZ            = 24576000,
 
 #if Rt685I2SToAmpIsI2SMaster==1
@@ -343,7 +340,7 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
     }
     else
     {
-
+		
         if (44100U == sampleRate)
         {
 			CLOCK_InitAudioPll(&audioPllConfig_44p1K);
@@ -364,15 +361,14 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
         }		
 
 
-			#if EnableAudioPllAdjustingToSyncBetweenBtFsAndLocalFs==1
-				AUDIOPLL0NUM_StartingUpValue = CLKCTL1->AUDIOPLL0NUM;
-				AUDIOPLL0NUM_AdjustingValue=0;
-			#endif
+		#if EnableAudioPllAdjustingToSyncBetweenBtFsAndLocalFs==1
+			AUDIOPLL0NUM_StartingUpValue = CLKCTL1->AUDIOPLL0NUM;
+			AUDIOPLL0NUM_AdjustingValue=0;
+		#endif
 
         /* attach main clock to I3C (500MHz / 20 = 25MHz). */
         CLOCK_AttachClk(kMAIN_CLK_to_I3C_CLK);
         CLOCK_SetClkDiv(kCLOCK_DivI3cClk, 20);
-
 
 		switch(I2SClkShareCfgIdx)
 		{
@@ -416,7 +412,7 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 		        //CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM5);
 		        /* attach AUDIO PLL clock to FLEXCOMM6 (I2S6) */
         		//CLOCK_AttachClk(kAUDIO_PLL_to_FLEXCOMM6);
-
+			
 			break;
 			case NvtFc5Fc6_AmpFc1Fc3:
 				//this is for QR87 big board
@@ -438,6 +434,7 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 				//this is for ... reserved
 				//...
 			break;
+
 		}
 
         // attach AUDIO PLL clock to MCLK , 24.576MHz or 22.5792MHz
@@ -466,18 +463,18 @@ uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx)
 				case BtPcmFc2Fc4_AmpFc1Fc3:
 					//this is for QR87 big board --- with BT connected
 					SetFcClkSharing(FcIdx_TxToBt, FcIdx_RxFrBt,  0);	//share clk of FcIdx_RxFrBt  to FcIdx_TxToBt,  using internal share group 0
-						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
+					SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
 				break;
 				case AmpFc1Fc3:
 					//this is for QR87 big board --- A2DP Amp only
 					//SetFcClkSharing(FcIdx_TxToNvt,FcIdx_RxFrNvt , 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
-						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
-				break;
+					SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
+					break;
 				case NvtFc5Fc6_AmpFc1Fc3:
 					//this is for QR87 big board --- with NVT connected
 					SetFcClkSharing(FcIdx_TxToNvt,FcIdx_RxFrNvt , 0);	//share clk of FcIdx_RxFrNvt to FcIdx_TxToNvt, using internal share group 0
-						SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
-				break;
+					SetFcClkSharing(FcIdx_TxToAmp, FcIdx_RxFrAmp, 1);	//share clk of FcIdx_TxToAmp to FcIdx_RxFrAmp, using internal share group 1
+					break;
 			}
 		#endif
 
@@ -596,53 +593,48 @@ void BOARD_InitHardware(void)
         1,
     };
 
-#if UsingQAR87Board == 1
-    gpio_pin_config_t IW611_PMIC_config = {
-        kGPIO_DigitalOutput,
-        1,
-    };
-    /* Attach main clock to I3C, 500MHz / 20 = 25Hz. */
-    CLOCK_AttachClk(kMAIN_CLK_to_I3C_CLK);
-    CLOCK_SetClkDiv(kCLOCK_DivI3cClk, 20);
+	#if UsingQAR87Board == 1
+	    gpio_pin_config_t IW611_PMIC_config = {
+	        kGPIO_DigitalOutput,
+	        1,
+	    };
+	    /* Attach main clock to I3C, 500MHz / 20 = 25Hz. */
+	    CLOCK_AttachClk(kMAIN_CLK_to_I3C_CLK);
+	    CLOCK_SetClkDiv(kCLOCK_DivI3cClk, 20);
 
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
+	    BOARD_InitBootPins();
+	    BOARD_InitBootClocks();
 	
-    /* Attach AUX0_PLL clock to flexspi with divider 4*/
-    //BOARD_SetFlexspiClock(2, 8);
-    /* attach FRG0 clock to FLEXCOMM4 */
-    CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
-    CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
+	    /* Attach AUX0_PLL clock to flexspi with divider 4*/
+	    //BOARD_SetFlexspiClock(2, 8);
+	    /* attach FRG0 clock to FLEXCOMM4 */
+	    CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
+	    CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
 
-    BOARD_InitDebugConsole();
+	    hal_gpio_port_init();
+	    BOARD_InitPMICs();
+	    BOARD_InitDebugConsole();
+	    //move to Start Audio task hal_amp_aw88166_power_on();
+	    //move to Start Audio task hal_amp_aw88166_init();
+	#else
+	    BOARD_InitBootPins();
+	    BOARD_InitBootClocks();
+	    BOARD_InitDebugConsole();
+	    BOARD_I3C_ReleaseBus();
+	    BOARD_InitI3CPins();
 
-    /* Connect trigger sources to PINT */
-    INPUTMUX_Init(INPUTMUX);
-    INPUTMUX_AttachSignal(INPUTMUX, kPINT_PinInt0, POWERKEY_PINT_PIN_INT0_SRC);
-    INPUTMUX_AttachSignal(INPUTMUX, kPINT_PinInt1, FUNKEY_PINT_PIN_INT1_SRC);
-    /* Turnoff clock to inputmux to save power. Clock is only needed to make changes */
-    INPUTMUX_Deinit(INPUTMUX);
+	    /* Init output reset pin. */
+	    GPIO_PortInit(GPIO, 2);
+	    GPIO_PinInit(GPIO, 2, 12, &reset_config);
 
+	    /* Attach AUX0_PLL clock to flexspi with divider 4*/
+	    BOARD_SetFlexspiClock(2, 8);
+	    /* attach FRG0 clock to FLEXCOMM4 */
+	    CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
+	    CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
 
-#else
-    BOARD_InitBootPins();
-    BOARD_InitBootClocks();
-    BOARD_InitDebugConsole();
-    BOARD_I3C_ReleaseBus();
-    BOARD_InitI3CPins();
-
-    /* Init output reset pin. */
-    GPIO_PortInit(GPIO, 2);
-    GPIO_PinInit(GPIO, 2, 12, &reset_config);
-
-    /* Attach AUX0_PLL clock to flexspi with divider 4*/
-    BOARD_SetFlexspiClock(2, 8);
-    /* attach FRG0 clock to FLEXCOMM4 */
-    CLOCK_SetFRGClock(BOARD_BT_UART_FRG_CLK);
-    CLOCK_AttachClk(BOARD_BT_UART_CLK_ATTACH);
-
-	PRINTF("RT685 MCU: start\r\n");
-#endif
+		PRINTF("RT685 MCU: start\r\n");
+	#endif
 
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: ----IW611 BT HFP A2DP with Conversa--- \r\n");
@@ -661,14 +653,14 @@ void BOARD_InitHardware(void)
 
 #if UsingQAR87Board == 1
 	#if UsingDbgPins == 1
-		//InitDbgPin(); //should be called after gpio init
+		InitDbgPin();
 	#endif
 	InitSineToneGen1();
 	InitSineToneGen2();
 	InitBtnEvt(); //need more editing for Quanta board
 #else
 	InitDbgPin();
-	OpeningBlink(3);
+	//OpeningBlink(3);
 	InitSineToneGen1();
 	InitSineToneGen2();
 	InitBtnEvt();
@@ -688,43 +680,43 @@ void BOARD_InitHardware(void)
 
 	//boot DSP and handshake with DSP
 	#if 1	//folding
-			//need to boot DSP
-			PRINTF("RT685 MCU: Booting DSP\r\n");
-			/* Clear MUA reset before run DSP core */
-			RESET_PeripheralReset(kMU_RST_SHIFT_RSTn);
+		//need to boot DSP
+		PRINTF("RT685 MCU: Booting DSP\r\n");
+		/* Clear MUA reset before run DSP core */
+		RESET_PeripheralReset(kMU_RST_SHIFT_RSTn);
 
-			//INPUTMUX_Init(INPUTMUX);
-			//INPUTMUX_AttachSignal(INPUTMUX, 1U, kINPUTMUX_MuBToDspInterrupt);
-			//INPUTMUX_Deinit(INPUTMUX);
+		//INPUTMUX_Init(INPUTMUX);
+		//INPUTMUX_AttachSignal(INPUTMUX, 1U, kINPUTMUX_MuBToDspInterrupt);
+		//INPUTMUX_Deinit(INPUTMUX);
 
-			/* Clear SEMA42 reset */
-			RESET_PeripheralReset(kSEMA_RST_SHIFT_RSTn);
+		/* Clear SEMA42 reset */
+		RESET_PeripheralReset(kSEMA_RST_SHIFT_RSTn);
 
-			/* Clear MUA reset */
-			RESET_PeripheralReset(kMU_RST_SHIFT_RSTn);
+		/* Clear MUA reset */
+		RESET_PeripheralReset(kMU_RST_SHIFT_RSTn);
 
-			/* SEMA42 init */
-			SEMA42_Init(APP_SEMA42);
-			/* Reset the sema42 gate */
-			SEMA42_ResetAllGates(APP_SEMA42);
-			domainId = APP_GetMCoreDomainID();
+		/* SEMA42 init */
+		SEMA42_Init(APP_SEMA42);
+		/* Reset the sema42 gate */
+		SEMA42_ResetAllGates(APP_SEMA42);
+		domainId = APP_GetMCoreDomainID();
 
-			MU_Init(APP_MU);
-			EnableIRQ(MU_A_IRQn);
+		MU_Init(APP_MU);
+		EnableIRQ(MU_A_IRQn);
 
-			/* Enable transmit and receive interrupt */
-			MU_EnableInterrupts(APP_MU, kMU_Rx0FullInterruptEnable);
+		/* Enable transmit and receive interrupt */
+		MU_EnableInterrupts(APP_MU, kMU_Rx0FullInterruptEnable);
 
-			PRINTF("RT685 MCU: Waiting for DSP handshake\r\n");
-			BOARD_DSP_Init();
+		PRINTF("RT685 MCU: Waiting for DSP handshake\r\n");
+		BOARD_DSP_Init();
 
-			/* Wait DSP core is Boot Up */
-			while (BOOT_FLAG != MU_GetFlags(APP_MU))
-			{
-				delay_ms(1);
-			};
+		/* Wait DSP core is Boot Up */
+		while (BOOT_FLAG != MU_GetFlags(APP_MU))
+		{
+			delay_ms(1);
+		};
 
-			memset((void *)&VarBlockSharedByDspAndMcu, 0, sizeof(VarBlockSharedByDspAndMcu));
+		memset((void *)&VarBlockSharedByDspAndMcu, 0, sizeof(VarBlockSharedByDspAndMcu));
 
 		//init opus file ptrs
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[ 0]=(unsigned int)&OpusFileBeg1;
@@ -753,8 +745,7 @@ void BOARD_InitHardware(void)
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[23]=(unsigned int)&OpusFileEnd12;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[24]=(unsigned int)&OpusFileBeg13;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[25]=(unsigned int)&OpusFileEnd13;
-		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[26]=(unsigned int)&OpusFileBeg14;
-		VarBlockSharedByDspAndMcu.FileAddrTable_Opus[27]=(unsigned int)&OpusFileEnd14;
+
 
 		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[0]=(unsigned int)&SbcFileBeg1;
 		VarBlockSharedByDspAndMcu.FileAddrTable_Sbc[1]=(unsigned int)&SbcFileEnd1;
@@ -765,15 +756,15 @@ void BOARD_InitHardware(void)
 
 
 		VarBlockSharedByDspAndMcu.Cm33Hifi1HandShakeCheck=0x1234abcd;		//a flag for DSP side to check
-			MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, (U32)&VarBlockSharedByDspAndMcu);
+		MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, (U32)&VarBlockSharedByDspAndMcu);		//DSP side waits for 2 MSGs before DSP goes on --- this is the first
 
-			DelayMsByReadingCycCnt(20);		//wait a while to let DSP priting finish
+		DelayMsByReadingCycCnt(20);		//wait a while to let DSP priting finish
 
 		SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-			BOARD_InitDebugConsole();		//not sure --- conflict with DSP init debug console --- earlier prints can not be displayed
-			PRINTF("RT685 MCU: DSP handshake is received\r\n");
+		BOARD_InitDebugConsole();		//not sure --- conflict with DSP init debug console --- earlier prints can not be displayed
+		PRINTF("RT685 MCU: DSP handshake is received\r\n");
 		SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
-#endif
+	#endif
 
     DMA_Init(dmaBases[EXAMPLE_DMA_INSTANCE]);
 

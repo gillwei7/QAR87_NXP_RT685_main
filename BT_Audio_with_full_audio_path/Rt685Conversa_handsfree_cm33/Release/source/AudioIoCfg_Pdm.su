@@ -1,0 +1,14 @@
+../source/AudioIoCfg_Pdm.c:1081:6:DMicRx_Callback2	8	static
+../source/AudioIoCfg_Pdm.c:1045:6:DMicRx_Callback0	32	static
+../source/AudioIoCfg_Pdm.c:318:6:ImmediatelyStartDmicDmaChannels	4	static
+../source/AudioIoCfg_Pdm.c:393:6:Init_MicDmaCfgCh	8	static
+../source/AudioIoCfg_Pdm.c:524:6:BOARD_DeInit_DMA_PDM	16	static
+../source/AudioIoCfg_Pdm.c:586:6:BOARD_Init_DMA_PDM	8	static
+../source/AudioIoCfg_Pdm.c:712:6:BOARD_Init_DMIC	64	static
+../source/AudioIoCfg_Pdm.c:938:5:GetPdmCh0DmaTransferringIsUsingBufAOrB	0	static
+../source/AudioIoCfg_Pdm.c:942:5:GetPdmCh2DmaTransferringIsUsingBufAOrB	0	static
+../source/AudioIoCfg_Pdm.c:946:5:GetPdmCh4DmaTransferringIsUsingBufAOrB	0	static
+../source/AudioIoCfg_Pdm.c:950:5:GetPdmCh6DmaTransferringIsUsingBufAOrB	0	static
+../source/AudioIoCfg_Pdm.c:955:6:StartI2SToNvtNow	16	static
+../source/AudioIoCfg_Pdm.c:996:6:StartI2SToAmpNow	24	static
+../source/AudioIoCfg_Pdm.c:1139:6:ConfigDmicChainedDma	32	static

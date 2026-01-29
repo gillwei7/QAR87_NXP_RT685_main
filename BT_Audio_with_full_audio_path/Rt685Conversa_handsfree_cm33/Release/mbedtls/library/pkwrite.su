@@ -1,0 +1,5 @@
+../mbedtls/library/pkwrite.c:163:5:mbedtls_pk_write_pubkey	184	static
+../mbedtls/library/pkwrite.c:213:5:mbedtls_pk_write_pubkey_der	64	static
+../mbedtls/library/pkwrite.c:305:5:mbedtls_pk_write_key_der	208	static
+../mbedtls/library/pkwrite.c:562:5:mbedtls_pk_write_pubkey_pem	88	static
+../mbedtls/library/pkwrite.c:592:5:mbedtls_pk_write_key_pem	48	static

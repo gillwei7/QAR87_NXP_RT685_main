@@ -1,0 +1,4 @@
+../mbedtls/library/pkcs5.c:276:5:mbedtls_pkcs5_pbkdf2_hmac	192	static
+../mbedtls/library/pkcs5.c:124:5:mbedtls_pkcs5_pbes2_ext	264	static
+../mbedtls/library/pkcs5.c:109:5:mbedtls_pkcs5_pbes2	48	static
+../mbedtls/library/pkcs5.c:432:5:mbedtls_pkcs5_self_test	152	static

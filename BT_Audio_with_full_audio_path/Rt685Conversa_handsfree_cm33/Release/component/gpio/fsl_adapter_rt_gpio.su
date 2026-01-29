@@ -1,0 +1,14 @@
+../component/gpio/fsl_adapter_rt_gpio.c:57:13:HAL_GpioInterruptHandle	24	static
+../component/gpio/fsl_adapter_rt_gpio.c:92:6:GPIO_INTA_DriverIRQHandler	0	static
+../component/gpio/fsl_adapter_rt_gpio.c:99:6:GPIO_INTB_DriverIRQHandler	0	static
+../component/gpio/fsl_adapter_rt_gpio.c:179:6:HAL_GpioPreInit	0	static
+../component/gpio/fsl_adapter_rt_gpio.c:185:19:HAL_GpioInit	56	static
+../component/gpio/fsl_adapter_rt_gpio.c:258:19:HAL_GpioDeinit	8	static
+../component/gpio/fsl_adapter_rt_gpio.c:275:19:HAL_GpioGetInput	0	static
+../component/gpio/fsl_adapter_rt_gpio.c:288:19:HAL_GpioSetOutput	0	static
+../component/gpio/fsl_adapter_rt_gpio.c:301:19:HAL_GpioInstallCallback	0	static
+../component/gpio/fsl_adapter_rt_gpio.c:317:19:HAL_GpioGetTriggerMode	0	static
+../component/gpio/fsl_adapter_rt_gpio.c:334:19:HAL_GpioSetTriggerMode	16	static
+../component/gpio/fsl_adapter_rt_gpio.c:395:19:HAL_GpioWakeUpSetting	0	static
+../component/gpio/fsl_adapter_rt_gpio.c:410:19:HAL_GpioEnterLowpower	0	static
+../component/gpio/fsl_adapter_rt_gpio.c:417:19:HAL_GpioExitLowpower	0	static

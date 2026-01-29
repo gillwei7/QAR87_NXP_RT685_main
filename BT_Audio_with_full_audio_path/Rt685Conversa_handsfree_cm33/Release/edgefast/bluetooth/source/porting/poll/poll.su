@@ -1,0 +1,8 @@
+../edgefast/bluetooth/source/porting/poll/poll.c:478:13:slist_scan_callback	8	static
+../edgefast/bluetooth/source/porting/poll/poll.c:43:13:poll_event_update	16	static
+../edgefast/bluetooth/source/porting/poll/poll.c:83:6:k_poll_event_init	0	static
+../edgefast/bluetooth/source/porting/poll/poll.c:365:5:k_poll	48	static
+../edgefast/bluetooth/source/porting/poll/poll.c:436:6:k_poll_signal_init	8	static
+../edgefast/bluetooth/source/porting/poll/poll.c:451:6:k_poll_signal_reset	0	static
+../edgefast/bluetooth/source/porting/poll/poll.c:468:6:k_poll_signal_check	0	static
+../edgefast/bluetooth/source/porting/poll/poll.c:526:5:k_poll_signal_raise	8	static

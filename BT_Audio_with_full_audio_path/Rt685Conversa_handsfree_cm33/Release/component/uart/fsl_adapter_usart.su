@@ -1,0 +1,15 @@
+../component/uart/fsl_adapter_usart.c:266:13:HAL_UartInterruptHandle_Wrapper	24	static
+../component/uart/fsl_adapter_usart.c:329:19:HAL_UartInit	40	static
+../component/uart/fsl_adapter_usart.c:367:19:HAL_UartDeinit	8	static
+../component/uart/fsl_adapter_usart.c:380:19:HAL_UartReceiveBlocking	8	static
+../component/uart/fsl_adapter_usart.c:402:19:HAL_UartSendBlocking	8	static
+../component/uart/fsl_adapter_usart.c:423:19:HAL_UartEnterLowpower	0	static
+../component/uart/fsl_adapter_usart.c:430:19:HAL_UartExitLowpower	0	static
+../component/uart/fsl_adapter_usart.c:559:19:HAL_UartInstallCallback	0	static
+../component/uart/fsl_adapter_usart.c:576:19:HAL_UartReceiveNonBlocking	8	static
+../component/uart/fsl_adapter_usart.c:598:19:HAL_UartSendNonBlocking	8	static
+../component/uart/fsl_adapter_usart.c:619:19:HAL_UartGetReceiveCount	0	static
+../component/uart/fsl_adapter_usart.c:636:19:HAL_UartGetSendCount	0	static
+../component/uart/fsl_adapter_usart.c:653:19:HAL_UartAbortReceive	0	static
+../component/uart/fsl_adapter_usart.c:671:19:HAL_UartAbortSend	0	static
+../component/uart/fsl_adapter_usart.c:712:6:HAL_UartIsrFunction	24	static

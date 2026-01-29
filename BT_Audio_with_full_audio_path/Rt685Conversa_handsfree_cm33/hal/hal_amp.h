@@ -14,7 +14,6 @@
 #include "aw88166.h"
 
 void hal_amp_aw88166_power_on(void);
-void hal_amp_aw88166_power_off(void);
 void hal_amp_aw88166_init(void);
 /* prof_name: 1. "Music", 2. "Receiver"(Be used in phone call) */
 void hal_amp_aw88166_left_start(char *prof_name);

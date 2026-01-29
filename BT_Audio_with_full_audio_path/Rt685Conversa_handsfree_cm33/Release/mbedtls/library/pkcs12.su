@@ -1,0 +1,4 @@
+../mbedtls/library/pkcs12.c:122:5:mbedtls_pkcs12_pbe_sha1_rc4_128	0	static
+../mbedtls/library/pkcs12.c:317:5:mbedtls_pkcs12_derivation	664	static
+../mbedtls/library/pkcs12.c:189:5:mbedtls_pkcs12_pbe_ext	408	static
+../mbedtls/library/pkcs12.c:172:5:mbedtls_pkcs12_pbe	56	static

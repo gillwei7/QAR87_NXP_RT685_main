@@ -1,0 +1,6 @@
+../mbedtls/library/x509_crl.c:675:6:mbedtls_x509_crl_free.part.0	24	static
+../mbedtls/library/x509_crl.c:282:5:mbedtls_x509_crl_parse_der	96	static
+../mbedtls/library/x509_crl.c:504:5:mbedtls_x509_crl_parse	56	static
+../mbedtls/library/x509_crl.c:593:5:mbedtls_x509_crl_info	64	static
+../mbedtls/library/x509_crl.c:667:6:mbedtls_x509_crl_init	0	static
+../mbedtls/library/x509_crl.c:675:6:mbedtls_x509_crl_free	0	static

@@ -1,0 +1,8 @@
+../bt_ble/port/pal/mcux/bluetooth/fw_loader_uart.c:1166:17:fw_upload_uartReadFrame	24	static
+../bt_ble/port/pal/mcux/bluetooth/fw_loader_uart.c:1976:22:fw_upload_sendBuffer	56	static
+../bt_ble/port/pal/mcux/bluetooth/fw_loader_uart.c:1306:21:fw_upload_wait4HdrFrame.constprop	32	static
+../bt_ble/port/pal/mcux/bluetooth/fw_loader_uart.c:1773:21:fw_upload_wait4Req	16	static
+../bt_ble/port/pal/mcux/bluetooth/fw_loader_uart.c:2977:31:uart_fw_download_prep	40	static
+../bt_ble/port/pal/mcux/bluetooth/fw_loader_uart.c:3055:31:uart_fw_download	280	static
+../bt_ble/port/pal/mcux/bluetooth/fw_loader_uart.c:760:7:uart_init_interface	16	static
+../bt_ble/port/pal/mcux/bluetooth/fw_loader_uart.c:3021:6:wakeUpControllerFromBootSleep	0	static

@@ -1,0 +1,3 @@
+../device/system_MIMXRT685S_cm33.c:145:6:SystemCoreClockUpdate	24	static
+../device/system_MIMXRT685S_cm33.c:222:29:SystemInitHook	0	static
+../device/system_MIMXRT685S_cm33.c:99:29:SystemInit	8	static

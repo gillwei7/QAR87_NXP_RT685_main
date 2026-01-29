@@ -45,6 +45,9 @@
 
 
 //tuning parameter file
+//#include "conversaParam7_6_0_q1bcMic034_Fb128_16kHz.h" //conversaParam7_6_0_q1bcMic034_Fb128_16kHz
+//#include "conversaParam7_5_0_q2bcMic034_Fb128_fbfFront_16kHz.h" //conversaParam7_5_0_q2bcMic034_Fb128_fbfFront_16kHz
+
 #include "conversaParam7_5_0_q3abcMic034_FBF_16kHz.h"	//conversaParam7_5_0_q3abcMic_Fbf_16kHz
 #include "conversaParam7_5_0_q3abcMic034_NBF_16kHz.h"	//conversaParam7_5_0_q3abcMic_Talker_16kHz
 
@@ -190,21 +193,21 @@ void initSetConversaInstParam(nxp_conversa_plugin_t *p_conversaPluginParams, Con
 	switch(Cfg)
 	{
 		case (int)ConversaTuningCfg_HfpVoiceCall:
-				p_conversaPluginConfig->num_mics    = 4;
-				p_conversaPluginConfig->num_mics_bf = 4;
-				p_conversaPluginConfig->create_bf   = CONVERSA_BF_MODE_ADAPTIVE_OR_FIX;
+				p_conversaPluginConfig->num_mics    = 4;//3;
+				p_conversaPluginConfig->num_mics_bf = 4;//3;
+				p_conversaPluginConfig->create_bf   = CONVERSA_BF_MODE_ADAPTIVE; //CONVERSA_BF_MODE_ADAPTIVE_OR_FIX;
 				WhichConversaOutToFeedToVit         =CONVERSA_OutSignalIdx_BfOut;
 				break;
 		case (int)ConversaTuningCfg_NearEnd:
 				p_conversaPluginConfig->num_mics    = 4;
 				p_conversaPluginConfig->num_mics_bf = 4;
-				p_conversaPluginConfig->create_bf 	= CONVERSA_BF_MODE_ADAPTIVE_OR_FIX;		// Conversa beam former mode (select adaptive + fix steering available)
+				p_conversaPluginConfig->create_bf 	= CONVERSA_BF_MODE_ADAPTIVE; //CONVERSA_BF_MODE_ADAPTIVE_OR_FIX;		// Conversa beam former mode (select adaptive + fix steering available)
 				WhichConversaOutToFeedToVit         =CONVERSA_OutSignalIdx_BfOut;
 				break;
 		case (int)ConversaTuningCfg_FarEnd:
 				p_conversaPluginConfig->num_mics    = 4;
 				p_conversaPluginConfig->num_mics_bf = 4;
-				p_conversaPluginConfig->create_bf 	= CONVERSA_BF_MODE_ADAPTIVE_OR_FIX;		// Conversa beam former mode (select adaptive + fix steering available)
+				p_conversaPluginConfig->create_bf 	= CONVERSA_BF_MODE_ADAPTIVE; //CONVERSA_BF_MODE_ADAPTIVE_OR_FIX;		// Conversa beam former mode (select adaptive + fix steering available)
 				WhichConversaOutToFeedToVit         =CONVERSA_OutSignalIdx_BfOut;
 				break;
 		case (int)ConversaTuningCfg_AdaptiveMode:
@@ -452,18 +455,23 @@ void InitConversa(ConversaTuningCfg_t TuningCfg, int NeedToPrintInfo)
 	{
 		case (int)ConversaTuningCfg_HfpVoiceCall:
 			p_address=&conversaParam7_5_0_q3abcMic_Talker_16kHz;
+			//p_address=&conversaParam7_5_0_q3abcMic_Fbf_16kHz;
 			break;
 		case (int)ConversaTuningCfg_NearEnd:
 			p_address=&conversaParam7_5_0_q3abcMic_Talker_16kHz;
-		break;
+			//p_address=&conversaParam7_5_0_q3abcMic_Fbf_16kHz;
+			break;
 		case (int)ConversaTuningCfg_FarEnd:
 			p_address=&conversaParam7_5_0_q3abcMic_Fbf_16kHz;
 			break;
 		case (int)ConversaTuningCfg_AdaptiveMode:
 			p_address=&conversaParam7_5_0_q3abcMic_Talker_16kHz;
+			//p_address=&conversaParam7_5_0_q3abcMic_Fbf_16kHz;
 			break;
 		default:
 			p_address=&conversaParam7_5_0_q3abcMic_Talker_16kHz;
+			//p_address=&conversaParam7_5_0_q3abcMic_Fbf_16kHz;
+			//p_address=&conversaParam7_6_0_q1bcMic034_Fb128_16kHz;
 			break;
 	}
 
@@ -699,15 +707,16 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 			*	CH2 = right
 			*	CH3 = middle of right
 			*/
-			pp_inputAudioData_Tx_FLT[0]=(float *)Ptr_Mic5; //nose,
-			pp_inputAudioData_Tx_FLT[1]=(float *)Ptr_Mic4; //left,
-			pp_inputAudioData_Tx_FLT[2]=(float *)Ptr_Mic6; //right,
-			pp_inputAudioData_Tx_FLT[3]=(float *)Ptr_Mic7; //middle of right
+			pp_inputAudioData_Tx_FLT[0]=(float *)Ptr_Mic4; //nose,
+			pp_inputAudioData_Tx_FLT[1]=(float *)Ptr_Mic6; //left,
+			pp_inputAudioData_Tx_FLT[2]=(float *)Ptr_Mic7; //right,
+			pp_inputAudioData_Tx_FLT[3]=(float *)Ptr_Mic5; //middle of right
 
 			//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
 			if((PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg==ConversaTuningCfg_NoChange)&&(ConversaIsNowBeingUsed))
 			{
 				ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, (float *)BtRxInBuf, pp_OutputAudioSignals, RawMicSignal16BitForVitRef, 0);
+				//ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, (float *)BtRxInBuf, pp_OutputAudioSignals, RawMicSignal16BitForVitRef, 1);
 			}else
 			{
 				//bypass conversa --- simply assign the output pointers to the input pointers or zero buffer
@@ -905,16 +914,22 @@ void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord)
 		#endif
 
 		//fill USB up streaming buffer --- 8 channels, all 16KHz, 32bit
-		//#if UseUacDnAudioForConversaTuning_VoiceCall16KHz==1
+		//#if UseUacDnAudioForConversaTuning_VoiceCall16KHz!=1
 		#if 1
 			for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
 			{
-				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=ConversaTxOut32BitBuf[i];
-				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=AecOut32BitBuf[i];
+				//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=ConversaTxOut32BitBuf[i];
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=PtrVarBlockSharedByDspAndMcu->I2SBufOtToAmpL[i]<<16;
+				//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=AecOut32BitBuf[i];
 				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=BfOut32BitBuf[i];
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=PtrVarBlockSharedByDspAndMcu->I2SBufOtToAmpR[i]<<16;
 				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=NlpOut32BitBuf[i];
-				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=RawMic32BitBuf0[i];
-				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=RawMic32BitBuf1[i];
+
+				//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=0;//BfOut32BitBuf[i];
+				//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=0;//BfOut32BitBuf[i];
+
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=RawMic32BitBuf1[i];
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=RawMic32BitBuf0[i];
 				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=RawMic32BitBuf2[i];
 				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=RawMic32BitBuf3[i];
 			}

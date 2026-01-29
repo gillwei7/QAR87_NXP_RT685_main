@@ -23,10 +23,6 @@
 
 #include "app_handsfree.h"
 
-#if UsingQAR87Board == 1
-#include "hal_common.h"
-#endif
-
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -107,7 +103,7 @@ ToNvt: fc5 toNvt, fc6 FrNvt  (fc5 clk share to fc6), fc5 is master, NVT is slave
 
 /*
 
-know bug:
+know bug 1:
 
 play a2dp
 make a tel incoming call.
@@ -123,4 +119,8 @@ in bt music playing, say hey quanta, and immediately start a wechat call --> cra
 known issue 3 --- not sure:
 Using_UART2ToPrint Using_UART5ToPrint (either in mcu setting or dsp setting) set to 1 may cause a2dp play unstable --- crash in 5~20 minutes ???
 
+
+
 */
+
+

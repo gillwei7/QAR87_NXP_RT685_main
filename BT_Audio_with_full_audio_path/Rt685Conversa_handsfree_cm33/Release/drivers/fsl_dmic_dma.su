@@ -1,0 +1,6 @@
+../drivers/fsl_dmic_dma.c:38:13:DMIC_TransferReceiveDMACallback	4	static
+../drivers/fsl_dmic_dma.c:69:6:DMIC_InstallDMADescriptorMemory	0	static
+../drivers/fsl_dmic_dma.c:85:10:DMIC_TransferCreateHandleDMA	24	static
+../drivers/fsl_dmic_dma.c:121:10:DMIC_TransferReceiveDMA	104	static
+../drivers/fsl_dmic_dma.c:229:6:DMIC_TransferAbortReceiveDMA	8	static
+../drivers/fsl_dmic_dma.c:251:10:DMIC_TransferGetReceiveCountDMA	16	static

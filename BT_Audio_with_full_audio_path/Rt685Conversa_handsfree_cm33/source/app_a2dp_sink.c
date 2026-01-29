@@ -40,11 +40,6 @@
 #include "CircularBuf.h"
 #include "SubFunc.h"
 
-#if UsingQAR87Board == 1
-#include "system_status.h"
-
-#endif
-
 #if 1
 
 #define A2DP_CLASS_OF_DEVICE (0x200404U)
@@ -336,11 +331,11 @@ test						CurrentStreamSbc_srcClock_Hz = BOARD_SwitchAudioFreq(CurrentStreamSbc_
 
         //g_audioInit = 1;
 
-		cmd_init_ct();
+		//cmd_init_ct();//B36932 move to app_dcc.c line 126
 		//ClearAudioCirBuf(0,0,1);			//???
-        // TODO gill avrcp not connect so far
+
 		/*AVRCP Profile level connection*/
-		avrcp_control_connect(conn_rider_phone);
+		//avrcp_control_connect(conn_rider_phone);//B36932 move to app_handsfree.c line 177
         PRINTF("sbc_configured done, Fs: %d\r\n",CurrentStreamSbc_sampleRate_Hz);	//seems to be always 44100Hz Fs
 	}
 	else
@@ -358,9 +353,6 @@ void sbc_deinit()
 		(void)BOARD_SwitchAudioFreq(0U);
 	#endif
     RequestToGetOutofA2dpPlay=1;
-    set_music_status(COMPONENT_OFF);
-//    ss_set_state(USAGE_STATE_HOME);
-
 	PRINTF("sbc_deinit done\r\n");
 }
 void sbc_deconfigured(int err)
@@ -378,8 +370,6 @@ void sbc_deconfigured(int err)
 		#endif
         g_audioInit=0;
 		RequestToGetOutofA2dpPlay=1;
-	    set_music_status(COMPONENT_OFF);
-//		ss_set_state(USAGE_STATE_HOME);
     	PRINTF("sbc_deconfigured done\r\n");
 	}
 	else
@@ -412,8 +402,7 @@ void sbc_stop_play(int err)
 			//HAL_AudioTransferAbortSend((hal_audio_handle_t)&audio_tx_handle[0]);
 		#endif
 	    RequestToGetOutofA2dpPlay=1;
-	    set_music_status(COMPONENT_OFF);
-//	    ss_set_state(USAGE_STATE_HOME);
+
 		PRINTF("sbc_stop_play done\r\n");
 	}
 	else
@@ -440,7 +429,7 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 			//xfer.data           = data;
 
 
-			//DbgPin6Up();DbgPin5Up();
+//			DbgPin6Up();DbgPin5Up();
 			SEMA42_Lock(APP_SEMA42, SEMA42_GATE1, domainId);
 				int FreeAod;
 				FreeAod=CirAudioBuf_SpaceAvailableInSamples_S8((volatile T_CircularAudioBuf_S8 *)&VarBlockSharedByDspAndMcu.CirBuf_SbcRaw);
@@ -470,23 +459,18 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 					//PRINTF("f\r\n");
 				}
 
-				//PRINTF("BT Sbc buf: %d\r\n", CirBuf_SbcRaw_LengthInBytes-FreeAod);
+//				PRINTF("BT Sbc buf: %d\r\n", CirBuf_SbcRaw_LengthInBytes-FreeAod);
 			SEMA42_Unlock(APP_SEMA42, SEMA42_GATE1);
-			//DbgPin6Dn();DbgPin5Dn();
-			// Get into MusicPlayer State Only when current state is HomeVitStandby
-			//if(DeviceWorkStateCur!=WorkState_MusicPlayer)
-			if(DeviceWorkStateCur==WorkState_HomeVitStandby || DeviceWorkStateCur==WorkState_Menu || DeviceWorkStateCur==WorkState_About)
+//			DbgPin6Dn();DbgPin5Dn();
+
+			if(DeviceWorkStateCur!=WorkState_MusicPlayer)
 			{
 				//request to get into WorkState_MusicPlayer after SBC buffer is half full
 				//if(CirAudioBuf_GetUsagePercentage_S8((T_CircularAudioBuf_S8 *)&VarBlockSharedByDspAndMcu.CirBuf_SbcRaw)>60)
 				if(FreeAod<CirBuf_SbcRaw_LengthInBytes*1/2)
 				{
-					// Get into
 					//this is 3/4 full
 					RequestToGetIntoA2dpPlay=1;
-				    set_music_status(COMPONENT_ON);
-
-//					ss_set_state(USAGE_STATE_MUSIC_PLAYER);
 					//VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 					//VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
 				}

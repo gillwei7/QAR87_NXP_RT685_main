@@ -1,0 +1,2 @@
+../component/pmic/glf70583/glf70583.c:11:11:glf70583_i2c_write	24	static
+../component/pmic/glf70583/glf70583.c:25:11:glf70583_i2c_read	24	static

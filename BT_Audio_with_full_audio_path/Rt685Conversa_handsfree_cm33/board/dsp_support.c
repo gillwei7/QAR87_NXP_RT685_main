@@ -65,7 +65,6 @@ void BOARD_DSP_Init(void)
 #endif
 #endif
 #endif
-
 #if UsingQAR87Board == 1
 	//initial PMIC for DSP
 	// to do ....

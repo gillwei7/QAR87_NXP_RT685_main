@@ -1,0 +1,12 @@
+../source/app_a2dp_sink.c:358:6:sbc_deconfigured	4	static
+../source/app_a2dp_sink.c:380:6:sbc_start_play	0	static
+../source/app_a2dp_sink.c:393:6:sbc_stop_play	4	static
+../source/app_a2dp_sink.c:285:6:sbc_configured	16	static
+../source/app_a2dp_sink.c:413:6:sbc_streamer_data	16	static
+../source/app_a2dp_sink.c:78:16:app_sdp_a2dp_source_user	24	static
+../source/app_a2dp_sink.c:180:6:a2dp_sink_register_service	0	static
+../source/app_a2dp_sink.c:186:6:app_audio_streamer_task_signal	16	static
+../source/app_a2dp_sink.c:226:9:app_get_snk_a2dp_status	0	static
+../source/app_a2dp_sink.c:346:6:sbc_deinit	8	static
+../source/app_a2dp_sink.c:507:6:sdp_discover_for_a2dp_source	8	static
+../source/app_a2dp_sink.c:521:6:a2dp_sink_ready	16	static

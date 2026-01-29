@@ -44,7 +44,7 @@ static const uint32_t powerFullDspFreqLevel[2][5] = {
 #else
 const uint32_t powerFullDspFreqLevel[2][5] = {
 #endif
-    /* For part 0C - 85C */
+	/* For part 0C - 85C */
     {600U * MEGA, 480U * MEGA, 300U * MEGA, 195U * MEGA, 70U * MEGA},
     /* For part -20C - 85C */
     {550U * MEGA, 440U * MEGA, 285U * MEGA, 170U * MEGA, 55U * MEGA}};

@@ -1,0 +1,2 @@
+../source/app_discover.c:32:6:app_discover	16	static
+../source/app_discover.c:52:10:app_get_addr	8	static

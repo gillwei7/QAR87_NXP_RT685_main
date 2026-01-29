@@ -2224,12 +2224,12 @@ static API_RESULT ethermind_a2dp_notify_cb
                 timestamp |= *(data + 7);
 
                 offset = 12U;
-#if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
-                if (ep_state->cp_header_len > 0U) {
-                    /* todo: the decrypt may be need in furture. */
-                    offset += ep_state->cp_header_len;
-                }
-#endif
+				#if ((defined(CONFIG_BT_A2DP_CP_SERVICE)) && (CONFIG_BT_A2DP_CP_SERVICE > 0U))
+				    if (ep_state->cp_header_len > 0U) {
+				        /* todo: the decrypt may be need in furture. */
+				        offset += ep_state->cp_header_len;
+				    }
+				#endif
                 /**
                  * Add SBC media frames to JPL.
                  *

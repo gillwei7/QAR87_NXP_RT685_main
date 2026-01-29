@@ -1,0 +1,9 @@
+../edgefast/bluetooth/source/porting/ring_buffer.c:18:10:ring_buf_put_claim	12	static
+../edgefast/bluetooth/source/porting/ring_buffer.c:42:5:ring_buf_put_finish	0	static
+../edgefast/bluetooth/source/porting/ring_buffer.c:63:10:ring_buf_put	24	static
+../edgefast/bluetooth/source/porting/ring_buffer.c:85:10:ring_buf_get_claim	12	static
+../edgefast/bluetooth/source/porting/ring_buffer.c:109:5:ring_buf_get_finish	0	static
+../edgefast/bluetooth/source/porting/ring_buffer.c:130:10:ring_buf_get	24	static
+../edgefast/bluetooth/source/porting/ring_buffer.c:154:10:ring_buf_peek	24	static
+../edgefast/bluetooth/source/porting/ring_buffer.c:192:5:ring_buf_item_put	32	static
+../edgefast/bluetooth/source/porting/ring_buffer.c:231:5:ring_buf_item_get	24	static

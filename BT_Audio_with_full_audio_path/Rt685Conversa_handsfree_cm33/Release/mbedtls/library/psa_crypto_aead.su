@@ -1,0 +1,2 @@
+../mbedtls/library/psa_crypto_aead.c:164:14:mbedtls_psa_aead_encrypt	472	static
+../mbedtls/library/psa_crypto_aead.c:284:14:mbedtls_psa_aead_decrypt	472	static

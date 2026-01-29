@@ -1,0 +1,10 @@
+../codec/port/wm8904/fsl_codec_wm8904_adapter.c:79:10:HAL_CODEC_WM8904_Init	0	static
+../codec/port/wm8904/fsl_codec_wm8904_adapter.c:100:10:HAL_CODEC_WM8904_Deinit	0	static
+../codec/port/wm8904/fsl_codec_wm8904_adapter.c:116:10:HAL_CODEC_WM8904_SetFormat	0	static
+../codec/port/wm8904/fsl_codec_wm8904_adapter.c:139:10:HAL_CODEC_WM8904_SetVolume	16	static
+../codec/port/wm8904/fsl_codec_wm8904_adapter.c:193:10:HAL_CODEC_WM8904_SetMute	0	static
+../codec/port/wm8904/fsl_codec_wm8904_adapter.c:209:10:HAL_CODEC_WM8904_SetPower	0	static
+../codec/port/wm8904/fsl_codec_wm8904_adapter.c:233:10:HAL_CODEC_WM8904_SetRecord	0	static
+../codec/port/wm8904/fsl_codec_wm8904_adapter.c:259:10:HAL_CODEC_WM8904_SetRecordChannel	0	static
+../codec/port/wm8904/fsl_codec_wm8904_adapter.c:275:10:HAL_CODEC_WM8904_SetPlay	0	static
+../codec/port/wm8904/fsl_codec_wm8904_adapter.c:292:10:HAL_CODEC_WM8904_ModuleControl	0	static

@@ -1,0 +1,5 @@
+../source/UsbApp.c:384:14:USB_DeviceCallback	16	static
+../source/UsbApp.c:306:6:USB_IRQHandler	8	static
+../source/UsbApp.c:313:6:USB_DeviceClockInit	16	static
+../source/UsbApp.c:364:6:USB_DeviceIsrEnable	0	static
+../source/UsbApp.c:542:6:UsbAppInit	8	static

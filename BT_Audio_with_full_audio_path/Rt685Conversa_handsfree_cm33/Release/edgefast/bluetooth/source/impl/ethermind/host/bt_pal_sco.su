@@ -1,0 +1,8 @@
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:37:5:bt_sco_server_register	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:63:5:bt_sco_server_unregister	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:79:6:bt_sco_connected	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:104:6:bt_sco_disconnected	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:201:6:bt_sco_chan_set_state	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:284:9:bt_esco_conn_req	40	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:322:6:bt_sco_cleanup_acl	8	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_sco.c:364:17:bt_conn_create_sco	32	static

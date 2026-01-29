@@ -1,0 +1,10 @@
+../codec/fsl_codec_common.c:32:10:CODEC_Init	0	static
+../codec/fsl_codec_common.c:48:10:CODEC_Deinit	0	static
+../codec/fsl_codec_common.c:64:10:CODEC_SetFormat	0	static
+../codec/fsl_codec_common.c:84:10:CODEC_ModuleControl	0	static
+../codec/fsl_codec_common.c:112:10:CODEC_SetVolume	0	static
+../codec/fsl_codec_common.c:135:10:CODEC_SetMute	0	static
+../codec/fsl_codec_common.c:157:10:CODEC_SetPower	0	static
+../codec/fsl_codec_common.c:179:10:CODEC_SetRecord	0	static
+../codec/fsl_codec_common.c:204:10:CODEC_SetRecordChannel	8	static
+../codec/fsl_codec_common.c:231:10:CODEC_SetPlay	0	static

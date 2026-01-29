@@ -1,0 +1,10 @@
+../source/virtual_com.c:326:14:USB_DeviceCdcVcomSetConfigure	8	static
+../source/virtual_com.c:352:14:USB_DeviceCdcVcomInit	32	static
+../source/virtual_com.c:360:10:InvertU32	0	static
+../source/virtual_com.c:370:6:crc32	4	static
+../source/virtual_com.c:382:6:InitCrc32	24	static
+../source/virtual_com.c:394:6:ResetCrc32Seed	0	static
+../source/virtual_com.c:398:6:Init_CrcEngine	24	static
+../source/virtual_com.c:415:6:USB_DeviceCdcVcomTask_ConnectTuningTool	40	static
+../source/virtual_com.c:96:14:USB_DeviceCdcVcomCallback	16	static
+../source/virtual_com.c:629:6:USB_DeviceCdcVcomTask	0	static

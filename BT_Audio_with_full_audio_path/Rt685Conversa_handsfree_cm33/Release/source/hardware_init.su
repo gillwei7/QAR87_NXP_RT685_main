@@ -1,0 +1,8 @@
+../source/hardware_init.c:248:9:APP_GetMCoreDomainID	0	static
+../source/hardware_init.c:274:6:InitAudioPLLForAllAudioPeripherals	8	static
+../source/hardware_init.c:282:6:InitBaseAudioClkForPdm	8	static
+../source/hardware_init.c:323:6:SetFcClkSharing	4	static
+../source/hardware_init.c:332:10:BOARD_SwitchAudioFreq	16	static
+../source/hardware_init.c:537:6:BOARD_I3C_ReleaseBus	8	static
+../source/hardware_init.c:587:6:BOARD_InitHardware	48	static
+../source/hardware_init.c:778:5:controller_hci_uart_get_configuration	16	static

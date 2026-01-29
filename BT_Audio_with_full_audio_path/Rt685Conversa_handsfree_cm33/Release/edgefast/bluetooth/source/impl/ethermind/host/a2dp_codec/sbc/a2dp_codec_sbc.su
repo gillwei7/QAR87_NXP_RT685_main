@@ -1,0 +1,4 @@
+../edgefast/bluetooth/source/impl/ethermind/host/a2dp_codec/sbc/a2dp_codec_sbc.c:26:9:bt_a2dp_sbc_get_subband_num	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/a2dp_codec/sbc/a2dp_codec_sbc.c:39:9:bt_a2dp_sbc_get_block_length	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/a2dp_codec/sbc/a2dp_codec_sbc.c:56:9:bt_a2dp_sbc_get_channel_num	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/a2dp_codec/sbc/a2dp_codec_sbc.c:73:10:bt_a2dp_sbc_get_sampling_frequency	0	static

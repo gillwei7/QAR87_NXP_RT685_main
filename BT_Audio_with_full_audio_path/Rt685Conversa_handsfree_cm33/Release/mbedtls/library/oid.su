@@ -1,0 +1,17 @@
+../mbedtls/library/oid.c:232:1:mbedtls_oid_get_attr_short_name	16	static
+../mbedtls/library/oid.c:284:1:mbedtls_oid_get_x509_ext_type	16	static
+../mbedtls/library/oid.c:302:1:mbedtls_oid_get_extended_key_usage	16	static
+../mbedtls/library/oid.c:315:1:mbedtls_oid_get_certificate_policies	8	static
+../mbedtls/library/oid.c:426:1:mbedtls_oid_get_sig_alg_desc	16	static
+../mbedtls/library/oid.c:431:1:mbedtls_oid_get_sig_alg	24	static
+../mbedtls/library/oid.c:438:1:mbedtls_oid_get_oid_by_sig_alg	8	static
+../mbedtls/library/oid.c:476:1:mbedtls_oid_get_pk_alg	16	static
+../mbedtls/library/oid.c:477:1:mbedtls_oid_get_oid_by_pk_alg	4	static
+../mbedtls/library/oid.c:567:1:mbedtls_oid_get_ec_grp	16	static
+../mbedtls/library/oid.c:568:1:mbedtls_oid_get_oid_by_ec_grp	4	static
+../mbedtls/library/oid.c:601:1:mbedtls_oid_get_cipher_alg	16	static
+../mbedtls/library/oid.c:676:1:mbedtls_oid_get_md_alg	16	static
+../mbedtls/library/oid.c:677:1:mbedtls_oid_get_oid_by_md	4	static
+../mbedtls/library/oid.c:726:1:mbedtls_oid_get_md_hmac	16	static
+../mbedtls/library/oid.c:758:1:mbedtls_oid_get_pkcs12_pbe_alg	24	static
+../mbedtls/library/oid.c:768:5:mbedtls_oid_get_numeric_string	40	static

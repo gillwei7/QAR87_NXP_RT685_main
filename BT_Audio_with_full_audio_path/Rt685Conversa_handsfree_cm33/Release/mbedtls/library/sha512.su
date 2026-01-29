@@ -1,0 +1,15 @@
+../mbedtls/library/sha512.c:46:6:mbedtls_sha512_init	0	static
+../mbedtls/library/sha512.c:53:6:mbedtls_sha512_free	0	static
+../mbedtls/library/sha512.c:64:6:mbedtls_sha512_clone	8	static
+../mbedtls/library/sha512.c:79:5:mbedtls_sha512_starts_ret	0	static
+../mbedtls/library/sha512.c:126:6:mbedtls_sha512_starts	0	static
+../mbedtls/library/sha512.c:182:5:mbedtls_internal_sha512_process	888	static
+../mbedtls/library/sha512.c:290:5:mbedtls_sha512_update_ret.part.0	32	static
+../mbedtls/library/sha512.c:278:6:mbedtls_sha512_process	0	static
+../mbedtls/library/sha512.c:290:5:mbedtls_sha512_update_ret	8	static
+../mbedtls/library/sha512.c:344:6:mbedtls_sha512_update	0	static
+../mbedtls/library/sha512.c:356:5:mbedtls_sha512_finish_ret	24	static
+../mbedtls/library/sha512.c:425:6:mbedtls_sha512_finish	0	static
+../mbedtls/library/sha512.c:439:5:mbedtls_sha512_ret	256	static
+../mbedtls/library/sha512.c:476:6:mbedtls_sha512	256	static
+../mbedtls/library/sha512.c:565:5:mbedtls_sha512_self_test	336	static

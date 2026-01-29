@@ -1,0 +1,17 @@
+../component/pmic/pca9420/fsl_pca9420.c:26:6:PCA9420_GetDefaultConfig	12	static
+../component/pmic/pca9420/fsl_pca9420.c:71:6:PCA9420_Init	40	static
+../component/pmic/pca9420/fsl_pca9420.c:106:6:PCA9420_GetDefaultModeConfig	0	static
+../component/pmic/pca9420/fsl_pca9420.c:131:6:PCA9420_GetRegulatorVolt	0	static
+../component/pmic/pca9420/fsl_pca9420.c:194:6:PCA9420_WriteModeConfigs	40	static
+../component/pmic/pca9420/fsl_pca9420.c:245:6:PCA9420_ReadModeConfigs	48	static
+../component/pmic/pca9420/fsl_pca9420.c:340:6:PCA9420_SwitchMode	40	static
+../component/pmic/pca9420/fsl_pca9420.c:354:6:PCA9420_GetCurrentMode	40	static
+../component/pmic/pca9420/fsl_pca9420.c:382:9:PCA9420_GetRegulatorStatus	24	static
+../component/pmic/pca9420/fsl_pca9420.c:397:6:PCA9420_FeedWatchDog	24	static
+../component/pmic/pca9420/fsl_pca9420.c:404:6:PCA9420_WriteRegs	24	static
+../component/pmic/pca9420/fsl_pca9420.c:419:6:PCA9420_ReadRegs	24	static
+../component/pmic/pca9420/fsl_pca9420.c:434:6:PCA9420_ModifyReg	48	static
+../component/pmic/pca9420/fsl_pca9420.c:456:6:PCA9420_EnableInterrupts	40	static
+../component/pmic/pca9420/fsl_pca9420.c:483:6:PCA9420_DisableInterrupts	40	static
+../component/pmic/pca9420/fsl_pca9420.c:510:10:PCA9420_GetInterruptStatus	32	static
+../component/pmic/pca9420/fsl_pca9420.c:527:6:PCA9420_ClearInterruptStatus	40	static

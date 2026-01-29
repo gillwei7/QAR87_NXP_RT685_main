@@ -1,0 +1,9 @@
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_scan.c:241:12:start_le_scan_legacy	56	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_scan.c:80:6:bt_scan_reset	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_scan.c:158:5:bt_le_scan_set_enable	48	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_scan.c:325:5:bt_le_scan_update	40	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_scan.c:1450:6:bt_hci_le_adv_report	96	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_scan.c:1535:5:bt_le_scan_start	48	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_scan.c:1629:5:bt_le_scan_stop	40	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_scan.c:1650:5:bt_le_scan_cb_register	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_scan.c:1661:6:bt_le_scan_cb_unregister	0	static

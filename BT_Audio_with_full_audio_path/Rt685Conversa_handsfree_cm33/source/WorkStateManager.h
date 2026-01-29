@@ -111,9 +111,6 @@ extern EventGroupHandle_t EvtGrpHdl_StateMangerTaskToBtStack;
 #define EnableWorkState_Translation							1
 #define EnableWorkState_AiConversation						1
 #define EnableWorkState_VideoAi								1
-#define EnableWorkState_Menu								1
-#define EnableWorkState_About								1
-#define EnableWorkState_TakePhoto							0
 										/*
 										Note:
 											HfpCall			--- always enabled
@@ -134,31 +131,24 @@ typedef enum
 	WorkState_HfpCall,
 	WorkState_HomeVitStandby,
 	WorkState_AudioIoDbg,
-	WorkState_Menu,
 	WorkState_VideoRecording,
-	WorkState_TakePhoto,
 	WorkState_MediaPlayer,
 	WorkState_MusicPlayer,
 	WorkState_Translation,
 	WorkState_AiConversation,
 	WorkState_VideoAi,
-	WorkState_About,
 
 	//-------------------------
 	WorkState_Void_Pre,
 	WorkState_HfpCall_Pre,
 	WorkState_HomeVitStandby_Pre,
 	WorkState_AudioIoDbg_Pre,
-	WorkState_Menu_Pre,
 	WorkState_VideoRecording_Pre,
-	WorkState_TakePhoto_Pre,
 	WorkState_MediaPlayer_Pre,
 	WorkState_MusicPlayer_Pre,
 	WorkState_Translation_Pre,
 	WorkState_AiConversation_Pre,
 	WorkState_VideoAi_Pre,
-	WorkState_About_Pre,
-
 
 } TDeviceWorkState;
 
@@ -178,29 +168,11 @@ extern int RequestToGetIntoHfp;
 extern int RequestToGetOutofHfp;
 extern int RequestToGetIntoA2dpPlay;
 extern int RequestToGetOutofA2dpPlay;
-extern int RequestToGetIntoVideoAI;
-extern int RequestToGetOutofVideoAI;
-extern int RequestToGetIntoTranslation;
-extern int RequestToGetOutofTranslation;
-extern int RequestToGetIntoMediaPlayer;
-extern int RequestToGetOutofMediaPlayer;
-extern int RequestToGetIntoTakePhoto;
-extern int RequestToGetOutofTakePhoto;
-extern int RequestToGetIntoVideoRecording;
-extern int RequestToGetOutofVideoRecording;
-extern int RequestToGetIntoMenu;
-extern int RequestToGetOutofMenu;
-extern int RequestToGetIntoAbout;
-extern int RequestToGetOutofAbout;
-extern int RequestToGetIntoHome;
-extern int RequestToGetOutofHome;
 
 extern void sco_audio_start(void);
 extern volatile int AllowAudioInterfaceReInit_PdmI2S;
 extern volatile int AllowAudioInterfaceReInit_Fc25;
 
 extern void Manager_Task(void *pvParameters);
-void ChangeMasterVolumeLevel15(int level16);
-void ChangeMasterVolumeLevel15_UpDown(int direction);
 
 #endif

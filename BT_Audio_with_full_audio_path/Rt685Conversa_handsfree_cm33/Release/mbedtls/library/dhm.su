@@ -1,0 +1,10 @@
+../mbedtls/library/dhm.c:103:6:mbedtls_dhm_init	0	static
+../mbedtls/library/dhm.c:112:5:mbedtls_dhm_read_params	48	static
+../mbedtls/library/dhm.c:194:5:mbedtls_dhm_make_params	72	static
+../mbedtls/library/dhm.c:249:5:mbedtls_dhm_set_group	24	static
+../mbedtls/library/dhm.c:270:5:mbedtls_dhm_read_public	8	static
+../mbedtls/library/dhm.c:291:5:mbedtls_dhm_make_public	56	static
+../mbedtls/library/dhm.c:391:5:mbedtls_dhm_calc_secret	80	static
+../mbedtls/library/dhm.c:449:6:mbedtls_dhm_free	8	static
+../mbedtls/library/dhm.c:473:5:mbedtls_dhm_parse_dhm	80	static
+../mbedtls/library/dhm.c:677:5:mbedtls_dhm_self_test	136	static

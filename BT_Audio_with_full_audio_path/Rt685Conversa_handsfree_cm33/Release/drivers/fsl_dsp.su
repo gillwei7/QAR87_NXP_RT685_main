@@ -1,0 +1,3 @@
+../drivers/fsl_dsp.c:41:6:DSP_Init	8	static
+../drivers/fsl_dsp.c:73:6:DSP_Deinit	8	static
+../drivers/fsl_dsp.c:90:6:DSP_CopyImage	12	static

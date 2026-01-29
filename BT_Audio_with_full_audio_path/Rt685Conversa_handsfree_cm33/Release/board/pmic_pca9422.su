@@ -1,0 +1,4 @@
+../board/pmic_pca9422.c:16:6:BOARD_Config_PMICModes	0	static
+../board/pmic_pca9422.c:30:6:BOARD_Config_PMICEnMode	0	static
+../board/pmic_pca9422.c:48:6:BOARD_Config_PMICRegEnable	0	static
+../board/pmic_pca9422.c:63:6:BOARD_Init_PMICConfigure	456	static

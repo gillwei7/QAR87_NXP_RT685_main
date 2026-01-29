@@ -1,0 +1,10 @@
+../drivers/fsl_gpio.c:60:6:GPIO_PortInit	0	static
+../drivers/fsl_gpio.c:97:6:GPIO_PinInit	12	static
+../drivers/fsl_gpio.c:138:6:GPIO_SetPinInterruptConfig	8	static
+../drivers/fsl_gpio.c:153:6:GPIO_PortEnableInterrupts	0	static
+../drivers/fsl_gpio.c:177:6:GPIO_PortDisableInterrupts	0	static
+../drivers/fsl_gpio.c:202:6:GPIO_PortClearInterruptFlags	0	static
+../drivers/fsl_gpio.c:226:10:GPIO_PortGetInterruptStatus	0	static
+../drivers/fsl_gpio.c:253:6:GPIO_PinEnableInterrupt	0	static
+../drivers/fsl_gpio.c:277:6:GPIO_PinDisableInterrupt	0	static
+../drivers/fsl_gpio.c:302:6:GPIO_PinClearInterruptFlag	0	static

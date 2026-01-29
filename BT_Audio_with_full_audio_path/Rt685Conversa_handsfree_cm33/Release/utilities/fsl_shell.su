@@ -1,0 +1,16 @@
+../utilities/fsl_shell.c:273:13:SHELL_WriteBuffer	40	static
+../utilities/fsl_shell.c:242:19:SHELL_SerialManagerRxCallback	0	static
+../utilities/fsl_shell.c:639:23:SHELL_ExitCommand	16	static
+../utilities/fsl_shell.c:619:23:SHELL_HelpCommand	24	static
+../utilities/fsl_shell.c:766:13:SHELL_GetHistoryCommand.part.0.constprop	32	static
+../utilities/fsl_shell.c:1053:16:SHELL_RegisterCommand	16	static
+../utilities/fsl_shell.c:1067:16:SHELL_UnregisterCommand	8	static
+../utilities/fsl_shell.c:1079:16:SHELL_Write	16	static
+../utilities/fsl_shell.c:1128:5:SHELL_Printf	20	static
+../utilities/fsl_shell.c:648:13:SHELL_ProcessCommand	296	static
+../utilities/fsl_shell.c:1173:16:SHELL_WriteSynchronization	24	static
+../utilities/fsl_shell.c:1187:5:SHELL_PrintfSynchronization	28	static
+../utilities/fsl_shell.c:1208:6:SHELL_ChangePrompt	16	static
+../utilities/fsl_shell.c:1220:6:SHELL_PrintPrompt	16	static
+../utilities/fsl_shell.c:967:16:SHELL_Init	24	static
+../utilities/fsl_shell.c:453:19:SHELL_Task	72	static

@@ -1,0 +1,16 @@
+../edgefast/bluetooth/source/porting/porting.c:64:21:RNG_GetPseudoRandomNo	40	static
+../edgefast/bluetooth/source/porting/porting.c:122:17:RNG_GetPseudoRandomData	8	static
+../edgefast/bluetooth/source/porting/porting.c:127:9:u8_to_dec	8	static
+../edgefast/bluetooth/source/porting/porting.c:155:5:char2hex	0	static
+../edgefast/bluetooth/source/porting/porting.c:174:5:hex2char	0	static
+../edgefast/bluetooth/source/porting/porting.c:187:8:bin2hex	12	static
+../edgefast/bluetooth/source/porting/porting.c:206:8:hex2bin	12	static
+../edgefast/bluetooth/source/porting/porting.c:273:6:bt_ble_porting_init	0	static
+../edgefast/bluetooth/source/porting/porting.c:290:6:bt_ble_porting_deinit	0	static
+../edgefast/bluetooth/source/porting/porting.c:301:13:bt_addr_le_str	56	static
+../edgefast/bluetooth/source/porting/porting.c:310:13:bt_hex	8	static
+../edgefast/bluetooth/source/porting/porting.c:329:13:bt_addr_str	32	static
+../edgefast/bluetooth/source/porting/porting.c:338:13:bt_uuid_str	8	static
+../edgefast/bluetooth/source/porting/porting.c:369:10:crc32_ieee	4	static
+../edgefast/bluetooth/source/porting/porting.c:378:6:vApplicationGetIdleTaskMemory	8	static
+../edgefast/bluetooth/source/porting/porting.c:409:6:vApplicationGetTimerTaskMemory	8	static

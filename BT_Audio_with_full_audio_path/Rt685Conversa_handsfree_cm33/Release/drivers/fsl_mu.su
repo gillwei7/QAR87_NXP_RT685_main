@@ -1,0 +1,6 @@
+../drivers/fsl_mu.c:68:6:MU_Init	0	static
+../drivers/fsl_mu.c:86:6:MU_Deinit	0	static
+../drivers/fsl_mu.c:102:6:MU_SendMsg	0	static
+../drivers/fsl_mu.c:124:10:MU_ReceiveMsg	0	static
+../drivers/fsl_mu.c:150:6:MU_SetFlags	0	static
+../drivers/fsl_mu.c:183:10:MU_TriggerInterrupts	0	static

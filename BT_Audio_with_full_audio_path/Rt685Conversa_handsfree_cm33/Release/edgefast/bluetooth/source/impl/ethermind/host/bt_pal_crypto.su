@@ -1,0 +1,10 @@
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_crypto.c:113:12:bt_aes_128_encrypt	64	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_crypto.c:303:5:prng_init	32	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_crypto.c:321:5:bt_rand	32	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_crypto.c:353:5:bt_encrypt_le	48	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_crypto.c:384:5:bt_encrypt_be	0	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_crypto.c:458:5:bt_aes_128_cmac_setup	128	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_crypto.c:504:5:bt_aes_128_cmac_init	16	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_crypto.c:518:5:bt_aes_128_cmac_update	48	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_crypto.c:575:5:bt_aes_128_cmac_final	48	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_crypto.c:398:5:bt_aes_128_cmac_be	120	static

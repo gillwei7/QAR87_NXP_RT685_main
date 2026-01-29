@@ -7,7 +7,6 @@
 
 
 
-#define Pi_Value		3.1415926535897932384626
 #define _Pow2_31_M1_   	2147483647
 #define _Pow2_15_M1_   	32767
 

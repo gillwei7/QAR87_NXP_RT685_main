@@ -1,0 +1,6 @@
+../hal/hal_amp.c:10:6:hal_amp_aw88166_power_on	16	static
+../hal/hal_amp.c:18:6:hal_amp_aw88166_init	8	static
+../hal/hal_amp.c:24:6:hal_amp_aw88166_left_start	0	static
+../hal/hal_amp.c:28:6:hal_amp_aw88166_right_start	0	static
+../hal/hal_amp.c:32:6:hal_amp_aw88166_left_stop	0	static
+../hal/hal_amp.c:36:6:hal_amp_aw88166_right_stop	0	static

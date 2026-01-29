@@ -86,7 +86,7 @@ void AudioProcOneFrame_Gain(TSoftGain *Gain, float *Dst, float *Src, int l)
             Gain->GainArray[i]=Gain->TargetGain*Gain->SmoothingCoefBeta + Gain->PrevGain*Gain->SmoothingCoefAlfa;
             Gain->PrevGain=Gain->GainArray[i];
         }
-        
+
         //step 2: use gain array to gain and mix
 		//vec_addf(0,0,0,10);
 		for(int i=0;i<l;i++)
@@ -114,7 +114,7 @@ void AudioProcOneFrame_Mix2To1(TSoftMixer2To1 *Mixer, float *Dst, float *Src1, f
             Mixer->PrevGainSrc1=Mixer->GainArraySrc1[i];
             Mixer->PrevGainSrc2=Mixer->GainArraySrc2[i];
         }
-        
+
         //step 2: use gain array to gain and mix
         for(int i=0;i<l;i++)
             *Dst++= *Src1++ * Mixer->GainArraySrc1[i] + *Src2++ * Mixer->GainArraySrc2[i];

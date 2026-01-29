@@ -14,9 +14,10 @@
 //B36932 #include "aw_params_music44.1k16bit_bck32fs.h"
 //#include "aw_params_music_48k_32bit_20251112.h" //B36932
 //#include "aw_params_music_48k_16bit.h"
-//#include "aw_params_music_overcompressed.h"
 //#include "aw_params_music_48k16b_receiver_16k16b.h"
 #include "AW88166_QAR88n_R_20251216_RCV mode no effect.h"
+
+
 
 
 static status_t aw_dev0_i2c_write_func(uint16_t dev_addr, uint8_t reg_addr,
@@ -57,7 +58,7 @@ static void aw_dev0_reset_gpio_ctl(bool State)
 {
 #if UsingQAR87Board == 1
     //GPIO_PinWrite(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, State ? 1U : 0U);
-    GPIO_PinWrite(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, 1U);
+	GPIO_PinWrite(GPIO, AMP_RESET_PORT, AMP_RESET_PIN, 1U);
 #endif
 }
 
@@ -101,15 +102,10 @@ void init_aw88166(void){
 	PRINTF("[AMP][init_aw88166] \r\n");
 
 	ret = aw883xx_smartpa_init((void *)&init_info[AW_DEV_0]);
-	if(ret==0)
-		PRINTF("[AMP][init_aw88166]aw883xx_smartpa_init 0x34 OK \r\n");
-	else
-		PRINTF("[AMP][init_aw88166]aw883xx_smartpa_init error:%d \r\n",ret);
-
-	ret= aw883xx_smartpa_init((void *)&init_info[AW_DEV_1]);
+	ret+= aw883xx_smartpa_init((void *)&init_info[AW_DEV_1]);
 
 	if(ret==0)
-		PRINTF("[AMP][init_aw88166]aw883xx_smartpa_init 0x35 OK \r\n");
+		PRINTF("[AMP][init_aw88166]aw883xx_smartpa_init OK \r\n");
 	else
 		PRINTF("[AMP][init_aw88166]aw883xx_smartpa_init error:%d \r\n",ret);
 }

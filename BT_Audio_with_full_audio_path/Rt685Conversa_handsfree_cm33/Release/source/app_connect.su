@@ -1,0 +1,16 @@
+../source/app_connect.c:177:13:disconnected	8	static
+../source/app_connect.c:206:13:security_changed	128	static
+../source/app_connect.c:129:13:connected	56	static
+../source/app_connect.c:76:6:app_hf_set_connectable	8	static
+../source/app_connect.c:103:6:sdp_discover_for_hfp_hf	8	static
+../source/app_connect.c:260:6:app_connect	24	static
+../source/app_connect.c:300:6:app_disconnect	8	static
+../source/app_connect.c:313:6:app_auto_connect_paired_devices	0	static
+../source/app_connect.c:323:6:app_connect_init	0	static
+../source/app_connect.c:330:5:app_read_paired_devices	136	static
+../source/app_connect.c:384:6:app_lfs_init	8	static
+../source/app_connect.c:397:5:app_save_paired_device	128	static
+../source/app_connect.c:460:5:app_save_paired_devices	104	static
+../source/app_connect.c:502:5:app_clear_paired_devices	16	static
+../source/app_connect.c:564:5:app_auto_connect_save_addr	16	static
+../source/app_connect.c:607:6:app_a2dp_hf_auto_connect	16	static

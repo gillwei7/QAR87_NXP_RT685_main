@@ -1,0 +1,2 @@
+../bt_ble/port/pal/mcux/bluetooth/controller/controller_wifi_nxp.c:129:17:controller_hci_uart_get_configuration	0	static
+../bt_ble/port/pal/mcux/bluetooth/controller/controller_wifi_nxp.c:100:6:controller_init	64	static

@@ -1,0 +1,4 @@
+../hal/hal_common.c:17:6:hal_delay_us	0	static
+../hal/hal_common.c:28:6:hal_delay_ms	0	static
+../hal/hal_common.c:32:6:hal_gpio_port_init	8	static
+../hal/hal_common.c:40:6:Scan_I2C_Devices	40	static

@@ -34,6 +34,7 @@
 #include "fsl_gpio.h"
 
 #include "GlobalDef.h"
+#include "SubFunc.h"
 
 #include "xa_type_def.h"
 #include "xa_error_standards.h"
@@ -884,14 +885,15 @@ int SbcDecodeProcess(int SbcFileIdx)
 
 	int loopTime=0;
 
+	//each time, sbc decoded samples could be 64 or 128 samples
 	if(i_samp_freq==16000)
-		loopTime=4*2;		//2*8ms=10mss, this is   > 10ms	--- calling this decoding functions is once every 10ms
+		loopTime=4*2;	//this is > 10ms, even sbc decoded sample is 64	--- calling this decoding functions is once every 10ms
 
 	if(i_samp_freq==48000)
-		loopTime=6*2;	//6*2.666ms=15.96ms, this is > 10ms	--- calling this decoding functions is once every 10ms
+		loopTime=6*2;	//this is > 10ms, even sbc decoded sample is 64	--- calling this decoding functions is once every 10ms
 
 	if(i_samp_freq==44100)
-		loopTime=5*2;	//5*2.902ms=14.51ms, this is > 10ms	--- calling this decoding functions is once every 10ms
+		loopTime=5*2;	//this is > 10ms, even sbc decoded sample is 64	--- calling this decoding functions is once every 10ms
 
 	int FreeAod_Audio;
 	int AodSbc;
@@ -1105,8 +1107,6 @@ int SbcDecodeProcess(int SbcFileIdx)
 				//fill output buffer
 				SbcAudioSamplesGeneratedPerCh=ui_nsamples/i_num_chan;
 
-
-
 				int OutSampleNum;
 				S16 *TmpSrcPtr=(S16 *)pb_out_buf;
 
@@ -1145,7 +1145,7 @@ int SbcDecodeProcess(int SbcFileIdx)
 									SrcIn_2S32Mixed[2*i+0]=((*TmpSrcPtr++)<<16);
 									SrcIn_2S32Mixed[2*i+1]=((*TmpSrcPtr++)<<16);
 									//SrcIn_2S32Mixed[2*i+0]=  0x100000*i;
-									//SrcIn_2S32Mixed[2*i+1]=0-0x100000*i;
+									//SrcIn_2S32Mixed[2*i+1]=0-0x200000*i;
 								}
 							}
 						}else
@@ -1179,7 +1179,7 @@ int SbcDecodeProcess(int SbcFileIdx)
 						S16 *TmpDstPtr=(S16 *)SrcIn_2S32Mixed;
 						for(int i=0;i<OutSampleNum;i++)
 						{
-							*TmpDstPtr++=(SrcOut_2S32Mixed[2*i+0]>>16);
+							*TmpDstPtr++=(SrcOut_2S32Mixed[2*i+0]>>16); //B36932, It may be necessary to multiply by 1.99 to restore the A2DP volume; it's uncertain whether all Bluetooth transmitters will halve the volume.
 							*TmpDstPtr++=(SrcOut_2S32Mixed[2*i+1]>>16);
 							//*TmpDstPtr++=  0x10*i;
 							//*TmpDstPtr++=0-0x10*i;

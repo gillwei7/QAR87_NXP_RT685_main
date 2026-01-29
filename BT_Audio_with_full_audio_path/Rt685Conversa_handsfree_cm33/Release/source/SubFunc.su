@@ -1,0 +1,12 @@
+../source/SubFunc.c:55:6:BlinkDbgPinNTime	32	static
+../source/SubFunc.c:91:6:InitDbgPin	24	static
+../source/SubFunc.c:144:6:delay_us	8	static
+../source/SubFunc.c:152:6:delay_ms	8	static
+../source/SubFunc.c:163:6:DelayMsByReadingCycCnt	8	static
+../source/SubFunc.c:184:6:DelayUsByReadingCycCnt	4	static
+../source/SubFunc.c:206:6:TestGetCycCnt	16	static
+../source/SubFunc.c:228:6:InitBtnEvt	0	static
+../source/SubFunc.c:236:6:GenBtnEvt	20	static
+../source/SubFunc.c:635:6:InitFirFilter	24	static
+../source/SubFunc.c:656:6:Convert48KTo16K	0	static
+../source/SubFunc.c:668:6:Test_Convert48KTo16K	536	static

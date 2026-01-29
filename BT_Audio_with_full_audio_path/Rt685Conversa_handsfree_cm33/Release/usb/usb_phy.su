@@ -1,0 +1,6 @@
+../usb/usb_phy.c:14:7:USB_EhciPhyGetBase	0	static
+../usb/usb_phy.c:75:10:USB_EhciPhyInit	4	static
+../usb/usb_phy.c:140:10:USB_EhciLowPowerPhyInit	8	static
+../usb/usb_phy.c:199:6:USB_EhciPhyDeinit	0	static
+../usb/usb_phy.c:227:6:USB_EhcihostPhyDisconnectDetectCmd	0	static
+../usb/usb_phy.c:251:6:USB_PhyDeviceForceEnterFSMode	0	static

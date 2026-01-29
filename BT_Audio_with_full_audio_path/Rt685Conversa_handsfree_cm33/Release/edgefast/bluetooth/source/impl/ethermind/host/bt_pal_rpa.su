@@ -1,0 +1,2 @@
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rpa.c:91:6:bt_rpa_irk_matches	40	static
+../edgefast/bluetooth/source/impl/ethermind/host/bt_pal_rpa.c:129:5:bt_rpa_create	0	static

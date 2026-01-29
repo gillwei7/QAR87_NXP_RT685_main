@@ -1,0 +1,17 @@
+../mbedtls/library/ctr_drbg.c:812:12:ctr_drbg_self_test_entropy	16	static
+../mbedtls/library/ctr_drbg.c:115:12:block_cipher_df	608	static
+../mbedtls/library/ctr_drbg.c:238:12:ctr_drbg_update_internal	72	static
+../mbedtls/library/ctr_drbg.c:350:12:mbedtls_ctr_drbg_reseed_internal	408	static
+../mbedtls/library/ctr_drbg.c:36:6:mbedtls_ctr_drbg_init	8	static
+../mbedtls/library/ctr_drbg.c:50:6:mbedtls_ctr_drbg_free	8	static
+../mbedtls/library/ctr_drbg.c:68:6:mbedtls_ctr_drbg_set_prediction_resistance	0	static
+../mbedtls/library/ctr_drbg.c:74:6:mbedtls_ctr_drbg_set_entropy_len	0	static
+../mbedtls/library/ctr_drbg.c:80:5:mbedtls_ctr_drbg_set_nonce_len	0	static
+../mbedtls/library/ctr_drbg.c:109:6:mbedtls_ctr_drbg_set_reseed_interval	0	static
+../mbedtls/library/ctr_drbg.c:300:5:mbedtls_ctr_drbg_update_ret	64	static
+../mbedtls/library/ctr_drbg.c:324:6:mbedtls_ctr_drbg_update	56	static
+../mbedtls/library/ctr_drbg.c:407:5:mbedtls_ctr_drbg_reseed	0	static
+../mbedtls/library/ctr_drbg.c:438:5:mbedtls_ctr_drbg_seed	56	static
+../mbedtls/library/ctr_drbg.c:504:5:mbedtls_ctr_drbg_random_with_add	96	static
+../mbedtls/library/ctr_drbg.c:583:5:mbedtls_ctr_drbg_random	16	static
+../mbedtls/library/ctr_drbg.c:833:5:mbedtls_ctr_drbg_self_test	208	static

@@ -1,0 +1,16 @@
+../drivers/fsl_dmic.c:55:10:DMIC_GetInstance	0	static
+../drivers/fsl_dmic.c:78:6:DMIC_Init	8	static
+../drivers/fsl_dmic.c:109:6:DMIC_DeInit	8	static
+../drivers/fsl_dmic.c:144:6:DMIC_SetOperationMode	0	static
+../drivers/fsl_dmic.c:169:6:DMIC_ConfigChannel	4	static
+../drivers/fsl_dmic.c:198:6:DMIC_CfgChannelDc	0	static
+../drivers/fsl_dmic.c:215:6:DMIC_Use2fs	0	static
+../drivers/fsl_dmic.c:226:6:DMIC_EnableChannnel	0	static
+../drivers/fsl_dmic.c:240:6:DMIC_FifoChannel	4	static
+../drivers/fsl_dmic.c:255:6:DMIC_ResetChannelDecimator	0	static
+../drivers/fsl_dmic.c:301:6:DMIC_EnableIntCallback	4	static
+../drivers/fsl_dmic.c:321:6:DMIC_DisableIntCallback	4	static
+../drivers/fsl_dmic.c:341:6:DMIC_HwvadEnableIntCallback	4	static
+../drivers/fsl_dmic.c:361:6:DMIC_HwvadDisableIntCallback	4	static
+../drivers/fsl_dmic.c:374:6:DMIC0_DriverIRQHandler	0	static
+../drivers/fsl_dmic.c:387:6:HWVAD0_DriverIRQHandler	0	static

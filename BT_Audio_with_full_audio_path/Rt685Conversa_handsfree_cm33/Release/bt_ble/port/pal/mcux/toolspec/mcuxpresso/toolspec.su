@@ -1,0 +1,7 @@
+../bt_ble/port/pal/mcux/toolspec/mcuxpresso/toolspec.c:28:5:_write	0	static
+../bt_ble/port/pal/mcux/toolspec/mcuxpresso/toolspec.c:37:5:_read	0	static
+../bt_ble/port/pal/mcux/toolspec/mcuxpresso/toolspec.c:46:5:_close	0	static
+../bt_ble/port/pal/mcux/toolspec/mcuxpresso/toolspec.c:54:5:_fstat	0	static
+../bt_ble/port/pal/mcux/toolspec/mcuxpresso/toolspec.c:62:5:_isatty	0	static
+../bt_ble/port/pal/mcux/toolspec/mcuxpresso/toolspec.c:70:5:_lseek	0	static
+../bt_ble/port/pal/mcux/toolspec/mcuxpresso/toolspec.c:75:6:debugHardfault	0	static

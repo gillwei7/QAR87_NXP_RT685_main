@@ -100,9 +100,9 @@
                         <key>LibrarySearchPath</key>
                         <value flag="-L" inheritance="prepend">
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/NatureDspLibary}</ListEntry>
-                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVitEap}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/hifi4_nn}</ListEntry>
                             <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/CadenceCommon}</ListEntry>
+                            <ListEntry>${workspace_loc:Rt685Conversa_handsfree_hifi4/ConversaVitEap}</ListEntry>
                         </value>
                     </StringListMapEntry>
                     <StringListMapEntry>
@@ -117,8 +117,8 @@
                     <StringListMapEntry>
                         <key>Libraries</key>
                         <value flag="-l" inheritance="prepend">
-                            <ListEntry>NXP_Conversa_RT685HiFi4</ListEntry>
                             <ListEntry>NXP_EAP16_RT685Hifi4</ListEntry>
+                            <ListEntry>NXP_Conversa_RT685HiFi4</ListEntry>
                             <ListEntry>VIT_v6.6.0_EngineeringRelease</ListEntry>
                             <ListEntry>naturedsp</ListEntry>
                             <ListEntry>xa_asrc_src_pp</ListEntry>

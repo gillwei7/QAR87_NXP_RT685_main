@@ -169,8 +169,6 @@ void print_paired_devices(void)
 void save_new_paired_device(struct bt_conn *conn, uint8_t isRiderHeadset)
 {
 	struct bt_conn_info conn_info;
-	uint8_t current_paired_device_count = 0;
-
 	if (bt_conn_get_info(conn, &conn_info) != 0)
 	{
 		PRINTF("Failed to get connection info.\n");
@@ -247,22 +245,10 @@ void save_new_paired_device(struct bt_conn *conn, uint8_t isRiderHeadset)
 	//PRINTF("Saving new paired device: Address: %02X:%02X:%02X:%02X:%02X:%02X, Name: %s, Type: %d\n",
 	//			addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], name, device_type);
 
-
-
 	#if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
 		app_save_paired_device(device_addr, name, device_type);
 	#endif
 	PRINTF("Updated Paired Devices list !!\n\n");
-
-//	//gill only keep one paired device in list
-	current_paired_device_count = g_pairedDeviceCount;
-
-	if(g_pairedDeviceCount > 1){
-		PRINTF("Delete previous paired device %d times\r\n", current_paired_device_count-1);
-		for(int i = 1;i < current_paired_device_count;i++){
-			delete_device(1);
-		}
-	}
 
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
 	app_read_paired_devices();
@@ -391,21 +377,17 @@ void connect_paired_device(uint8_t device_index)
 	}
 	//Get the correct paired device
 	uint8_t *addr = paired_devices[device_index - 1].addr;
-#if BT_CONNECTION_LOG
+
 	PRINTF("Connecting to [%d] Address: %02X:%02X:%02X:%02X:%02X:%02X, Name: %s, Type: %d\n",
 			device_index,
 			addr[0], addr[1], addr[2], addr[3], addr[4], addr[5],
 			paired_devices[device_index - 1].name, paired_devices[device_index - 1].device_type);
-#endif
+
 	//Reverse the address bytes (Little Endian → Big Endian)
 	for (int i = 0; i < 6; i++) {
 		device_addr[i] = addr[5 - i];
 	}
 
-#if 1
-	app_connect(RIDER_PHONE, device_addr);
-
-#else
 	//Call the correct connection function based on device type
 	if (paired_devices[device_index - 1].device_type == RIDER_PHONE)
 	{
@@ -423,7 +405,6 @@ void connect_paired_device(uint8_t device_index)
 	{
 		PRINTF("Failed, Invalid device type !\n");
 	}
-#endif
 }
 
 bool is_valid_device(uint8_t *addr)

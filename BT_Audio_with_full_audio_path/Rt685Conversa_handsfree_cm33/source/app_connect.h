@@ -54,9 +54,7 @@ int app_read_paired_devices();
 int app_save_paired_device(const uint8_t addr[6], const char *name, uint8_t device_type);
 int app_save_paired_devices();
 int app_clear_paired_devices();
-//int app_auto_connect_save_addr(bt_addr_t const *addr);
-void app_auto_connect_paired_devices(void);
-void app_clear_device_enter_discoverable(void);
+int app_auto_connect_save_addr(bt_addr_t const *addr);
 #endif
 
 #endif /* __APP_CONNECT_H__ */
