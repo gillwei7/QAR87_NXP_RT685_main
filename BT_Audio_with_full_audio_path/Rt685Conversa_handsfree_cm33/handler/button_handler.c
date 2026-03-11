@@ -4,7 +4,7 @@
  *  Created on: 2025年10月22日
  *      Author: 11301026
  */
-
+#if 0
 #include "button_handler.h"
 #include "i2c_component_handler.h"
 #include "spi_handler.h"
@@ -478,4 +478,4 @@ void button_task(void *pvParameters)
         } /* PowerKey EDGE */
     } /* for (;;) */
 }
-
+#endif

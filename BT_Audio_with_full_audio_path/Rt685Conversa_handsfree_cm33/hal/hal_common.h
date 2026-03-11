@@ -111,5 +111,17 @@ void hal_log_message(const int level,const char *file, const char *func, uint8_t
 // Board Init
 void hal_board_init(void);
 
+
+void i2c_device_handler (void);
+void spi_command_handler_init(void);
+void spi_command_handler(void);
+void connect_handler (void);
+void ringtone_handler (void);
+void button_init (void);
+void button_handler (void);
+
+void touch_post_event(void *param);
+void charger_post_event(void *param);
+
 #endif /* HAL_DRIVER_H_ */
 #endif

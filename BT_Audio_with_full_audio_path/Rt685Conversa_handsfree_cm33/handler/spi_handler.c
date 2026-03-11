@@ -88,6 +88,11 @@ extern volatile SystemStatus ss ;
 uint8_t Novatek_boot_completed = 0;
 extern RingtoneState general_RingtoneState;
 
+uint8_t received_value;
+passive_evt_t  passive_evt;
+QueueSetMemberHandle_t activated;
+
+
 /*******************************************************************************
  * Code
  ******************************************************************************/
@@ -194,6 +199,9 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 				PRINTF("[Passive] ACK:[11 11] Nova boot completed\r\n");
 				hal_led_refresh();
 				battery_timer_start();
+#if UsingQAR87BoardHwVersion == 0 // Dev Board
+				Novatek_boot_completed = 1;
+#endif
 				general_RingtoneState = Ringtone_PowerON;
 			}
 			break;
@@ -404,10 +412,11 @@ void SPI_SLAVE_IRQHandler(void)
  */
 static uint8_t execute_active_spi_transmission(uint8_t hex_value)
 {
+#if 0
     if (sys_bus_mutex != NULL) {
         xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
     }
-
+#endif
     PRINTF("\n--- Executing Active SPI for value: 0x%02X ---\r\n", hex_value);
 
 	uint8_t execute_active_spi_transmission_completed = kStatus_Fail;
@@ -568,10 +577,11 @@ static uint8_t execute_active_spi_transmission(uint8_t hex_value)
 		passive_evt_t evt = PASSIVE_EVT_NEED_INIT;
 		(void)xQueueSend(passive_evt_queue, &evt, 0);
 	}
-
+#if 0
     if (sys_bus_mutex != NULL) {
         xSemaphoreGive(sys_bus_mutex);
     }
+#endif
     return execute_active_spi_transmission_completed;
 }
 
@@ -692,7 +702,104 @@ void spi_handler_task(void *pvParameters)
 void send_spi_request(uint8_t hex_val)
 {
 	(void)xQueueSend(spi_request_queue, &hex_val, 0);
+
 }
 
+void spi_command_handler_init(void)
+{
+#if 0
+    if (sys_bus_mutex == NULL) {
+        sys_bus_mutex = xSemaphoreCreateMutex();
+        configASSERT(sys_bus_mutex != NULL);
+    }
+#endif
+    // 初始化 SPI frame 的 checksum
+    dataFrame1[3] = calculateChecksum(dataFrame1, 3);
+    dataFrame2[3] = calculateChecksum(dataFrame2, 3);
+
+    PRINTF("=== SPI Slave Ready ===\r\n");
+    PRINTF("GPIO is LOW: Passive mode active, waiting for Master...\r\n");
+    //PRINTF("SPI Handler Task is ready, waiting for requests from the queue.\r\n");
+    PRINTF("SPI Handler Task unified: waiting for passive/active events via QueueSet.\r\n");
 
 
+    // NEW: 確保被動事件佇列存在
+    if (passive_evt_queue == NULL) {
+        passive_evt_queue = xQueueCreate(10, sizeof(passive_evt_t));
+    }
+    // NEW: 進入被動監聽狀態（原 passive 任務起始行為）
+    vTaskDelay(pdMS_TO_TICKS(10));
+    init_passive_mode();
+
+    // NEW: 建立並加入 QueueSet（同時監聽 passive_evt_queue 與 spi_request_queue）
+    if (spi_evt_set == NULL) {
+        // 估計總同時待處理項目數（可視實際 queue 長度調整）
+        spi_evt_set = xQueueCreateSet(20);
+        configASSERT(spi_evt_set != NULL);
+    }
+    if (passive_evt_queue) {
+        xQueueAddToSet(passive_evt_queue, spi_evt_set);
+    }
+    if (spi_request_queue) {
+        xQueueAddToSet(spi_request_queue, spi_evt_set);
+    }
+
+}
+
+void spi_command_handler(void)
+{
+
+	// NEW: 以 QueueSet 同步等待兩個來源的事件
+
+	activated = xQueueSelectFromSet(spi_evt_set, pdMS_TO_TICKS(10));
+
+	if (activated == passive_evt_queue) {
+		if (xQueueReceive(passive_evt_queue, &passive_evt, 0) == pdPASS) {
+			switch (passive_evt) {
+			case PASSIVE_EVT_NEED_INIT:
+				vTaskDelay(pdMS_TO_TICKS(10));
+				if (GPIO_PinRead(GPIO, 2, 15) == 0 && operation_mode != MODE_ACTIVE) {
+					init_passive_mode();
+				}
+				break;
+			case PASSIVE_EVT_RX_DONE:
+				PRINTF("[Passive] Sequence completed. Parsing frame...\r\n");
+				handle_passive_ack_frame(passive_rx_buffer);
+				PRINTF("[Passive] Ready for next sequence.\r\n");
+				break;
+			default:
+				break;
+			}
+		}
+	} else if (activated == spi_request_queue) {
+		if (xQueueReceive(spi_request_queue, &received_value, 0) == pdPASS) {
+			//若 PASSIVE 還在忙，延後執行或重丟回 queue 等待下一輪 */
+			if (passive_mode_busy || operation_mode == MODE_PASSIVE_ACK) {
+				PRINTF("[Active] Passive ACK busy, deferring active request 0x%02X\r\n", received_value);
+				(void)xQueueSend(spi_request_queue, &received_value, 0); // 丟回去，下一輪再試
+				vTaskDelay(pdMS_TO_TICKS(10));
+				return;
+			}
+			if (is_nova_active()) {
+				PRINTF("[Active] Nova active (PIO1_10=HIGH), deferring active request 0x%02X\r\n", received_value);
+				(void)xQueueSend(spi_request_queue, &received_value, 0);
+				vTaskDelay(pdMS_TO_TICKS(10));
+				return;
+			}
+
+			for (int i = 0; i < SPI_ACTIVE_RETRY_TIME; i++) {
+				PRINTF("[Active] execute_active_spi_transmission\r\n");
+
+				if (execute_active_spi_transmission(received_value) == kStatus_Success) {
+					break;
+				}
+				vTaskDelay(pdMS_TO_TICKS(20));
+			}
+			if (received_value == POWER_LONG_PRESS_HEX_VALUE) {
+				general_RingtoneState = Ringtone_PowerOFF;
+				vTaskDelay(pdMS_TO_TICKS(200));
+				led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+			}
+		}
+	}
+}

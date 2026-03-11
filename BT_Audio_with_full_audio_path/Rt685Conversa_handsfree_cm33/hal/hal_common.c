@@ -10,6 +10,7 @@
 #include "fsl_spi.h"
 #include "board.h"
 #include "button_handler.h"
+#include "buttons_handler.h"
 #include "i2c_component_handler.h"
 #include "fsl_adapter_gpio.h"
 
@@ -90,6 +91,7 @@ static void hal_gpio_pin_init(void)
     GPIO_PinInit(GPIO, NXP_532_PWR_PMIC1_PORT, NXP_532_PWR_PMIC1_PIN, &output_low_pin_config);
     GPIO_PinInit(GPIO, AP533_RST_N_PORT, AP533_RST_N_PIN, &output_low_pin_config);
     GPIO_PinInit(GPIO, AP533_WAKEUP_N_PORT, AP533_WAKEUP_N_PIN, &output_low_pin_config);
+    GPIO_PinInit(GPIO, HS_SPI_2_RDY_PORT, HS_SPI_2_RDY_PIN, &input_pin_config);
     /* AMP GPIO */
     GPIO_PinInit(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, &output_low_pin_config);
     /* HW Config GPIO */
@@ -125,7 +127,6 @@ static void hal_gpio_interrupt_callback(void *param)
     }
     portYIELD_FROM_ISR(xHPW);
     SDK_ISR_EXIT_BARRIER;
-
 }
 
 void hal_gpio_interrupt_init(void)
@@ -166,8 +167,8 @@ void hal_gpio_interrupt_init(void)
     HAL_GpioSetTriggerMode(s_ChargerIntGpioHandle, kHAL_GpioInterruptFallingEdge);
     HAL_GpioSetTriggerMode(s_GaugeIntGpioHandle, kHAL_GpioInterruptFallingEdge);
 
-    HAL_GpioInstallCallback(s_TouchIntGpioHandle, hal_gpio_interrupt_callback, (void *)TOUCH_EVENT_BIT);
-    HAL_GpioInstallCallback(s_ChargerIntGpioHandle, hal_gpio_interrupt_callback, (void *)CHARGER_EVENT_BIT);
+    HAL_GpioInstallCallback(s_TouchIntGpioHandle, touch_post_event, (void *)TOUCH_EVENT_BIT);
+    HAL_GpioInstallCallback(s_ChargerIntGpioHandle, charger_post_event, (void *)CHARGER_EVENT_BIT);
     HAL_GpioInstallCallback(s_GaugeIntGpioHandle, hal_gpio_interrupt_callback, (void *)GAUGE_2_EVENT_BIT);
 
 }

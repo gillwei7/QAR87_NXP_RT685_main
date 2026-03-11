@@ -7,7 +7,7 @@
 
 #ifndef BUTTON_HANDLER_H_
 #define BUTTON_HANDLER_H_
-
+#if 0
 #include <stdint.h>
 #include <stdbool.h>
 #include "FreeRTOS.h"
@@ -42,5 +42,5 @@ void button_task(void *pvParameters);
 void pint_intr_callback(pint_pin_int_t pintr, uint32_t pmatch_status);
 
 bool power_key_low_for_ms(uint32_t ms) ; //for pca9422 ship mode
-
+#endif
 #endif /* BUTTON_HANDLER_H_ */
