@@ -42,7 +42,7 @@ void hal_pmic_pca9422_enter_ship_mode(void)
     BOARD_PMIC_I2C_Send(PCA9422_DEFAULT_I2C_ADDR, 0x0A, 1, &value, 1);
 }
 
-void hal_pmic_glf70583_init (uint8_t glf70583_a_i2c_addr, uint8_t glf70583_b_i2c_addr)
+static void hal_pmic_glf70583_init (uint8_t glf70583_a_i2c_addr, uint8_t glf70583_b_i2c_addr)
 {
     /*
     PMIC-1(0x25):
@@ -138,6 +138,31 @@ void hal_pmic_glf70583_init (uint8_t glf70583_a_i2c_addr, uint8_t glf70583_b_i2c
     GPIO_PinWrite(GPIO, NXP_532_PWR_PMIC1_PORT, NXP_532_PWR_PMIC1_PIN, 1); //Enable GLF70583
 }
 
+static void hal_pmic_glf70583_cutoff_nt98532_power (uint8_t glf70583_a_i2c_addr, uint8_t glf70583_b_i2c_addr)
+{
+    // 0x25: Disable All
+    glf70583_i2c_write(glf70583_a_i2c_addr, 0x26, 0x00);
+    // 0x26: Enable BT/Wi-Fi (BUCK1 and BUCK4), Disable Others
+    glf70583_i2c_write(glf70583_b_i2c_addr, 0x26, 0x90);
+}
+
+static void hal_pmic_glf70583_turn_on_nt98532_power (uint8_t glf70583_a_i2c_addr, uint8_t glf70583_b_i2c_addr)
+{
+#if UsingQAR87BoardHwVersion == 0 // Dev Board
+    // 0x25: Disable BUCK4, Enable Others
+    glf70583_i2c_write(glf70583_a_i2c_addr, 0x26, 0xEC);
+    // 0x26: Enable BUCK1, 2 and 4, Disable Others
+    glf70583_i2c_write(glf70583_b_i2c_addr, 0x26, 0xD0);
+#endif
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
+    // 0x25: Enable All
+    glf70583_i2c_write(glf70583_a_i2c_addr, 0x26, 0xFC);
+    // 0x26: Enable BUCK1, 2, 3 and 4
+    glf70583_i2c_write(glf70583_b_i2c_addr, 0x26, 0xF0);
+#endif
+
+}
+
 void hal_pmic_glf70583_actual_board_init (void)
 {
 	config_status = (uint8_t)GPIO_PinRead(GPIO, HW_CONFIG_03_PORT, HW_CONFIG_03_PIN);
@@ -151,6 +176,35 @@ void hal_pmic_glf70583_actual_board_init (void)
 		hal_pmic_glf70583_init(GLF70583_B_I2C_ADDR, GLF70583_A_I2C_ADDR);
 	}
 }
+
+void hal_pmic_glf70583_cutoff_nt98532 (void)
+{
+	config_status = (uint8_t)GPIO_PinRead(GPIO, HW_CONFIG_03_PORT, HW_CONFIG_03_PIN);
+	PRINTF("[HW] config_status: %d \r\n", config_status);
+
+	if (config_status == 0) {
+		PRINTF("[PMIC] GLF70583 correct \r\n");
+		hal_pmic_glf70583_cutoff_nt98532_power(GLF70583_A_I2C_ADDR, GLF70583_B_I2C_ADDR);
+	} else if (config_status == 1) {
+		PRINTF("[PMIC] GLF70583 reverse \r\n");
+		hal_pmic_glf70583_cutoff_nt98532_power(GLF70583_B_I2C_ADDR, GLF70583_A_I2C_ADDR);
+	}
+}
+
+void hal_pmic_glf70583_turn_on_nt98532 (void)
+{
+	config_status = (uint8_t)GPIO_PinRead(GPIO, HW_CONFIG_03_PORT, HW_CONFIG_03_PIN);
+	PRINTF("[HW] config_status: %d \r\n", config_status);
+
+	if (config_status == 0) {
+		PRINTF("[PMIC] GLF70583 correct \r\n");
+		hal_pmic_glf70583_turn_on_nt98532_power(GLF70583_A_I2C_ADDR, GLF70583_B_I2C_ADDR);
+	} else if (config_status == 1) {
+		PRINTF("[PMIC] GLF70583 reverse \r\n");
+		hal_pmic_glf70583_turn_on_nt98532_power(GLF70583_B_I2C_ADDR, GLF70583_A_I2C_ADDR);
+	}
+}
+
 
 void BOARD_InitPMICs(void)
 {

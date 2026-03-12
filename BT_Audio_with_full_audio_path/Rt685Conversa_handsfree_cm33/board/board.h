@@ -450,7 +450,7 @@
 #define SOC_SPI_ENABLE                1
 #define MENU_STATE_ENABLE             0
 #define ABOUT_STATE_ENABLE            0
-#define CES_DEMO                      1
+#define CES_DEMO                      0
 
 #if CES_DEMO
 #define CES_DEMO_FOR_NOVATEK          0
