@@ -17,7 +17,7 @@
 #define LONG_PRESS_MS                 (1000U)
 #define POWER_OFF_MS                  (5000U)
 #define CAMERA_RECORDING_MS           (1000U)
-#define PRESS_COUNTER_TIMEOUT_MS      (250U)
+#define PRESS_COUNTER_TIMEOUT_MS      (500U)
 #define BUTTON_DEBOUNCE_MS            (40U)
 
 extern volatile SystemStatus ss;
