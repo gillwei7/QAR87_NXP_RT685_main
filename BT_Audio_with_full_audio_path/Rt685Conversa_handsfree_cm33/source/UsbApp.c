@@ -305,9 +305,9 @@ void SCTIMER_CaptureInit(void)
 __attribute__((section("CodeQuickAccess")))
 void USB_IRQHandler(void)
 {
-	//DbgPin6Up();
+	//DbgPin6Up();DbgPin5Up();
     USB_DeviceLpcIp3511IsrFunction(g_composite.deviceHandle);
-	//DbgPin6Dn();
+	//DbgPin6Dn();DbgPin6Dn();
 }
 
 void USB_DeviceClockInit(void)

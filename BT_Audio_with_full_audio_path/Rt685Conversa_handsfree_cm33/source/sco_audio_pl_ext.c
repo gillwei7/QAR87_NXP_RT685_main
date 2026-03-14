@@ -81,6 +81,8 @@ extern hal_audio_config_t rxSpeakerConfig;
 
 
 	EventGroupHandle_t EvtGrpHdl_StateMangerTaskToBtStack;
+//EventGroupHandle_t EvtGrpHdl_AudioDmaIntrToAudioTask;
+
 extern uint32_t BOARD_SwitchAudioFreq(uint32_t sampleRate, int I2SClkShareCfgIdx);
 
 AT_NONCACHEABLE_SECTION_ALIGN(static HAL_AUDIO_HANDLE_DEFINE(tx_speaker_handle), 4);
@@ -132,6 +134,7 @@ S16 TmpDbgSigalBuf[BUFFER_SIZE/2];
 void SCO_AudioFlow_SemaphorePost(void)
 {
 		OSA_SemaphorePost(xSemaphoreDmaAudioDataReady);
+	//xEventGroupSetBits(EvtGrpHdl_AudioDmaIntrToAudioTask,DmaAudioIntrRequest_AllAudioDataIsReady);
 	}
 
 static void txMicCallback(hal_audio_handle_t handle, hal_audio_status_t completionStatus, void *callbackParam)
@@ -150,7 +153,7 @@ static void txMicCallback(hal_audio_handle_t handle, hal_audio_status_t completi
     }
     else
     {
-    	DbgPin5Up();
+//    	DbgPin5Up();
 		//take audio out from cir buffer and set xfer to start the transfer
     	OSA_SR_ALLOC();
 		OSA_ENTER_CRITICAL();
@@ -174,7 +177,7 @@ static void txMicCallback(hal_audio_handle_t handle, hal_audio_status_t completi
 
 		//audio PLL adjusting based on AOD of the cir buffer
 		#if EnableAudioPllAdjustingToSyncBetweenBtFsAndLocalFs==1
-			CheckI2SInputBufAodAndAdjustAudioPll(AOD_BTDnBuf);
+			CheckPcmRxFrBtBufAodAndAdjustAudioPll(AOD_BTDnBuf);
 		#endif
 
 		/*
@@ -188,7 +191,7 @@ static void txMicCallback(hal_audio_handle_t handle, hal_audio_status_t completi
 			LedOn_B();
 		}
 		*/
-		DbgPin5Dn();
+//		DbgPin5Dn();
     }
     AllowAudioInterfaceReInit_Fc25=1;
 }
@@ -202,7 +205,7 @@ static void rxSpeakerCallback(hal_audio_handle_t handle, hal_audio_status_t comp
     }
     else
     {
-    	DbgPin6Up();
+//    	DbgPin6Up();
 		if (atomic_get(&emptySpeakerBlock) < 2U)
 		{
 			hal_audio_transfer_t xfer;
@@ -215,7 +218,7 @@ static void rxSpeakerCallback(hal_audio_handle_t handle, hal_audio_status_t comp
 			{
 				rxSpeaker_index++;
 			}
-			if (rxSpeaker_index == 2)
+			if (rxSpeaker_index >= 2)
 			{
 				rxSpeaker_index = 0U;
 			}
@@ -229,10 +232,10 @@ static void rxSpeakerCallback(hal_audio_handle_t handle, hal_audio_status_t comp
 			{
 				//there is at least 1 free frame space in the cir buffer
 				#if 0
-					GenerateSinWavFromTable_S16_SingleCh(&TmpDbgSigalBuf[0*128], 128);
-					GenerateSinWavFromTable_S16_SingleCh(&TmpDbgSigalBuf[1*128], 128);
-					GenerateSinWavFromTable_S16_SingleCh(&TmpDbgSigalBuf[2*128], 128);
-					GenerateSinWavFromTable_S16_SingleCh(&TmpDbgSigalBuf[3*128], 128);
+					GenerateSinWavFromTable_S16_SingleCh(1,&TmpDbgSigalBuf[0*128], 128);
+					GenerateSinWavFromTable_S16_SingleCh(1,&TmpDbgSigalBuf[1*128], 128);
+					GenerateSinWavFromTable_S16_SingleCh(1,&TmpDbgSigalBuf[2*128], 128);
+					GenerateSinWavFromTable_S16_SingleCh(1,&TmpDbgSigalBuf[3*128], 128);
 					CirAudioBuf_WriteSamples_S16(&BTDnAudioBuf_S16, BUFFER_SIZE/(kHAL_AudioWordWidth16bits/8), TmpDbgSigalBuf);
 				#else
 					//CirAudioBuf_WriteSamples_S16(&BTDnAudioBuf_S16, BUFFER_SIZE/(kHAL_AudioWordWidth16bits/8), (S16 *)(RxAudioBufFromBt + (1-rxSpeaker_index) * BUFFER_SIZE));		//buffer A or B select, select the other one by 1-rxSpeaker_index
@@ -248,7 +251,7 @@ static void rxSpeakerCallback(hal_audio_handle_t handle, hal_audio_status_t comp
 			OSA_EXIT_CRITICAL();
 		}
         //rxSpeaker_test++;
-    	DbgPin6Dn();
+//    	DbgPin6Dn();
     }
     AllowAudioInterfaceReInit_Fc25=1;
 }
@@ -289,9 +292,9 @@ void DeInitCodec(void)
 	//	PRINTF("DeInitCodec is failed, %d \r\n",r);
 	//	return;
 	//}
-	//AmpState=AmpState_UnConfigured;
+	AmpState=AmpState_UnConfigured;
 }
-void InitAndStartCodec(int fs, int bits)
+void InitAndStartCodec(int fs, int bits, int Mfreq)
 {
 	int r;
 
@@ -310,7 +313,7 @@ void InitAndStartCodec(int fs, int bits)
 		// gill modify to amp_post_event, align with I2C task control the I2C write function
 		amp_post_event(AMP_EVT_RECEIVER_START);
 	}
-	//AmpState=AmpState_ConfiguredAndActive;
+	AmpState=AmpState_ConfiguredAndActive;
 }
 
 #else
@@ -336,7 +339,7 @@ void InitAndStartCodec(int fs, int bits, int Mfreq)
 	if(AmpState==AmpState_ConfiguredAndActive)
 		return;
 
-	DbgPin8Up();
+//	DbgPin8Up();
 	((wm8904_config_t *)boardCodecScoConfig.codecDevConfig)->mclk_HZ=Mfreq;
 
 	r=CODEC_Init(&codec_handle, &boardCodecScoConfig);
@@ -348,13 +351,13 @@ void InitAndStartCodec(int fs, int bits, int Mfreq)
 	}else
 	{
 		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, true);
-		//CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, txSpeakerConfig.sampleRate_Hz, txSpeakerConfig.bitWidth);
-		CODEC_SetFormat(&codec_handle, txSpeakerConfig.srcClock_Hz, fs, bits);
+		//CODEC_SetFormat(&codec_handle, CLOCK_GetMclkClkFreq(), txSpeakerConfig.sampleRate_Hz, txSpeakerConfig.bitWidth);
+		CODEC_SetFormat(&codec_handle, CLOCK_GetMclkClkFreq(), fs, bits);
 		CODEC_SetVolume(&codec_handle, kCODEC_VolumeDAC, HFP_CODEC_DAC_VOLUME);
 		CODEC_SetVolume(&codec_handle, kCODEC_VolumeHeadphoneLeft | kCODEC_VolumeHeadphoneRight, HFP_CODEC_HP_VOLUME);
 		CODEC_SetMute(&codec_handle, kCODEC_PlayChannelHeadphoneRight | kCODEC_PlayChannelHeadphoneLeft, false);
 	}
-	DbgPin8Dn();
+//	DbgPin8Dn();
 	AmpState=AmpState_ConfiguredAndActive;
 }
 #endif
@@ -483,14 +486,14 @@ void ButtonEventProcess(void)
 	if(BtnEvtVarGroup[0].BtnEvt1==BTN_EVT_SING_PRESS)
 	{
 		//on board user button 1 is short pressed
-		VarBlockSharedByDspAndMcu.U32ControlPara[0]=1;
+		VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdIdx_Btn1]=1;
 
 		BtnEvtVarGroup[0].BtnEvt1=0;
 	}
 	if(BtnEvtVarGroup[1].BtnEvt1==BTN_EVT_SING_PRESS)
 	{
 		//on board user button 2 is short pressed
-		VarBlockSharedByDspAndMcu.U32ControlPara[1]=1;
+		VarBlockSharedByDspAndMcu.U32ControlPara[ControlParaIdIdx_Btn2]=1;
 
 		BtnEvtVarGroup[1].BtnEvt1=0;
 	}
@@ -508,17 +511,18 @@ void ButtonEventProcess(void)
 #endif
 }
 __attribute__((section("CodeQuickAccess")))
-void VitStandBy_Task(void *handle)
+void AudioFlow_Task(void *handle)
 {
     OSA_SR_ALLOC();
 
-	SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-	PRINTF_M("RT685 MCU: enter task VitStandBy_Task \r\n");
-	SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
+	PRINTF_M("RT685 MCU: enter task AudioFlow_Task \r\n");
 
     while (1)
     {
         OSA_SemaphoreWait(xSemaphoreDmaAudioDataReady, osaWaitForever_c);
+
+    	//xEventGroupWaitBits(EvtGrpHdl_AudioDmaIntrToAudioTask, DmaAudioIntrRequest_AllAudioDataIsReady, pdTRUE, pdFALSE, portMAX_DELAY);
+    	//xEventGroupClearBits(EvtGrpHdl_AudioDmaIntrToAudioTask,DmaAudioIntrRequest_AllAudioDataIsReady);
 
         DbgPin5Up();
 		switch(DeviceWorkStateCur)
@@ -553,6 +557,9 @@ void VitStandBy_Task(void *handle)
 		}
 		DbgPin5Dn();
 
+		if(DeviceWorkStateCur!=WorkState_HfpCall)
+			GraduallySetAudioPllBackToDefault();
+
 		AudioIoFrameCnt++;
 
 		AllowAudioInterfaceReInit_PdmI2S=1;
@@ -575,19 +582,27 @@ void StartAudioTask(void)
 	VarBlockSharedByDspAndMcu.I2SFs_Nvt=NvtI2SFs_48KHz;
 	VarBlockSharedByDspAndMcu.I2SFs_Amp=16000;
 	VarBlockSharedByDspAndMcu.PdmFs=16000;
-#if EnableUsbComAndAudio
 	VarBlockSharedByDspAndMcu.UacUpFs=AUDIO_IN_SAMPLING_RATE_KHZ*1000;
 	VarBlockSharedByDspAndMcu.UacDnFs=AUDIO_OUT_SAMPLING_RATE_KHZ*1000;
-#endif
+
 	InitAudioCircularBuf(1,1,1);	//int ToInitBtCir, int ToInitUacCir,  int ToInitSbcCir
 	//InitAndStartPdm();		//if use this , it init dma again, cause BT firmware downloading fail
+
+	#if UsingQAR87Board == 1
+		//Initial Smart Amplifier
+	    //B36932 Quanta don't do it here, hal_amp_aw88166_power_on();
+	    //B36932 Quanta don't do it here, hal_amp_aw88166_init();
+	#endif
 
 	if (taskCreated == 0)
 	{
 
 		EvtGrpHdl_StateMangerTaskToBtStack=xEventGroupCreate();
+
+		//EvtGrpHdl_AudioDmaIntrToAudioTask=xEventGroupCreate();
 		OSA_SemaphoreCreate(xSemaphoreDmaAudioDataReady, 0);
-		result = xTaskCreate(VitStandBy_Task, "VitStandBy", 1024*10, NULL, HFP_STREAMER_TASK_PRIORITY, NULL);
+
+		result = xTaskCreate(AudioFlow_Task, "VitStandBy", 1024*10, NULL, HFP_STREAMER_TASK_PRIORITY, NULL);
 		assert(pdPASS == result);
 
 		taskCreated = 1U;
@@ -690,7 +705,7 @@ API_RESULT sco_audio_start_pl_ext(void)
 
 	BtHfpRequest=HfpRequest_AudioStart;
 	//block till workstate is WorkState_HfpCall and after HfpRequest_AudioStart is done (audio interface is running)
-	xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_AudioStart, pdTRUE, pdFALSE, pdMS_TO_TICKS(500));
+	xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_AudioStart, pdTRUE, pdFALSE, portMAX_DELAY);
 	xEventGroupClearBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_AudioStart);
 
 	return API_SUCCESS;
@@ -723,7 +738,7 @@ API_RESULT sco_audio_set_speaker_volume_ext(UCHAR volume)
 		BtHfpRequest=HfpRequest_SetCodecAmpVolume;
 	BtHfpAudioVolume=volume;
 		//block till workstate is WorkState_HfpCall and after HfpRequest_AudioStart is done (audio interface is running)
-		xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_SetCodecAmpVolume, pdTRUE, pdFALSE, pdMS_TO_TICKS(500));
+	xEventGroupWaitBits(EvtGrpHdl_StateMangerTaskToBtStack, HfpRequest_SetCodecAmpVolume, pdTRUE, pdFALSE, portMAX_DELAY);
 		xEventGroupClearBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_SetCodecAmpVolume);
 
 		return API_SUCCESS;

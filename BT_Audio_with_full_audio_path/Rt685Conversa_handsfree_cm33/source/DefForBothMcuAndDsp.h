@@ -125,7 +125,11 @@
 #define APP_SEMA42								SEMA42
 #define SEMA42_GATE0							SEMA42_ID_PrintProtect
 #define SEMA42_GATE1							SEMA42_ID_SbcRawCirBufferProtect
-#define SEMA42_GATE2							2U
+
+//Quanta seems define in other file
+#define CHN_MU_REG_NUM 	0U
+#define BOOT_FLAG 		0x01U
+#define BOOT_FLAG_2 	0x02U
 
 #define AudioFrameSizeInSamplePerChMaxForDMABuf		(128*3)
 //both PDM and I2S are 16KHz
@@ -143,6 +147,8 @@
 #endif
 //gill
 #define OPUS_INDEX_MAXIMUM 14
+
+
 
 typedef enum _VoiceCommandMenu
 {
@@ -210,12 +216,60 @@ typedef enum _ConversaTuningCfg
 	ConversaTuningCfg_HfpVoiceCall,
 	ConversaTuningCfg_NearEnd,
 	ConversaTuningCfg_FarEnd,
-	ConversaTuningCfg_XXX,
+	ConversaTuningCfg_AdaptiveMode,
+	ConversaTuningCfg_XXX2,
+	ConversaTuningCfg_XXX3,
+	ConversaTuningCfg_ShutDownConversa,
 } ConversaTuningCfg_t;
+
+typedef enum _EapTuningCfg
+{
+	EapTuningCfg_NoChange=0,
+	EapTuningCfg_MusicPlay,
+	EapTuningCfg_MediaPlay,
+	EapTuningCfg_VideoRecording,
+	EapTuningCfg_xxx1,
+	EapTuningCfg_xxx2,
+	EapTuningCfg_xxx3,
+	EapTuningCfg_ShutDownEap,
+} EapTuningCfg_t;
+
+
+typedef enum _McuToDspReqeust_t
+{
+	McuToDspReqeust_None=0,
+	McuToDspReqeust_IncMasterVol,
+	McuToDspReqeust_DecMasterVol,
+	McuToDspReqeust_SetMasterVol,
+	McuToDspReqeust_MuteMasterVol,
+	McuToDspReqeust_UnMuteMasterVol,
+} McuToDspReqeust_t;
 
 
 #define CirBuf_SbcRaw_LengthInBytes 20000				//this value was checked by printing MCU writing and DSP reading rd/wr pointers --- at the beginning, MCU will write 8000 bytes in, so 20K byte size is a proper size
 #define CirBuf_SbcRaw_MaxReadSizeLengthInBytes 512		//using 512 because Cadence Sbc decoder uses 512 bytes as input buffer size, this is the maximum size reading from this cir buffer
+
+#if 1
+	#define ControlParaIdx_McuCmdToDsp			0
+	#define ControlParaIdx_McuCmdToDspPara1		1
+	#define ControlParaIdx_McuCmdToDspPara2		2
+
+	#define ControlParaIdx_Btn1					10
+	#define ControlParaIdx_Btn2					11
+
+
+	#define ControlParaIdx_McuJobDone			18
+	#define ControlParaIdx_DspJobDone			19
+	#define ControlParaIdIdx_Max				20
+
+#endif
+
+#define DspPrintsToMcuThenMcuPrintsToUsbCom			1			//note, when this is enabled, the printing can not be too frequent
+#if DspPrintsToMcuThenMcuPrintsToUsbCom==1
+	#define DspPrintBufLength	100
+#endif
+
+#define CycCntHistoryLength	100
 
 //MCU program must has the exact same struct def as the following --- this h file should be included by both MCU and DSP prj
 typedef struct
@@ -224,8 +278,8 @@ typedef struct
 	__attribute__((aligned(32))) S32 PdmInAudioBuf[8][AudioFrameSizeInSamplePerCh_16KHz];
 
 	__attribute__((aligned(32))) S32 UacUpAudioBuf[AudioFrameSizeInSamplePerCh_16KHz*8];		//this buffer is channel mixed, and to be used as cir buffer data source
-	__attribute__((aligned(32))) S32 UacDnAudioBufL[AudioFrameSizeInSamplePerCh_48KHz*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh_16KHz space
-	__attribute__((aligned(32))) S32 UacDnAudioBufR[AudioFrameSizeInSamplePerCh_48KHz*3];		//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh_16KHz space
+	__attribute__((aligned(32))) S32 UacDnAudioBufL[AudioFrameSizeInSamplePerCh_48KHz];			//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh_16KHz space
+	__attribute__((aligned(32))) S32 UacDnAudioBufR[AudioFrameSizeInSamplePerCh_48KHz];			//when local fs=16KHz, Uac dn is 48KHz, need 3 times of AudioFrameSizeInSamplePerCh_16KHz space
 	__attribute__((aligned(32))) S16 I2SBufInFrAmpL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		// from amp, for AEC, not use now
 	__attribute__((aligned(32))) S16 I2SBufInFrAmpR[AudioFrameSizeInSamplePerChMaxForDMABuf];
 	__attribute__((aligned(32))) S16 I2SBufInFrNvtL[AudioFrameSizeInSamplePerChMaxForDMABuf]; 		//from nvt, cm33 write in, DSP conversa process
@@ -251,14 +305,22 @@ typedef struct
 	U32 I2SFrmSizeInSamples_Nvt;
 	U32 PdmFrmSizeInSamples;
 
-	U32 U32CycCntHistory	[100];
+	U32 CycCntHistory		[CycCntHistoryLength];
+	#if DspPrintsToMcuThenMcuPrintsToUsbCom==1
+		U32 DspPrintBuf		[DspPrintBufLength+1][30];		//DspPrintBufLength lines, each line 80 chars, as a circular buf, +1 is for the extra read/write space, total needed space length is always 1 more than useful length
+															//the first U32 is the print length
+		U32 DspPrintBufWrIdx;
+		U32 DspPrintBufRdIdx;
+	#endif
+	U32 U32ControlPara		[ControlParaIdIdx_Max+1];
 	U32 MonitorInfoArray1	[20];
 	U32 MonitorInfoArray2	[20];
-	U32 U32ControlPara		[40];
-	U32 FileAddrTable_Opus	[OPUS_INDEX_MAXIMUM*2];
+
+	U32 FileAddrTable_Opus	[30];
 	U32 FileAddrTable_Sbc	[10];
 
-	U32 NeedToSwitchConversaTuningCfg;		//MCU writes this to command DSP side to re-init conversa with the selected tuning cfg
+	U32 NeedToSwitchConversaTuningCfg;		//MCU writes this to command DSP side to re-init conversa with the selected tuning cfg (preset idx)
+	U32 NeedToSwitchEapTuningCfg;			//MCU writes this to command DSP side to re-init EAP      with the selected tuning cfg (preset idx)
 
 	U32 NeedToStartPlayOpus;
 	U32 PlayOpusFileIdx;
@@ -284,7 +346,6 @@ typedef struct
 	#endif
 
 	U32 U32Tmp2;
-	U32 Cm33Hifi1HandShakeCheck;
 
 	//SBC decoding RAW data from MCU to DSP
 	int  CirBuf_SbcRaw;	//use dummy variable here is to avoid the T_CircularAudioBuf_S8 type missing error
@@ -293,6 +354,9 @@ typedef struct
 	int  CirBuf_SbcRaw_Dummy3;		//dummy is to reserve the space for (T_CircularAudioBuf_S8 *)&CirBuf_SbcRaw
 
 	U32 CirBuf_SbcRaw_DataArea[(CirBuf_SbcRaw_LengthInBytes+CirBuf_SbcRaw_MaxReadSizeLengthInBytes)/4];
+
+	//the end of this structure
+	U32 Cm33Hifi1HandShakeCheck;
 } T_CommonVarSharedByDspAndMcu;
 
 

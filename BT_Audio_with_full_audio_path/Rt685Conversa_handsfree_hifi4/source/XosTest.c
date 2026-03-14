@@ -26,9 +26,9 @@
 #include "GlobalDef.h"
 #include "SubFunc.h"
 
-
-
 #include "test.h"
+
+#if 0
 
 #define xt_printf PRINTF
 #define printf PRINTF
@@ -294,4 +294,6 @@ int XOS_Test(void)
     return -1; // should never get here
 #endif
 }
+
+#endif
 

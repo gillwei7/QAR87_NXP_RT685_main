@@ -21,14 +21,16 @@ extern unsigned char NeedToMute_SpkR;
 extern int AUDIOPLL0NUM_StartingUpValue;
 extern int AUDIOPLL0NUM_AdjustingValue;
 
-extern void GenerateSinWavFromTable_S32(S32 *DstPtrL,S32 *DstPtrR, int L);	//L should be <=128
-extern void GenerateSinWavFromTable_S32_SingleCh(S32 *DstPtr, int L);		//L should be <=128
-extern void GenerateSinWavFromTable_S16_LRMixed (S16 *DstPtr, int L);		//L should be <=128
-extern void GenerateSinWavFromTable_S16_SingleCh(S16 *DstPtr, int L);		//L should be <=128
+extern void GenerateSinWavFromTable_S32_DualCh        (int WhichOne, S32 *DstPtrL, S32 *DstPtrR, int L);	//L should be <=AudioFrameSizeInSamplePerCh_48KHz
+extern void GenerateSinWavFromTable_S32_DualCh_LRMixed(int WhichOne, S32 *DstPtr,                int L);	//L should be <=AudioFrameSizeInSamplePerCh_48KHz
+extern void GenerateSinWavFromTable_S32_SingleCh      (int WhichOne, S32 *DstPtr,                int L, int PosNeg);	//L should be <=AudioFrameSizeInSamplePerCh_48KHz
+extern void GenerateSinWavFromTable_S16_DualCh        (int WhichOne, S16 *DstPtrL, S16 *DstPtrR, int L);
+extern void GenerateSinWavFromTable_S16_DualCh_LRMixed(int WhichOne, S16 *DstPtr,                int L);			//L should be <=AudioFrameSizeInSamplePerCh_48KHz
+extern void GenerateSinWavFromTable_S16_SingleCh      (int WhichOne, S16 *DstPtr,                int L, int PosNeg);		//L should be <=AudioFrameSizeInSamplePerCh_48KHz
 
 
-
-extern void CheckI2SInputBufAodAndAdjustAudioPll(int AodValue);
+extern void GraduallySetAudioPllBackToDefault(void);
+extern void CheckPcmRxFrBtBufAodAndAdjustAudioPll(int AodValue);
 
 
 

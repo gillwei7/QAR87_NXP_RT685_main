@@ -24,36 +24,36 @@
 
 #if UsingQAR87Board == 1
 
-#define FcIdx_RxFrAmp			3
-#define FcIdx_TxToAmp			1
-#define DEMO_I2STxToAmp 			(I2S1)
-#define DEMO_I2SRxFrAmp 			(I2S3)
-#define I2S_FCTxToAmp_DMA_CHANNEL 	(3)				//flexcomm1 tx
-#define I2S_FCRxFrAmp_DMA_CHANNEL 	(6)				//flexcomm3 rx
+#define FcIdx_RxFrAmp				(3)
+#define FcIdx_TxToAmp				(1)
+#define I2STxToAmpInstance 			(I2S1)
+#define I2SRxFrAmpInstance 			(I2S3)
+#define I2S_TxToAmp_DMA_CHANNEL 	(3)				//flexcomm1 tx
+#define I2S_RxFrAmp_DMA_CHANNEL 	(6)				//flexcomm3 rx
 
-#define FcIdx_RxFrNvt			6
-#define FcIdx_TxToNvt			5
+#define FcIdx_RxFrNvt				(6)
+#define FcIdx_TxToNvt				(5)
 #define I2STxToNvtInstance		(I2S5)
 #define I2SRxFrNvtInstance		(I2S6)
 #define I2S_TxToNvt_DMA_CHANNEL (11)			//flexcomm5 tx
 #define I2S_RxFrNvt_DMA_CHANNEL (12)			//flexcomm6 rx
 
 
-#define FcIdx_RxFrBt			4
-#define FcIdx_TxToBt			2
-#define I2STxToBtInstance		(I2S2)
-#define I2SRxFrBtInstance		(I2S4)			//B36932 should be I2S4 (I2S5)
-#define I2S_TxToBt_DMA_CHANNEL 	(5)				//flexcomm2 tx to BT
-#define I2S_RxFrBt_DMA_CHANNEL 	(8)				//flexcomm4 rx from BT
+#define FcIdx_RxFrBt				(4)
+#define FcIdx_TxToBt				(2)
+#define PcmTxToBtInstance			(I2S2)
+#define PcmRxFrBtInstance			(I2S4)			//B36932 should be I2S4 (I2S5)
+#define Pcm_TxToBt_DMA_CHANNEL 		(5)				//flexcomm2 tx to BT
+#define Pcm_RxFrBt_DMA_CHANNEL 		(8)				//flexcomm4 rx from BT
 
 #else
 //having I2S1 and I2S2 swapped, is to aviod using a wire connecting I2STx0 to AMP Data Input --- only use a jump connecting JP8.2 and JP8.3
 #define FcIdx_RxFrAmp			1
 #define FcIdx_TxToAmp			3
-#define DEMO_I2STxToAmp 			(I2S3)
-#define DEMO_I2SRxFrAmp 			(I2S1)
-#define I2S_FCRxFrAmp_DMA_CHANNEL 	(2)				//flexcomm1 rx
-#define I2S_FCTxToAmp_DMA_CHANNEL 	(7)				//flexcomm3 tx
+#define I2STxToAmpInstance 			(I2S3)
+#define I2SRxFrAmpInstance 			(I2S1)
+#define I2S_RxFrAmp_DMA_CHANNEL 	(2)				//flexcomm1 rx
+#define I2S_TxToAmp_DMA_CHANNEL 	(7)				//flexcomm3 tx
 
 //Note --- on RT685 EVK, we use fc2 and 5 for the I2S to NVT --- while using I2S to NVT, BT SCO interface is OFF.
 #define FcIdx_RxFrNvt			5
@@ -65,10 +65,10 @@
 
 #define FcIdx_RxFrBt			5
 #define FcIdx_TxToBt			2
-#define I2STxToBtInstance		(I2S2)
-#define I2SRxFrBtInstance		(I2S5)
-#define I2S_TxToBt_DMA_CHANNEL 	(5)				//flexcomm2 rx
-#define I2S_RxFrBt_DMA_CHANNEL 	(10)			//flexcomm5 tx
+#define PcmTxToBtInstance		(I2S2)
+#define PcmRxFrBtInstance		(I2S5)
+#define Pcm_TxToBt_DMA_CHANNEL 	(5)				//flexcomm2 rx
+#define Pcm_RxFrBt_DMA_CHANNEL 	(10)			//flexcomm5 tx
 
 #endif
 /*
@@ -154,8 +154,8 @@ extern volatile S16 I2SRxFrNvtCh0And1Mixed_A[AudioFrameSizeInSamplePerChMaxForDM
 extern volatile S16 I2SRxFrNvtCh0And1Mixed_B[AudioFrameSizeInSamplePerChMaxForDMABuf*2];    //1 frame samples --- for 2 channels mixed I2S audio data
 
 
-extern volatile U8 I2S1DmaTransferringIsUsingBufA;
-extern volatile U8 I2S3DmaTransferringIsUsingBufA;
+extern volatile U8 I2SFrAmpDmaTransferringIsUsingBufA;
+extern volatile U8 I2SToAmpDmaTransferringIsUsingBufA;
 extern volatile U8 I2STxToNvtDmaTransferringIsUsingBufA;
 extern volatile U8 I2SRxFrNvtDmaTransferringIsUsingBufA;
 
@@ -167,8 +167,8 @@ extern i2s_dma_handle_t I2STxToAmpHandle;
 extern i2s_dma_handle_t I2SRxFrNvtHandle;
 extern i2s_dma_handle_t I2STxToNvtHandle;
 
-extern unsigned int *DmaDscrPtr_I2S1;
-extern unsigned int *DmaDscrPtr_I2S3;
+extern unsigned int *DmaDscrPtr_I2SRxFrAmp;
+extern unsigned int *DmaDscrPtr_I2STxToAmp;
 extern unsigned int *DmaDscrPtr_I2SRxFrNvt;
 extern unsigned int *DmaDscrPtr_I2STxToNvt;
 
@@ -199,8 +199,8 @@ extern void EnableI2SToAmpDmaChannel(void);
 extern void EnableI2STxToNvtDmaChannel(void);
 extern void EnableI2SRxFrNvtDmaChannel(void);
 
-extern void ImmediatelyStartI2S3Dma(void);
-extern void ImmediatelyStartI2S1Dma(void);
+extern void ImmediatelyStartI2SToAmpDma(void);
+extern void ImmediatelyStartI2SFrAmpDma(void);
 extern void ImmediatelyStartI2STxToNvtDma(void);
 extern void ImmediatelyStartI2SRxFrNvtDma(void);
 
@@ -214,8 +214,8 @@ extern void BOARD_Init_I2S_FcTxToAmp(int Fs, int BitW);
 extern void BOARD_Init_I2S_FcTxToNvt(int Fs, int BitW);
 extern void BOARD_Init_I2S_FcRxFrNvt(int Fs, int BitW);
 
-extern int GetI2S3DmaTransferringIsUsingBufAOrB(void);
-extern int GetI2S1DmaTransferringIsUsingBufAOrB(void);
+extern int GetI2SToAmpDmaTransferringIsUsingBufAOrB(void);
+extern int GetI2SFrAmpDmaTransferringIsUsingBufAOrB(void);
 extern int GetI2STxToNvtDmaTransferringIsUsingBufAOrB(void);
 extern int GetI2SRxFrNvtDmaTransferringIsUsingBufAOrB(void);
 

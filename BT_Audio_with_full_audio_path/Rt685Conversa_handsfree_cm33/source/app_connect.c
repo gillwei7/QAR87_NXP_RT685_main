@@ -44,6 +44,8 @@ static void security_changed(struct bt_conn *conn, bt_security_t level, enum bt_
 #define SDP_CLIENT_USER_BUF_LEN        512U
 NET_BUF_POOL_FIXED_DEFINE(sdp_client_pool, CONFIG_BT_MAX_CONN, SDP_CLIENT_USER_BUF_LEN, CONFIG_NET_BUF_USER_DATA_SIZE, NULL);
 
+struct bt_conn *phone_le_conn=NULL;;
+
 bt_addr_t g_riderHsAddr, g_riderPhoneAddr, g_passengerHsAddr;
 
 //static uint8_t g_defaultConnectInitialized;
@@ -151,14 +153,11 @@ static void connected(struct bt_conn *conn, uint8_t err)
 	}
 
 	bt_conn_get_info(conn, &info);
-	if (info.type == BT_CONN_TYPE_LE)
-	{
-		return;
-	}
 
-	 if (g_connectInitRiderPhone)
+	 if (info.type == BT_CONN_TYPE_BR && g_connectInitRiderPhone)
 	{
 		PRINTF("Glasses trigger ACL Connection Successful\r\n");
+		PRINTF("ACL Connection Successful with Rider Phone,Role: %d\n",info.role);
 		g_connectInitRiderPhone = 0U;
 		conn_rider_phone = conn;
 
@@ -171,6 +170,18 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
 		/*Profile level connection HFP HF*/
 		sdp_discover_for_hfp_hf(&info);
+	} else if (info.type == BT_CONN_TYPE_LE)
+	{
+		PRINTF("\nLE Connected...\n");
+		phone_le_conn= conn;
+
+#if CONFIG_BT_SMP
+       if (bt_conn_set_security(conn, BT_SECURITY_L0))
+        {
+            PRINTF("Failed to set security\n");
+        }
+#endif
+
 	}else{
 		PRINTF("ACL Connected\r\n");
 	}
@@ -191,6 +202,14 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 		g_connectInitRiderPhone = 0U;
 		//app_hf_set_connectable();
     }
+    else if (phone_le_conn == conn)
+	{
+
+    	PRINTF("LE ACL Disconnection (reason %d)\n", reason);
+      
+        phone_le_conn = NULL;
+		return;
+	}
 	else
 	{
 #ifdef APP_DEBUG_EN
@@ -220,7 +239,7 @@ static void security_changed(struct bt_conn *conn, bt_security_t level,  enum bt
         PRINTF("Security changed: %s level %u\n", addr, level);
 
         if(g_isRiderHeadset){
-            save_new_paired_device(conn,1);
+            save_new_paired_device(conn,g_isRiderHeadset);
         }else {
             save_new_paired_device(conn,0);
         }

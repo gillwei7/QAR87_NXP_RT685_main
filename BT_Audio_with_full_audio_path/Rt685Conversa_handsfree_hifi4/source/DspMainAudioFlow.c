@@ -40,12 +40,9 @@
 
 #include "DspMainAudioFlow.h"
 
-#ifndef CORE_DSP
-#define CORE_DSP
-#endif
-
 #include "AudioProc_Conversa.h"
 #include "AudioProc_Vit.h"
+#include "AudioProc_Eap.h"
 #include "AudioDecoder.h"
 
 
@@ -124,6 +121,9 @@ __attribute__((__section__(".dram.data"))) __attribute__((aligned(32)))
 S16 AudioOneFrameBuf_48KHz_15 [AudioFrameSizeInSamplePerCh_48KHz];
 __attribute__((__section__(".dram.data"))) __attribute__((aligned(32)))
 S16 AudioOneFrameBuf_48KHz_16 [AudioFrameSizeInSamplePerCh_48KHz];
+
+__attribute__((__section__(".dram.data"))) __attribute__((aligned(32)))
+S32 AudioOneFrameBuf_48KHz_AllZeros [AudioFrameSizeInSamplePerCh_48KHz];
 
 
 S32 *SrcPtrS32_Mic0;
@@ -276,7 +276,7 @@ void PrepareMainAudioFlowPointersAndInputFloatData(int NeedToCvtMicToFlt, int Ne
 	FltPtr_GeneratedToneL=	(float *)AudioOneFrameBuf_48KHz_11;
 	FltPtr_GeneratedToneR=	(float *)AudioOneFrameBuf_48KHz_12;
 		S32Ptr_Tmp1L=        		AudioOneFrameBuf_48KHz_07;			//S32Ptr_Tmp1L/R,2,3,4 point to the same place as FltPtr_Tmp1L/R,2,3,4
-		S32Ptr_Tmp1R=        		AudioOneFrameBuf_48KHz_08;
+		S32Ptr_Tmp1R=        		AudioOneFrameBuf_48KHz_08;			//S32Ptr_Tmp1L and S32Ptr_Tmp1R should point to 2 buffers that are near by together --- will be used as a combined area for LRMixed
 		S32Ptr_Tmp2L=        		AudioOneFrameBuf_48KHz_09;
 		S32Ptr_Tmp2R=        		AudioOneFrameBuf_48KHz_10;
 	//temp buffers --- S16
@@ -313,14 +313,29 @@ void PrepareMainAudioFlowPointersAndInputFloatData(int NeedToCvtMicToFlt, int Ne
 		ConvertS16ToFloat(SrcPtrFlt_I2SInNvtR, (const S16 *)SrcPtrS16_I2SNvtR, AudioFrameSizeInSamplePerCh_48KHz);
 	}
 }
+
+void InitDspMainAudioFlow(void)
+{
+	#if DspPrintsToMcuThenMcuPrintsToUsbCom==1
+		PtrVarBlockSharedByDspAndMcu->DspPrintBufRdIdx=0;
+		PtrVarBlockSharedByDspAndMcu->DspPrintBufWrIdx=0;
+	#endif
+
+	EapIsNowBeingUsed=0;
+	ConversaIsNowBeingUsed=0;
+	memset(AudioOneFrameBuf_48KHz_AllZeros,0,sizeof(AudioOneFrameBuf_48KHz_AllZeros));
+}
 #endif
 
 #if 1	//--- folding, main audio flow processing functions
+
+void DspMainAudioFlowProcOneFrame_HfpCall(int OptionWord);	//this one is in AudioProc_Conversa.c
+
 __attribute__((__section__(".iram.text")))
 void DspMainAudioFlowProcOneFrame_AudioIoDbg(int OptionWord)
 {
 	//Note: Fs here is 16KHz
-	DbgPin8Up();
+//	DbgPin8Up();
 	switch(OptionWord)
 	{
 		case 0:
@@ -421,170 +436,11 @@ void DspMainAudioFlowProcOneFrame_AudioIoDbg(int OptionWord)
 		}
 	#endif
 
-	DbgPin8Dn();
+//	DbgPin8Dn();
 }
 
 __attribute__((__section__(".iram.text")))
 void DspMainAudioFlowProcOneFrame_VideoRecording(int OptionWord)
-{
-	int i;
-
-	DbgPin7Up();
-
-	#if 1	//step 1: convert input samples from S32 or S16 to float
-		S16 RawMicSignal16BitForVitRef[AudioFrameSizeInSamplePerCh_16KHz];
-
-		PrepareMainAudioFlowPointersAndInputFloatData(1,0,0,1);//B36932 (int NeedToCvtMicToFlt, int NeedToCvtUacDnToFlt, int NeedToCvtAmpI2SInToFlt, int NeedToCvtNvtI2SInToFlt)
-		int FrmSizeInSamples=PtrVarBlockSharedByDspAndMcu->I2SFrmSizeInSamples_Amp;
-
-		for(int i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
-			RawMicSignal16BitForVitRef[i]=(SrcPtrS32_Mic0[i]>>16);
-
-	#endif
-
-	#if 1	//step 2: get audio from sbc decoder and opus decoder, or clear the decoder buffer if the decoder is NOT running
-		//in this mode, OPUS and SBC stream are converted to 48KHz Fs
-		#if EnableOpusDec==1
-			unsigned short *OtPtrS16_Opus;
-			//take out OPUS output audio, and mix with UAC, with satuation, no gaining
-			xos_mutex_lock(&g_audio_OpusDecoderMutex);
-				if(CirAudioBuf_SpaceOccupiedInSamples_S32(&OpusOutputCirBuf_LRMixed) >= FrmSizeInSamples)
-				{
-					OtPtrS16_Opus=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&OpusOutputCirBuf_LRMixed, FrmSizeInSamples);
-					for(i=0;i<FrmSizeInSamples;i++)
-					{
-						AudioOneFrameBuf_OpusDecodedL[i]=*OtPtrS16_Opus++;
-						AudioOneFrameBuf_OpusDecodedR[i]=*OtPtrS16_Opus++;
-					}
-				}else
-				{
-					memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(S16)*FrmSizeInSamples);
-					memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(S16)*FrmSizeInSamples);
-				}
-			xos_mutex_unlock(&g_audio_OpusDecoderMutex);
-		#endif
-		#if EnableSbcDec==1
-			unsigned short *OtPtrS16_Sbc;
-			//take out Sbc output audio, and mix with UAC, with satuation, no gaining
-			xos_mutex_lock(&g_audio_SbcDecoderMutex);
-				if(CirAudioBuf_SpaceOccupiedInSamples_S32(&SbcOutputCirBuf_LRMixed) >= FrmSizeInSamples)
-				{
-					OtPtrS16_Sbc=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&SbcOutputCirBuf_LRMixed, FrmSizeInSamples);
-					for(i=0;i<FrmSizeInSamples;i++)
-					{
-						AudioOneFrameBuf_SbcDecodedL[i]=*OtPtrS16_Sbc++;
-						AudioOneFrameBuf_SbcDecodedR[i]=*OtPtrS16_Sbc++;
-					}
-				}else
-				{
-					//PRINTF("SBC cir buffer is empty\n");
-					memset(AudioOneFrameBuf_SbcDecodedL,0,sizeof(S16)*FrmSizeInSamples);
-					memset(AudioOneFrameBuf_SbcDecodedR,0,sizeof(S16)*FrmSizeInSamples);
-				}
-			xos_mutex_unlock(&g_audio_SbcDecoderMutex);
-		#endif
-	#endif
-
-	#if 1	//step 3: prepare Rx data for Conversa, need to mix Sbc, Opus and do SRC
-			int OutSampleNum;
-			S32 TmpS32Buf_LRMixed_SrcInput                    [AudioFrameSizeInSamplePerCh_48KHz*2];
-			S32 TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[AudioFrameSizeInSamplePerCh_16KHz*2];
-			float *ConversaRefIn;
-
-			vec_add16x16(DstPtrS16_I2SAmpL, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedL, AudioFrameSizeInSamplePerCh_48KHz);
-			vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedR, AudioFrameSizeInSamplePerCh_48KHz);
-
-			//convert to S32 and do SRC, then convert back to float --- to make the 16KHz float input ref in for Conversa
-			for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
-			{
-				TmpS32Buf_LRMixed_SrcInput[2*i+0]=(DstPtrS16_I2SAmpL[i]<<16);
-				TmpS32Buf_LRMixed_SrcInput[2*i+1]=(DstPtrS16_I2SAmpR[i]<<16);
-			}
-
-			ProcCadenceAsrc(&SRC_ConversaRx2, TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput, TmpS32Buf_LRMixed_SrcInput,  AudioFrameSizeInSamplePerCh_48KHz,    &OutSampleNum);
-
-			//borrow TmpS32Buf_LRMixed_SrcInput for Conversa ref in buffer, 16KHz float
-			ConversaRefIn=(float *)TmpS32Buf_LRMixed_SrcInput;
-			for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
-			{
-				float a,b;
-				a=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+0]*_Value_Pow_2_Neg31_;
-				b=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+i]*_Value_Pow_2_Neg31_;
-				ConversaRefIn[i]=(a+b)*0.5f;
-			}
-	#endif
-
-	#if 1	//step 4: Conversa and VIT process
-		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
-		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
-
-		#if 1
-			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
-		#else
-		#endif
-
-		//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
-		ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef);
-	#endif
-
-	#if 1 //fill AMP I2S out buffer with FltPtr_Tmp1L (SBC + OPUS mixed audio)
-		//fill AMP I2S out buffer with FltPtr_Tmp1L (SBC + OPUS mixed audio)
-		//this is aready done when mixing opus and sbc
-
-		ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], AudioFrameSizeInSamplePerCh_16KHz);
-		ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], AudioFrameSizeInSamplePerCh_16KHz);
-
-		for(int i=0; i < AudioFrameSizeInSamplePerCh_16KHz; i++ ) //16KHz to 48KHz
-		{
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L++;
-
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R++;
-		}
-
-	#endif
-
-	#if 1	//folding --- step5: put interested audio channels to UAC 8 ch
-		//convert conversa output to S32
-		vec_float2int(S32Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], -31,  AudioFrameSizeInSamplePerCh_16KHz);	//conversa TxOut
-		vec_float2int(S32Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], -31,  AudioFrameSizeInSamplePerCh_16KHz);	//conversa BfOut
-
-		if(ASR_WavPulse==ASR_WavPulse_WakeWordDetected)
-		{
-			ConversaTxOut32BitBuf[0]=0x7fff0000;
-			ASR_WavPulse=ASR_WavPulse_NothingDetected;
-		}else if(ASR_WavPulse==ASR_WavPulse_VoiceCmdDetected)
-		{
-			AecOut32BitBuf[0]=0x7fff0000;
-			ASR_WavPulse=ASR_WavPulse_NothingDetected;
-		}
-
-		//fill USB up streaming buffer --- 8 channels, all 16KHz, 32bit
-		for(i=0;i<FrmSizeInSamples/3;i++)
-		{
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=DstPtrS16_I2SNvtL[i*3]<<16; //to Nvt L
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=DstPtrS16_I2SNvtR[i*3]<<16; //to Nvt R
-
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp1L[i];	//conversa Tx out
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
-
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic0[i];
-		}
-	#endif
-
-	DbgPin7Dn();
-}
-
-__attribute__((__section__(".iram.text")))
-void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 {
 	int i;
 	switch(OptionWord)
@@ -598,7 +454,7 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 		default:
 			break;
 	}
-	DbgPin7Up();
+//	DbgPin7Up();
 
 	#if 1	//step 1: convert input samples from S32 or S16 to float
 		S16 RawMicSignal16BitForVitRef[AudioFrameSizeInSamplePerCh_16KHz];
@@ -615,26 +471,74 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 		//in this mode, OPUS and SBC stream are converted to 48KHz Fs
 		#if EnableOpusDec==1
 			unsigned short *OtPtrS16_Opus;
-			//take out OPUS output audio, and mix with UAC, with satuation, no gaining
-			xos_mutex_lock(&g_audio_OpusDecoderMutex);
-				if(CirAudioBuf_SpaceOccupiedInSamples_S32(&OpusOutputCirBuf_LRMixed) >= FrmSizeInSamples)
+
+			#if EAP_ENABLE==1
+				if(EapAllowsWritingStrm1AsPromptAudio)
 				{
-					OtPtrS16_Opus=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&OpusOutputCirBuf_LRMixed, FrmSizeInSamples);
-					for(i=0;i<FrmSizeInSamples;i++)
-					{
-						AudioOneFrameBuf_OpusDecodedL[i]=*OtPtrS16_Opus++;
-						AudioOneFrameBuf_OpusDecodedR[i]=*OtPtrS16_Opus++;
-					}
+					xos_mutex_lock(&g_audio_OpusDecoderMutex);
+						if(CirAudioBuf_SpaceOccupiedInSamples_S32(&OpusOutputCirBuf_LRMixed) >= FrmSizeInSamples)
+						{
+							OtPtrS16_Opus=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&OpusOutputCirBuf_LRMixed, FrmSizeInSamples);
+							//prompt audio to EAP input stream[1]
+							for(i=0;i<FrmSizeInSamples;i++)
+							{
+								AudioOneFrameBuf_OpusDecodedL[i]=*OtPtrS16_Opus++;
+								AudioOneFrameBuf_OpusDecodedR[i]=*OtPtrS16_Opus++;
+							}
+					xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+						}else
+						{
+					xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+							//all zeros to EAP input stream[1]
+							memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(S16)*FrmSizeInSamples);
+							memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(S16)*FrmSizeInSamples);
+
+							LVM_ReturnStatus_en retStatusEAP = LVM_SUCCESS;
+
+							EapAllowsWritingStrm1AsPromptAudio = PL_FALSE;
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[0].TargetGain 		= LVM_MIXER_VOLUME_MAX; 			// Set audio playback stream back to 0dB --- Quanta should change the target gain to the proper variable
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[0].TimeConstantMs 	= NOTIF_VOLUME_TRANSITION_TIME_MS;	// Time to arrive to target volume
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[0].pCallback 		= (LVM_Callback)eapNotificationCallbackUp;
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[1].TargetGain 		= LVM_MIXER_VOLUME_MAX/256;
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[2].TargetGain 		= LVM_MIXER_VOLUME_MAX; 			// Set audio playback stream back to 0dB --- Quanta should change the target gain to the proper variable
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[2].TimeConstantMs 	= NOTIF_VOLUME_TRANSITION_TIME_MS;	// Time to arrive to target volume
+
+							//set this command, will let EAP recover the gain of stream [0] and [2] back to the target gain value in NOTIF_VOLUME_TRANSITION_TIME_MS
+							//and then will call back to eapNotificationCallbackUp, to let the next prompt playing is allowed
+							retStatusEAP = LVM_SetControlParameters(eap_1_Handle.hInstance, eap_1_Handle.pControlParams);
+							if(retStatusEAP != LVM_SUCCESS)
+							{
+								PRINTF("LVM_SetControlParameters: fail with error %i \r\n",retStatusEAP );
+							}
+						}
 				}else
 				{
+					//all zeros to EAP input stream[1]
 					memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(S16)*FrmSizeInSamples);
 					memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(S16)*FrmSizeInSamples);
 				}
-			xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+			#else
+				//take out OPUS output audio
+				xos_mutex_lock(&g_audio_OpusDecoderMutex);
+					if(CirAudioBuf_SpaceOccupiedInSamples_S32(&OpusOutputCirBuf_LRMixed) >= FrmSizeInSamples)
+					{
+						OtPtrS16_Opus=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&OpusOutputCirBuf_LRMixed, FrmSizeInSamples);
+						for(i=0;i<FrmSizeInSamples;i++)
+						{
+							AudioOneFrameBuf_OpusDecodedL[i]=*OtPtrS16_Opus++;
+							AudioOneFrameBuf_OpusDecodedR[i]=*OtPtrS16_Opus++;
+						}
+					}else
+					{
+						memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(S16)*FrmSizeInSamples);
+						memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(S16)*FrmSizeInSamples);
+					}
+				xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+			#endif
 		#endif
 		#if EnableSbcDec==1
 			unsigned short *OtPtrS16_Sbc;
-			//take out Sbc output audio, and mix with UAC, with satuation, no gaining
+			//take out Sbc output audio
 			xos_mutex_lock(&g_audio_SbcDecoderMutex);
 				if(CirAudioBuf_SpaceOccupiedInSamples_S32(&SbcOutputCirBuf_LRMixed) >= FrmSizeInSamples)
 				{
@@ -655,60 +559,96 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 	#endif
 
 	#if 1	//step 3: prepare Rx data for Conversa, need to mix Sbc, Opus and do SRC
-			int OutSampleNum;
-			S32 TmpS32Buf_LRMixed_SrcInput                    [AudioFrameSizeInSamplePerCh_48KHz*2];
-			S32 TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[AudioFrameSizeInSamplePerCh_16KHz*2];
-			float *ConversaRefIn;
+		int OutSampleNum;
+		S32 TmpS32Buf_LRMixed_SrcInput                    [AudioFrameSizeInSamplePerCh_48KHz*2];
+		S32 TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[AudioFrameSizeInSamplePerCh_16KHz*2];
+		float *ConversaRefIn;
 
+		#if EAP_ENABLE==1
+			S16 *EapInPtrs[LVM_MAX_STREAMS*2];	//this is LVM_MAX_STREAMS stereo channels
+			S16 *EapOtPtrs[2];					//this is 1 stereo channel
+
+			//input stream[0] for EAP
+			EapInPtrs[0]=AudioOneFrameBuf_SbcDecodedL;
+			EapInPtrs[1]=AudioOneFrameBuf_SbcDecodedR;
+			//input stream[1] for EAP
+			EapInPtrs[2]=AudioOneFrameBuf_OpusDecodedL;
+			EapInPtrs[3]=AudioOneFrameBuf_OpusDecodedR;
+			//input stream[2] for EAP --- zeros
+			EapInPtrs[4]=(S16 *)AudioOneFrameBuf_48KHz_AllZeros;
+			EapInPtrs[5]=EapInPtrs[4]+FrmSizeInSamples;
+
+			//output stream pointers
+			EapOtPtrs[0]=DstPtrS16_I2SAmpL;
+			EapOtPtrs[1]=DstPtrS16_I2SAmpR;
+
+			EapProcess(EapOtPtrs, EapInPtrs, FrmSizeInSamples,EapTuningCfg_MediaPlay);
+		#else
 			//add OPUS and SBC to DstPtrS16_I2SAmpL and R --- will be streamed to AMP
 			vec_add16x16(DstPtrS16_I2SAmpL, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)SrcPtrS16_I2SNvtL, AudioFrameSizeInSamplePerCh_48KHz);
-			//vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)SrcPtrS16_I2SNvtR, AudioFrameSizeInSamplePerCh_48KHz);
-			vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedR, (const short int*)SrcPtrS16_I2SNvtR, AudioFrameSizeInSamplePerCh_48KHz);
+			vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)SrcPtrS16_I2SNvtR, AudioFrameSizeInSamplePerCh_48KHz);
+		#endif
 
-			//convert to S32 and do SRC, then convert back to float --- to make the 16KHz float input ref in for Conversa
-			for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
-			{
-				S32Ptr_Tmp1L[2*i+0]=(DstPtrS16_I2SAmpL[i]<<16);		//S32Ptr_Tmp1L together with S32Ptr_Tmp1R is used as S32 LRMixed buffer
-				S32Ptr_Tmp1L[2*i+1]=(DstPtrS16_I2SAmpR[i]<<16); 	//S32Ptr_Tmp1L together with S32Ptr_Tmp1R is used as S32 LRMixed buffer
-			}
+		//convert to S32 and do SRC, then convert back to float --- to make the 16KHz float input ref in for Conversa
+		for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+		{
+			S32Ptr_Tmp1L[2*i+0]=(DstPtrS16_I2SAmpL[i]<<16);		//S32Ptr_Tmp1L together with S32Ptr_Tmp1R is used as S32 LRMixed buffer
+			S32Ptr_Tmp1L[2*i+1]=(DstPtrS16_I2SAmpR[i]<<16); 	//S32Ptr_Tmp1L together with S32Ptr_Tmp1R is used as S32 LRMixed buffer
+		}
 
-			//master volume control ---  in and out are both S32 --- change PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1 in MCU side to set new volume target
-			SoftGainControl_MasterLAndR.TargetGain=PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1;
-			AudioProcOneFrameS32_Gain(&SoftGainControl_MasterLAndR, TmpS32Buf_LRMixed_SrcInput, S32Ptr_Tmp1L, AudioFrameSizeInSamplePerCh_48KHz*2);	//FltPtr_Tmp1L together with FltPtr_Tmp1R is used as LRMixed buffer
+		//master volume control ---  in and out are both S32 --- change PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1 in MCU side to set new volume target
+		SoftGainControl_MasterLAndR.TargetGain=PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1;
+		AudioProcOneFrameS32_Gain(&SoftGainControl_MasterLAndR, TmpS32Buf_LRMixed_SrcInput, S32Ptr_Tmp1L, AudioFrameSizeInSamplePerCh_48KHz*2);	//FltPtr_Tmp1L together with FltPtr_Tmp1R is used as LRMixed buffer
 
-			for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
-			{
-				DstPtrS16_I2SAmpL[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+0]>>16);	//48KHz/ 32bit ==> 48KHz/ 16bit
-				DstPtrS16_I2SAmpR[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+1]>>16);
-			}
+		for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+		{
+			DstPtrS16_I2SAmpL[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+0]>>16);	//48KHz/ 32bit ==> 48KHz/ 16bit
+			DstPtrS16_I2SAmpR[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+1]>>16);
+		}
 
-			//SSRC process
-			ProcCadenceAsrc(&SRC_ConversaRx2, TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput, TmpS32Buf_LRMixed_SrcInput,  AudioFrameSizeInSamplePerCh_48KHz,    &OutSampleNum);
+		//SSRC process
+		ProcCadenceAsrc(&SRC_ConversaRx2, TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput, TmpS32Buf_LRMixed_SrcInput,  AudioFrameSizeInSamplePerCh_48KHz,    &OutSampleNum);
 
-			//borrow TmpS32Buf_LRMixed_SrcInput for Conversa ref in buffer, 16KHz float
-			ConversaRefIn=(float *)TmpS32Buf_LRMixed_SrcInput;
-			for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
-			{
-				float a,b;
-				a=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+0]*_Value_Pow_2_Neg31_;
-				b=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+i]*_Value_Pow_2_Neg31_;
-				ConversaRefIn[i]=(a+b)*0.5f;
-			}
+		//borrow TmpS32Buf_LRMixed_SrcInput for Conversa ref in buffer, 16KHz float
+		ConversaRefIn=(float *)TmpS32Buf_LRMixed_SrcInput;
+		for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
+		{
+			float a,b;
+			a=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+0]*_Value_Pow_2_Neg31_;
+			b=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+i]*_Value_Pow_2_Neg31_;
+			ConversaRefIn[i]=(a+b)*0.5f;
+		}
 	#endif
 
 	#if 1	//step 4: Conversa and VIT process
 		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
 		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
 
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
 		#if 1
-			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
+			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
 
-		//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
-		ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef);
+
+		if((PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg==ConversaTuningCfg_NoChange)&&(ConversaIsNowBeingUsed))
+		{
+			//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
+			ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef,0);
+		}else
+		{
+			//bypass conversa --- simply assign the output pointers to the input pointers or zero buffer
+			ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef,1);
+		}
+
 	#endif
 
 
@@ -740,15 +680,15 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 		vec_float2int(S32Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], -31,  AudioFrameSizeInSamplePerCh_16KHz);	//conversa BfOut
 
 		#if 1	//later to be closed
-		if(ASR_WavPulse==ASR_WavPulse_WakeWordDetected)
-		{
-			ConversaTxOut32BitBuf[0]=0x7fff0000;
-			ASR_WavPulse=ASR_WavPulse_NothingDetected;
-		}else if(ASR_WavPulse==ASR_WavPulse_VoiceCmdDetected)
-		{
-			AecOut32BitBuf[0]=0x7fff0000;
-			ASR_WavPulse=ASR_WavPulse_NothingDetected;
-		}
+			if(ASR_WavPulse==ASR_WavPulse_WakeWordDetected)
+			{
+				ConversaTxOut32BitBuf[0]=0x7fff0000;
+				ASR_WavPulse=ASR_WavPulse_NothingDetected;
+			}else if(ASR_WavPulse==ASR_WavPulse_VoiceCmdDetected)
+			{
+				AecOut32BitBuf[0]=0x7fff0000;
+				ASR_WavPulse=ASR_WavPulse_NothingDetected;
+			}
 		#endif
 
 		//fill USB up streaming buffer --- 8 channels, all 16KHz, 32bit
@@ -769,13 +709,13 @@ void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 		}
 	#endif
 
-	DbgPin7Dn();
+//	DbgPin7Dn();
 }
 
 __attribute__((__section__(".iram.text")))
-void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
+void DspMainAudioFlowProcOneFrame_MediaPlayer(int OptionWord)
 {
-	S16 i;
+	int i;
 	switch(OptionWord)
 	{
 		case 0:
@@ -787,13 +727,12 @@ void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
 		default:
 			break;
 	}
-
-	DbgPin7Up();
+//	DbgPin7Up();
 
 	#if 1	//step 1: convert input samples from S32 or S16 to float
 		S16 RawMicSignal16BitForVitRef[AudioFrameSizeInSamplePerCh_16KHz];
 
-		PrepareMainAudioFlowPointersAndInputFloatData(1,0,0,0);//(int NeedToCvtMicToFlt, int NeedToCvtUacDnToFlt, int NeedToCvtAmpI2SInToFlt, int NeedToCvtNvtI2SInToFlt)
+		PrepareMainAudioFlowPointersAndInputFloatData(1,0,0,1);//(int NeedToCvtMicToFlt, int NeedToCvtUacDnToFlt, int NeedToCvtAmpI2SInToFlt, int NeedToCvtNvtI2SInToFlt)
 		int FrmSizeInSamples=PtrVarBlockSharedByDspAndMcu->I2SFrmSizeInSamples_Amp;
 
 		for(int i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
@@ -805,26 +744,75 @@ void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
 		//in this mode, OPUS and SBC stream are converted to 48KHz Fs
 		#if EnableOpusDec==1
 			unsigned short *OtPtrS16_Opus;
-			//take out OPUS output audio, and mix with UAC, with satuation, no gaining
-			xos_mutex_lock(&g_audio_OpusDecoderMutex);
-				if(CirAudioBuf_SpaceOccupiedInSamples_S32(&OpusOutputCirBuf_LRMixed) >= FrmSizeInSamples)
+
+			#if EAP_ENABLE==1
+
+				if(EapAllowsWritingStrm1AsPromptAudio)
 				{
-					OtPtrS16_Opus=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&OpusOutputCirBuf_LRMixed, FrmSizeInSamples);
-					for(i=0;i<FrmSizeInSamples;i++)
-					{
-						AudioOneFrameBuf_OpusDecodedL[i]=*OtPtrS16_Opus++;
-						AudioOneFrameBuf_OpusDecodedR[i]=*OtPtrS16_Opus++;
-					}
+					xos_mutex_lock(&g_audio_OpusDecoderMutex);
+						if(CirAudioBuf_SpaceOccupiedInSamples_S32(&OpusOutputCirBuf_LRMixed) >= FrmSizeInSamples)
+						{
+							OtPtrS16_Opus=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&OpusOutputCirBuf_LRMixed, FrmSizeInSamples);
+							//prompt audio to EAP input stream[1]
+							for(i=0;i<FrmSizeInSamples;i++)
+							{
+								AudioOneFrameBuf_OpusDecodedL[i]=*OtPtrS16_Opus++;
+								AudioOneFrameBuf_OpusDecodedR[i]=*OtPtrS16_Opus++;
+							}
+					xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+						}else
+						{
+					xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+							//all zeros to EAP input stream[1]
+							memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(S16)*FrmSizeInSamples);
+							memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(S16)*FrmSizeInSamples);
+
+							LVM_ReturnStatus_en retStatusEAP = LVM_SUCCESS;
+
+							EapAllowsWritingStrm1AsPromptAudio = PL_FALSE;
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[0].TargetGain 		= LVM_MIXER_VOLUME_MAX; 			// Set audio playback stream back to 0dB --- Quanta should change the target gain to the proper variable
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[0].TimeConstantMs 	= NOTIF_VOLUME_TRANSITION_TIME_MS;	// Time to arrive to target volume
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[0].pCallback 		= (LVM_Callback)eapNotificationCallbackUp;
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[1].TargetGain 		= LVM_MIXER_VOLUME_MAX/256;
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[2].TargetGain 		= LVM_MIXER_VOLUME_MAX; 			// Set audio playback stream back to 0dB --- Quanta should change the target gain to the proper variable
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[2].TimeConstantMs 	= NOTIF_VOLUME_TRANSITION_TIME_MS;	// Time to arrive to target volume
+
+							//set this command, will let EAP recover the gain of stream [0] and [2] back to the target gain value in NOTIF_VOLUME_TRANSITION_TIME_MS
+							//and then will call back to eapNotificationCallbackUp, to let the next prompt playing is allowed
+							retStatusEAP = LVM_SetControlParameters(eap_1_Handle.hInstance, eap_1_Handle.pControlParams);
+							if(retStatusEAP != LVM_SUCCESS)
+							{
+								PRINTF("LVM_SetControlParameters: fail with error %i \r\n",retStatusEAP );
+							}
+						}
 				}else
 				{
+					//all zeros to EAP input stream[1]
 					memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(S16)*FrmSizeInSamples);
 					memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(S16)*FrmSizeInSamples);
 				}
-			xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+			#else
+				//take out OPUS output audio
+				xos_mutex_lock(&g_audio_OpusDecoderMutex);
+					if(CirAudioBuf_SpaceOccupiedInSamples_S32(&OpusOutputCirBuf_LRMixed) >= FrmSizeInSamples)
+					{
+						OtPtrS16_Opus=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&OpusOutputCirBuf_LRMixed, FrmSizeInSamples);
+						for(i=0;i<FrmSizeInSamples;i++)
+						{
+							AudioOneFrameBuf_OpusDecodedL[i]=*OtPtrS16_Opus++;
+							AudioOneFrameBuf_OpusDecodedR[i]=*OtPtrS16_Opus++;
+						}
+					}else
+					{
+						memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(S16)*FrmSizeInSamples);
+						memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(S16)*FrmSizeInSamples);
+					}
+				xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+			#endif
 		#endif
 		#if EnableSbcDec==1
 			unsigned short *OtPtrS16_Sbc;
-			//take out Sbc output audio, and mix with UAC, with satuation, no gaining
+			//take out Sbc output audio
 			xos_mutex_lock(&g_audio_SbcDecoderMutex);
 				if(CirAudioBuf_SpaceOccupiedInSamples_S32(&SbcOutputCirBuf_LRMixed) >= FrmSizeInSamples)
 				{
@@ -845,63 +833,395 @@ void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
 	#endif
 
 	#if 1	//step 3: prepare Rx data for Conversa, need to mix Sbc, Opus and do SRC
-			int OutSampleNum;
-			S32 TmpS32Buf_LRMixed_SrcInput                    [AudioFrameSizeInSamplePerCh_48KHz*2];
-			S32 TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[AudioFrameSizeInSamplePerCh_16KHz*2];
-			float *ConversaRefIn;
+		int OutSampleNum;
+		S32 TmpS32Buf_LRMixed_SrcInput                    [AudioFrameSizeInSamplePerCh_48KHz*2];
+		S32 TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[AudioFrameSizeInSamplePerCh_16KHz*2];
+		float *ConversaRefIn;
 
+		#if EAP_ENABLE==1
+
+			S16 *EapInPtrs[LVM_MAX_STREAMS*2];	//this is LVM_MAX_STREAMS stereo channels
+			S16 *EapOtPtrs[2];					//this is 1 stereo channel
+
+			//input stream[0] for EAP
+			EapInPtrs[0]=SrcPtrS16_I2SNvtL;
+			EapInPtrs[1]=SrcPtrS16_I2SNvtR;
+			//input stream[1] for EAP
+			EapInPtrs[2]=AudioOneFrameBuf_OpusDecodedL;
+			EapInPtrs[3]=AudioOneFrameBuf_OpusDecodedR;
+			//input stream[2] for EAP --- zeros
+			EapInPtrs[4]=(S16 *)AudioOneFrameBuf_48KHz_AllZeros;
+			EapInPtrs[5]=EapInPtrs[4]+FrmSizeInSamples;
+
+			//output stream pointers
+			EapOtPtrs[0]=DstPtrS16_I2SAmpL;
+			EapOtPtrs[1]=DstPtrS16_I2SAmpR;
+
+			EapProcess(EapOtPtrs, EapInPtrs, FrmSizeInSamples,EapTuningCfg_MediaPlay);
+		#else
 			//add OPUS and SBC to DstPtrS16_I2SAmpL and R --- will be streamed to AMP
-			vec_add16x16(DstPtrS16_I2SAmpL, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedL, AudioFrameSizeInSamplePerCh_48KHz);
-			//vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedR, AudioFrameSizeInSamplePerCh_48KHz);
-			vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedR, (const short int*)AudioOneFrameBuf_SbcDecodedR, AudioFrameSizeInSamplePerCh_48KHz);
+			vec_add16x16(DstPtrS16_I2SAmpL, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)SrcPtrS16_I2SNvtL, AudioFrameSizeInSamplePerCh_48KHz);
+			vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)SrcPtrS16_I2SNvtR, AudioFrameSizeInSamplePerCh_48KHz);
+		#endif
 
-			//convert to S32 and do SRC, then convert back to float --- to make the 16KHz float input ref in for Conversa
-			for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
-			{
-				S32Ptr_Tmp1L[2*i+0]=(DstPtrS16_I2SAmpL[i]<<16);		//S32Ptr_Tmp1L together with S32Ptr_Tmp1R is used as S32 LRMixed buffer
-				S32Ptr_Tmp1L[2*i+1]=(DstPtrS16_I2SAmpR[i]<<16); 	//S32Ptr_Tmp1L together with S32Ptr_Tmp1R is used as S32 LRMixed buffer
-			}
+		//convert to S32 and do SRC, then convert back to float --- to make the 16KHz float input ref in for Conversa
+		for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+		{
+			S32Ptr_Tmp1L[2*i+0]=(DstPtrS16_I2SAmpL[i]<<16);		//S32Ptr_Tmp1L together with S32Ptr_Tmp1R is used as S32 LRMixed buffer
+			S32Ptr_Tmp1L[2*i+1]=(DstPtrS16_I2SAmpR[i]<<16); 	//S32Ptr_Tmp1L together with S32Ptr_Tmp1R is used as S32 LRMixed buffer
+		}
 
-			//master volume control ---  in and out are both S32 --- change PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1 in MCU side to set new volume target
-			SoftGainControl_MasterLAndR.TargetGain=PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1;
-			AudioProcOneFrameS32_Gain(&SoftGainControl_MasterLAndR, TmpS32Buf_LRMixed_SrcInput, S32Ptr_Tmp1L, AudioFrameSizeInSamplePerCh_48KHz*2);	//FltPtr_Tmp1L together with FltPtr_Tmp1R is used as LRMixed buffer
+		//master volume control ---  in and out are both S32 --- change PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1 in MCU side to set new volume target
+		SoftGainControl_MasterLAndR.TargetGain=PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1;
+		AudioProcOneFrameS32_Gain(&SoftGainControl_MasterLAndR, TmpS32Buf_LRMixed_SrcInput, S32Ptr_Tmp1L, AudioFrameSizeInSamplePerCh_48KHz*2);	//FltPtr_Tmp1L together with FltPtr_Tmp1R is used as LRMixed buffer
 
-			for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
-			{
-				DstPtrS16_I2SAmpL[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+0]>>16);	//48KHz/ 32bit ==> 48KHz/ 16bit
-				DstPtrS16_I2SAmpR[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+1]>>16);
-			}
+		//gill
+//		for(int i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+//		{
+//			DstPtrS16_I2SAmpL[i] =  i * 20;
+//			DstPtrS16_I2SAmpR[i] = -i * 20;
+//		}
 
-			//SSRC process
-			ProcCadenceAsrc(&SRC_ConversaRx2, TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput, TmpS32Buf_LRMixed_SrcInput,  AudioFrameSizeInSamplePerCh_48KHz,    &OutSampleNum);
+		for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+		{
+			DstPtrS16_I2SAmpL[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+0]>>16);	//48KHz/ 32bit ==> 48KHz/ 16bit
+			DstPtrS16_I2SAmpR[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+1]>>16);
+		}
 
-			//borrow TmpS32Buf_LRMixed_SrcInput for Conversa ref in buffer, 16KHz float
-			ConversaRefIn=(float *)TmpS32Buf_LRMixed_SrcInput;
-			for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
-			{
-				float a,b;
-				a=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+0]*_Value_Pow_2_Neg31_;
-				b=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+i]*_Value_Pow_2_Neg31_;
-				ConversaRefIn[i]=(a+b)*0.5f;
-			}
+		//SSRC process
+		ProcCadenceAsrc(&SRC_ConversaRx2, TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput, TmpS32Buf_LRMixed_SrcInput,  AudioFrameSizeInSamplePerCh_48KHz,    &OutSampleNum);
+
+		//borrow TmpS32Buf_LRMixed_SrcInput for Conversa ref in buffer, 16KHz float
+		ConversaRefIn=(float *)TmpS32Buf_LRMixed_SrcInput;
+		for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
+		{
+			float a,b;
+			a=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+0]*_Value_Pow_2_Neg31_;
+			b=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+i]*_Value_Pow_2_Neg31_;
+			ConversaRefIn[i]=(a+b)*0.5f;
+		}
 	#endif
 
 	#if 1	//step 4: Conversa and VIT process
 		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
 		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
 
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
 		#if 1
-			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
+			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
 
-		//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
-		ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef);
+
+		if((PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg==ConversaTuningCfg_NoChange)&&(ConversaIsNowBeingUsed))
+		{
+			//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
+			ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef,0);
+		}else
+		{
+			//bypass conversa --- simply assign the output pointers to the input pointers or zero buffer
+			ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef,1);
+		}
+
 	#endif
 
 
+
+	#if 1
+		//fill AMP I2S out buffer with FltPtr_Tmp1L (SBC + OPUS mixed audio)
+		//this is aready done when mixing opus and sbc
+
+		ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], AudioFrameSizeInSamplePerCh_16KHz);
+		ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], AudioFrameSizeInSamplePerCh_16KHz);
+		//ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], AudioFrameSizeInSamplePerCh_16KHz);
+
+		for(int i=0; i < AudioFrameSizeInSamplePerCh_16KHz; i++ ) //16KHz to 48KHz
+		{
+			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
+			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
+			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L++;
+
+			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
+			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
+			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R++;
+		}
+
+	#endif
+
+	#if 1	//folding --- step5: put interested audio channels to UAC 8 ch
+		//convert conversa output to S32
+		vec_float2int(S32Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], -31,  AudioFrameSizeInSamplePerCh_16KHz);	//conversa TxOut
+		vec_float2int(S32Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], -31,  AudioFrameSizeInSamplePerCh_16KHz);	//conversa BfOut
+
+		#if 1	//later to be closed
+			if(ASR_WavPulse==ASR_WavPulse_WakeWordDetected)
+			{
+				ConversaTxOut32BitBuf[0]=0x7fff0000;
+				ASR_WavPulse=ASR_WavPulse_NothingDetected;
+			}else if(ASR_WavPulse==ASR_WavPulse_VoiceCmdDetected)
+			{
+				AecOut32BitBuf[0]=0x7fff0000;
+				ASR_WavPulse=ASR_WavPulse_NothingDetected;
+			}
+		#endif
+
+		//fill USB up streaming buffer --- 8 channels, all 16KHz, 32bit
+		for(i=0;i<FrmSizeInSamples/3;i++)
+		{
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+0];
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+1];
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=DstPtrS16_I2SNvtL[i*3]<<16; //to Nvt L
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=DstPtrS16_I2SNvtR[i*3]<<16; //to Nvt R
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=SrcPtrS16_I2SNvtL[i*3]<<16;	//48K16bit
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=SrcPtrS16_I2SNvtR[i*3]<<16;
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=DstPtrS16_I2SAmpL[i*3]<<16; //48K16bit
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=DstPtrS16_I2SAmpR[i*3]<<16;
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp1L[i];	//conversa Tx out
+			//PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
+
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=SrcPtrS32_Mic0[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic0[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic0[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic0[i];
+		}
+	#endif
+
+//	DbgPin7Dn();
+}
+
+__attribute__((__section__(".iram.text")))
+void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
+{
+	S16 i;
+	switch(OptionWord)
+	{
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		default:
+			break;
+	}
+
+//	DbgPin7Up();
+
+	#if 1	//step 1: convert input samples from S32 or S16 to float
+		S16 RawMicSignal16BitForVitRef[AudioFrameSizeInSamplePerCh_16KHz];
+
+		PrepareMainAudioFlowPointersAndInputFloatData(1,0,0,0);//(int NeedToCvtMicToFlt, int NeedToCvtUacDnToFlt, int NeedToCvtAmpI2SInToFlt, int NeedToCvtNvtI2SInToFlt)
+		int FrmSizeInSamples=PtrVarBlockSharedByDspAndMcu->I2SFrmSizeInSamples_Amp;
+
+		for(int i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
+			RawMicSignal16BitForVitRef[i]=(SrcPtrS32_Mic0[i]>>16);
+
+	#endif
+
+	#if 1	//step 2: get audio from sbc decoder and opus decoder, or clear the decoder buffer if the decoder is NOT running
+		//in this mode, OPUS and SBC stream are converted to 48KHz Fs
+		#if EnableOpusDec==1
+			unsigned short *OtPtrS16_Opus;
+
+			#if EAP_ENABLE==1 //B36932 enable EAP
+				if(EapAllowsWritingStrm1AsPromptAudio)
+				{
+					xos_mutex_lock(&g_audio_OpusDecoderMutex);
+						if(CirAudioBuf_SpaceOccupiedInSamples_S32(&OpusOutputCirBuf_LRMixed) >= FrmSizeInSamples)
+						{
+							OtPtrS16_Opus=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&OpusOutputCirBuf_LRMixed, FrmSizeInSamples);
+							//prompt audio to EAP input stream[1]
+							for(i=0;i<FrmSizeInSamples;i++)
+							{
+								AudioOneFrameBuf_OpusDecodedL[i]=*OtPtrS16_Opus++;
+								AudioOneFrameBuf_OpusDecodedR[i]=*OtPtrS16_Opus++;
+							}
+					xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+						}else
+						{
+					xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+							//all zeros to EAP input stream[1]
+							memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(S16)*FrmSizeInSamples);
+							memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(S16)*FrmSizeInSamples);
+
+							//PRINTF_M("	DSP: OPUS play is finished\r\n");
+
+							LVM_ReturnStatus_en retStatusEAP = LVM_SUCCESS;
+
+							EapAllowsWritingStrm1AsPromptAudio = PL_FALSE;
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[0].TargetGain 		= LVM_MIXER_VOLUME_MAX; 			// Set audio playback stream back to 0dB --- Quanta should change the target gain to the proper variable
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[0].TimeConstantMs 	= NOTIF_VOLUME_TRANSITION_TIME_MS;	// Time to arrive to target volume
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[0].pCallback 		= (LVM_Callback)eapNotificationCallbackUp;
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[1].TargetGain 		= LVM_MIXER_VOLUME_MAX/256;
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[2].TargetGain 		= LVM_MIXER_VOLUME_MAX; 			// Set audio playback stream back to 0dB --- Quanta should change the target gain to the proper variable
+							eap_1_Handle.pControlParams->pMIXER_StreamParams[2].TimeConstantMs 	= NOTIF_VOLUME_TRANSITION_TIME_MS;	// Time to arrive to target volume
+
+							//set this command, will let EAP recover the gain of stream [0] and [2] back to the target gain value in NOTIF_VOLUME_TRANSITION_TIME_MS
+							//and then will call back to eapNotificationCallbackUp, to let the next prompt playing is allowed
+							retStatusEAP = LVM_SetControlParameters(eap_1_Handle.hInstance, eap_1_Handle.pControlParams);
+							if(retStatusEAP != LVM_SUCCESS)
+							{
+								PRINTF("LVM_SetControlParameters: fail with error %i \r\n",retStatusEAP );
+							}
+						}
+				}else
+				{
+					//all zeros to EAP input stream[1]
+					memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(S16)*FrmSizeInSamples);
+					memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(S16)*FrmSizeInSamples);
+				}
+			#else
+				//take out OPUS output audio
+				xos_mutex_lock(&g_audio_OpusDecoderMutex);
+					if(CirAudioBuf_SpaceOccupiedInSamples_S32(&OpusOutputCirBuf_LRMixed) >= FrmSizeInSamples)
+					{
+						OtPtrS16_Opus=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&OpusOutputCirBuf_LRMixed, FrmSizeInSamples);
+						for(i=0;i<FrmSizeInSamples;i++)
+						{
+							AudioOneFrameBuf_OpusDecodedL[i]=*OtPtrS16_Opus++;
+							AudioOneFrameBuf_OpusDecodedR[i]=*OtPtrS16_Opus++;
+						}
+					}else
+					{
+						memset(AudioOneFrameBuf_OpusDecodedL,0,sizeof(S16)*FrmSizeInSamples);
+						memset(AudioOneFrameBuf_OpusDecodedR,0,sizeof(S16)*FrmSizeInSamples);
+					}
+				xos_mutex_unlock(&g_audio_OpusDecoderMutex);
+			#endif
+		#endif
+		#if EnableSbcDec==1
+			unsigned short *OtPtrS16_Sbc;
+			//take out Sbc output audio
+			xos_mutex_lock(&g_audio_SbcDecoderMutex);
+				if(CirAudioBuf_SpaceOccupiedInSamples_S32(&SbcOutputCirBuf_LRMixed) >= FrmSizeInSamples)
+				{
+					OtPtrS16_Sbc=(unsigned short *)CirAudioBuf_ReadSamples_GetRdPtr_S32(&SbcOutputCirBuf_LRMixed, FrmSizeInSamples);
+					for(i=0;i<FrmSizeInSamples;i++)
+					{
+						AudioOneFrameBuf_SbcDecodedL[i]=*OtPtrS16_Sbc++;
+						AudioOneFrameBuf_SbcDecodedR[i]=*OtPtrS16_Sbc++;
+					}
+				}else
+				{
+					//PRINTF("SBC cir buffer is empty\n");
+					memset(AudioOneFrameBuf_SbcDecodedL,0,sizeof(S16)*FrmSizeInSamples);
+					memset(AudioOneFrameBuf_SbcDecodedR,0,sizeof(S16)*FrmSizeInSamples);
+				}
+			xos_mutex_unlock(&g_audio_SbcDecoderMutex);
+		#endif
+	#endif
+
+	#if 1	//step 3: prepare Rx data for Conversa, need to mix Sbc, Opus and do SRC
+		int OutSampleNum;
+		S32 TmpS32Buf_LRMixed_SrcInput                    [AudioFrameSizeInSamplePerCh_48KHz*2];
+		S32 TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[AudioFrameSizeInSamplePerCh_16KHz*2];
+		float *ConversaRefIn;
+
+
+		//DbgPin6Up();
+		#if EAP_ENABLE==1
+			S16 *EapInPtrs[LVM_MAX_STREAMS*2];	//this is LVM_MAX_STREAMS stereo channels
+			S16 *EapOtPtrs[2];					//this is 1 stereo channel
+
+			//input stream[0] for EAP
+			EapInPtrs[0]=AudioOneFrameBuf_SbcDecodedL;
+			EapInPtrs[1]=AudioOneFrameBuf_SbcDecodedR;
+			//input stream[1] for EAP
+			EapInPtrs[2]=AudioOneFrameBuf_OpusDecodedL;
+			EapInPtrs[3]=AudioOneFrameBuf_OpusDecodedR;
+			//input stream[2] for EAP --- zeros
+			EapInPtrs[4]=(S16 *)AudioOneFrameBuf_48KHz_AllZeros;
+			EapInPtrs[5]=EapInPtrs[4]+FrmSizeInSamples;
+
+			//output stream pointers
+			EapOtPtrs[0]=DstPtrS16_I2SAmpL;
+			EapOtPtrs[1]=DstPtrS16_I2SAmpR;
+
+			EapProcess(EapOtPtrs, EapInPtrs, FrmSizeInSamples, EapTuningCfg_MusicPlay);
+		#else
+			//add OPUS and SBC to DstPtrS16_I2SAmpL and R --- will be streamed to AMP
+			vec_add16x16(DstPtrS16_I2SAmpL, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedL, AudioFrameSizeInSamplePerCh_48KHz);
+			vec_add16x16(DstPtrS16_I2SAmpR, (const short int*)AudioOneFrameBuf_OpusDecodedL, (const short int*)AudioOneFrameBuf_SbcDecodedR, AudioFrameSizeInSamplePerCh_48KHz);
+		#endif
+		//DbgPin6Dn();
+
+		//convert to S32 and do SRC, then convert back to float --- to make the 16KHz float input ref in for Conversa
+		for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+		{
+			S32Ptr_Tmp1L[2*i+0]=(DstPtrS16_I2SAmpL[i]<<16);		//S32Ptr_Tmp1L together with S32Ptr_Tmp1R is used as S32 LRMixed buffer
+			S32Ptr_Tmp1L[2*i+1]=(DstPtrS16_I2SAmpR[i]<<16); 	//S32Ptr_Tmp1L together with S32Ptr_Tmp1R is used as S32 LRMixed buffer
+		}
+
+		/*
+		for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+		{
+			DstPtrS16_I2SAmpR[i]=i*0x10;
+		}
+		*/
+
+		//master volume control ---  in and out are both S32 --- change PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1 in MCU side to set new volume target
+		SoftGainControl_MasterLAndR.TargetGain=PtrVarBlockSharedByDspAndMcu->MasterVolumeGain0To1;
+		AudioProcOneFrameS32_Gain(&SoftGainControl_MasterLAndR, TmpS32Buf_LRMixed_SrcInput, S32Ptr_Tmp1L, AudioFrameSizeInSamplePerCh_48KHz*2);	//FltPtr_Tmp1L together with FltPtr_Tmp1R is used as LRMixed buffer
+
+		for(i=0;i<AudioFrameSizeInSamplePerCh_48KHz;i++)
+		{
+			DstPtrS16_I2SAmpL[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+0]>>16);	//48KHz/ 32bit ==> 48KHz/ 16bit
+			DstPtrS16_I2SAmpR[i]=(TmpS32Buf_LRMixed_SrcInput[2*i+1]>>16);
+		}
+
+		//SSRC process
+		ProcCadenceAsrc(&SRC_ConversaRx2, TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput, TmpS32Buf_LRMixed_SrcInput,  AudioFrameSizeInSamplePerCh_48KHz,    &OutSampleNum);
+
+		//borrow TmpS32Buf_LRMixed_SrcInput for Conversa ref in buffer, 16KHz float
+		ConversaRefIn=(float *)TmpS32Buf_LRMixed_SrcInput;
+		for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
+		{
+			float a,b;
+			a=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+0]*_Value_Pow_2_Neg31_;
+			b=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+i]*_Value_Pow_2_Neg31_;
+			ConversaRefIn[i]=(a+b)*0.5f;
+		}
+	#endif
+
+
+	#if 1	//step 4: Conversa and VIT process
+		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
+		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
+
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
+		#if 1
+			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
+		#else
+		#endif
+
+		//DbgPin6Up();
+		if((PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg==ConversaTuningCfg_NoChange)&&(ConversaIsNowBeingUsed))
+		{
+			//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
+			ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef,0);
+		}else
+		{
+			//bypass conversa --- simply assign the output pointers to the input pointers or zero buffer
+			ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef,1);
+		}
+		//DbgPin6Dn();
+	#endif
 
 	#if 1
 		//fill AMP I2S out buffer with FltPtr_Tmp1L (SBC + OPUS mixed audio)
@@ -925,10 +1245,13 @@ void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+0]=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+0];
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+1]=TmpS32Buf_LRMixed_SbcOpusMixed_16KHz_SrcOutput[2*i+1];
 
-		//	PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp1L[i];	//conversa Tx out
-		//	PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp2L[i];	//Output to AMP L
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp2R[i]; //Output to AMP R
+			#if 0
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp2L[i];	//Output to AMP L
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp2R[i]; //Output to AMP R
+			#else
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+2]=S32Ptr_Tmp1L[i];	//conversa Tx out
+				PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
+			#endif
 
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=SrcPtrS32_Mic0[i];
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic1[i];
@@ -937,7 +1260,7 @@ void DspMainAudioFlowProcOneFrame_MusicPlayer(int OptionWord)
 		}
 	#endif
 
-	DbgPin7Dn();
+//	DbgPin7Dn();
 }
 
 __attribute__((__section__(".iram.text")))
@@ -945,7 +1268,7 @@ void DspMainAudioFlowProcOneFrame_Translation(int OptionWord)
 {
 	int i;
 
-	DbgPin7Up();
+//	DbgPin7Up();
 
 	#if 1	//step 1: convert input samples from S32 or S16 to float
 		S16 RawMicSignal16BitForVitRef[AudioFrameSizeInSamplePerCh_16KHz];
@@ -1034,33 +1357,41 @@ void DspMainAudioFlowProcOneFrame_Translation(int OptionWord)
 		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
 		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
 
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
 		#if 1
-			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
+			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
 
 		//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
-		ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef);
+		ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef,0);
 	#endif
 
 	#if 1 //fill AMP I2S out buffer with FltPtr_Tmp1L (SBC + OPUS mixed audio)
 		//fill AMP I2S out buffer with FltPtr_Tmp1L (SBC + OPUS mixed audio)
 		//this is aready done when mixing opus and sbc
 
-		ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], AudioFrameSizeInSamplePerCh_16KHz);
+		//ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], AudioFrameSizeInSamplePerCh_16KHz);
+
+		//ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_AecOut], AudioFrameSizeInSamplePerCh_16KHz);
 		ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], AudioFrameSizeInSamplePerCh_16KHz);
 
 		for(int i=0; i < AudioFrameSizeInSamplePerCh_16KHz; i++ ) //16KHz to 48KHz
 		{
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L++;
-
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R++;
+			DstPtrS16_I2SNvtL[3*i+0] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtL[3*i+1] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtL[3*i+2] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+0] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+1] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+2] = *S16Ptr_Tmp1R++;
 		}
 
 	#endif
@@ -1090,13 +1421,13 @@ void DspMainAudioFlowProcOneFrame_Translation(int OptionWord)
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
 
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic0[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic1[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic2[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic3[i];
 		}
 	#endif
 
-	DbgPin7Dn();
+//	DbgPin7Dn();
 
 }
 
@@ -1126,7 +1457,7 @@ void DspMainAudioFlowProcOneFrame_VideoAi(int OptionWord)
 {
 	int i;
 
-	DbgPin7Up();
+//	DbgPin7Up();
 
 	#if 1	//step 1: convert input samples from S32 or S16 to float
 		S16 RawMicSignal16BitForVitRef[AudioFrameSizeInSamplePerCh_16KHz];
@@ -1215,33 +1546,41 @@ void DspMainAudioFlowProcOneFrame_VideoAi(int OptionWord)
 		PL_FLOAT*  pp_inputAudioData_Tx_FLT[4];
 		PL_FLOAT*  pp_OutputAudioSignals   [5];	//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
 
+		/*Conversa Mic position must be:
+		*	CH0 = nose
+		*	CH1 = left
+		*	CH2 = right
+		*	CH3 = middle of right
+		*/
 		#if 1
-			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn0; //A3, glasses mic location
-			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn1; //C7, glasses mic location
-			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2; //C8, glasses mic location
+			pp_inputAudioData_Tx_FLT[0]=SrcPtrFlt_DmicIn1;
+			pp_inputAudioData_Tx_FLT[1]=SrcPtrFlt_DmicIn0;
+			pp_inputAudioData_Tx_FLT[2]=SrcPtrFlt_DmicIn2;
+			pp_inputAudioData_Tx_FLT[3]=SrcPtrFlt_DmicIn3;
 		#else
 		#endif
 
 		//Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
-		ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef);
+		ConversaProcessAndFeedToVit(pp_inputAudioData_Tx_FLT, ConversaRefIn, pp_OutputAudioSignals, RawMicSignal16BitForVitRef,0);
 	#endif
 
 	#if 1 //fill AMP I2S out buffer with FltPtr_Tmp1L (SBC + OPUS mixed audio)
 		//fill AMP I2S out buffer with FltPtr_Tmp1L (SBC + OPUS mixed audio)
 		//this is aready done when mixing opus and sbc
 
-		ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], AudioFrameSizeInSamplePerCh_16KHz);
-		ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], AudioFrameSizeInSamplePerCh_16KHz);
+		//ConvertFloatToS16(S16Ptr_Tmp1L, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_TxOut], AudioFrameSizeInSamplePerCh_16KHz);
+
+		ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_AecOut], AudioFrameSizeInSamplePerCh_16KHz);
+		//ConvertFloatToS16(S16Ptr_Tmp1R, (const float *)pp_OutputAudioSignals[CONVERSA_OutSignalIdx_BfOut], AudioFrameSizeInSamplePerCh_16KHz);
 
 		for(int i=0; i < AudioFrameSizeInSamplePerCh_16KHz; i++ ) //16KHz to 48KHz
 		{
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L;
-			*DstPtrS16_I2SNvtL++ = *S16Ptr_Tmp1L++;
-
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R;
-			*DstPtrS16_I2SNvtR++ = *S16Ptr_Tmp1R++;
+			DstPtrS16_I2SNvtL[3*i+0] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtL[3*i+1] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtL[3*i+2] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+0] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+1] = *S16Ptr_Tmp1R;
+			DstPtrS16_I2SNvtR[3*i+2] = *S16Ptr_Tmp1R++;
 		}
 
 	#endif
@@ -1271,21 +1610,34 @@ void DspMainAudioFlowProcOneFrame_VideoAi(int OptionWord)
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+3]=S32Ptr_Tmp1R[i];	//conversa Bf out
 
 			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+4]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic0[i];
-			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic0[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+5]=SrcPtrS32_Mic1[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+6]=SrcPtrS32_Mic2[i];
+			PtrVarBlockSharedByDspAndMcu->UacUpAudioBuf[i*8+7]=SrcPtrS32_Mic3[i];
 		}
 	#endif
 
-	DbgPin7Dn();
+//	DbgPin7Dn();
+
 }
 #endif
 
-
-
+int WhichConversaOutToFeedToVit;
 //Note: PtrArray_OutSignals: from 0 to 4: RxOut, TxOut, AecOut, BfOut, NlpOut
-void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float **PtrArray_OutSignals, S16 *RawMicSigForVitRef)
+void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float **PtrArray_OutSignals, S16 *RawMicSigForVitRef, int ToByPassConversa)
 {
+
+	/*******************************************************************************
+	 * Conversa Process
+	 *                                                        ____________
+	 * pp_processBuff_Tx_In_8b[0]   = mic 0 ---------------->|            |
+	 * pp_processBuff_Tx_In_8b[1]   = mic 1 ---------------->|            |
+	 *                    ...                                |  Conversa  |------> pp_processBuff_Tx_Out_8b[0] = Conversa TX out
+	 * pp_processBuff_Tx_In_8b[n-1] = mic n ---------------->|  TX path   |
+	 *                                                       |    16k     |------> pp_processBuff_Rx_Out_8b = Not used when in music playing / media playing (any case that is not in duplex 16KHz voice call)
+	 *                                                       |            |
+	 * pp_processBuff_Ref_In_8b[0] = EAP out for AEC ref --->|____________|
+	 *******************************************************************************/
+
 	int i;
 
 	NXP_STATUS retStatusConversa = OK;
@@ -1295,57 +1647,74 @@ void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float *
 	//--------------------prepare pointers and buffers, and call main conversa processing, and take out the generated signal pointers----------------------
 	//---beg---
 	#if 1	//folding
-	S32 VitInTmpBuf32Bit [AudioFrameSizeInSamplePerCh_16KHz];
-	S16 VitInTmpBuf16Bit [AudioFrameSizeInSamplePerCh_16KHz];
+		S32 VitInTmpBuf32Bit [AudioFrameSizeInSamplePerCh_16KHz];
+		S16 VitInTmpBuf16Bit [AudioFrameSizeInSamplePerCh_16KHz];
 
-	PL_FLOAT*  pp_inputAudioData_Rx_FLT [2];
-	PL_FLOAT** p_currentSensingInput 	= NULL;		// current sensing input
-	PL_FLOAT*  p_outputAudioData_Tx_FLT = NULL; 	// conversa out pointer
-	PL_FLOAT*  ConversaTmpOutputPtr		= NULL;
-	PL_FLOAT** pp_outputAudioData_Rx_FLT= NULL;
+		PL_FLOAT*  pp_inputAudioData_Rx_FLT [2];
+		PL_FLOAT** p_currentSensingInput 	= NULL;		// current sensing input
+		PL_FLOAT*  p_outputAudioData_Tx_FLT = NULL; 	// conversa out pointer
+		PL_FLOAT*  ConversaTmpOutputPtr		= NULL;
+		PL_FLOAT** pp_outputAudioData_Rx_FLT= NULL;
 
-	pp_inputAudioData_Rx_FLT[0]=PtrRxIn;
+		pp_inputAudioData_Rx_FLT[0]=PtrRxIn;
 
-	retStatusConversa = NxpConversa_Plugin_Process( &conversaPluginParams,
-													PtrArray_MicIn,
-													pp_inputAudioData_Rx_FLT,
-													p_currentSensingInput );
 
-	if (retStatusConversa != OK) 						// if return status not OK
-	{
-		if (retStatusConversa == LICENSE_EXPIRED)       // if license expired occurs
+		if(!ToByPassConversa)
 		{
-			//PRINTF_M("FAIL: conversa LICENSE_EXPIRED error\r\n");
-			retStatus = kStatus_LicenseError;
+			//really call conversa if not to by pass
+			retStatusConversa = NxpConversa_Plugin_Process( &conversaPluginParams,
+															PtrArray_MicIn,
+															pp_inputAudioData_Rx_FLT,
+															p_currentSensingInput );
+
+			if (retStatusConversa != OK) 						// if return status not OK
+			{
+				if (retStatusConversa == LICENSE_EXPIRED)       // if license expired occurs
+				{
+					PRINTF_M("FAIL: conversa LICENSE_EXPIRED error\r\n");
+					retStatus = kStatus_LicenseError;
+				}
+				else
+				{
+					PRINTF_M("FAIL: conversa process error %d\r\n",retStatusConversa);
+					retStatus = kStatus_Fail;
+				}
+			}
+		}
+
+		if(ToByPassConversa)
+		{
+			PtrArray_OutSignals[CONVERSA_OutSignalIdx_RxOut]=PtrRxIn;
+		}else
+		{
+			pp_outputAudioData_Rx_FLT = NxpConversa_Plugin_GetRxOut(&conversaPluginParams);
+			if (pp_outputAudioData_Rx_FLT[0] != PL_NULL)
+			{
+				PtrArray_OutSignals[CONVERSA_OutSignalIdx_RxOut]=pp_outputAudioData_Rx_FLT[0];
+			}
+			else
+			{
+				PRINTF_M("FAIL: conversaProcess return NULL RxOut pointer\r\n");
+				retStatus = kStatus_OutOfRange;
+			}
+		}
+
+		if(ToByPassConversa)
+		{
+			p_outputAudioData_Tx_FLT = PtrArray_MicIn[0];
+		}else
+		{
+			p_outputAudioData_Tx_FLT = NxpConversa_Plugin_GetTxOut(&conversaPluginParams);
+		}
+		if (p_outputAudioData_Tx_FLT != PL_NULL)
+		{
+			PtrArray_OutSignals[CONVERSA_OutSignalIdx_TxOut]=p_outputAudioData_Tx_FLT;
 		}
 		else
 		{
-			PRINTF_M("FAIL: conversa process error %d\r\n",retStatusConversa);
-			retStatus = kStatus_Fail;
+			PRINTF_M("FAIL: conversaProcess return NULL TxOut pointer\r\n");
+			retStatus = kStatus_NullPointer;
 		}
-	}
-
-	pp_outputAudioData_Rx_FLT = NxpConversa_Plugin_GetRxOut(&conversaPluginParams);
-	if (pp_outputAudioData_Rx_FLT[0] != PL_NULL)
-	{
-		PtrArray_OutSignals[CONVERSA_OutSignalIdx_RxOut]=pp_outputAudioData_Rx_FLT[0];
-	}
-	else
-	{
-		PRINTF_M("FAIL: conversaProcess return NULL RxOut pointer\r\n");
-		retStatus = kStatus_OutOfRange;
-	}
-
-	p_outputAudioData_Tx_FLT = NxpConversa_Plugin_GetTxOut(&conversaPluginParams);
-	if (p_outputAudioData_Tx_FLT != PL_NULL)
-	{
-		PtrArray_OutSignals[CONVERSA_OutSignalIdx_TxOut]=p_outputAudioData_Tx_FLT;
-	}
-	else
-	{
-		PRINTF_M("FAIL: conversaProcess return NULL TxOut pointer\r\n");
-		retStatus = kStatus_NullPointer;
-	}
 	#endif
 	//---end---
 	//--------------------prepare pointers and buffers, and call main conversa processing, and take out the generated signal pointers----------------------
@@ -1356,7 +1725,13 @@ void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float *
 	//---beg---
 	#if 1	//folding
 		#if 1
-			ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxAecOut(&conversaPluginParams, 0);
+			if(ToByPassConversa)
+			{
+				ConversaTmpOutputPtr = PtrArray_MicIn[0];
+			}else
+			{
+				ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxAecOut(&conversaPluginParams, 0);
+			}
 			if(ConversaTmpOutputPtr!=PL_NULL)
 			{
 				PtrArray_OutSignals[CONVERSA_OutSignalIdx_AecOut]=ConversaTmpOutputPtr;
@@ -1368,7 +1743,13 @@ void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float *
 		#endif
 
 		#if 1
-			ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxBfOut(&conversaPluginParams);
+			if(ToByPassConversa)
+			{
+				ConversaTmpOutputPtr = PtrArray_MicIn[0];
+			}else
+			{
+				ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxBfOut(&conversaPluginParams);
+			}
 			if(ConversaTmpOutputPtr!=PL_NULL)
 			{
 				PtrArray_OutSignals[CONVERSA_OutSignalIdx_BfOut]=ConversaTmpOutputPtr;
@@ -1380,7 +1761,13 @@ void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float *
 		#endif
 
 		#if 1
-			ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxNlpOut(&conversaPluginParams);
+			if(ToByPassConversa)
+			{
+				ConversaTmpOutputPtr = PtrArray_MicIn[0];
+			}else
+			{
+				ConversaTmpOutputPtr = NxpConversa_Plugin_GetTxNlpOut(&conversaPluginParams);
+			}
 			if(ConversaTmpOutputPtr!=PL_NULL)
 			{
 				PtrArray_OutSignals[CONVERSA_OutSignalIdx_NlpOut]=ConversaTmpOutputPtr;
@@ -1392,11 +1779,25 @@ void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float *
 		#endif
 
 		//select one of the following 5
-		vec_float2int((int *)VitInTmpBuf32Bit, (const float *)PtrArray_OutSignals[CONVERSA_OutSignalIdx_AecOut],	-31,  AudioFrameSizeInSamplePerCh_16KHz);		//use conversa bf out as VIT input
-		//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)PtrArray_OutSignals[CONVERSA_OutSignalIdx_BfOut],	-31,  AudioFrameSizeInSamplePerCh_16KHz);		//use conversa aec out as VIT input
-		//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)PtrArray_OutSignals[CONVERSA_OutSignalIdx_NlpOut],	-31,  AudioFrameSizeInSamplePerCh_16KHz);		//use conversa nlp out as VIT input
-		//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)PtrArray_OutSignals[CONVERSA_OutSignalIdx_TxOut],	-31,  AudioFrameSizeInSamplePerCh_16KHz);		//use conversa final tx out as VIT input
-		//vec_float2int((int *)VitInTmpBuf32Bit, (const float *)PtrArray_MicIn[0],		-31,  AudioFrameSizeInSamplePerCh_16KHz);		//use raw mic 0 bf out as VIT input
+
+		switch(WhichConversaOutToFeedToVit)
+		{
+			case CONVERSA_OutSignalIdx_AecOut:
+				vec_float2int((int *)VitInTmpBuf32Bit, (const float *)PtrArray_OutSignals[CONVERSA_OutSignalIdx_AecOut],-31,  AudioFrameSizeInSamplePerCh_16KHz);		//use conversa aec out as VIT input
+				break;
+			case CONVERSA_OutSignalIdx_BfOut:
+				vec_float2int((int *)VitInTmpBuf32Bit, (const float *)PtrArray_OutSignals[CONVERSA_OutSignalIdx_BfOut],	-31,  AudioFrameSizeInSamplePerCh_16KHz);		//use conversa bf out as VIT input
+				break;
+			case CONVERSA_OutSignalIdx_NlpOut:
+				vec_float2int((int *)VitInTmpBuf32Bit, (const float *)PtrArray_OutSignals[CONVERSA_OutSignalIdx_NlpOut],-31,  AudioFrameSizeInSamplePerCh_16KHz);		//use conversa nlp out as VIT input
+				break;
+			case CONVERSA_OutSignalIdx_TxOut:
+				vec_float2int((int *)VitInTmpBuf32Bit, (const float *)PtrArray_OutSignals[CONVERSA_OutSignalIdx_TxOut],	-31,  AudioFrameSizeInSamplePerCh_16KHz);		//use conversa final tx out as VIT input
+				break;
+			default:
+				vec_float2int((int *)VitInTmpBuf32Bit, (const float *)PtrArray_MicIn[0],		                        -31,  AudioFrameSizeInSamplePerCh_16KHz);		//use raw mic 0 bf out as VIT input
+				break;
+		}
 
 		for(i=0;i<AudioFrameSizeInSamplePerCh_16KHz;i++)
 			VitInTmpBuf16Bit[i]=(VitInTmpBuf32Bit[i]>>16);
@@ -1405,7 +1806,7 @@ void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float *
 			if(CirAudioBuf_SpaceAvailableInSamples_S16(&VitCircBuff) >= AudioFrameSizeInSamplePerCh_16KHz)
 			{
 				//PRINTF(".\r\n");
-				CirAudioBuf_WriteSamples_S16(&VitCircBuff, AudioFrameSizeInSamplePerCh_16KHz, VitInTmpBuf16Bit);
+				CirAudioBuf_WriteSamples_S16(&VitCircBuff,        AudioFrameSizeInSamplePerCh_16KHz, VitInTmpBuf16Bit);
 				CirAudioBuf_WriteSamples_S16(&VitCircBuff_RawMic, AudioFrameSizeInSamplePerCh_16KHz, RawMicSigForVitRef);
 			}
 			//trigger VIT task to step on
@@ -1419,26 +1820,6 @@ void ConversaProcessAndFeedToVit(float **PtrArray_MicIn, float *PtrRxIn, float *
 	#endif
 	//---end---
 	//------------------take out internal output streaming from conversa and put to VIT input cir buffer, with converting float --> int --> short in-------
-
-
-
-	//-----------------------------------------------switch conversa tuning config when MCU side requests--------------------------------------------------
-	//---beg---
-	#if 1	//folding
-//		if(PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg!=ConversaTuningCfg_NoChange)
-//		{
-//			//confirmed need to change Conversa cfg
-//			if(PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg!=CurrentConversaTuningCfg)
-//			{
-//				//confirmed the new cfg is different from current
-//				DeInitConversa();
-//				InitConversa(PtrVarBlockSharedByDspAndMcu->NeedToSwitchConversaTuningCfg, 0);	//no need to print
-//			}
-//		}
-	#endif
-	//---end---
-	//-----------------------------------------------switch conversa tuning config when MCU side requests--------------------------------------------------
-
-
-
 }
+
+

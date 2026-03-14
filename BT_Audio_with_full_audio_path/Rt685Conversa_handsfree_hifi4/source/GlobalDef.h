@@ -13,9 +13,21 @@
 //-----------------------------------APP cfg--------------------------------------
 //---beg---
 
+//conversa tuning is in homeVit standby
+//set UseUacDnAudioForConversaTuning_VoiceCall16KHz to 1 to do voice call tuning, set both to 1 to do farBF tuning
+#define UseUacDnAudioForConversaTuning_VoiceCall16KHz	0
+#define UseUacDnAudioForConversaTuning_FarBf16KHz		0
+#if UseUacDnAudioForConversaTuning_FarBf16KHz==1
+	#undef UseUacDnAudioForConversaTuning_VoiceCall16KHz
+	#define UseUacDnAudioForConversaTuning_VoiceCall16KHz	1
+#endif
 
-#define EnableOpusDecodingPrint		1
-#define EnableSbcDecodingPrint		1
+#define EAP_ENABLE					1
+
+
+
+#define EnableOpusDecodingPrint		0
+#define EnableSbcDecodingPrint		0
 
 #define EnableLvlMeter				1
 
@@ -28,6 +40,9 @@
 
 #define DecoderSbc_SrcInSizeInSamples	256
 #define DecoderOpus_SrcInSizeInSamples	256
+
+#define TestAlgoInitAndDeInit				0	//in normal running, must set this to 0
+#define EnableDebugPrint					1
 
 //---end---
 //-----------------------------------APP cfg--------------------------------------
@@ -100,17 +115,14 @@ typedef signed long long s64;
 
 
 #define APP_MU MUB
-#define CHN_MU_REG_NUM 0U
-#define BOOT_FLAG 0x01U
 #define APP_MU_IRQn 6
 
-//#include "..\..\Rt685_UsbAudio_McuPrg\source\UsbAudioCfg.h"
 #include "..\..\Rt685Conversa_handsfree_cm33\source\DefForBothMcuAndDsp.h"
 
 
 //should set only 1 of the following 2 to 1, or both to 0
 #define Using_UART5ToPrint		0 // =0 will use FC2 (PIO0_15)
-#define Using_UART2ToPrint		1 // =0 will use FC2 (PIO0_15)
+#define Using_UART2ToPrint		0 // =1 will use FC2 (PIO0_15)
 
 #if(Using_UART5ToPrint)&&(Using_UART2ToPrint)
 	#error can not set Using_UART5ToPrint and Using_UART2ToPrint to 1 at the same time!
@@ -183,6 +195,7 @@ SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);	\
 	PRINTF(x, ##__VA_ARGS__);					\
 SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);			\
 } while(0)
+
 
 
 #endif

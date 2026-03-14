@@ -34,9 +34,13 @@
 #include "app_connect.h"
 #include "sco_audio_pl.h"
 #include "app_a2dp_sink.h"
+#include <peripheral_gls.h>
 
 #include "GlobalDef.h"
 #include "WorkStateManager.h"
+
+//CRH
+#include <app_avrcp.h>
 
 #if UsingQAR87Board == 1
 #include "spi_handler.h"
@@ -201,6 +205,7 @@ static void connected(struct bt_conn *conn, int err)
     bt_conn_get_info(conn, &info);
    // app_auto_connect_save_addr(info.br.dst);
 #endif
+    avrcp_control_connect(conn); //B36932 for testing
 }
 
 static void disconnected(struct bt_conn *conn)
@@ -836,6 +841,8 @@ void hfp_hf_a2dp_task(void *pvParameters)
 		PRINTF("BR/EDR set connectable and discoverable done\n");
     }
 #endif
+
+    xTaskCreate(peripheral_gls_task, "peripheral_gls_task", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
 
     DeviceWorkStateCur=WorkState_Void;
     StartAudioTask();

@@ -20,6 +20,8 @@
 #include <bluetooth/a2dp_codec_sbc.h>
 #include <bluetooth/sdp.h>
 #include <app_dcc.h>
+#include <app_avrcp.h>
+#include <peripheral_gls.h>
 #include "clock_config.h"
 #include "board.h"
 #include "fsl_debug_console.h"
@@ -121,8 +123,12 @@ void bt_ready(int err)
 
     	a2dp_sink_register_service();
     hfp_hf_register_service();
+    cmd_init_ct(); //B36932 for testing
     	app_lfs_init();
 
+#if defined(APP_LE_PERIPHERAL_ENABLE) && (APP_LE_PERIPHERAL_ENABLE == 1)
+    le_adv_start();
+#endif
     app_a2dp_hf_auto_connect();
 #if 0
    // if(g_pairedDeviceCount)

@@ -243,8 +243,9 @@ void save_new_paired_device(struct bt_conn *conn, uint8_t isRiderHeadset)
 			device_type = PASSENGER_HEADSET;
 		}
 	}
-	PRINTF("Saving new paired device: Address: %02X:%02X:%02X:%02X:%02X:%02X, Name: %s, Type: %d\n",
-				addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], name, device_type);
+
+	//PRINTF("Saving new paired device: Address: %02X:%02X:%02X:%02X:%02X:%02X, Name: %s, Type: %d\n",
+	//			addr[0], addr[1], addr[2], addr[3], addr[4], addr[5], name, device_type);
 
 
 
@@ -401,8 +402,28 @@ void connect_paired_device(uint8_t device_index)
 		device_addr[i] = addr[5 - i];
 	}
 
+#if 1
 	app_connect(RIDER_PHONE, device_addr);
 
+#else
+	//Call the correct connection function based on device type
+	if (paired_devices[device_index - 1].device_type == RIDER_PHONE)
+	{
+		app_connect(RIDER_PHONE, device_addr);
+	}
+	else if (paired_devices[device_index - 1].device_type == RIDER_HEADSET)
+	{
+		app_connect(RIDER_HEADSET, device_addr);
+
+	}else if (paired_devices[device_index - 1].device_type == PASSENGER_HEADSET)
+	{
+		app_connect(PASSENGER_HEADSET, device_addr);
+
+	} else
+	{
+		PRINTF("Failed, Invalid device type !\n");
+	}
+#endif
 }
 
 bool is_valid_device(uint8_t *addr)

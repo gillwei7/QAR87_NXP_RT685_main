@@ -136,7 +136,7 @@ static void function_button_timer_callback(TimerHandle_t xTimer)
 {
 	if (btn_raw_read()) {
 		function_button_tick = xTaskGetTickCount();
-//		PRINTF("[Button] Release Button(%ld)\r\n", function_button_tick);
+		PRINTF("[Button] Release Button(%ld)\r\n", function_button_tick);
 
 		// Filter long press
 		if( (function_button_tick - function_button_down_tick) <= LONG_PRESS_MS) {
@@ -151,7 +151,7 @@ static void function_button_timer_callback(TimerHandle_t xTimer)
 			function_button_press_tick = function_button_down_tick;
 		}
 		function_button_press_set = 1;
-//		PRINTF("[Button] Press Button(%ld)\r\n", function_button_down_tick);
+		PRINTF("[Button] Press Button(%ld)\r\n", function_button_down_tick);
 	}
 }
 
@@ -214,10 +214,10 @@ void button_press_handler (void)
 					PRINTF("[Button] Single press function button\r\n");
 #if SOC_SPI_ENABLE
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
-					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
-							ss_get_state() == USAGE_STATE_VIDEO_RECORDING || ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
-						send_spi_request(SHORT_PRESS_HEX_VALUE); // Stop Recording and Take Photo
-					}
+//					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
+//							ss_get_state() == USAGE_STATE_VIDEO_RECORDING || ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
+//						send_spi_request(SHORT_PRESS_HEX_VALUE); // Stop Recording and Take Photo
+//					}
 #endif
 #endif
 				}

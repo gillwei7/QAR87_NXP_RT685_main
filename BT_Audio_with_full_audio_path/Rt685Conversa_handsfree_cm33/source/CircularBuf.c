@@ -49,7 +49,7 @@ T_MCh32BitUacUpAudioSample UacUpAudioBuf_MCh_DataArea
 #if Rt685I2SToNvtIsI2SMaster==0
 	//only when NT is I2S master, we use cir buffer
 	T_CircularAudioBuf_S32 I2SRxFrNvt_CirBuf;
-	S32 I2SRxFrNvt_CirBuf_S32_DataArea[I2SNvt_CirBuf_LenInSamples + AudioFrameSizeInSamplePerCh_16KHz];	//read to this buffer is from i2s1,3, read size is AudioFrameSizeInSamplePerCh_16KHz
+	S32 I2SRxFrNvt_CirBuf_S32_DataArea[I2SNvt_CirBuf_LenInSamples + AudioFrameSizeInSamplePerCh_16KHz];	//read to this buffer is from i2sFrAmp,i2sToAmp, read size is AudioFrameSizeInSamplePerCh_16KHz
 	T_CircularAudioBuf_S32 I2STxToNvt_CirBuf;
 	S32 I2STxToNvt_CirBuf_S32_DataArea[I2SNvt_CirBuf_LenInSamples + AudioFrameSizeInSamplePerCh_I2SToNvt];	//read to this buffer is from i2sTxToNvt, read size is AudioFrameSizeInSamplePerCh_I2SToNvt
 #endif
@@ -83,10 +83,8 @@ void ClearAudioCirBuf(int ToClrBtCir, int ToClrUacCir,  int ToClrSbcCir)
 	}
 	if(ToClrUacCir)
 	{
-#if EnableUsbComAndAudio
 		CirUacUpAudioBuf_ClearAllSamples_MultiCh(&UacUpAudioBuf_MCh);
 		CirUacDnAudioBuf_ClearAllSamples_MultiCh(&UacDnAudioBuf_MCh);
-#endif
 	}
 	if(ToClrSbcCir)
 	{

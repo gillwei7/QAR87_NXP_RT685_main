@@ -109,7 +109,7 @@ ToNvt: fc5 toNvt, fc6 FrNvt  (fc5 clk share to fc6), fc5 is master, NVT is slave
 
 /*
 
-know bug:
+know bug 1:
 
 play a2dp
 make a tel incoming call.
@@ -118,6 +118,12 @@ it goes back to a2dp play.
 but, the playing is broken. The printing info shows the sbc buffer goes less and less, while 1000 frame period is good --> DSP side is eating sbc too quickly????????  Later to find time to fix !!!
 
 
+known bug 2:
+in bt music playing, say hey quanta, and immediately start a wechat call --> crashes
+
+
+known issue 3 --- not sure:
+Using_UART2ToPrint Using_UART5ToPrint (either in mcu setting or dsp setting) set to 1 may cause a2dp play unstable --- crash in 5~20 minutes ???
 
 
 

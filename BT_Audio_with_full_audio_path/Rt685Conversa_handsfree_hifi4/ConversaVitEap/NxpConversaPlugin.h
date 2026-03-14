@@ -49,10 +49,11 @@ typedef struct nxp_conversa_plugin_config_s {
 	uint32_t create_aec;						///< Set create_aec = 1 to allocate memory for the Acoustic Echo Canceller (AEC).
 	nxp_float aec_filter_length_ms;				///< Set the length of the AEC filter in milliseconds. May be rounded up to support SIMD.
 	uint32_t aec_uses_current_sensing;			///< Set aec_uses_current_sensing = 1 to use an alternative reference signal than the Rx input for the AEC.
+	uint32_t create_wnd;						///< Set create_wnd = 1 to allocate memory for the Wind Noise Detection (WND).
 	uint32_t create_bf;							///< Set create_bf = 1 to allocate memory for the Beamformer (BF).
 	uint32_t create_doa;						///< Set create_doa = 1 to allocate memory for the Direction of Arrival (DOA) estimator.
 	uint32_t create_se_model;					///< Set create_se_model = 1 to allocate memory for the Speech Enhancement (SE) model.
-	uint8_t* se_model_ptr;						///< Set the pointer to the SE model data.
+	const uint8_t* se_model_ptr;				///< Set the pointer to the SE model data.
 	uint32_t se_model_size;						///< Set the size of the SE model data.
 	uint32_t se_model_is_permuted;				///< Select whether the SE model data is permuted. Unpermuted models will be copied to the Conversa heap and permuted there.
 	uint32_t enable_tuning_tool_signal_buffer;	///< Set enable_tuning_tool_signal_buffer = 1 to enable additional tuning tool signals. Can be disabled after tuning to save memory.
@@ -355,7 +356,7 @@ extern NXP_STATUS NxpConversa_Plugin_GetSignalID(nxp_conversa_plugin_t *APluginI
  *  @param [in] Aparameter_data Pointer to the parameter data.
  *  @return OK if successful or INVALID_PARAMETER if the parameter ID is not found.
  */
-extern NXP_STATUS NxpConversa_Plugin_SetParameterID(nxp_conversa_plugin_t* APluginInit_s, uint32_t Aid, uint32_t Alength, uint32_t* Aparameter_data);
+extern NXP_STATUS NxpConversa_Plugin_SetParameterID(nxp_conversa_plugin_t* APluginInit_s, uint32_t Aid, uint32_t Alength, const uint32_t* Aparameter_data);
 
 /**
  * Print the Conversa memory usage.

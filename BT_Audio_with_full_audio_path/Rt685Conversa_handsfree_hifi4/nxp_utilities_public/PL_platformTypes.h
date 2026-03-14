@@ -9,6 +9,10 @@
 #ifndef _PLATFORM_TYPE_H_
 #define _PLATFORM_TYPE_H_
 
+#ifndef CORE_DSP
+#define CORE_DSP
+#endif
+
 #ifdef CORE_MCU
 	#include "PL_platformTypes_CortexM33.h"
 #else

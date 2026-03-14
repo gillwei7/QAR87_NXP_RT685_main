@@ -2333,7 +2333,7 @@ static API_RESULT ethermind_a2dp_notify_cb
 						if(CycCntN==1000)
 						{
 							CycCntN=0;
-							PRINTF("1000 average: %d \r\n", CycCntAcc/1000);		//watch fill raw sbc data to JPL
+//							PRINTF("1000 average: %d \r\n", CycCntAcc/1000);		//watch fill raw sbc data to JPL
 							CycCntAcc=0;
 						}else
 						{

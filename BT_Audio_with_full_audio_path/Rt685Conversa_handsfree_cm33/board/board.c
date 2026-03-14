@@ -21,6 +21,8 @@
 #include "fsl_i3c.h"
 #endif /* SDK_I3C_BASED_COMPONENT_USED */
 
+#include "GlobalDef.h"
+
 /*******************************************************************************
  * Definitions
  ******************************************************************************/
@@ -46,11 +48,25 @@ AT_QUICKACCESS_SECTION_DATA(static uint32_t s_flexspiPin[10]);
  * Code
  ******************************************************************************/
 /* Initialize debug console. */
+
+#if PRINTF_GoesToUsbCom
+	#define BOARD_DEBUG_UART_BASEADDR (uint32_t) USART5
+	#define BOARD_DEBUG_UART_INSTANCE 5U
+	#define BOARD_DEBUG_UART_CLK_FREQ CLOCK_GetFlexCommClkFreq(5U)
+	#define BOARD_DEBUG_UART_FRG_CLK \
+		(&(const clock_frg_clk_config_t){5, kCLOCK_FrgPllDiv, 255, 0}) /*!< Select FRG0 mux as frg_pll */
+	#define BOARD_DEBUG_UART_CLK_ATTACH kFRG_to_FLEXCOMM5
+	#define BOARD_DEBUG_UART_RST        kFC5_RST_SHIFT_RSTn
+	#define BOARD_DEBUG_UART_CLKSRC     kCLOCK_Flexcomm5
+	#define BOARD_UART_IRQ_HANDLER      FLEXCOMM5_IRQHandler
+	#define BOARD_UART_IRQ              FLEXCOMM5_IRQn
+#endif
+
 void BOARD_InitDebugConsole(void)
 {
     uint32_t uartClkSrcFreq;
-
-	#if (Using_UART5ToPrint)||(Using_UART2ToPrint)
+	//not sure if involving uart5 for usb print can cause a2dp play unstable, crash in 5~20 min ???
+	#if (Using_UART5ToPrint)||(Using_UART2ToPrint)             ||(PRINTF_GoesToUsbCom)		// add // before the last part to completely un-touch uart5 and disable the USB print from MCU
     /* attach FRG0 clock to FLEXCOMM0 (debug console) */
     CLOCK_SetFRGClock(BOARD_DEBUG_UART_FRG_CLK);
     CLOCK_AttachClk(BOARD_DEBUG_UART_CLK_ATTACH);

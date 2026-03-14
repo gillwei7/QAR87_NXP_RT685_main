@@ -13,6 +13,7 @@
 #include "buttons_handler.h"
 #include "i2c_component_handler.h"
 #include "fsl_adapter_gpio.h"
+#include "GlobalDef.h"
 
 /*******************************************************************************
  * Definitions
@@ -260,6 +261,14 @@ void hal_soc_enable(void)
 
 void hal_board_init(void)
 {
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
+	if (PRINTF_GoesToUsbCom) {
+		// PRINTF doesn't use UART but goes to USB com
+		GPIO_PinWrite(GPIO, NXP_532_USB_SWITCH_PORT, NXP_532_USB_SWITCH_PIN, 0U);
+		GPIO_PinWrite(GPIO, USB_SWDIO_SWITCH_PORT, USB_SWDIO_SWITCH_PIN, 1U);
+	}
+#endif
+
 	PRINTF("[System] Version= %s \n", HAL_MCU_APP_VERSION);
 
 	hal_gpio_init();

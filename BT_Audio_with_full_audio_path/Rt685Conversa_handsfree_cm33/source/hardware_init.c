@@ -63,7 +63,7 @@
 #include "usb_device_descriptor.h"
 #include "audio_unified.h"
 
-
+#include "AudioIoCfg_I2s.h"
 
 #include "UsbApp.h"
 
@@ -647,7 +647,7 @@ void BOARD_InitHardware(void)
 
 	PRINTF("\r\n");
 	PRINTF("RT685 MCU: ----IW611 BT HFP A2DP with Conversa--- \r\n");
-	PRINTF("RT685 MCU: ------------ McuVer 1.6.1 ------------ \r\n");
+	PRINTF("RT685 MCU: ------------ McuVer 1.7.0 ------------ \r\n");
 	PRINTF("RT685 MCU: ----IW611 BT HFP A2DP with Conversa--- \r\n");
 
 	PRINTF("\r\n");
@@ -669,7 +669,7 @@ void BOARD_InitHardware(void)
 	InitBtnEvt(); //need more editing for Quanta board
 #else
 	InitDbgPin();
-	OpeningBlink(3);
+	//OpeningBlink(3);
 	InitSineToneGen1();
 	InitSineToneGen2();
 	InitBtnEvt();
@@ -766,7 +766,7 @@ void BOARD_InitHardware(void)
 
 
 		VarBlockSharedByDspAndMcu.Cm33Hifi1HandShakeCheck=0x1234abcd;		//a flag for DSP side to check
-			MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, (U32)&VarBlockSharedByDspAndMcu);
+		MU_SendMsgNonBlocking(APP_MU, CHN_MU_REG_NUM, (U32)&VarBlockSharedByDspAndMcu);		//DSP side waits for 2 MSGs before DSP goes on --- this is the first
 
 			DelayMsByReadingCycCnt(20);		//wait a while to let DSP priting finish
 
