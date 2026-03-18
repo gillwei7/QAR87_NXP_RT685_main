@@ -284,11 +284,13 @@ void send_music_status_to_soc(void)
 {
 	// Todo
 	// To make novatek open music ui or open home ui
+#if SOC_SPI_ENABLE
 	if (music_status) {
 		send_spi_request(MUSIC_START_HEX_VALUE); //music start
 	} else {
 		send_spi_request(MUSIC_STOP_HEX_VALUE); //music stop
 	}
+#endif
 	//send_spi_request(MUSIC_START_HEX_VALUE); //music start
 	//send_spi_request(MUSIC_STOP_HEX_VALUE); //music stop
 }
@@ -374,30 +376,103 @@ void ss_print_bt_addr (void)
 }
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
-  void ss_ble_on()  { ss.flags |=  SS_BLE_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
-  void ss_ble_off() { ss.flags &= ~SS_BLE_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
-  bool ss_ble_is_on() { return (ss.flags & SS_BLE_BIT) != 0; }
+void ss_ble_on() {
+	ss.flags |=  SS_BLE_BIT;
+	System_Status=1;
+#if SOC_SPI_ENABLE
+	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+#endif
+}
+void ss_ble_off() {
+	ss.flags &= ~SS_BLE_BIT;
+	System_Status=1;
+#if SOC_SPI_ENABLE
+	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+#endif
+}
 
-  void ss_ha_on()   { ss.flags |=  SS_HA_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
-  void ss_ha_off()  { ss.flags &= ~SS_HA_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
-  bool ss_ha_is_on()  { return (ss.flags & SS_HA_BIT) != 0; }
+bool ss_ble_is_on() {
+	return (ss.flags & SS_BLE_BIT) != 0;
+}
 
-  void ss_bt_on()   { ss.flags |=  SS_BT_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
-  void ss_bt_off()  { ss.flags &= ~SS_BT_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
-  bool ss_bt_is_on()  { return (ss.flags & SS_BT_BIT) != 0; }
+void ss_ha_on() {
+	ss.flags |=  SS_HA_BIT;
+	System_Status=1;
+#if SOC_SPI_ENABLE
+	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+#endif
+}
 
-  void ss_mic_on()  { ss.flags |=  SS_MIC_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
-  void ss_mic_off() { ss.flags &= ~SS_MIC_BIT; System_Status=1;send_spi_request(SYSTEM_STATUS_HEX_VALUE);}
-  bool ss_mic_is_on() { return (ss.flags & SS_MIC_BIT) != 0; }
+void ss_ha_off() {
+	ss.flags &= ~SS_HA_BIT;
+	System_Status=1;
+#if SOC_SPI_ENABLE
+	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+#endif
+}
+
+bool ss_ha_is_on() {
+	return (ss.flags & SS_HA_BIT) != 0;
+}
+
+void ss_bt_on() {
+	ss.flags |=  SS_BT_BIT;
+	System_Status=1;
+#if SOC_SPI_ENABLE
+	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+#endif
+}
+
+void ss_bt_off() {
+	ss.flags &= ~SS_BT_BIT;
+	System_Status=1;
+#if SOC_SPI_ENABLE
+	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+#endif
+}
+
+bool ss_bt_is_on() {
+	return (ss.flags & SS_BT_BIT) != 0;
+}
+
+void ss_mic_on() {
+	ss.flags |=  SS_MIC_BIT;
+	System_Status=1;
+#if SOC_SPI_ENABLE
+	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+#endif
+}
+
+void ss_mic_off() {
+	ss.flags &= ~SS_MIC_BIT;
+	System_Status=1;
+#if SOC_SPI_ENABLE
+	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+#endif
+}
+
+bool ss_mic_is_on() {
+	return (ss.flags & SS_MIC_BIT) != 0;
+}
 
 
 /* ====== Layer：設定與讀取 ====== */
-  void     ss_set_layer(uint8_t layer) { ss.layer = layer; System_Status=1;}
-  uint8_t  ss_get_layer()          { return ss.layer; }
+void ss_set_layer(uint8_t layer) {
+	ss.layer = layer; System_Status=1;
+}
+
+uint8_t ss_get_layer() {
+	return ss.layer;
+}
 
 /* ====== 充電與電量：設定與讀取 ====== */
   void ss_set_charging(bool on) {
-    if (on) ss.batt |= SS_CHARGER_BIT; else ss.batt &= ~SS_CHARGER_BIT;
+    if (on) {
+    	ss.batt |= SS_CHARGER_BIT;
+    }
+    else {
+    	ss.batt &= ~SS_CHARGER_BIT;
+    }
     System_Status=1;
 }
   bool ss_is_charging() {
@@ -405,7 +480,9 @@ void ss_print_bt_addr (void)
 }
 
   void ss_set_battery(uint8_t percent) {
-    if (percent > 100) percent = 100; // clamp 到 0..100
+    if (percent > 100) {
+    	percent = 100; // clamp 到 0..100
+    }
     ss.batt = (uint8_t)((ss.batt & SS_CHARGER_BIT) | (percent << SS_LEVEL_SHIFT));
     System_Status=1;
 }

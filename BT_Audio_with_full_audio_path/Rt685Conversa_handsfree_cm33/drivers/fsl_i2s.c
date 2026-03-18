@@ -9,8 +9,6 @@
 #include "fsl_i2s.h"
 #include "fsl_flexcomm.h"
 #include <string.h>
-#include "board.h"
-#include "fsl_debug_console.h"
 
 /*******************************************************************************
  * Definitions
@@ -185,9 +183,7 @@ status_t I2S_EmptyTxFifo(I2S_Type *base)
     while (((base->FIFOSTAT & I2S_FIFOSTAT_TXEMPTY_MASK) == 0U) && (timeout != 0U))
     {
         timeout -= I2S_TX_ONE_SAMPLE_MAX_TIMEOUT;
-//        SDK_DelayAtLeastUs(I2S_TX_ONE_SAMPLE_MAX_TIMEOUT, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
-    	vTaskDelay(1); // We need to monitor whether this will cause any issues
-
+        SDK_DelayAtLeastUs(I2S_TX_ONE_SAMPLE_MAX_TIMEOUT, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     }
 
     /* The last piece of valid data can be still being transmitted from I2S at this moment */
@@ -197,9 +193,7 @@ status_t I2S_EmptyTxFifo(I2S_Type *base)
     while (((base->FIFOSTAT & I2S_FIFOSTAT_TXEMPTY_MASK) == 0U) && (timeout != 0U))
     {
         timeout -= I2S_TX_ONE_SAMPLE_MAX_TIMEOUT;
-//        SDK_DelayAtLeastUs(I2S_TX_ONE_SAMPLE_MAX_TIMEOUT, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
-    	vTaskDelay(1); // We need to monitor whether this will cause any issues
-
+        SDK_DelayAtLeastUs(I2S_TX_ONE_SAMPLE_MAX_TIMEOUT, SDK_DEVICE_MAXIMUM_CPU_CLOCK_FREQUENCY);
     }
 
     return ((base->FIFOSTAT & I2S_FIFOSTAT_TXEMPTY_MASK) == 0U) ? kStatus_Fail : kStatus_Success;

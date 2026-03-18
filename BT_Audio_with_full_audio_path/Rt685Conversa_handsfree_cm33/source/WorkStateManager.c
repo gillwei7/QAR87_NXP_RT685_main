@@ -87,39 +87,41 @@ bit 8~9:   	PDM Fs: 0,1,2,3 -> 16K, 32K, 44.1K, 48K
 bit 10~15:  	PDM ch enable
 */
 
+
+
 const char *WorkStateName[]=
 {
 	    "WorkState_Void",		//this is a state that there is no audio interface active at all
-		"WorkState_HfpCall",
-		"WorkState_HomeVitStandby",
-		"WorkState_AudioIoDbg",
+	"WorkState_HfpCall",
+	"WorkState_HomeVitStandby",
+	"WorkState_AudioIoDbg",
 		"WorkState_Menu",
-		"WorkState_VideoRecording",
+	"WorkState_VideoRecording",
 		"WorkState_TakePhoto",
-		"WorkState_MediaPlayer",
-		"WorkState_MusicPlayer",
-		"WorkState_Translation",
-		"WorkState_AiConversation",
-		"WorkState_VideoAi",
-		"WorkState_About",
+	"WorkState_MediaPlayer",
+	"WorkState_MusicPlayer",
+	"WorkState_Translation",
+	"WorkState_AiConversation",
+	"WorkState_VideoAi",
+	"WorkState_About",
 
-		//-------------------------
-		"WorkState_Void_Pre",
-		"WorkState_HfpCall_Pre",
-		"WorkState_HomeVitStandby_Pre",
-		"WorkState_AudioIoDbg_Pre",
-		"WorkState_Menu_Pre",
-		"WorkState_VideoRecording_Pre",
-		"WorkState_TakePhoto_Pre",
-		"WorkState_MediaPlayer_Pre",
-		"WorkState_MusicPlayer_Pre",
-		"WorkState_Translation_Pre",
-		"WorkState_AiConversation_Pre",
-		"WorkState_VideoAi_Pre",
-		"WorkState_About_Pre",
+	//-------------------------
+	"WorkState_Void_Pre",
+	"WorkState_HfpCall_Pre",
+	"WorkState_HomeVitStandby_Pre",
+	"WorkState_AudioIoDbg_Pre",
+	"WorkState_Menu_Pre",
+	"WorkState_VideoRecording_Pre",
+	"WorkState_TakePhoto_Pre",
+	"WorkState_MediaPlayer_Pre",
+	"WorkState_MusicPlayer_Pre",
+	"WorkState_Translation_Pre",
+	"WorkState_AiConversation_Pre",
+	"WorkState_VideoAi_Pre",
+	"WorkState_About_Pre",
 };
 
-// 15-level volume gain table (0.00158f â†’ 0.999f, equal-dB spacing)
+// 15-level volume gain table (0.00158f ¡÷ 0.999f, equal-dB spacing)
 const float MasterVolumeGainTable15[15] =
 {
     0.063058f, // Level 1  (-24.00 dB)
@@ -144,7 +146,7 @@ extern RingtoneState general_RingtoneState;
 
 void ChangeMasterVolumeLevel15(int level15)
 {
-    int index = level15 - 1;  // level 1~16 â†’ index 0~15
+    int index = level15 - 1;  // level 1~16 ¡÷ index 0~15
 
     // Clamp
     if(index < 0) index = 0;
@@ -367,27 +369,27 @@ void VocEvtProc_HfpCall(U32 VoiceCmd)
 }
 void AppEvtProc_HfpCall()
 {
-		BaseType_t	PriorityTaskWoken = pdFALSE;
-		switch(BtHfpRequest)
-		{
-			case HfpRequest_AudioSetup:
-				break;
-			case HfpRequest_AudioStart:
+	BaseType_t	PriorityTaskWoken = pdFALSE;
+	switch(BtHfpRequest)
+	{
+		case HfpRequest_AudioSetup:
+			break;
+		case HfpRequest_AudioStart:
 			sco_audio_start();
-				xEventGroupSetBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_AudioStart);
-				break;
-			case HfpRequest_AudioStop:
-				break;
-			case HfpRequest_SetCodecAmpVolume:
-				//to add
-				xEventGroupSetBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_SetCodecAmpVolume);
-				break;
-			case HfpRequest_RingToneStart:
-				break;
-			case HfpRequest_RingToneStop:
-				break;
-		}
-		BtHfpRequest=HfpRequest_None;
+			xEventGroupSetBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_AudioStart);
+			break;
+		case HfpRequest_AudioStop:
+			break;
+		case HfpRequest_SetCodecAmpVolume:
+			//to add
+			xEventGroupSetBits(EvtGrpHdl_StateMangerTaskToBtStack,HfpRequest_SetCodecAmpVolume);
+			break;
+		case HfpRequest_RingToneStart:
+			break;
+		case HfpRequest_RingToneStop:
+			break;
+	}
+	BtHfpRequest=HfpRequest_None;
 }
 void VocEvtProc_HomeVitStandby(U32 VoiceCmd)
 {
@@ -555,22 +557,22 @@ void AppEvtProc_MusicPlayer()
 
 	#if 1 //B36932 for debug only
 		//for demo volume control only
-	//close this ++ to have stable master volume
+		//close this ++ to have stable master volume
 		//TstCnt++;		//this is just a test to watch mater volume changes have effect (on the UAC up streaming channel 1 2)
 
-	if(TstCnt%600 ==1)
-	{
+		if(TstCnt%600 ==1)
+		{
 			VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.199f;
 			//VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
 			//VarBlockSharedByDspAndMcu.PlayOpusFileIdx=OpusCount++;
 			//if(OpusCount>12)
 			//	OpusCount=0;
-	}
-	if(TstCnt%600 ==301)
-	{
-		VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;
-	}
-#endif
+		}
+		if(TstCnt%600 ==301)
+		{
+			VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.999f;
+		}
+	#endif
 }
 void VocEvtProc_Translation(U32 VoiceCmd)
 {
@@ -759,21 +761,21 @@ void Manager_Task(void *pvParameters)
 			#if 1	//folding
 				//getting into/out of HFP
 				if((RequestToGetIntoHfp)&&(DeviceWorkStateCur!=WorkState_HfpCall))
-					{
-						DeviceWorkStatePre=DeviceWorkStateCur;
-						DeviceWorkStateCur=WorkState_HfpCall_Pre;
-						WorkStateIsChanged=1;
-						RequestToGetIntoHfp=0;
-					}
+				{
+					DeviceWorkStatePre=DeviceWorkStateCur;
+					DeviceWorkStateCur=WorkState_HfpCall_Pre;
+					WorkStateIsChanged=1;
+					RequestToGetIntoHfp=0;
+				}
 
 				//if((RequestToGetOutofHfp)&&(DeviceWorkStateCur==WorkState_HfpCall))
-					if(RequestToGetOutofHfp)
-					{
-						DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
-						DeviceWorkStatePre=WorkState_HfpCall;
-						WorkStateIsChanged=1;
-						RequestToGetOutofHfp=0;
-					}
+				if(RequestToGetOutofHfp)
+				{
+					DeviceWorkStateCur=DeviceWorkStatePre + (WorkState_Void_Pre - WorkState_Void);		//this gives _pre
+					DeviceWorkStatePre=WorkState_HfpCall;
+					WorkStateIsChanged=1;
+					RequestToGetOutofHfp=0;
+				}
 
 				#if EnableWorkState_MusicPlayer==1
 					//getting into/out of A2dp
@@ -784,7 +786,6 @@ void Manager_Task(void *pvParameters)
 							DeviceWorkStatePre=DeviceWorkStateCur;
 							DeviceWorkStateCur=WorkState_MusicPlayer_Pre;
 							WorkStateIsChanged=1;
-
 						}
 						RequestToGetIntoA2dpPlay=0;
 					}
@@ -812,11 +813,9 @@ void Manager_Task(void *pvParameters)
 
 							DeviceWorkStatePre=WorkState_MusicPlayer;
 							WorkStateIsChanged=1;
-
 						}
 						RequestToGetOutofA2dpPlay=0;
 					}
-
 					#if 0
 						//this part is to check switching according to the request from DSP side --- evk board button press makes the request
 						if((DeviceWorkStateCur!=WorkState_MusicPlayer)&&(VarBlockSharedByDspAndMcu.CurVoiceMenu==ASR_Menu_MusicPlayer))
@@ -1241,7 +1240,6 @@ void Manager_Task(void *pvParameters)
 								general_RingtoneState = Ringtone_StopVideoAI;
 							}
 						#endif
-
 						break;
 					default:
 						break;
@@ -1270,7 +1268,7 @@ void Manager_Task(void *pvParameters)
 				send_state_to_soc();
 				PRINTF_M("WorkStateIsChanged\r\n");
 				PRINTF_M("Mcu: Pre in: %s\r\n",WorkStateName[DeviceWorkStatePre]);
-				PRINTF_M("Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
+				PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
 				WorkStateIsChanged=0;
 			}
 		#endif
@@ -1379,7 +1377,7 @@ void Manager_Task(void *pvParameters)
 					break;
 			}
 		#endif
-		
+
 		#if DspPrintsToMcuThenMcuPrintsToUsbCom==1
 			//check if there is the print request from DSP --- now only USB COM print is available
 			if(UsedSpaceOfThePrintBuf(VarBlockSharedByDspAndMcu.DspPrintBufWrIdx, VarBlockSharedByDspAndMcu.DspPrintBufRdIdx, DspPrintBufLength))
