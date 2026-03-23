@@ -434,6 +434,10 @@
 #define SOC_SPI_SSEL                  0
 #define SOC_SPI_SPOL                  kSPI_SpolActiveAllLow
 
+#define EXAMPLE_SPI_SLAVE_RX_CHANNEL 26
+#define EXAMPLE_SPI_SLAVE_TX_CHANNEL 27
+
+#define EXAMPLE_DMA            DMA0
 
 #define PMIC_GLF70583_ENABLE          1
 #define PMIC_PCA9422_ENABLE           1

@@ -127,6 +127,16 @@ void Init_I2C_Component(void)
 #if CHG_BQ25618_ENABLE
 	hal_power_charger_bq25618_init();
 #endif
+#if TOUCH_AW93305_ENABLE
+	hal_touch_aw93305_init(); //Touch Init
+#endif
+#if AMP_AW88166_ENABLE
+	hal_amp_aw88166_power_on();
+	hal_amp_aw88166_init(); // Init AMP
+#endif
+
+	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
+
 	power_on_reason = get_power_on_reason();
 
 	if (power_on_reason == POWER_ON_CHARGER) {
@@ -145,9 +155,6 @@ void Init_I2C_Component(void)
 	hal_led_ktd2027_power_on_indicator(); //White light turns on first
 #endif
 
-#if TOUCH_AW93305_ENABLE
-	hal_touch_aw93305_init(); //Touch Init
-#endif
 #if FG_GLF70302_ENABLE
 	hal_power_gauge_glf70302_get_battery_level(); //Read the battery level after powering on
 #if 0
@@ -156,10 +163,6 @@ void Init_I2C_Component(void)
 	ss_set_battery(hal_power_get_battery_percentage(battery_info.soc));
 #endif
 
-#if AMP_AW88166_ENABLE
-	hal_amp_aw88166_power_on();
-	hal_amp_aw88166_init(); // Init AMP
-#endif
 
 #if CHG_BQ25618_ENABLE
 
@@ -344,6 +347,7 @@ void I2C_Task(void *pvParameters)
                 else if(aw933xx.event.right_wareds)
                 {
                 	PRINTF("[Touch] slide_right \n");
+                	ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
 #if SOC_SPI_ENABLE
                     if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
                         send_spi_request(FORWARD_SLIDE_HEX_VALUE);
@@ -359,6 +363,8 @@ void I2C_Task(void *pvParameters)
                 else if(aw933xx.event.left_wareds)
                 {
                 	PRINTF("[Touch] slide_left \n");
+                	ChangeMasterVolumeLevel15_UpDown(1); // pass positive value to increase volume
+
 #if SOC_SPI_ENABLE
                     if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
                         send_spi_request(BACK_SLIDE_HEX_VALUE);

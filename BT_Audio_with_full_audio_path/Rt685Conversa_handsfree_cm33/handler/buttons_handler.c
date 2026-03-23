@@ -186,7 +186,7 @@ void button_press_handler (void)
 #if SOC_SPI_ENABLE
 #if 1
 			if (Novatek_boot_completed) {
-				send_spi_request(POWER_SHORT_PRESS_HEX_VALUE);
+//				send_spi_request(POWER_SHORT_PRESS_HEX_VALUE);
 			}
 #else // use button to switch state
 //			RequestToGetIntoMediaPlayer = 1;
@@ -195,7 +195,8 @@ void button_press_handler (void)
 			RequestToGetIntoVideoRecording = 1;
 #endif
 #endif
-
+			hfp_RejectCall();
+			PRINTF("[Button] hfp_RejectCall\r\n");
 			PRINTF("[Button] press power button\r\n");
 			// Clear cnt
 			power_button_short_press_cnt = 0;
@@ -212,6 +213,8 @@ void button_press_handler (void)
 				if(function_button_short_press_cnt == 1)
 				{
 					PRINTF("[Button] Single press function button\r\n");
+					PRINTF("[Button] hfp_AnswerCall\r\n");
+					hfp_AnswerCall();
 #if SOC_SPI_ENABLE
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
 //					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||

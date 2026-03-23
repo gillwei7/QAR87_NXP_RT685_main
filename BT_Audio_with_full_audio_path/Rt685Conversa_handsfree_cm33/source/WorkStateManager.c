@@ -121,7 +121,7 @@ const char *WorkStateName[]=
 	"WorkState_About_Pre",
 };
 
-// 15-level volume gain table (0.00158f ¡÷ 0.999f, equal-dB spacing)
+// 15-level volume gain table (0.00158f -> 0.999f, equal-dB spacing)
 const float MasterVolumeGainTable15[15] =
 {
     0.063058f, // Level 1  (-24.00 dB)
@@ -146,7 +146,7 @@ extern RingtoneState general_RingtoneState;
 
 void ChangeMasterVolumeLevel15(int level15)
 {
-    int index = level15 - 1;  // level 1~16 ¡÷ index 0~15
+    int index = level15 - 1;  // level 1~16 -> index 0~15
 
     // Clamp
     if(index < 0) index = 0;

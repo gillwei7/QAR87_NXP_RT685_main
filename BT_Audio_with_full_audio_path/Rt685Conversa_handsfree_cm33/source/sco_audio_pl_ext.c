@@ -728,7 +728,7 @@ void sco_audio_spkr_play_pl_ext(UCHAR *m_data, UINT16 m_datalen)
 #endif /* HCI_SCO */
 API_RESULT sco_audio_set_speaker_volume_ext(UCHAR volume)
 {
-	PRINTF_M("RT685 MCU: sco_audio_set_speaker_volume_ext \r\n");
+	PRINTF_M("RT685 MCU: sco_audio_set_speaker_volume_ext: %d \r\n", volume);
 
 	if(DeviceWorkStateCur!=WorkState_HfpCall)
 	{

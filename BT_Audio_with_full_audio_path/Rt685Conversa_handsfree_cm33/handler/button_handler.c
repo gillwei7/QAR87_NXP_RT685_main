@@ -220,6 +220,10 @@ void button_task(void *pvParameters)
 				if(!ss_is_charging())
 				{
 					PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
+//					for (uint8_t i = 0x00; i <= 0x0A; i++) {
+//						send_spi_request(i);
+//						vTaskDelay(pdMS_TO_TICKS(50));
+//					}
 #if SOC_SPI_ENABLE
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
 					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||

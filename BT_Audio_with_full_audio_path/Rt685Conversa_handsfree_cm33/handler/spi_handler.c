@@ -4,13 +4,1229 @@
  *  Created on: 2025年10月15日
  *      Author: 11301026
  */
-
+#if 1
 #include "spi_handler.h"
 #include "i2c_component_handler.h"
 #include "system_status.h"
 #include "app_handsfree.h"
 #include "hal_led.h"
+#include "fsl_crc.h"
+#include "fsl_spi_dma.h"
+#include "fsl_dma.h"
 
+#define USE_DMA 1
+
+extern EventGroupHandle_t i2c_event_group ;
+
+EventGroupHandle_t spi_event_group ;
+
+QueueHandle_t spi_request_queue = NULL;
+
+/*******************************************************************************
+ * Variables
+ ******************************************************************************/
+static uint8_t srcBuff[BUFFER_SIZE];
+static uint8_t destBuff[BUFFER_SIZE];
+static volatile uint32_t txIndex = BUFFER_SIZE;
+static volatile uint32_t rxIndex = BUFFER_SIZE;
+
+static volatile uint8_t global_pending_command = 0; // 用來存 hex_value
+
+static volatile uint32_t currentFrameSize = 0;
+static volatile uint8_t currentFrame = 0;
+static uint8_t* currentSrcBuff = NULL;
+
+/* Globals for Streaming */
+static stream_ctx_t g_stream = {0}; // 初始化
+
+extern volatile SystemStatus ss;
+uint8_t Novatek_boot_completed = 0;
+SemaphoreHandle_t sys_bus_mutex = NULL;
+
+SemaphoreHandle_t spi_streaming_done_semaphore;
+
+static volatile bool global_priority_cmd_pending = false; /* === 高優先級指令旗標 === */
+static volatile bool g_streaming_tx_success = false; // 紀錄最後一包串流是否成功
+
+static bool s_dma_initialized = false;
+
+static void InitCrc32(CRC_Type *base, uint32_t seed);
+static void spi_setting_reset(void);
+static void spi_setting_reset_receive_mode(void);
+static void spi_dma_setting_reset(void);
+static void spi_dma_setting_reset_receive_mode(void);
+static void printf_tx_data(void);
+static void printf_rx_data(void);
+static bool spi_check_rx_data_crc32(const uint8_t *data, size_t length);
+static uint32_t spi_calculate_tx_data_crc32(const uint8_t *data, size_t length);
+static void SPI_StartFrame_PreloadTX(uint8_t* srcBuff, uint32_t frameSize);
+static void spi_prepare_command_packet_data(uint8_t hex_value);
+static void spi_prepare_generic_packet(uint8_t msg_type, uint32_t packet_id, uint8_t *payload_ptr, uint32_t payload_len);
+static void spi_process_atomic_command(uint8_t cmd, uint8_t val);
+
+static void SPI_SlaveUserCallback(SPI_Type *base, spi_dma_handle_t *handle, status_t status, void *userData);
+static void EXAMPLE_SlaveDMASetup(void);
+static void EXAMPLE_SlaveStartDMATransfer(void);
+
+#define TRANSFER_SIZE 532U
+
+uint8_t slaveRxData[TRANSFER_SIZE] = {0};
+uint8_t slaveTxData[TRANSFER_SIZE] = {0};
+
+dma_handle_t slaveTxHandle;
+dma_handle_t slaveRxHandle;
+
+spi_dma_handle_t slaveHandle;
+
+
+uint8_t queued_cmd;
+
+volatile bool isTransferCompleted = false;
+volatile slave_fsm_state_t g_slave_state = S_IDLE;
+
+#define MSG_CMD_SESSION_START  0x01
+#define MSG_CMD_SESSION_END    0x02
+#define MSG_DATA_FIRMWARE      0x10
+#define MSG_DATA_FILE          0x11
+#define MSG_CMD_ATOMIC_EXEC    0x20
+#define MSG_CMD_ATOMIC_STATUS  0x21
+#define MSG_CMD_ABORT          0x23
+
+/* 會話上下文 (Session Context) - 用於記憶長傳輸狀態 */
+typedef struct {
+    bool     active;        // 是否處於會話中
+    uint32_t expected_id;   // 預期接收的下一個 Packet ID
+    uint32_t received_bytes;// 已接收總位元組數 (用於除錯)
+    uint32_t current_crc; // 用於存儲軟體 CRC 的累積值
+} session_ctx_t;
+
+/* 靜態變數，保持狀態跨越多次 handle_passive_receive 調用 */
+static session_ctx_t g_session = { .active = false, .expected_id = 0, .received_bytes = 0 };
+
+extern RingtoneState general_RingtoneState;
+
+static void spi_process_atomic_command(uint8_t cmd, uint8_t val)
+{
+    switch (cmd) {
+        case 0x00:
+            if (val == 0x00) {
+                PRINTF("[App] CMD:00 VAL:%02X -> Nova do nothing \r\n", val);
+                hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
+                led_post_event(LED_EVT_REFRESH);
+            }
+            else if (val == 0x01) {
+                PRINTF("[App] CMD:00 VAL:%02X -> Capture Start \r\n", val);
+                led_post_event(LED_EVT_PHOTO_CAPTURE);
+                // ToDo:使NXP發出 "滴～喀嚓 "聲音
+                ss_set_capture_status(COMPONENT_START);
+            }
+            else if (val == 0x03) {
+                PRINTF("[App] CMD:00 VAL:%02X -> Capture Completed \r\n", val);
+                led_post_event(LED_EVT_REFRESH);
+                ss_set_capture_status(COMPONENT_END);
+            }
+            else if (val == 0x04) {
+                PRINTF("[App] CMD:00 VAL:%02X -> Recording Start \r\n", val);
+                hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
+                led_post_event(LED_EVT_REFRESH);
+                ss_set_recording_status(COMPONENT_START);
+            }
+            else if (val == 0x05) {
+                PRINTF("[App] CMD:00 VAL:%02X -> Recording Completed \r\n", val);
+                hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
+                led_post_event(LED_EVT_REFRESH);
+                ss_set_recording_status(COMPONENT_END);
+            }
+            else if (val == 0x06) {
+                PRINTF("[App] CMD:00 VAL:%02X -> Media Playing \r\n", val);
+                if (get_media_status() == MUSIC_PAUSE) {
+                    set_media_status(MUSIC_PLAYING);
+                }
+            }
+            else if (val == 0x07) {
+                PRINTF("[App] CMD:00 VAL:%02X -> Media Pause \r\n", val);
+                if (get_media_status() == MUSIC_PLAYING) {
+                    set_media_status(MUSIC_PAUSE);
+                }
+            }
+            else if (val == 0x08) {
+                PRINTF("[App] CMD:00 VAL:%02X -> Wi-Fi connection \r\n", val);
+            }
+            else if (val == 0x09) {
+                PRINTF("[App] CMD:00 VAL:%02X -> WiFi disconnection \r\n", val);
+                general_RingtoneState = Ringtone_WiFi_Disconnected;
+            }
+            break;
+
+        case 0x11: // Nova boot completed
+            if (val == 0x11) {
+                PRINTF("[App] CMD:11 VAL:11 -> Nova boot completed\r\n");
+                Novatek_boot_completed = 1;
+                hal_led_refresh();
+                battery_timer_start();
+                general_RingtoneState = Ringtone_PowerON;
+            }
+            break;
+
+        case 0x40: // Novatek update usage state
+            PRINTF("[App] CMD:40 VAL:%02X -> Update Usage State \r\n", val);
+            ss_set_state(val);
+            break;
+
+        case 0x50: // Update Layer
+            PRINTF("[App] CMD:50 VAL:%02X -> Update Layer \r\n", val);
+            ss.layer = val;
+            break;
+
+        default:
+            PRINTF("[App] Unknown CMD=0x%02X (VAL=0x%02X)\r\n", cmd, val);
+            break;
+    }
+}
+
+static void spi_dma_setting_reset(void)
+{
+	spi_setting_reset();
+	EXAMPLE_SlaveDMASetup();
+}
+
+static void spi_dma_setting_reset_receive_mode(void)
+{
+	memset(slaveTxData, 0, TRANSFER_SIZE);
+	spi_dma_setting_reset();
+    EXAMPLE_SlaveStartDMATransfer();
+}
+
+static void SPI_SlaveUserCallback(SPI_Type *base, spi_dma_handle_t *handle, status_t status, void *userData)
+{
+    if (status == kStatus_Success)
+    {
+        BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+        isTransferCompleted = true;
+
+        /* DMA callback runs in IRQ context, so use ISR-safe API. */
+        if (spi_event_group != NULL)
+        {
+            xEventGroupSetBitsFromISR(spi_event_group, SPI_TRANSFER_COMPLETE_EVENT_BIT, &xHigherPriorityTaskWoken);
+        }
+        portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    }
+
+}
+
+static void EXAMPLE_SlaveStartDMATransfer(void)
+{
+    uint32_t i = 0U;
+    spi_transfer_t slaveXfer;
+
+    /* 重置旗標 */
+    isTransferCompleted = false;
+
+    /* Create handle for slave instance. */
+    SPI_SlaveTransferCreateHandleDMA(SOC_SPI_SLAVE, &slaveHandle, SPI_SlaveUserCallback, NULL, &slaveTxHandle,
+                                     &slaveRxHandle);
+
+    slaveXfer.txData   = (uint8_t *)&slaveTxData;
+    slaveXfer.rxData   = (uint8_t *)&slaveRxData;
+    slaveXfer.dataSize = TRANSFER_SIZE * sizeof(slaveTxData[0]);
+    slaveXfer.configFlags = kSPI_FrameAssert;
+
+    /* Start transfer, when transmission complete, the SPI_SlaveUserCallback will be called. */
+    if (kStatus_Success != SPI_SlaveTransferDMA(SOC_SPI_SLAVE, &slaveHandle, &slaveXfer))
+    {
+        PRINTF("There is an error when start SPI_SlaveTransferDMA \r\n");
+    }
+}
+
+static void EXAMPLE_SlaveDMASetup(void)
+{
+    /* DMA init */
+    //DMA_Init(EXAMPLE_DMA);
+
+    if (s_dma_initialized) {
+        // 非第一次：先清除 CH26/CH27 的殘留硬體狀態
+        DMA_AbortTransfer(&slaveTxHandle);
+        DMA_AbortTransfer(&slaveRxHandle);
+    }
+
+    /* configure channel/priority and create handle for TX and RX. */
+    DMA_EnableChannel(EXAMPLE_DMA, EXAMPLE_SPI_SLAVE_TX_CHANNEL);
+    DMA_EnableChannel(EXAMPLE_DMA, EXAMPLE_SPI_SLAVE_RX_CHANNEL);
+    DMA_SetChannelPriority(EXAMPLE_DMA, EXAMPLE_SPI_SLAVE_TX_CHANNEL, kDMA_ChannelPriority0);
+    DMA_SetChannelPriority(EXAMPLE_DMA, EXAMPLE_SPI_SLAVE_RX_CHANNEL, kDMA_ChannelPriority1);
+    DMA_CreateHandle(&slaveTxHandle, EXAMPLE_DMA, EXAMPLE_SPI_SLAVE_TX_CHANNEL);
+    DMA_CreateHandle(&slaveRxHandle, EXAMPLE_DMA, EXAMPLE_SPI_SLAVE_RX_CHANNEL);
+
+    s_dma_initialized = true;
+}
+
+static void spi_setting_reset(void)
+{
+    SPI_DisableInterrupts(SOC_SPI_SLAVE, kSPI_RxLvlIrq | kSPI_TxLvlIrq);
+    spi_slave_config_t slave_config;
+    SPI_SlaveGetDefaultConfig(&slave_config);
+    slave_config.sselPol = (spi_spol_t)SOC_SPI_SPOL;
+
+    /* 重置 SPI IP，這會瞬間清空硬體 FIFO 裡殘留的 */
+    SPI_Deinit(SOC_SPI_SLAVE);
+    SPI_SlaveInit(SOC_SPI_SLAVE, &slave_config);
+}
+
+static void spi_setting_reset_receive_mode(void)
+{
+	spi_setting_reset();
+
+    memset(srcBuff, 0, BUFFER_SIZE);
+    SPI_StartFrame_PreloadTX(srcBuff, BUFFER_SIZE);
+    SPI_EnableInterrupts(SOC_SPI_SLAVE, kSPI_RxLvlIrq | kSPI_TxLvlIrq);
+}
+
+static void printf_rx_data(void)
+{
+	for ( uint32_t i = 0; i < BUFFER_SIZE; i++)
+	{
+		PRINTF("0x%02X ", destBuff[i]);
+		if ((i + 1) % 10 == 0)
+		{
+			PRINTF("\r\n");
+		}
+	}
+}
+
+static void printf_tx_data(void)
+{
+	for (uint32_t i = 0; i < BUFFER_SIZE; i++)
+	{
+		PRINTF("0x%02X ", srcBuff[i]);
+		if ((i + 1) % 10 == 0)
+		{
+			PRINTF("\r\n");
+		}
+	}
+}
+
+static void spi_prepare_generic_packet(uint8_t msg_type, uint32_t packet_id, uint8_t *payload_ptr, uint32_t payload_len)
+{
+    /* 定義常數 */
+    const uint32_t header_len  = HEADER_LEN; // 16
+    const uint32_t payload_max = PAYLOAD_LEN; // 512
+
+    uint32_t crc32Result = 0;
+
+    /* 1. 清空緩衝區 (Padding 0x00) */
+    memset(srcBuff, 0, BUFFER_SIZE);
+
+    /* 2. 填寫 Header (Offset 0x00 ~ 0x0F) */
+    srcBuff[0] = 0xAA; // SYNC_HEAD Low
+    srcBuff[1] = 0x55; // SYNC_HEAD High
+    srcBuff[2] = 0x02; // PROT_VER
+    srcBuff[3] = msg_type; // [動態] MSG_TYPE
+
+    // PACKET_ID (Little Endian)
+    srcBuff[4] = (uint8_t)(packet_id & 0xFF);
+    srcBuff[5] = (uint8_t)((packet_id >> 8) & 0xFF);
+    srcBuff[6] = (uint8_t)((packet_id >> 16) & 0xFF);
+    srcBuff[7] = (uint8_t)((packet_id >> 24) & 0xFF);
+
+    // DATA_LEN (Payload 的有效長度)
+    srcBuff[8]  = (uint8_t)(payload_len & 0xFF);
+    srcBuff[9]  = (uint8_t)((payload_len >> 8) & 0xFF);
+    srcBuff[10] = (uint8_t)((payload_len >> 16) & 0xFF);
+    srcBuff[11] = (uint8_t)((payload_len >> 24) & 0xFF);
+
+    // Reserved at 12~15 is 0x00 (memset done)
+
+    /* 3. 填寫 Payload */
+    if (payload_ptr != NULL && payload_len > 0) {
+        // 確保不超過 512 bytes
+        uint32_t copy_len = (payload_len > payload_max) ? payload_max : payload_len;
+        memcpy(&srcBuff[header_len], payload_ptr, copy_len);
+    }
+
+    /* 4. 計算單包 CRC32 (Header 16 + Payload 512 = 528 Bytes) */
+    crc32Result = spi_calculate_tx_data_crc32(srcBuff, header_len + payload_max);
+
+    /* 5. 填寫 CRC (Offset 528) */
+    uint8_t *pCrc = &srcBuff[header_len + payload_max];
+    pCrc[0] = (uint8_t)(crc32Result & 0xFF);
+    pCrc[1] = (uint8_t)((crc32Result >> 8) & 0xFF);
+    pCrc[2] = (uint8_t)((crc32Result >> 16) & 0xFF);
+    pCrc[3] = (uint8_t)((crc32Result >> 24) & 0xFF);
+
+    PRINTF("[SPI][Gen] Type=0x%02X, ID=%u, Len=%u, CRC=0x%08X\r\n", msg_type, packet_id, payload_len, crc32Result);
+}
+
+static void spi_prepare_command_packet_data(uint8_t hex_value)
+{
+    /* V2.3.0 封包結構常數 */
+    // Total: 532 Bytes
+    // Header: 16 Bytes
+    // Payload: 512 Bytes
+    // CRC: 4 Bytes at the end
+
+    uint32_t crc32Result = 0;
+    
+    /* 1. 清空緩衝區 (Padding 0x00) */
+    // 這一步非常重要，因為 Protocol 要求 Payload 不足 512 的部分必須補零
+    memset(srcBuff, 0, BUFFER_SIZE);
+
+    /* 2. 填寫 Header (Offset 0x00 ~ 0x0F) */
+    
+    // Offset 0x00: SYNC_HEAD (0x55AA) -> Little Endian: AA 55
+    srcBuff[0] = 0xAA; 
+    srcBuff[1] = 0x55;
+    
+    // Offset 0x02: PROT_VER (0x02)
+    srcBuff[2] = 0x02;
+    
+    // Offset 0x03: MSG_TYPE (0x20 = CMD_ATOMIC_EXEC)
+    // 根據您的需求，這是Slave主動發起的指令，歸類為原子執行
+    srcBuff[3] = 0x20;
+
+    // Offset 0x04: PACKET_ID (4 Bytes) 
+    // 原子指令不需要序號，保持 0x00000000 (memset 已處理)
+
+    // Offset 0x10 ~ : Payload
+    
+    uint32_t payload_len = 0;
+
+    if (hex_value == SYSTEM_STATUS_HEX_VALUE) // 0x93
+    {
+        /* System Status: 7 Bytes Payload */
+        // payload[0] = cmd_id (0x93)
+        // payload[1] = format_ver (0x01)
+        // payload[2] = arg_len (3)
+        // payload[3] = flags (0x00)
+        // payload[4] = ss.flags
+        // payload[5] = ss.layer
+        // payload[6] = ss.batt
+        
+        srcBuff[HEADER_LEN + 0] = hex_value;
+        srcBuff[HEADER_LEN + 1] = 0x01;
+        srcBuff[HEADER_LEN + 2] = 0x03; // Args length
+        srcBuff[HEADER_LEN + 3] = 0x00;
+        srcBuff[HEADER_LEN + 4] = ss.flags;
+        srcBuff[HEADER_LEN + 5] = ss.layer;
+        srcBuff[HEADER_LEN + 6] = ss.batt;
+        
+        payload_len = 7;
+    }
+    else
+    {
+        /* Generic Atomic Command: 4 Bytes Payload */
+        // payload[0] = cmd_id (hex_value)
+        // payload[1] = format_ver (0x01)
+        // payload[2] = arg_len (0)
+        // payload[3] = flags (0x00)
+        
+        srcBuff[HEADER_LEN + 0] = hex_value;
+        srcBuff[HEADER_LEN + 1] = 0x01;
+        srcBuff[HEADER_LEN + 2] = 0x00; // Args length
+        srcBuff[HEADER_LEN + 3] = 0x00;
+        
+        payload_len = 4;
+    }
+
+    // Offset 0x08: DATA_LEN (4 Bytes) 
+    srcBuff[8]  = (uint8_t)(payload_len & 0xFF);
+    srcBuff[9]  = (uint8_t)((payload_len >> 8) & 0xFF);
+    srcBuff[10] = (uint8_t)((payload_len >> 16) & 0xFF);
+    srcBuff[11] = (uint8_t)((payload_len >> 24) & 0xFF);
+
+    // Offset 0x0C: RESERVED (4 Bytes) -> 保持 0x00 (memset 已處理)
+
+    /* 4. 計算 CRC32 */
+    // 計算範圍：Header (16) + Payload (512) = 528 Bytes
+    // 注意：即使有效數據只有 few bytes，CRC 計算必須涵蓋完整的 512 bytes payload (含補零)
+    uint32_t calc_len = HEADER_LEN + PAYLOAD_LEN; // 16 + 512 = 528
+    crc32Result = spi_calculate_tx_data_crc32(srcBuff, calc_len);
+
+    /* 5. 填寫 CRC (Offset 0x210 / 528) - Little Endian */
+    // CRC 位於 BUFFER 的最後 4 個 Bytes
+    uint8_t *pCrc = &srcBuff[calc_len]; 
+    pCrc[0] = (uint8_t)(crc32Result & 0xFF);
+    pCrc[1] = (uint8_t)((crc32Result >> 8) & 0xFF);
+    pCrc[2] = (uint8_t)((crc32Result >> 16) & 0xFF);
+    pCrc[3] = (uint8_t)((crc32Result >> 24) & 0xFF);
+
+    PRINTF("[SPI][TX] Prepared Atomic Cmd: 0x%02X, CRC: 0x%08X\r\n", hex_value, crc32Result);
+}
+
+static void InitCrc32(CRC_Type *base, uint32_t seed)
+{
+    crc_config_t config;
+
+    config.polynomial    = kCRC_Polynomial_CRC_32;
+    config.reverseIn     = true;
+    config.complementIn  = false;
+    config.reverseOut    = true;
+    config.complementOut = true;
+    config.seed          = seed;
+
+    CRC_Init(base, &config);
+}
+
+static uint32_t spi_calculate_tx_data_crc32(const uint8_t *data, size_t length)
+{
+    CRC_Type *base = CRC_ENGINE;
+
+    /* 1. 初始化 (Seed = 0xFFFFFFFF) */
+    InitCrc32(base, 0xFFFFFFFFU);
+
+    /* 2. 寫入資料 */
+    CRC_WriteData(base, (uint8_t *)data, length);
+
+    /* 3. 回傳結果 */
+    return CRC_Get32bitResult(base);
+}
+
+static bool spi_check_rx_data_crc32(const uint8_t *data, size_t length)
+{
+    PRINTF("[SPI][Debug] Packet Head: %02X %02X %02X %02X\r\n", data[0], data[1], data[2], data[3]);
+    bool isPass = false;
+
+    /* 基本檢查：確保指標有效且長度大於 CRC 長度 (4 bytes) */
+    if ((data == NULL) || (length <= 4))
+    {
+        PRINTF("[SPI][Receive] Error: Invalid data pointer or length too short.\r\n");
+        return false; // <-- 修改這裡：回傳 false 而不是空的 return
+    }
+
+    CRC_Type *base = CRC_ENGINE; 
+    uint32_t calcCrc32 = 0;
+    uint32_t rxCrc32 = 0;
+    uint32_t dataToCalcLen = length - 4; /* V2.3.0 固定為 532 - 4 = 528 */
+
+    /* 1. 初始化 CRC-32 模組 */
+    InitCrc32(base, 0xFFFFFFFFU);
+
+    /* 2. 寫入資料進行計算 (Header + Payload) */
+    CRC_WriteData(base, (uint8_t *)data, dataToCalcLen);
+
+    /* 3. 取得計算結果 */
+    calcCrc32 = CRC_Get32bitResult(base);
+
+    /* 4. 提取封包末尾的 CRC (Offset 528) */
+    const uint8_t *pCrcPtr = &data[dataToCalcLen];
+    rxCrc32 = (uint32_t)pCrcPtr[0] |
+              ((uint32_t)pCrcPtr[1] << 8) |
+              ((uint32_t)pCrcPtr[2] << 16) |
+              ((uint32_t)pCrcPtr[3] << 24);
+
+    /* 5. 比對結果 */
+    if (calcCrc32 == rxCrc32)
+    {
+        isPass = true;
+    }
+    else
+    {
+        PRINTF("[SPI][Receive] CRC FAIL! Calc: 0x%08x, Rx: 0x%08x\r\n", calcCrc32, rxCrc32);
+        isPass = false;
+    }
+
+    return isPass;
+}
+
+static uint32_t crc32_soft(uint32_t crc, const uint8_t *buf, size_t len)
+{
+    /* Linux crc32_le 邏輯: 
+     * 1. 輸入時反轉 (Invert)
+     * 2. 計算 (Polynomial: 0xEDB88320 -> 0x04C11DB7 的反轉)
+     * 3. 輸出時反轉 (Invert)
+     */
+    crc = ~crc;
+    while (len--) {
+        crc ^= *buf++;
+        for (int i = 0; i < 8; i++)
+            crc = (crc >> 1) ^ ((crc & 1) ? 0xEDB88320 : 0);
+    }
+    return ~crc;
+}
+
+static void SPI_StartFrame_PreloadTX(uint8_t* srcBuff, uint32_t frameSize)
+{
+    while (SPI_GetStatusFlags(SOC_SPI_SLAVE) & kSPI_RxNotEmptyFlag) {
+        (void)SPI_ReadData(SOC_SPI_SLAVE);
+    }
+    currentFrameSize = frameSize;
+    if (currentFrameSize > MAX_FRAME_SIZE) {
+        currentFrameSize = MAX_FRAME_SIZE;
+    }
+    txIndex = currentFrameSize;
+    rxIndex = currentFrameSize;
+    currentSrcBuff = srcBuff;
+    while ((txIndex > 0U) && (SPI_GetStatusFlags(SOC_SPI_SLAVE) & kSPI_TxNotFullFlag)) {
+        SPI_WriteData(SOC_SPI_SLAVE, currentSrcBuff[currentFrameSize - txIndex], 0);
+        txIndex--;
+    }
+}
+
+void SPI_SLAVE_IRQHandler(void)
+{
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    if ((SPI_GetStatusFlags(SOC_SPI_SLAVE) & kSPI_RxNotEmptyFlag) && (rxIndex > 0U))
+    {
+        destBuff[BUFFER_SIZE - rxIndex] = SPI_ReadData(SOC_SPI_SLAVE);
+        rxIndex--;
+    }
+
+    if ((SPI_GetStatusFlags(SOC_SPI_SLAVE) & kSPI_TxNotFullFlag) && (txIndex > 0U))
+    {
+        SPI_WriteData(SOC_SPI_SLAVE, (uint16_t)(srcBuff[BUFFER_SIZE - txIndex]), 0);
+        txIndex--;
+    }
+
+    if ((rxIndex == 0U) && (txIndex == 0U))
+    {
+        SPI_DisableInterrupts(SOC_SPI_SLAVE, kSPI_RxLvlIrq | kSPI_TxLvlIrq);
+        xEventGroupSetBitsFromISR(spi_event_group, SPI_TRANSFER_COMPLETE_EVENT_BIT, &xHigherPriorityTaskWoken);
+    }
+
+    /* Force context switch if needed */
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+    SDK_ISR_EXIT_BARRIER;
+}
+
+/* [線性故事 1] 處理主動發送流程 (符合 V2.3.0 時序) */
+static void handle_active_transmit(uint8_t cmd_hex)
+{
+    PRINTF("\n[SPI][TX] Start Active Request Sequence (Cmd: 0x%02X).\r\n", cmd_hex);
+
+    /* 1. 準備資料 & 狀態: S_TX_REQ */
+    g_slave_state = S_TX_REQ;
+    spi_dma_setting_reset();
+    spi_prepare_command_packet_data(cmd_hex);
+    memcpy(slaveTxData, srcBuff, BUFFER_SIZE);
+    
+    // 清除舊事件，避免誤判
+    xEventGroupClearBits(spi_event_group, MASTER_GRANT_ACK_EVENT_BIT | SPI_TRANSFER_COMPLETE_EVENT_BIT);
+
+    /* 2. 發起請求: Pull Low */
+    PRINTF("[SPI][TX] 1. Pull Low (Request)\r\n");
+    GPIO_PinWrite(GPIO, 2, 15, 0);
+    g_slave_state = S_WAIT_GRANT; // 轉移狀態：等待授權
+
+    /* 3. 阻塞等待 Grant */
+    PRINTF("[SPI][TX] 2. Wait for Grant...\r\n");
+    EventBits_t bits = xEventGroupWaitBits(
+        spi_event_group, 
+        MASTER_GRANT_ACK_EVENT_BIT | SPI_TRANSFER_COMPLETE_EVENT_BIT, // 未來可加入 SPI_CS_RISE_EVENT_BIT 來處理搶佔
+        pdFALSE, pdFALSE, pdMS_TO_TICKS(500));
+    
+    // 優先檢查是否被搶佔 (DMA 傳輸完成)
+    if ((bits & SPI_TRANSFER_COMPLETE_EVENT_BIT) != 0) {
+        PRINTF("[SPI][TX] Preempted by Master! Yielding to RX.\r\n");
+        // 釋放 Ready 線 (雖然 ISR 已經拉高了，保險起見)
+        GPIO_PinWrite(GPIO, 2, 15, 1);
+        g_slave_state = S_IDLE; 
+        // 這裡不清除 SPI_TRANSFER_COMPLETE_EVENT_BIT，直接 Return
+        // 讓主迴圈 (spi_handler_task) 接手處理 handle_passive_receive
+        return; 
+    }   
+
+    if ((bits & MASTER_GRANT_ACK_EVENT_BIT) != 0) {
+        xEventGroupClearBits(spi_event_group, MASTER_GRANT_ACK_EVENT_BIT);
+
+        /* [關鍵原子操作] 收到授權 -> S_DMA_TX_SETUP -> S_DMA_TX_RUN */
+        g_slave_state = S_DMA_TX_SETUP;
+        
+        // A. 先裝彈 (避免 0x4ECC 錯位)
+        EXAMPLE_SlaveStartDMATransfer();
+        
+        // B. 再釋放 Ready
+        GPIO_PinWrite(GPIO, 2, 15, 1);
+        
+        g_slave_state = S_DMA_TX_RUN; // 標記為 Run，ISR 看到 CS Rise 就不會拉低 Ready
+        PRINTF("[SPI][TX] 3. Grant OK. DMA Armed & Ready High.\r\n");
+
+        /* 4. 等待傳輸完成 (Hardware DMA) */
+        bits = xEventGroupWaitBits(
+            spi_event_group, SPI_TRANSFER_COMPLETE_EVENT_BIT, 
+            pdTRUE, pdFALSE, pdMS_TO_TICKS(1000));
+
+        if ((bits & SPI_TRANSFER_COMPLETE_EVENT_BIT) != 0) {
+            g_slave_state = S_TX_VERIFY; // 傳輸完成，進入驗證態
+            PRINTF("[SPI][TX] 4. Transfer Done. Waiting for Master ACK...\r\n");
+
+            /* 5. 等待 Master 簽收 (ACK 脈衝) */
+            bits = xEventGroupWaitBits(
+                spi_event_group, MASTER_GRANT_ACK_EVENT_BIT, 
+                pdTRUE, pdFALSE, pdMS_TO_TICKS(500));
+
+            if ((bits & MASTER_GRANT_ACK_EVENT_BIT) != 0) {
+                PRINTF("[SPI][TX] 5. Master ACK Received. Success!\r\n");
+                // === 等待 ACK 脈衝結束 ===
+                uint32_t pulse_timeout = 15;
+                while (GPIO_PinRead(GPIO, 1, 10) == 1 && pulse_timeout > 0) {
+                    vTaskDelay(pdMS_TO_TICKS(1)); 
+                    pulse_timeout--;
+                }
+            } else {
+                PRINTF("[SPI][TX] Warning: Master ACK Timeout.\r\n");
+            }
+        } else {
+            PRINTF("[SPI][TX] Error: DMA Transfer Timeout!\r\n");
+        }
+    } else {
+        PRINTF("[SPI][TX] Error: Grant Timeout!\r\n");
+    }
+
+    /* 6. 結尾清理：強制回到 IDLE */
+    GPIO_PinWrite(GPIO, 2, 15, 1); // 確保 Ready 為 High
+    g_slave_state = S_IDLE;
+    /* 清除優先指令旗標，讓被暫停的 Streaming 可以繼續 */
+    global_priority_cmd_pending = false; 
+    spi_dma_setting_reset_receive_mode(); // 恢復 RX 監聽
+    xEventGroupClearBits(spi_event_group, SPI_CS_RISE_EVENT_BIT); // 清除殘留的 CS 事件
+    PRINTF("[SPI] TX Sequence End. Back to IDLE.\r\n");
+}
+
+/* 專門處理 Streaming 的發送流程 (State Machine) */
+static void handle_streaming_transmit(void)
+{
+    // 0. 安全檢查：如果沒啟動測試，直接退出
+    if (!g_stream.active) return;
+
+    // 1. 根據當前狀態準備資料 (Prepare Packet)
+    const uint32_t PAYLOAD_SIZE = 512;
+    const uint32_t TOTAL_FILE_SIZE = g_stream.total_pkts * PAYLOAD_SIZE;
+    uint8_t dummy_payload[512]; // Stack variable
+    
+    // [Phase 1: Start]
+    if (g_stream.current_pkt == 0) {
+        uint32_t file_size_le = TOTAL_FILE_SIZE;
+        spi_prepare_generic_packet(MSG_CMD_SESSION_START, 0, (uint8_t*)&file_size_le, sizeof(uint32_t));
+    }
+    // [Phase 3: End]
+    else if (g_stream.current_pkt > g_stream.total_pkts) {
+        // 全域 CRC 放在 END 封包
+        spi_prepare_generic_packet(MSG_CMD_SESSION_END, g_stream.total_pkts + 1, (uint8_t*)&g_stream.global_crc, sizeof(uint32_t));
+    }
+    // [Phase 2: Data]
+    else {
+        // 準備 DATA 封包 (ID = current_pkt)
+        memset(dummy_payload, ((g_stream.current_pkt - 1) % 0xFF), PAYLOAD_SIZE);
+        spi_prepare_generic_packet(MSG_DATA_FILE, g_stream.current_pkt, dummy_payload, PAYLOAD_SIZE);
+    }
+    
+    g_streaming_tx_success = false; // 預設為失敗
+    /* 強制重置 SPI 引擎，確保清除上一包留下的 RX DMA 狀態 */
+    SPI_Deinit(SOC_SPI_SLAVE);
+    spi_slave_config_t slave_config;
+    SPI_SlaveGetDefaultConfig(&slave_config);
+    slave_config.sselPol = (spi_spol_t)SOC_SPI_SPOL;
+    SPI_SlaveInit(SOC_SPI_SLAVE, &slave_config);
+    EXAMPLE_SlaveDMASetup(); // 重新配置 DMA 控制器
+
+    // 清除舊事件
+    xEventGroupClearBits(spi_event_group, MASTER_GRANT_ACK_EVENT_BIT | SPI_TRANSFER_COMPLETE_EVENT_BIT);
+
+    /* 1. 發起請求: Pull Low */
+    g_slave_state = S_TX_REQ;
+    GPIO_PinWrite(GPIO, 2, 15, 0); // Request
+    g_slave_state = S_WAIT_GRANT;
+
+    /* 2. 阻塞等待 Grant */
+    EventBits_t bits = xEventGroupWaitBits(
+        spi_event_group, 
+        MASTER_GRANT_ACK_EVENT_BIT | SPI_TRANSFER_COMPLETE_EVENT_BIT,
+        pdFALSE, pdFALSE, pdMS_TO_TICKS(500)); // Timeout 500ms
+
+    if ((bits & SPI_TRANSFER_COMPLETE_EVENT_BIT) != 0) {
+        /* 發生搶佔了！Master 沒給 Grant 就直接傳完了 */
+        PRINTF("[SPI] Preemption detected during Stream TX. Yielding...\r\n");
+        
+        // A. 釋放 Ready 線 (回到安全狀態)
+        GPIO_PinWrite(GPIO, 2, 15, 1);
+        g_slave_state = S_IDLE;
+
+        // B. 安排重試：重新設定 STREAMING 事件，讓下一輪主迴圈再次呼叫此函式
+        xEventGroupSetBits(spi_event_group, SLAVE_STREAMING_DATA_EVENT_BIT);
+
+        // C. 直接退出：保留 COMPLETE 位元，讓主迴圈去執行 handle_passive_receive
+        return; 
+    }    
+
+    if ((bits & MASTER_GRANT_ACK_EVENT_BIT) != 0) {
+        // [修正] 手動清除 Grant 事件
+        xEventGroupClearBits(spi_event_group, MASTER_GRANT_ACK_EVENT_BIT);
+
+        /* 收到授權 -> Arming -> Run */
+        g_slave_state = S_DMA_TX_SETUP;
+
+        /* 確保資料搬移到 DMA Buffer */
+        memcpy(slaveTxData, srcBuff, BUFFER_SIZE);
+        
+        // A. 裝彈
+        EXAMPLE_SlaveStartDMATransfer();
+        
+        // B. 釋放 Ready
+        GPIO_PinWrite(GPIO, 2, 15, 1);
+        g_slave_state = S_DMA_TX_RUN;
+
+        /* 3. 等待傳輸完成 */
+        bits = xEventGroupWaitBits(
+            spi_event_group, SPI_TRANSFER_COMPLETE_EVENT_BIT, 
+            pdTRUE, pdFALSE, pdMS_TO_TICKS(1000));
+
+        if ((bits & SPI_TRANSFER_COMPLETE_EVENT_BIT) != 0) {
+            g_slave_state = S_TX_VERIFY;
+
+            /* 4. 等待 Master ACK 脈衝 */
+            bits = xEventGroupWaitBits(
+                spi_event_group, MASTER_GRANT_ACK_EVENT_BIT, 
+                pdTRUE, pdFALSE, pdMS_TO_TICKS(500));
+
+            if ((bits & MASTER_GRANT_ACK_EVENT_BIT) != 0) {
+                PRINTF("[Stream] ACK Rise detected.\r\n");
+                uint32_t timeout_cnt = 0;
+                while (GPIO_PinRead(GPIO, 1, 10) != 0) {
+                    vTaskDelay(pdMS_TO_TICKS(1)); // 每 1ms 檢查一次
+                    timeout_cnt++;
+                    if (timeout_cnt > 20) { // 正常脈衝是 10ms，超過 20ms 視為異常
+                        PRINTF("[Stream] Warning: ACK pulse stuck High!\r\n");
+                        break;
+                    }
+                }
+                g_streaming_tx_success = true; 
+                PRINTF("[Stream] ACK Fall detected (Safe to proceed).\r\n");
+            } else {
+                PRINTF("[Stream] Warning: ACK Timeout.\r\n");
+            }
+        } else {
+            PRINTF("[Stream] Error: DMA Timeout.\r\n");
+        }
+    } else {
+        PRINTF("[Stream] Error: Grant Timeout.\r\n");
+    }
+
+    /* 5. 結尾清理 */
+    GPIO_PinWrite(GPIO, 2, 15, 1);
+    g_slave_state = S_IDLE;
+    spi_dma_setting_reset_receive_mode(); // 恢復 RX
+    xEventGroupClearBits(spi_event_group, SPI_CS_RISE_EVENT_BIT | MASTER_GRANT_ACK_EVENT_BIT);
+    
+    /* 6. 狀態機判斷 */
+    if (g_streaming_tx_success) {
+        // 如果剛才送的是 Data Packet，要更新 Global CRC
+        if (g_stream.current_pkt > 0 && g_stream.current_pkt <= g_stream.total_pkts) {
+             // 重算一次 CRC (因為 memory copy 可能被覆蓋)
+             memset(dummy_payload, ((g_stream.current_pkt - 1) % 0xFF), PAYLOAD_SIZE);
+             g_stream.global_crc = crc32_soft(g_stream.global_crc, dummy_payload, PAYLOAD_SIZE);
+        }
+
+        PRINTF("[Stream] Pkt %d Success.\r\n", g_stream.current_pkt);
+        
+        // [成功]：推進狀態
+        if (g_stream.current_pkt > g_stream.total_pkts) {
+            // 全部結束
+            PRINTF("[SPI] Streaming Test Completed! Global CRC: 0x%08X\r\n", g_stream.global_crc);
+            g_stream.active = false;
+        } else {
+            // 進到下一包
+            g_stream.current_pkt++;
+            g_stream.retry_count = 0;
+            // [關鍵] 自我觸發：通知 Task 繼續處理下一包
+            xEventGroupSetBits(spi_event_group, SLAVE_STREAMING_DATA_EVENT_BIT);
+        }
+    } else {
+        // [失敗]：重試邏輯
+        g_stream.retry_count++;
+        PRINTF("[Stream] Pkt %d Failed/Preempted. Retry %d/5\r\n", g_stream.current_pkt, g_stream.retry_count);
+        
+        if (g_stream.retry_count >= 5) {
+            PRINTF("[SPI] Streaming Aborted (Max Retries).\r\n");
+            g_stream.active = false; // 放棄
+        } else {
+            // [關鍵] 自我觸發：通知 Task 重試這一包
+            vTaskDelay(pdMS_TO_TICKS(50)); 
+            xEventGroupSetBits(spi_event_group, SLAVE_STREAMING_DATA_EVENT_BIT);
+        }
+    }
+}
+
+/* [線性故事 2] 處理被動接收流程 (整合 Session 邏輯與全域校驗完整版) */
+static void handle_passive_receive(void)
+{
+    // 標記狀態：處理中
+    g_slave_state = S_PROCESSING;
+    PRINTF("[SPI][RX] DMA Done. Analyzing UFP Packet...\r\n");
+
+    bool retry_loop = false;
+
+    /* 使用 do-while 迴圈來處理「收到重傳包」的情況 */
+    do {
+        retry_loop = false; // 預設不需要重試
+
+        // 1. 搬運資料
+        memcpy(destBuff, slaveRxData, BUFFER_SIZE);
+
+        // 2. 校驗與解析
+        bool crcResult = spi_check_rx_data_crc32(destBuff, sizeof(destBuff));
+
+        if (crcResult) 
+        {
+            /* [成功路徑] */
+            uint16_t sync_head = (uint16_t)destBuff[0] | ((uint16_t)destBuff[1] << 8);
+            
+            if (sync_head == 0x55AA) {
+                // PRINTF("[SPI][RX] Processing Done. Preparing Next...\r\n");
+                uint8_t msg_type = destBuff[3];
+                uint32_t pkt_id  = *(uint32_t*)&destBuff[4];
+                uint32_t data_len = *(uint32_t*)&destBuff[8];
+                
+                PRINTF("[SPI][RX] Valid UFP: Type=0x%02X, ID=%u, Len=%u\r\n", msg_type, pkt_id, data_len);
+            
+                /* 這裡處理業務邏輯 (Switch Case...) - [V2.3.0 Session Logic] */
+                bool logic_success = true;
+
+                /* 取得 Payload 指標 (跳過 16 bytes Header) */
+                uint8_t *payload = &destBuff[HEADER_LEN];
+
+                switch (msg_type) 
+                {
+                    /* --- 會話建立 (Session Start) --- */
+                    case MSG_CMD_SESSION_START:
+                        PRINTF("[Session] START Detected. Resetting Global CRC (Soft).\r\n");
+                        g_session.active = true;
+                        g_session.expected_id = 1; 
+                        g_session.received_bytes = 0;
+                        
+                        /* [修正] 初始化軟體 CRC 種子為 0 */
+                        /* Linux crc32_le(0, ...) 內部會 ^ 0xFFFFFFFF，所以這裡設 0 即可 */
+                        g_session.current_crc = 0; 
+                        break;
+
+                    /* --- 數據流 (Data Streaming) --- */
+                    case MSG_DATA_FILE:
+                    case MSG_DATA_FIRMWARE:
+                        if (!g_session.active) {
+                            PRINTF("[Session] Error: Data received without Session Start!\r\n");
+                        } 
+                        else if (pkt_id == g_session.expected_id) {
+                            /* [正常接收] */
+                            
+                            /* [修正] 使用軟體 CRC 進行增量計算 */
+                            /* 注意：必須傳入上一輪的結果 g_session.current_crc */
+                            g_session.current_crc = crc32_soft(g_session.current_crc, &destBuff[HEADER_LEN], 512);
+                            
+                            g_session.expected_id++; 
+                            g_session.received_bytes += data_len;
+                            // PRINTF("[Session] Recv: %u bytes\r\n", data_len);
+                        } 
+                        else if (pkt_id == (g_session.expected_id - 1)) {
+                            /* [重複包] Master 沒收到上一次的 ACK，重傳了舊包 */
+                            PRINTF("[Session] Warning: Duplicate ID %u. ACK only.\r\n", pkt_id);
+                        } 
+                        else {
+                            /* [錯誤] 跳號 (E03) */
+                            PRINTF("[Session] Error: ID Mismatch! Exp: %u, Rx: %u\r\n", g_session.expected_id, pkt_id);
+                            logic_success = false; 
+                        }
+                        break;
+
+                    /* --- 會話結束 (Session End) --- */
+                    case MSG_CMD_SESSION_END:
+                        if (g_session.active) {
+                            /* [全域校驗結算] */
+                            uint32_t final_global_crc = g_session.current_crc; 
+                            
+                            /* 假設 Master 將整份檔案的全域 CRC 放在 END 封包 Payload 的前 4 Bytes */
+                            uint32_t master_global_crc = *(uint32_t*)&destBuff[HEADER_LEN];
+                            
+                            PRINTF("[Session] END Detected. Total Received Bytes: %u\r\n", g_session.received_bytes);
+                            PRINTF("[Session] Global CRC Check: Calc=0x%08X, Master=0x%08X\r\n", 
+                                   final_global_crc, master_global_crc);
+
+                            if (final_global_crc == master_global_crc) {
+                                PRINTF("[Session] SUCCESS! Global integrity verified.\r\n");
+                            } else {
+                                PRINTF("[Session] FAILED! Global CRC Mismatch.\r\n");
+                                logic_success = false; // 觸發錯誤流程
+                            }
+                            g_session.active = false;
+                        }
+                        break;
+
+                    /* --- 原子指令 (插隊) --- */
+                    case MSG_CMD_ATOMIC_EXEC:
+                        //PRINTF("[APP] Atomic Command (ID=0x%02X) Executed.\r\n", destBuff[HEADER_LEN]);
+						{
+							uint8_t app_cmd = payload[0];
+							uint8_t app_val = payload[4];
+
+							PRINTF("[SPI][RX] Atomic Exec: Cmd=0x%02X, Val=0x%02X\r\n", app_cmd, app_val);
+
+							// 呼叫業務邏輯函式
+							spi_process_atomic_command(app_cmd, app_val);
+						}
+                        break;
+                    
+                    case MSG_CMD_ABORT:
+                        PRINTF("[Session] ABORT Command Received. Resetting.\r\n");
+                        g_session.active = false;
+                        g_session.expected_id = 0;
+                        break;
+
+                    default:
+                        PRINTF("[SPI] Unknown Msg Type: 0x%02X\r\n", msg_type);
+                        break;
+                }
+
+                if (logic_success) {
+                    /* 邏輯正確 -> 準備下一包 -> 發送 ACK */
+                    /* 這裡不要拉高 GPIO！
+                     * 因為我們的 DMA 還沒設好，如果現在拉高，Master 會追撞上來。
+                     * 讓 Busy (Low) 繼續保持，Master 會在線上等我們。
+                     */
+                     // GPIO_PinWrite(GPIO, 2, 15, 1);
+                }
+                else {
+                    /* [E03] 邏輯或全域校驗錯誤 -> 跳轉至錯誤處理區塊，進入 ERROR_HOLD */
+                    PRINTF("[SPI][RX] Logic/Global Error. Entering ERROR_HOLD.\r\n");
+                    goto error_hold_entry; 
+                }
+            } 
+            else {
+                PRINTF("[SPI][RX] Error: Invalid SYNC_HEAD (0x%04X)\r\n", sync_head);
+                goto error_hold_entry; // 跳轉至錯誤鎖死邏輯，迫使 Master 重傳
+            }
+        } 
+        else 
+        {
+            /* [失敗路徑] CRC 失敗 */
+            error_hold_entry: // 邏輯錯誤跳轉標籤
+
+            PRINTF("[SPI][RX] CRC/Logic FAIL! Entering ERROR_HOLD. Waiting for Master Retry...\r\n");
+            g_slave_state = S_ERROR_HOLD;
+            
+            // A. 預備 DMA 接重傳 (重要！否則接不到資料)
+            spi_dma_setting_reset_receive_mode();
+            
+            // B. 等待重傳 (由 CS 下降緣 -> DMA 完成 觸發)
+            EventBits_t retryBits = xEventGroupWaitBits(
+                spi_event_group, SPI_TRANSFER_COMPLETE_EVENT_BIT, 
+                pdTRUE, pdFALSE, pdMS_TO_TICKS(500));
+                
+            if ((retryBits & SPI_TRANSFER_COMPLETE_EVENT_BIT) == 0) {
+                // 超時：Master 放棄了
+                PRINTF("[SPI][RX] Global Timeout! Master gave up. Forced Reset.\r\n");
+                GPIO_PinWrite(GPIO, 2, 15, 1); // 自我解鎖
+            } else {
+                // 收到重傳包：設定旗標，讓迴圈重跑一次
+                PRINTF("[SPI][RX] Retry Packet Received. Re-analyzing...\r\n");
+                
+                // [關鍵] 清除位元，準備下一輪判定
+                xEventGroupClearBits(spi_event_group, SPI_TRANSFER_COMPLETE_EVENT_BIT);
+                
+                retry_loop = true; // <--- 觸發下一次迴圈
+            }
+        }
+
+    } while (retry_loop); // 如果收到重傳，就回到上面 memcpy 再次檢查
+
+    /* 結尾清理 */
+    g_slave_state = S_IDLE;
+    memset(slaveRxData, 0x00, TRANSFER_SIZE);
+    
+    // 3. 配置 DMA 接收 (Arming) - 先配置好 DMA
+    spi_dma_setting_reset_receive_mode();
+
+    // 4. [最後一步] 萬事備妥，才拉高 Ready 線 (ACK)
+    // 告訴 Master：「上一包處理完了，而且下一包我也準備好接了，來吧！」
+    GPIO_PinWrite(GPIO, 2, 15, 1); 
+    
+    // 5. 確保沒有殘留的 CS 事件，避免回到主迴圈誤觸
+    xEventGroupClearBits(spi_event_group, SPI_CS_RISE_EVENT_BIT);
+}
+
+
+
+void spi_handler_task(void *pvParameters)
+{
+    // Initialize system bus mutex for synchronization between SPI and I2C components
+    if (sys_bus_mutex == NULL) {
+        sys_bus_mutex = xSemaphoreCreateMutex();
+        configASSERT(sys_bus_mutex != NULL);
+    }
+    /* 初始化 */
+    memset(destBuff, 0, BUFFER_SIZE);
+    g_slave_state = S_IDLE;
+    GPIO_PinWrite(GPIO, 2, 15, 1); // 初始 Ready High
+    spi_dma_setting_reset_receive_mode(); // 被動監聽開啟
+
+    PRINTF("[SPI] Task Started. FSM State: S_IDLE\r\n");
+
+    EventBits_t bits;
+    uint8_t queued_cmd;
+
+    while (1)
+    {
+        /* 主迴圈：只負責分流 */
+        /* 使用 pdTRUE 自動清除觸發位元，因為子函式會處理後續 */
+        bits = xEventGroupWaitBits(
+            spi_event_group,
+            SPI_TRANSFER_COMPLETE_EVENT_BIT |   // 1. Master 送完資料給 Slave 了
+            SLAVE_TRANSFER_EVENT_BIT |          // 2. 有原子指令要發送 (如按鍵)
+            SLAVE_STREAMING_DATA_EVENT_BIT |    // 3. 有串流封包要發送 (如檔案測試)
+            SPI_CS_RISE_EVENT_BIT,              // 4. CS 拉高事件 (用於偵測結束)
+            pdFALSE,                             // 執行完後不自動清除
+            pdFALSE,                            // 只要其中一個 Bit 成立就喚醒
+            pdMS_TO_TICKS(20)                   // 週期醒來檢查 queue 命令
+        );
+
+        /* 分流邏輯 */
+
+        // 1. 最高優先權：SPI 傳輸完成 (被動接收 或 搶佔發生)
+        if ((bits & SPI_TRANSFER_COMPLETE_EVENT_BIT) != 0)
+        {
+            // 手動清除事件
+            xEventGroupClearBits(spi_event_group, SPI_TRANSFER_COMPLETE_EVENT_BIT);
+            handle_passive_receive();
+        }
+        else if ((bits & SLAVE_TRANSFER_EVENT_BIT) != 0)
+        {
+            // 進入主動發送故事線
+            xEventGroupClearBits(spi_event_group, SLAVE_TRANSFER_EVENT_BIT);
+            handle_active_transmit(global_pending_command);
+        }
+        else if ((bits & SLAVE_STREAMING_DATA_EVENT_BIT) != 0)
+        {
+            // 處理串流資料發送事件
+            xEventGroupClearBits(spi_event_group, SLAVE_STREAMING_DATA_EVENT_BIT);
+            handle_streaming_transmit();
+        }
+        else if ((bits & SPI_CS_RISE_EVENT_BIT) != 0)
+        {
+            // 純粹的狀態變更 Log，實際上已由 ISR 處理 GPIO
+            // PRINTF("[SPI] CS Rise Detected (State: %d)\r\n", g_slave_state);
+            xEventGroupClearBits(spi_event_group, SPI_CS_RISE_EVENT_BIT);
+        }
+        else if ((bits & MASTER_GRANT_ACK_EVENT_BIT) != 0)
+        {
+            // 在 IDLE 狀態收到這個通常是雜訊或殘留
+            xEventGroupClearBits(spi_event_group, MASTER_GRANT_ACK_EVENT_BIT);
+            PRINTF("[SPI] Ignored stray Grant/ACK signal.\r\n");
+        }
+
+        // 相容舊架構：處理由 send_state_to_soc() 送進來的 queue 命令
+        if ((spi_request_queue != NULL) &&
+            (xQueueReceive(spi_request_queue, &queued_cmd, 0) == pdPASS))
+        {
+            global_pending_command = queued_cmd;
+            global_priority_cmd_pending = true;
+            handle_active_transmit(global_pending_command);
+        }
+    }
+}
+
+void send_spi_request(uint8_t hex_val)
+{
+#if 0
+    PRINTF("[Debug] send_spi_request(0x%02X) called. GroupHandle: %p\r\n", hex_val, spi_event_group);
+    global_pending_command = hex_val;
+    global_priority_cmd_pending = true;
+    xEventGroupSetBits(spi_event_group, SLAVE_TRANSFER_EVENT_BIT);
+#endif
+}
+
+
+
+void start_spi_streaming_test(void) {
+    if (g_stream.active) {
+        PRINTF("[SPI] Streaming already active!\r\n");
+        return; // 防止重複觸發
+    }
+
+    PRINTF("[SPI] Starting Async Streaming Test...\r\n");
+    g_stream.active = true;
+    g_stream.current_pkt = 0; // 0 = Start Packet, 1~20 = Data, 21 = End Packet
+    g_stream.total_pkts = 20;
+    g_stream.retry_count = 0;
+    g_stream.global_crc = 0;
+
+    // 觸發 Task 開始處理第一包 (Session Start)
+    // 這裡我們復用 SLAVE_STREAMING_DATA_EVENT_BIT
+    xEventGroupSetBits(spi_event_group, SLAVE_STREAMING_DATA_EVENT_BIT);
+}
+
+void spi_command_handler_init(void)
+{
+    /* 初始化 */
+    memset(destBuff, 0, BUFFER_SIZE);
+    g_slave_state = S_IDLE;
+    GPIO_PinWrite(GPIO, 2, 15, 1); // 初始 Ready High
+    spi_dma_setting_reset_receive_mode(); // 被動監聽開啟
+
+    PRINTF("[SPI] Task Started. FSM State: S_IDLE\r\n");
+
+    EventBits_t bits;
+    uint8_t queued_cmd;
+
+}
+
+void spi_command_handler(void)
+{
+    /* 主迴圈：只負責分流 */
+    /* 使用 pdTRUE 自動清除觸發位元，因為子函式會處理後續 */
+	EventBits_t bits;
+    bits = xEventGroupWaitBits(
+        spi_event_group,
+        SPI_TRANSFER_COMPLETE_EVENT_BIT |   // 1. Master 送完資料給 Slave 了
+        SLAVE_TRANSFER_EVENT_BIT |          // 2. 有原子指令要發送 (如按鍵)
+        SLAVE_STREAMING_DATA_EVENT_BIT |    // 3. 有串流封包要發送 (如檔案測試)
+        SPI_CS_RISE_EVENT_BIT,              // 4. CS 拉高事件 (用於偵測結束)
+        pdFALSE,                             // 執行完後不自動清除
+        pdFALSE,                            // 只要其中一個 Bit 成立就喚醒
+        pdMS_TO_TICKS(1)                   // 週期醒來檢查 queue 命令
+    );
+
+    /* 分流邏輯 */
+
+    // 1. 最高優先權：SPI 傳輸完成 (被動接收 或 搶佔發生)
+    if ((bits & SPI_TRANSFER_COMPLETE_EVENT_BIT) != 0)
+    {
+        // 手動清除事件
+        xEventGroupClearBits(spi_event_group, SPI_TRANSFER_COMPLETE_EVENT_BIT);
+        handle_passive_receive();
+    }
+    else if ((bits & SLAVE_TRANSFER_EVENT_BIT) != 0)
+    {
+        // 進入主動發送故事線
+        xEventGroupClearBits(spi_event_group, SLAVE_TRANSFER_EVENT_BIT);
+        handle_active_transmit(global_pending_command);
+    }
+    else if ((bits & SLAVE_STREAMING_DATA_EVENT_BIT) != 0)
+    {
+        // 處理串流資料發送事件
+        xEventGroupClearBits(spi_event_group, SLAVE_STREAMING_DATA_EVENT_BIT);
+        handle_streaming_transmit();
+    }
+    else if ((bits & SPI_CS_RISE_EVENT_BIT) != 0)
+    {
+        // 純粹的狀態變更 Log，實際上已由 ISR 處理 GPIO
+        // PRINTF("[SPI] CS Rise Detected (State: %d)\r\n", g_slave_state);
+        xEventGroupClearBits(spi_event_group, SPI_CS_RISE_EVENT_BIT);
+    }
+    else if ((bits & MASTER_GRANT_ACK_EVENT_BIT) != 0)
+    {
+        // 在 IDLE 狀態收到這個通常是雜訊或殘留
+        xEventGroupClearBits(spi_event_group, MASTER_GRANT_ACK_EVENT_BIT);
+        PRINTF("[SPI] Ignored stray Grant/ACK signal.\r\n");
+    }
+
+    // 相容舊架構：處理由 send_state_to_soc() 送進來的 queue 命令
+    if ((spi_request_queue != NULL) &&
+        (xQueueReceive(spi_request_queue, &queued_cmd, 0) == pdPASS))
+    {
+        global_pending_command = queued_cmd;
+        global_priority_cmd_pending = true;
+        handle_active_transmit(global_pending_command);
+    }
+}
+
+#if 0
 /* ============= 被動模式相關定義 ============= */
 typedef enum {
     MODE_PASSIVE_IDLE,
@@ -803,3 +2019,5 @@ void spi_command_handler(void)
 		}
 	}
 }
+#endif
+#endif

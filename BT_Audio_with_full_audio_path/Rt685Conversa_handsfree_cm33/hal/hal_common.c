@@ -14,6 +14,7 @@
 #include "i2c_component_handler.h"
 #include "fsl_adapter_gpio.h"
 #include "GlobalDef.h"
+#include "spi_handler.h"
 
 /*******************************************************************************
  * Definitions
@@ -36,7 +37,7 @@ extern TaskHandle_t       sI2CTaskHandle  ;
 extern QueueHandle_t spi_request_queue ;
 extern EventGroupHandle_t spi_event_group ;
 extern SemaphoreHandle_t spi_semaphore ;
-
+extern SemaphoreHandle_t spi_streaming_done_semaphore;
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -45,6 +46,8 @@ GPIO_HANDLE_DEFINE(s_TouchIntGpioHandle);
 GPIO_HANDLE_DEFINE(s_ChargerIntGpioHandle);
 GPIO_HANDLE_DEFINE(s_GaugeIntGpioHandle);
 
+GPIO_HANDLE_DEFINE(s_SPIIntGpioHandle);
+GPIO_HANDLE_DEFINE(s_SPI_CSIntGpioHandle);
 
 /**
  * @description: Delay N ms
@@ -91,7 +94,7 @@ static void hal_gpio_pin_init(void)
     /* SoC GPIO */
     GPIO_PinInit(GPIO, NXP_532_PWR_PMIC1_PORT, NXP_532_PWR_PMIC1_PIN, &output_low_pin_config);
     GPIO_PinInit(GPIO, AP533_RST_N_PORT, AP533_RST_N_PIN, &output_low_pin_config);
-    GPIO_PinInit(GPIO, AP533_WAKEUP_N_PORT, AP533_WAKEUP_N_PIN, &output_low_pin_config);
+    GPIO_PinInit(GPIO, AP533_WAKEUP_N_PORT, AP533_WAKEUP_N_PIN, &output_high_pin_config);
     GPIO_PinInit(GPIO, HS_SPI_2_RDY_PORT, HS_SPI_2_RDY_PIN, &input_pin_config);
     /* AMP GPIO */
     GPIO_PinInit(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, &output_low_pin_config);
@@ -116,6 +119,37 @@ static void hal_gpio_pin_init(void)
 
 }
 
+static void hal_gpio_spi_interrupt_callback(void *param)
+{
+    BaseType_t xHPW = pdFALSE;
+    EventBits_t uxBitsToSet = (EventBits_t)param;
+    uint32_t cs_level = GPIO_PinRead(GPIO, 1, 14);
+    if (uxBitsToSet == SPI_CS_RISE_EVENT_BIT) {
+        if (cs_level == 1) {
+            if (g_slave_state == S_RX_Active) {
+                GPIO_PinWrite(GPIO, AP533_WAKEUP_N_PORT, AP533_WAKEUP_N_PIN, 0U);
+            } 
+            else {
+            }
+        } 
+        else {
+            // S_WAIT_GRANT 收到 CS 下降緣代表被搶佔，同樣要把狀態為 S_RX_Active
+            if (g_slave_state == S_IDLE || g_slave_state == S_WAIT_GRANT) {
+                g_slave_state = S_RX_Active;
+            }
+            GPIO_PinWrite(GPIO, AP533_WAKEUP_N_PORT, AP533_WAKEUP_N_PIN, 1U);
+        }
+    }
+    if (uxBitsToSet == MASTER_TRANSFER_EVENT_BIT) {
+        uxBitsToSet = MASTER_GRANT_ACK_EVENT_BIT;
+    }
+    if (spi_event_group) {
+        xEventGroupSetBitsFromISR(spi_event_group, uxBitsToSet, &xHPW);
+    }
+    portYIELD_FROM_ISR(xHPW);
+    SDK_ISR_EXIT_BARRIER;
+}
+
 static void hal_gpio_interrupt_callback(void *param)
 {
     BaseType_t xHPW = pdFALSE;
@@ -132,6 +166,21 @@ static void hal_gpio_interrupt_callback(void *param)
 
 void hal_gpio_interrupt_init(void)
 {
+
+    hal_gpio_pin_config_t spi_int_config = {
+        kHAL_GpioDirectionIn,
+        0,
+        1U,
+        10U,
+    };
+
+    hal_gpio_pin_config_t spi_cs_int_config = {
+        kHAL_GpioDirectionIn,
+        0,
+        1U,
+        14U,
+    };
+
     hal_gpio_pin_config_t touch_int_config = {
         kHAL_GpioDirectionIn,
         0,
@@ -164,14 +213,22 @@ void hal_gpio_interrupt_init(void)
     HAL_GpioInit(s_ChargerIntGpioHandle, &charger_int_config);
     HAL_GpioInit(s_GaugeIntGpioHandle, &gauge_int_config);
 
+    HAL_GpioInit(s_SPIIntGpioHandle, &spi_int_config);
+    HAL_GpioInit(s_SPI_CSIntGpioHandle, &spi_cs_int_config);
+
     HAL_GpioSetTriggerMode(s_TouchIntGpioHandle, kHAL_GpioInterruptFallingEdge);
     HAL_GpioSetTriggerMode(s_ChargerIntGpioHandle, kHAL_GpioInterruptFallingEdge);
     HAL_GpioSetTriggerMode(s_GaugeIntGpioHandle, kHAL_GpioInterruptFallingEdge);
+
+    HAL_GpioSetTriggerMode(s_SPI_CSIntGpioHandle, kHAL_GpioInterruptEitherEdge);
+    HAL_GpioSetTriggerMode(s_SPIIntGpioHandle, kHAL_GpioInterruptRisingEdge);
 
     HAL_GpioInstallCallback(s_TouchIntGpioHandle, touch_post_event, (void *)TOUCH_EVENT_BIT);
     HAL_GpioInstallCallback(s_ChargerIntGpioHandle, charger_post_event, (void *)CHARGER_EVENT_BIT);
     HAL_GpioInstallCallback(s_GaugeIntGpioHandle, hal_gpio_interrupt_callback, (void *)GAUGE_2_EVENT_BIT);
 
+    HAL_GpioInstallCallback(s_SPIIntGpioHandle, hal_gpio_spi_interrupt_callback, (void *)MASTER_TRANSFER_EVENT_BIT);
+    HAL_GpioInstallCallback(s_SPI_CSIntGpioHandle, hal_gpio_spi_interrupt_callback, (void *)SPI_CS_RISE_EVENT_BIT);
 }
 
 void hal_gpio_init(void)
@@ -234,6 +291,13 @@ void hal_spi_init(void)
     }
 #endif
 
+    spi_streaming_done_semaphore = xSemaphoreCreateBinary();
+    if (spi_streaming_done_semaphore == NULL)
+    {
+        PRINTF("Failed to create semaphore -> spi_streaming_done_semaphore \r\n");
+        while (1);
+    }
+
     /* <<< NEW: 建立訊息佇列 >>> */
     // 佇列長度為 10，每個訊息的大小是一個 uint8_t
     spi_request_queue = xQueueCreate(10, sizeof(uint8_t));
@@ -275,7 +339,7 @@ void hal_board_init(void)
 	hal_i3c_init();
 	hal_spi_init();
 	Init_I2C_Component();
-	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
+//	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
 }
 
 #endif
