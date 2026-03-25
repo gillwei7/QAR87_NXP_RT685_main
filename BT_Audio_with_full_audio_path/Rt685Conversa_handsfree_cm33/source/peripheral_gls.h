@@ -15,7 +15,8 @@ extern "C" {
  * API
  ******************************************************************************/
 void peripheral_gls_task(void *pvParameters);
-void le_adv_start(void);
+void peripheral_gls_le_adv_start(void);
+void peripheral_gls_handle_ble_command(const struct bt_gatt_attr *attr, const char *cmd);
 #ifdef __cplusplus
 }
 #endif

@@ -46,6 +46,9 @@
 ******************************************************************************/
 extern usb_device_endpoint_struct_t g_cdcVcomDicEndpoints[];
 
+// For USB shell command use
+extern int app_clear_paired_devices(void);
+
 /* Line coding of cdc device */
 USB_DMA_INIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE) static uint8_t s_lineCoding[LINE_CODING_SIZE] = {
     /* E.g. 0x00,0xC2,0x01,0x00 : 0x0001C200 is 115200 bits per second */
@@ -600,7 +603,7 @@ const char *ComPrintInfo_Info2[]=
 };
 const char *ComPrintInfo_Info3[]=
 {
-"command c is pressed.\r\n",
+"[BT]Clear All pairing\r\n",
 };
 const char *ComPrintInfo_Info4[]=
 {
@@ -609,12 +612,12 @@ const char *ComPrintInfo_Info4[]=
 
 const char *ComPrintInfo_Help[]=
 {
-//help info
 "\r\n\
-Type and send a/A to ...\r\n\
-Type and send b/B to ...\r\n\
-\r\n\
-"
+Type for below shell commands\r\n\
+a:[Audio]Play OPUS ID:N, N max 12\r\n\
+b:[Audio]Play SBC File ID:N, N max 2\r\n",
+"c:[BT]Clear All Paired device\r\n",
+"\r\n"
 };
 
 #if PRINTF_GoesToUsbCom==1
@@ -641,7 +644,6 @@ void USB_DeviceCdcVcomTask(void)
             switch(s_currRecvBuf[0])
             {
             //source select
-            case 'A':
             case 'a':
             	VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
             	VarBlockSharedByDspAndMcu.PlayOpusFileIdx=s_currRecvBuf[2]-'0';		//idx=0 stands for the first opus file
@@ -650,7 +652,6 @@ void USB_DeviceCdcVcomTask(void)
             		VarBlockSharedByDspAndMcu.PlayOpusFileIdx = 12;
            		ComPrintInfoPtr=ComPrintInfo_Info1[0];
             	break;
-            case 'B':
             case 'b':
             	VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
             	VarBlockSharedByDspAndMcu.PlaySbcFileIdx=s_currRecvBuf[2]-'0';		//idx=0 stands for the first sbc file
@@ -659,11 +660,11 @@ void USB_DeviceCdcVcomTask(void)
             		VarBlockSharedByDspAndMcu.PlaySbcFileIdx = 2;
            		ComPrintInfoPtr=ComPrintInfo_Info2[0];
             	break;
-            case 'C':
+            // [BT]Clear All pairing
             case 'c':
            		ComPrintInfoPtr=ComPrintInfo_Info3[0];
+                app_clear_paired_devices();
             	break;
-            case 'D':
             case 'd':
            		ComPrintInfoPtr=ComPrintInfo_Info4[0];
             	break;

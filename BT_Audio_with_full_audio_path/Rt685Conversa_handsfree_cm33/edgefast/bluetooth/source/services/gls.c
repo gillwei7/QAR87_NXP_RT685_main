@@ -20,12 +20,14 @@
 #include <bluetooth/gatt.h>
 #include <bluetooth/services/gls.h>
 
+#include "peripheral_gls.h"
+
 #define BT_DIS_MANUF     "NXP"
 #define BT_DIS_NAME      "GLASSES Demo"
 #define BT_DIS_SN        "BLESN01"
 
 #define BT_DIS_STR_MAX   (20U)
-#define BT_CHAR_VALUE_MAX_LEN  15
+#define BT_CHAR_VALUE_MAX_LEN  30
 
 /*******************************************************************************
  * Variables
@@ -144,7 +146,7 @@ void bt_status_notify()
 	if(notif_enabled_char1)
 	{
 
-		//PRINTF("Status is %s\n", statusChar1);
+		PRINTF("Status is %s\n", statusChar1);
 
 		// Prepare status_update structure
 		status_update.flags = 0x00;
@@ -164,7 +166,7 @@ void bt_status_notify()
 	if(notif_enabled_char2)
 	{
 
-			//PRINTF("Status is %s\n", statusChar2);
+			PRINTF("Status is %s\n", statusChar2);
 
 			// Prepare status_update structure
 			status_update_min.flags = 0x00;
@@ -241,7 +243,24 @@ ssize_t write_char2(struct bt_conn *conn, const struct bt_gatt_attr *attr,
     char2_data[len] = '\0';
     g_char2DataLength = len;
 
-    PRINTF("Char2 write: %s, Length: %d\n", char2_data, len);
+    PRINTF("BLE Char2 write: %s, Length: %d\n", char2_data, len);
+
+    peripheral_gls_handle_ble_command(&glasses_svc.attrs[5], (const char *)char2_data);
+//    // Prepare status_update structure
+//    char test_char[] = "ACK:HOTSPOT_ON";
+//
+//    // Notify the status update
+//    int rc = bt_gatt_notify(NULL,
+//                        &glasses_svc.attrs[5],
+//                        test_char,
+//                        strlen(test_char));
+//
+//    PRINTF("notify result:%d\r\n", rc);
+//
+//    if (rc < 0 && rc != -ENOTCONN)
+//    {
+//        PRINTF("Char2 notify failed: %d\r\n", rc);
+//    }
 
     return len;
 

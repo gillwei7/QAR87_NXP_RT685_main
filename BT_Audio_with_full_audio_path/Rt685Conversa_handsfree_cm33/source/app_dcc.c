@@ -127,9 +127,10 @@ void bt_ready(int err)
     	app_lfs_init();
 
 #if defined(APP_LE_PERIPHERAL_ENABLE) && (APP_LE_PERIPHERAL_ENABLE == 1)
-    le_adv_start();
+    peripheral_gls_le_adv_start();
 #endif
     app_a2dp_hf_auto_connect();
+    //app_clear_paired_devices(); // For test
 #if 0
    // if(g_pairedDeviceCount)
    // {
