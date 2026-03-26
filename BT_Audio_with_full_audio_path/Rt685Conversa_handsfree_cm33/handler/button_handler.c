@@ -217,6 +217,10 @@ void button_task(void *pvParameters)
             {
             	btn_dbl_pending = false;
 				PRINTF("[Button] Short Press detected.\r\n");
+
+				//send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_TAKE_PICTURE);
+				application_examples_atomic_exec();
+
 				if(!ss_is_charging())
 				{
 					PRINTF("[Button] Short Press detected. Sending 0x%02X\r\n", SHORT_PRESS_HEX_VALUE);
@@ -228,7 +232,7 @@ void button_task(void *pvParameters)
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
 					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
 							ss_get_state() == USAGE_STATE_VIDEO_RECORDING || ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
-						send_spi_request(SHORT_PRESS_HEX_VALUE); // Stop Recording and Take Photo
+						//send_spi_request(SHORT_PRESS_HEX_VALUE); // Stop Recording and Take Photo
 					}
 #endif
 #endif
@@ -288,6 +292,9 @@ void button_task(void *pvParameters)
 
                 /* 回報 FunKey 長按（按住版），沿用既有 LONG_PRESS_HEX_VALUE */
                 PRINTF("[Button] Long Press (hold >=%ums) detected.\r\n", (unsigned)BTN_HOLD_MS);
+
+                application_examples_atomic_status();
+
                 if(!ss_is_charging())
                 {
                 PRINTF("[Button] Long Press (hold) detected. Sending 0x%02X\r\n",
@@ -295,7 +302,7 @@ void button_task(void *pvParameters)
 #if SOC_SPI_ENABLE
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
 				if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT)) {
-					send_spi_request(LONG_PRESS_HEX_VALUE); // Start Recording
+					//send_spi_request(LONG_PRESS_HEX_VALUE); // Start Recording
 				}
 #endif
 #endif
@@ -441,7 +448,7 @@ void button_task(void *pvParameters)
                         PRINTF("[PWR] Long Press (>=%ums) detected.\r\n", (unsigned)PWR_LONG_MS);
 #if SOC_SPI_ENABLE
                         if (Novatek_boot_completed) {
-                            send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
+                            //send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
                         } else {
         		            general_RingtoneState = Ringtone_PowerOFF;
         		            vTaskDelay(pdMS_TO_TICKS(200));
@@ -458,7 +465,7 @@ void button_task(void *pvParameters)
 #if SOC_SPI_ENABLE
 #if 1
                         if (Novatek_boot_completed) {
-                            send_spi_request(POWER_SHORT_PRESS_HEX_VALUE);
+                            //send_spi_request(POWER_SHORT_PRESS_HEX_VALUE);
 
                         }
 #else // use button to switch state

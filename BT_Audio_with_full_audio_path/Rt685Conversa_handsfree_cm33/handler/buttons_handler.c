@@ -289,7 +289,7 @@ void button_press_hold_handler (void)
 			{
 #if SOC_SPI_ENABLE
 				if (Novatek_boot_completed) {
-					send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
+					//send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
 				} else {
 					general_RingtoneState = Ringtone_PowerOFF;
 					vTaskDelay(pdMS_TO_TICKS(200));
@@ -339,7 +339,7 @@ void button_press_hold_handler (void)
 #if SOC_SPI_ENABLE
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
 				if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT)) {
-					send_spi_request(LONG_PRESS_HEX_VALUE); // Start Recording
+					//send_spi_request(LONG_PRESS_HEX_VALUE); // Start Recording
 				}
 #endif
 #endif

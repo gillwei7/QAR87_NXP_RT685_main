@@ -13,8 +13,11 @@
 #include "fsl_crc.h"
 #include "fsl_spi_dma.h"
 #include "fsl_dma.h"
+#include "hal_common.h"
 
 #define USE_DMA 1
+
+#define USE_NEW_COMMAND 1
 
 extern EventGroupHandle_t i2c_event_group ;
 
@@ -30,6 +33,7 @@ static uint8_t destBuff[BUFFER_SIZE];
 static volatile uint32_t txIndex = BUFFER_SIZE;
 static volatile uint32_t rxIndex = BUFFER_SIZE;
 
+static volatile uint8_t global_pending_msgtype = 0; // 用來存 hex_value
 static volatile uint8_t global_pending_command = 0; // 用來存 hex_value
 
 static volatile uint32_t currentFrameSize = 0;
@@ -60,9 +64,15 @@ static void printf_rx_data(void);
 static bool spi_check_rx_data_crc32(const uint8_t *data, size_t length);
 static uint32_t spi_calculate_tx_data_crc32(const uint8_t *data, size_t length);
 static void SPI_StartFrame_PreloadTX(uint8_t* srcBuff, uint32_t frameSize);
+#if USE_NEW_COMMAND
+static void spi_process_atomic_event(uint8_t event_id, const uint8_t *args);
+static void spi_prepare_command_packet_data(uint8_t msg_type, uint8_t cmd_id);
+#else if
 static void spi_prepare_command_packet_data(uint8_t hex_value);
-static void spi_prepare_generic_packet(uint8_t msg_type, uint32_t packet_id, uint8_t *payload_ptr, uint32_t payload_len);
 static void spi_process_atomic_command(uint8_t cmd, uint8_t val);
+#endif
+static void spi_prepare_generic_packet(uint8_t msg_type, uint32_t packet_id, uint8_t *payload_ptr, uint32_t payload_len);
+
 
 static void SPI_SlaveUserCallback(SPI_Type *base, spi_dma_handle_t *handle, status_t status, void *userData);
 static void EXAMPLE_SlaveDMASetup(void);
@@ -105,6 +115,158 @@ static session_ctx_t g_session = { .active = false, .expected_id = 0, .received_
 
 extern RingtoneState general_RingtoneState;
 
+msg_notification_info_t g_msg_info = {0};
+
+volatile MediaPlayPauseCmd g_media_play_cmd = MEDIA_TOGGLE;
+
+/* 宣告全域變數來儲存時間資訊 (可給予預設值) */
+volatile rtc_time_info_t g_system_time = {
+    .year   = 2026,
+    .month  = 3,
+    .day    = 16,
+    .hour   = 12,
+    .minute = 0,
+    .second = 0
+};
+
+
+void application_examples_atomic_status(void)
+{
+
+	send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_SYS_STATUS);
+	vTaskDelay(100);
+
+	g_system_time.day  = 17;
+	g_system_time.hour = 11;
+	g_system_time.minute = 11,
+	g_system_time.second = 11;
+	send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_TIME_SYNC);
+	vTaskDelay(100);
+
+    message_processing(APP_TYPE_EMAIL, "SW_weekly_report_0311_Daryl", "Dear Lydia, Jason FYI Best Regards Daryl");
+    send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_MSG_NOTIFICATION);
+    vTaskDelay(100);
+    message_processing(APP_TYPE_WECHAT, "壓電瓷磚（Piezoelectric tiles）技術", "壓電瓷磚技術是一種透過行人走路的動能轉換為電能的綠色能源解決方案。當人踏在瓷磚上時，壓力會使內部的壓電材料產生變形，從而產生壓電效應，將機械能轉化為電能。這種瓷磚能儲存能量以供驅動 LED 燈、數位顯示器或感測器使用，適合高人流量區域。");
+    send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_MSG_NOTIFICATION);
+    vTaskDelay(100);
+    message_processing(APP_TYPE_LINE, "今天星期三", "晚上吃好料");
+    send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_MSG_NOTIFICATION);
+    vTaskDelay(100);
+
+    send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_VERSION_INFO_SYNC);
+
+}
+void application_examples_atomic_exec(void)
+{
+    // 建立陣列
+    const uint8_t codes[] = {
+        0x01, 0x02, 0x04,
+        0x11, 0x15, 0x17, 0x19,
+        0x12, 0x13, 0x14, 0x1C,
+        0x1D, 0x21, 0x22, 0x23,
+    };
+
+    // 計算陣列長度
+    const size_t count = sizeof(codes) / sizeof(codes[0]);
+
+	// 逐一輸出（索引 + 十六進位值）
+	for (size_t i = 0; i < count; ++i) {
+		send_spi_request(CMD_ATOMIC_EXEC, codes[i]);
+		vTaskDelay(100);
+	}
+
+	ss_set_state(USAGE_STATE_HOME);
+	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE);
+
+}
+
+void message_processing(app_msg_type_t app_type, const char *title, const char *body)
+{
+    // 1. 儲存 AppType
+    g_msg_info.app_type = (uint8_t)app_type;
+
+    // 2. 清空原本的緩衝區 (可選，但比較安全)
+    memset(g_msg_info.title, 0, MAX_MSG_TITLE_LEN);
+    memset(g_msg_info.body, 0, MAX_MSG_BODY_LEN);
+
+    // 3. 處理 Title 字串
+    /* --- 3-1. 處理 Title 字串 (自動補空白) --- */
+    if (title != NULL && title[0] != '\0') {
+        size_t t_len = strlen(title);
+
+        // 確保長度不超過 Buffer，並且預留 1 個 Byte 給「自動空白」
+        if (t_len >= MAX_MSG_TITLE_LEN) {
+            t_len = MAX_MSG_TITLE_LEN - 1;
+        }
+
+        // 拷貝原始字串
+        memcpy(g_msg_info.title, title, t_len);
+
+        // 在字串最後強制補上一個空白字元 (0x20) 當作替死鬼
+        g_msg_info.title[t_len] = ' ';
+
+        // 實際要傳送的長度是 原始長度 + 1
+        g_msg_info.title_len = (uint8_t)(t_len + 1);
+    } else {
+        g_msg_info.title_len = 0;
+    }
+
+    /* --- 3-2. 處理 Body 字串 (自動補空白) --- */
+    if (body != NULL && body[0] != '\0') {
+        size_t b_len = strlen(body);
+
+        // 確保長度不超過 Buffer，並且預留 1 個 Byte 給「自動空白」
+        if (b_len >= MAX_MSG_BODY_LEN) {
+            b_len = MAX_MSG_BODY_LEN - 1;
+        }
+
+        // 拷貝原始字串
+        memcpy(g_msg_info.body, body, b_len);
+
+        // 在字串最後強制補上一個空白字元 (0x20)
+        g_msg_info.body[b_len] = ' ';
+
+        // 實際要傳送的長度是 原始長度 + 1
+        g_msg_info.body_len = (uint16_t)(b_len + 1);
+    } else {
+        g_msg_info.body_len = 0;
+    }
+}
+
+
+#if USE_NEW_COMMAND
+static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
+{
+	switch (event_id) {
+
+		case CMD_ATOMIC_EVENT_SYSTEM_BOOT_DONE:
+
+				PRINTF("[App] Nova boot completed\r\n");
+				Novatek_boot_completed = 1;
+				hal_led_refresh();
+				battery_timer_start();
+				general_RingtoneState = Ringtone_PowerON;
+			break;
+
+		case CMD_ATOMIC_EVENT_UI_PAGE_CHANGED:
+
+				uint8_t CurrentPageID,CurrentSubPageID ,ChangeReason ,ResultCode ;
+
+				CurrentPageID = args[0];
+				CurrentSubPageID = args[1];
+				ChangeReason  = args[2];
+				ResultCode = args[3];
+
+				PRINTF("[App] UI Page Changed: \r\n ");
+				PRINTF("\t CurrentPageID:0x%02X CurrentSubPageID:0x%02X \r\n",CurrentPageID,CurrentSubPageID);
+				PRINTF("\t ChangeReason:0x%02X  ResultCode:0x%02X \r\n",ChangeReason,ResultCode);
+
+			break;
+	}
+
+}
+
+#else if
 static void spi_process_atomic_command(uint8_t cmd, uint8_t val)
 {
     switch (cmd) {
@@ -183,6 +345,7 @@ static void spi_process_atomic_command(uint8_t cmd, uint8_t val)
             break;
     }
 }
+#endif
 
 static void spi_dma_setting_reset(void)
 {
@@ -356,6 +519,195 @@ static void spi_prepare_generic_packet(uint8_t msg_type, uint32_t packet_id, uin
     PRINTF("[SPI][Gen] Type=0x%02X, ID=%u, Len=%u, CRC=0x%08X\r\n", msg_type, packet_id, payload_len, crc32Result);
 }
 
+#if USE_NEW_COMMAND
+static void spi_prepare_command_packet_data(uint8_t msg_type, uint8_t cmd_id)
+{
+    uint32_t crc32Result = 0;
+
+    /* 1. 清空緩衝區 (Padding 0x00) */
+    memset(srcBuff, 0, BUFFER_SIZE);
+
+    /* 2. 填寫 Header (Offset 0x00 ~ 0x0F) */
+    // Offset 0x00: SYNC_HEAD (0x55AA) -> Little Endian: AA 55
+    srcBuff[0] = 0xAA;
+    srcBuff[1] = 0x55;
+
+    // Offset 0x02: PROT_VER (0x02)
+    srcBuff[2] = 0x02;
+
+    // Offset 0x03: MSG_TYPE (依據傳入參數: 0x20 或 0x21)
+    srcBuff[3] = msg_type;
+
+    // Offset 0x04: PACKET_ID (原子指令固定填 0x00000000，memset 已清零)
+    // Offset 0x0C: RESERVED  (固定填 0x00000000，memset 已清零)
+
+    /* 3. 填寫 Payload (Offset 0x10 ~) */
+    srcBuff[HEADER_LEN + 0] = cmd_id;   // payload[0] = cmd_id
+    srcBuff[HEADER_LEN + 1] = 0x01;     // payload[1] = fmt_ver (目前固定 0x01)
+
+    uint16_t arg_len = 0;
+    uint8_t *pArgs = &srcBuff[HEADER_LEN + 4]; // 參數寫入的起始位置 (payload[4..])
+
+    /* 根據 msg_type 與 cmd_id 填寫對應的參數 (Args) */
+     if (msg_type == CMD_ATOMIC_EXEC) // CMD_ATOMIC_EXEC (NXP -> Novatek 控制指令)
+     {
+         switch (cmd_id)
+         {
+
+			 case CMD_ATOMIC_EXEC_SWITCH_UI_PAGE: // SWITCH_UI_PAGE
+				 arg_len = 2;
+				 pArgs[0] = ss_get_state();
+				 pArgs[1] = 0x00; // TargetSubPageID
+				 break;
+
+             case CMD_ATOMIC_EXEC_MEDIA_PLAY_PAUSE: // MEDIA PLAY/PAUSE
+                 arg_len = 1;
+                 pArgs[0] = g_media_play_cmd; // 0x00: Toggle, 0x01: Force Play, 0x02: Force Pause (請依實際需求帶入)
+                 break;
+
+             default:
+                 // 其他控制指令如 OPEN OE(0x01), TAKE PICTURE(0x21) 等，無參數
+                 arg_len = 0;
+                 break;
+         }
+     }
+     else if (msg_type == CMD_ATOMIC_STATUS) // CMD_ATOMIC_STATUS (NXP -> Novatek 資訊同步)
+     {
+         switch (cmd_id)
+         {
+			 case CMD_ATOMIC_STATUS_SYS_STATUS: // SYS STATUS SYNC (依照新規格 4.3 修正為 4 Bytes)
+				 arg_len = 4;
+				 pArgs[0] = ss_get_battery();         // BatteryLevel (0-100)
+				 pArgs[1] = ss_is_charging() ? 1 : 0; // ChargingStatus (0/1)
+				 pArgs[2] = ss_bt_is_on() ? 1 : 0;    // BT_ConnStatus (0/1)
+				 pArgs[3] = ss_ble_is_on() ? 1 : 0;   // BLE_ConnStatus (0/1)
+				 break;
+
+             case CMD_ATOMIC_STATUS_TIME_SYNC: // TIME SYNC
+                 arg_len = 7;
+
+                 /* Args[0-1]: Year (uint16_t, Big Endian) */
+                 /* Big Endian: 高位元組存放在低記憶體位址 (pArgs[0]) */
+                 pArgs[0] = (uint8_t)((g_system_time.year >> 8) & 0xFF);
+                 pArgs[1] = (uint8_t)(g_system_time.year & 0xFF);
+
+                 /* Args[2]: Month (1-12) */
+                 pArgs[2] = g_system_time.month;
+
+                 /* Args[3]: Day (1-31) */
+                 pArgs[3] = g_system_time.day;
+
+                 /* Args[4]: Hour (0-23) */
+                 pArgs[4] = g_system_time.hour;
+
+                 /* Args[5]: Minute (0-59) */
+                 pArgs[5] = g_system_time.minute;
+
+                 /* Args[6]: Second (0-59) */
+                 pArgs[6] = g_system_time.second;
+                 break;
+
+             case CMD_ATOMIC_STATUS_MSG_NOTIFICATION: // MSG NOTIFICATION
+                 /* arg_len = 4 + N + M */
+                 arg_len = 4 + g_msg_info.title_len + g_msg_info.body_len;
+
+                 /* Args[0]: AppType */
+                 pArgs[0] = g_msg_info.app_type;
+
+                 /* Args[1]: TitleLength (N) */
+                 pArgs[1] = g_msg_info.title_len;
+
+                 /* Args[2]: BodyLength_L (N) */
+                 pArgs[2] = (uint8_t)(g_msg_info.body_len & 0xFF);
+                 /* Args[3]: BodyLength_H (N) */
+                 pArgs[3] = (uint8_t)((g_msg_info.body_len >> 8) & 0xFF);
+
+                 if (g_msg_info.title_len > 0) {
+                     memcpy(&pArgs[4], g_msg_info.title, g_msg_info.title_len);
+                 }
+
+                 if (g_msg_info.body_len > 0) {
+                     memcpy(&pArgs[4 + g_msg_info.title_len], g_msg_info.body, g_msg_info.body_len);
+                 }
+
+
+                 break;
+
+             case CMD_ATOMIC_STATUS_VERSION_INFO_SYNC: // VERSION INFO
+
+                 /* 1. 取得字串長度 (N) */
+                 // 這裡強制轉型成 const char* 給 strlen 使用
+                 size_t n_len = strlen((const char *)HAL_MCU_APP_VERSION);
+
+                 /* 2. 防護機制：限制長度不超過建議值 128 (同時也防禦 255 的溢位) */
+                 if (n_len > 128) {
+                     n_len = 128;
+                 }
+
+                 /* 3. 設定總 arg_len = 1 (長度欄位) + N (字串內容) */
+                 arg_len = (uint16_t)(1 + n_len);
+
+                 /* 4. Args[0]: VersionStringLength (N) */
+                 pArgs[0] = (uint8_t)n_len;
+
+                 /* 5. Args[1 ~ N]: VersionString */
+                 if (n_len > 0) {
+                     // 拷貝字串內容，從 pArgs[1] 開始放
+                     memcpy(&pArgs[1], HAL_MCU_APP_VERSION, n_len);
+                 }
+
+                 break;
+
+         /*ToDo: Structure processing of special instructions
+          *
+          *
+             case CMD_ATOMIC_STATUS_VOLUME_INFO_SYNC: // VOLUME INFO SYNC (依照新規格 4.5)
+                 arg_len = 2;
+                 pArgs[0] = audio_status.vol_level;   // VolumeLevel (0-100)
+                 pArgs[1] = audio_status.is_mute;     // MuteStatus (0/1)
+                 break;
+
+          */
+             default:
+                 arg_len = 0;
+                 break;
+         }
+     }
+
+     // payload[2] = arg_len_L
+     srcBuff[HEADER_LEN + 2] = (uint8_t)(arg_len & 0xFF);
+     // payload[3] = arg_len_H
+     srcBuff[HEADER_LEN + 3] = (uint8_t)((arg_len >> 8) & 0xFF);
+
+     /* 計算 DATA_LEN: Payload 表頭(4) + 參數長度(arg_len) */
+     uint32_t payload_valid_len = 4 + arg_len;
+
+     // Offset 0x08: DATA_LEN (4 Bytes, Little Endian)
+     srcBuff[8]  = (uint8_t)(payload_valid_len & 0xFF);
+     srcBuff[9]  = (uint8_t)((payload_valid_len >> 8) & 0xFF);
+     srcBuff[10] = (uint8_t)((payload_valid_len >> 16) & 0xFF);
+     srcBuff[11] = (uint8_t)((payload_valid_len >> 24) & 0xFF);
+
+     /* 4. 計算 CRC32 */
+     // 計算範圍：Header (16) + Payload (512) = 528 Bytes (含 Padding 的 0x00)
+     uint32_t calc_len = HEADER_LEN + PAYLOAD_LEN;
+     crc32Result = spi_calculate_tx_data_crc32(srcBuff, calc_len);
+
+     /* 5. 填寫 CRC (Offset 0x210 / 528) - Little Endian */
+     uint8_t *pCrc = &srcBuff[calc_len];
+     pCrc[0] = (uint8_t)(crc32Result & 0xFF);
+     pCrc[1] = (uint8_t)((crc32Result >> 8) & 0xFF);
+     pCrc[2] = (uint8_t)((crc32Result >> 16) & 0xFF);
+     pCrc[3] = (uint8_t)((crc32Result >> 24) & 0xFF);
+
+     PRINTF("[SPI][TX] Prepared Atomic Cmd: MSG_TYPE=0x%02X, CMD_ID=0x%02X, ArgsLen=%d, CRC=0x%08X\r\n",
+            msg_type, cmd_id, arg_len, crc32Result);
+
+     //printf_tx_data();
+}
+
+
+#else if
 static void spi_prepare_command_packet_data(uint8_t hex_value)
 {
     /* V2.3.0 封包結構常數 */
@@ -451,6 +803,7 @@ static void spi_prepare_command_packet_data(uint8_t hex_value)
 
     PRINTF("[SPI][TX] Prepared Atomic Cmd: 0x%02X, CRC: 0x%08X\r\n", hex_value, crc32Result);
 }
+#endif
 
 static void InitCrc32(CRC_Type *base, uint32_t seed)
 {
@@ -589,14 +942,14 @@ void SPI_SLAVE_IRQHandler(void)
 }
 
 /* [線性故事 1] 處理主動發送流程 (符合 V2.3.0 時序) */
-static void handle_active_transmit(uint8_t cmd_hex)
+static void handle_active_transmit(uint8_t msg_type_hex,uint8_t cmd_hex)
 {
     PRINTF("\n[SPI][TX] Start Active Request Sequence (Cmd: 0x%02X).\r\n", cmd_hex);
 
     /* 1. 準備資料 & 狀態: S_TX_REQ */
     g_slave_state = S_TX_REQ;
     spi_dma_setting_reset();
-    spi_prepare_command_packet_data(cmd_hex);
+    spi_prepare_command_packet_data(msg_type_hex,cmd_hex);
     memcpy(slaveTxData, srcBuff, BUFFER_SIZE);
     
     // 清除舊事件，避免誤判
@@ -950,16 +1303,37 @@ static void handle_passive_receive(void)
                         break;
 
                     /* --- 原子指令 (插隊) --- */
-                    case MSG_CMD_ATOMIC_EXEC:
+                    //case MSG_CMD_ATOMIC_EXEC:
+                    case CMD_ATOMIC_EVENT:
                         //PRINTF("[APP] Atomic Command (ID=0x%02X) Executed.\r\n", destBuff[HEADER_LEN]);
 						{
-							uint8_t app_cmd = payload[0];
-							uint8_t app_val = payload[4];
+						    // 提取 Header 欄位
+						    uint8_t event_id = payload[0];
+						    uint8_t fmt_ver  = payload[1];
+						    uint8_t arg_len  = payload[2];
+						    uint8_t flags    = payload[3];
 
-							PRINTF("[SPI][RX] Atomic Exec: Cmd=0x%02X, Val=0x%02X\r\n", app_cmd, app_val);
+							PRINTF("[SPI][RX] Atomic EVENT: event_id=0x%02X format_ver=0x%02X flags=0x%02X args_len=%d \r\n", event_id,fmt_ver,flags,arg_len);
+
+							const uint8_t *args = &payload[4];
+
+						    // 判斷並印出 Args
+						    if (arg_len > 0) {
+						    	PRINTF("Arguments  : ");
+						        // 指向 arg 起始位置 (payload[4])
+
+						        for (int i = 0; i < arg_len; i++) {
+						        	PRINTF("%02X ", args[i]);
+						        }
+						        PRINTF("\n");
+
+						    } else {
+						    	PRINTF("Arguments  : (None)\n");
+						    }
+						    PRINTF("====================================\n\n");
 
 							// 呼叫業務邏輯函式
-							spi_process_atomic_command(app_cmd, app_val);
+							spi_process_atomic_event(event_id,args);
 						}
                         break;
                     
@@ -1089,7 +1463,7 @@ void spi_handler_task(void *pvParameters)
         {
             // 進入主動發送故事線
             xEventGroupClearBits(spi_event_group, SLAVE_TRANSFER_EVENT_BIT);
-            handle_active_transmit(global_pending_command);
+            handle_active_transmit(global_pending_msgtype,global_pending_command);
         }
         else if ((bits & SLAVE_STREAMING_DATA_EVENT_BIT) != 0)
         {
@@ -1109,7 +1483,7 @@ void spi_handler_task(void *pvParameters)
             xEventGroupClearBits(spi_event_group, MASTER_GRANT_ACK_EVENT_BIT);
             PRINTF("[SPI] Ignored stray Grant/ACK signal.\r\n");
         }
-
+        /*
         // 相容舊架構：處理由 send_state_to_soc() 送進來的 queue 命令
         if ((spi_request_queue != NULL) &&
             (xQueueReceive(spi_request_queue, &queued_cmd, 0) == pdPASS))
@@ -1118,17 +1492,18 @@ void spi_handler_task(void *pvParameters)
             global_priority_cmd_pending = true;
             handle_active_transmit(global_pending_command);
         }
+        */
     }
 }
 
-void send_spi_request(uint8_t hex_val)
+void send_spi_request(uint8_t msg_type, uint8_t cmd_id)
 {
-#if 0
-    PRINTF("[Debug] send_spi_request(0x%02X) called. GroupHandle: %p\r\n", hex_val, spi_event_group);
-    global_pending_command = hex_val;
+    PRINTF("[Debug] send_spi_request() -> MSG_TYPE=0x%02X, CMD_ID=0x%02X called. GroupHandle: %p\r\n", msg_type,cmd_id, spi_event_group);
+
+    global_pending_msgtype = msg_type;
+    global_pending_command = cmd_id;
     global_priority_cmd_pending = true;
     xEventGroupSetBits(spi_event_group, SLAVE_TRANSFER_EVENT_BIT);
-#endif
 }
 
 
@@ -1171,6 +1546,7 @@ void spi_command_handler(void)
     /* 主迴圈：只負責分流 */
     /* 使用 pdTRUE 自動清除觸發位元，因為子函式會處理後續 */
 	EventBits_t bits;
+
     bits = xEventGroupWaitBits(
         spi_event_group,
         SPI_TRANSFER_COMPLETE_EVENT_BIT |   // 1. Master 送完資料給 Slave 了
@@ -1179,7 +1555,7 @@ void spi_command_handler(void)
         SPI_CS_RISE_EVENT_BIT,              // 4. CS 拉高事件 (用於偵測結束)
         pdFALSE,                             // 執行完後不自動清除
         pdFALSE,                            // 只要其中一個 Bit 成立就喚醒
-        pdMS_TO_TICKS(1)                   // 週期醒來檢查 queue 命令
+        pdMS_TO_TICKS(20)                   // 週期醒來檢查 queue 命令
     );
 
     /* 分流邏輯 */
@@ -1195,7 +1571,7 @@ void spi_command_handler(void)
     {
         // 進入主動發送故事線
         xEventGroupClearBits(spi_event_group, SLAVE_TRANSFER_EVENT_BIT);
-        handle_active_transmit(global_pending_command);
+        handle_active_transmit(global_pending_msgtype,global_pending_command);
     }
     else if ((bits & SLAVE_STREAMING_DATA_EVENT_BIT) != 0)
     {
@@ -1215,7 +1591,7 @@ void spi_command_handler(void)
         xEventGroupClearBits(spi_event_group, MASTER_GRANT_ACK_EVENT_BIT);
         PRINTF("[SPI] Ignored stray Grant/ACK signal.\r\n");
     }
-
+    /*
     // 相容舊架構：處理由 send_state_to_soc() 送進來的 queue 命令
     if ((spi_request_queue != NULL) &&
         (xQueueReceive(spi_request_queue, &queued_cmd, 0) == pdPASS))
@@ -1224,6 +1600,7 @@ void spi_command_handler(void)
         global_priority_cmd_pending = true;
         handle_active_transmit(global_pending_command);
     }
+    */
 }
 
 #if 0

@@ -269,7 +269,7 @@ void send_state_to_soc(void) // send state to soc if both audio path and state a
 	if (need_send_state) {
 		PRINTF("[System] need_send_state send_state_to_soc (%d) \r\n", current_usage_state);
 		current_state_value = USAGE_STATE_HEX_VALUE + current_usage_state;
-		send_spi_request(current_state_value);
+		//send_spi_request(current_state_value);
 		need_send_state = 0;
 
 	}
@@ -286,9 +286,9 @@ void send_music_status_to_soc(void)
 	// To make novatek open music ui or open home ui
 #if SOC_SPI_ENABLE
 	if (music_status) {
-		send_spi_request(MUSIC_START_HEX_VALUE); //music start
+		//send_spi_request(MUSIC_START_HEX_VALUE); //music start
 	} else {
-		send_spi_request(MUSIC_STOP_HEX_VALUE); //music stop
+		//send_spi_request(MUSIC_STOP_HEX_VALUE); //music stop
 	}
 #endif
 	//send_spi_request(MUSIC_START_HEX_VALUE); //music start
@@ -380,14 +380,14 @@ void ss_ble_on() {
 	ss.flags |=  SS_BLE_BIT;
 	System_Status=1;
 #if SOC_SPI_ENABLE
-	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+	//send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
 }
 void ss_ble_off() {
 	ss.flags &= ~SS_BLE_BIT;
 	System_Status=1;
 #if SOC_SPI_ENABLE
-	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+	//send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
 }
 
@@ -399,7 +399,7 @@ void ss_ha_on() {
 	ss.flags |=  SS_HA_BIT;
 	System_Status=1;
 #if SOC_SPI_ENABLE
-	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+	//send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
 }
 
@@ -407,7 +407,7 @@ void ss_ha_off() {
 	ss.flags &= ~SS_HA_BIT;
 	System_Status=1;
 #if SOC_SPI_ENABLE
-	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+	//send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
 }
 
@@ -419,7 +419,7 @@ void ss_bt_on() {
 	ss.flags |=  SS_BT_BIT;
 	System_Status=1;
 #if SOC_SPI_ENABLE
-	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+	//send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
 }
 
@@ -427,7 +427,7 @@ void ss_bt_off() {
 	ss.flags &= ~SS_BT_BIT;
 	System_Status=1;
 #if SOC_SPI_ENABLE
-	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+	//send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
 }
 
@@ -439,7 +439,7 @@ void ss_mic_on() {
 	ss.flags |=  SS_MIC_BIT;
 	System_Status=1;
 #if SOC_SPI_ENABLE
-	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+	//send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
 }
 
@@ -447,7 +447,7 @@ void ss_mic_off() {
 	ss.flags &= ~SS_MIC_BIT;
 	System_Status=1;
 #if SOC_SPI_ENABLE
-	send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+	//send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
 }
 

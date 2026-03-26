@@ -398,7 +398,7 @@ void I2C_Task(void *pvParameters)
 #if SOC_SPI_ENABLE
                         if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
                         		ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_HOME)) {
-                	        send_spi_request(ONE_TOUCH_HEX_VALUE);
+                	        //send_spi_request(ONE_TOUCH_HEX_VALUE);
                         }
 #endif
                 	}
@@ -406,7 +406,7 @@ void I2C_Task(void *pvParameters)
                 	{
 #if SOC_SPI_ENABLE
                         if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
-                            send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
+                            //send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
                         }
 #endif
                 	}
@@ -421,7 +421,7 @@ void I2C_Task(void *pvParameters)
                     		ss_get_state() == USAGE_STATE_ABOUT)) {
                     	// Media Player: Go Home (if the OE is on), Wake Up (if the OE is off)
                     	// Home: Wake Up (if the OE is off)
-                        send_spi_request(PRESS_TOUCH_HEX_VALUE);
+                        //send_spi_request(PRESS_TOUCH_HEX_VALUE);
                     }
 #endif
                 }
@@ -439,7 +439,7 @@ void I2C_Task(void *pvParameters)
                 	ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
 #if SOC_SPI_ENABLE
                     if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
-                        send_spi_request(FORWARD_SLIDE_HEX_VALUE);
+                        //send_spi_request(FORWARD_SLIDE_HEX_VALUE);
                     }
 #endif
                     if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
@@ -456,7 +456,7 @@ void I2C_Task(void *pvParameters)
 
 #if SOC_SPI_ENABLE
                     if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
-                        send_spi_request(BACK_SLIDE_HEX_VALUE);
+                        //send_spi_request(BACK_SLIDE_HEX_VALUE);
                     }
 #endif
                     if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
@@ -597,7 +597,7 @@ void I2C_Task(void *pvParameters)
             		PRINTF("[Gauge] Low battery, so it shuts down. \r\n");
 #if SOC_SPI_ENABLE
                         if (Novatek_boot_completed) {
-                            send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
+                            //send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
                         } else {
         		            general_RingtoneState = Ringtone_PowerOFF;
         		            vTaskDelay(pdMS_TO_TICKS(200));
@@ -677,7 +677,7 @@ void I2C_Task(void *pvParameters)
         {
             System_Status=0;
 #if SOC_SPI_ENABLE
-            send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+            //send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
         }
 
@@ -737,7 +737,7 @@ void i2c_device_handler (void)
 #if SOC_SPI_ENABLE
 				if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
 						ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_HOME)) {
-					send_spi_request(ONE_TOUCH_HEX_VALUE);
+					//send_spi_request(ONE_TOUCH_HEX_VALUE);
 				}
 #endif
 			}
@@ -745,7 +745,7 @@ void i2c_device_handler (void)
 			{
 #if SOC_SPI_ENABLE
 				if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
-					send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
+					//send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
 				}
 #endif
 			}
@@ -760,7 +760,7 @@ void i2c_device_handler (void)
 					ss_get_state() == USAGE_STATE_ABOUT)) {
 				// Media Player: Go Home (if the OE is on), Wake Up (if the OE is off)
 				// Home: Wake Up (if the OE is off)
-				send_spi_request(PRESS_TOUCH_HEX_VALUE);
+				//send_spi_request(PRESS_TOUCH_HEX_VALUE);
 			}
 #endif
 		}
@@ -777,7 +777,7 @@ void i2c_device_handler (void)
 			PRINTF("[Touch] slide_right \n");
 #if SOC_SPI_ENABLE
 			if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
-				send_spi_request(FORWARD_SLIDE_HEX_VALUE);
+				//send_spi_request(FORWARD_SLIDE_HEX_VALUE);
 			}
 #endif
 			if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
@@ -792,7 +792,7 @@ void i2c_device_handler (void)
 			PRINTF("[Touch] slide_left \n");
 #if SOC_SPI_ENABLE
 			if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
-				send_spi_request(BACK_SLIDE_HEX_VALUE);
+				//send_spi_request(BACK_SLIDE_HEX_VALUE);
 			}
 #endif
 			if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
@@ -907,7 +907,7 @@ void i2c_device_handler (void)
 			PRINTF("[Gauge] Low battery, so it shuts down. \r\n");
 #if SOC_SPI_ENABLE
 				if (Novatek_boot_completed) {
-					send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
+					//send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
 				} else {
 					general_RingtoneState = Ringtone_PowerOFF;
 					vTaskDelay(pdMS_TO_TICKS(200));
@@ -964,7 +964,7 @@ void i2c_device_handler (void)
 	{
 		System_Status=0;
 #if SOC_SPI_ENABLE
-		send_spi_request(SYSTEM_STATUS_HEX_VALUE);
+		//send_spi_request(SYSTEM_STATUS_HEX_VALUE);
 #endif
 	}
 }
