@@ -944,9 +944,9 @@ void I3C_MasterGetDefaultConfig(i3c_master_config_t *masterConfig)
     masterConfig->hKeep                        = kI3C_MasterHighKeeperNone;
     masterConfig->enableOpenDrainStop          = true;
     masterConfig->enableOpenDrainHigh          = true;
-    masterConfig->baudRate_Hz.i2cBaud          = 400000U;
+    masterConfig->baudRate_Hz.i2cBaud          = 100000U;
     masterConfig->baudRate_Hz.i3cPushPullBaud  = 12500000U;
-    masterConfig->baudRate_Hz.i3cOpenDrainBaud = 2500000U;
+    masterConfig->baudRate_Hz.i3cOpenDrainBaud = 400000U;
 }
 
 /*!

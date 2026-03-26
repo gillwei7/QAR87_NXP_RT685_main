@@ -1,0 +1,393 @@
+#ifndef SEMTECH_SX920X_H
+#define SEMTECH_SX920X_H
+
+#include "GlobalDef.h"
+
+#define SEMTECH_ADDRESSS        (0x29) // For SX9204
+
+/*
+*  I2C Registers
+*/
+
+//Interrupt Control
+#define SX920X_IRQ_SOURCE_REG	0x4000
+#define SX920X_IRQ_MASK_REG		0x4004
+#define SX920X_IRQ_ADV_MASK_REG	0x8010
+#define SX920X_IRQ_SETUP_REG	0x4008
+
+//Device State Configuration
+#define SX920X_DEVICE_RESET_REG	0x4240
+#define SX920X_COMMAND_REG		0x4280
+#define SX920X_CMMAND_BUSY_REG	0x4284
+
+//Pin Customization
+#define SX920X_PIN_SETUP_A_REG	0x42C0
+#define SX920X_PIN_SETUP_B_REG	0x42C4
+
+//Device Information
+#define SX920X_DEVICE_INFO_REG	0x42CC
+
+//Status Registers
+#define SX920X_DEVICE_STATUS_A_REG	0x8000
+#define SX920X_DEVICE_STATUS_B_REG	0x8004
+#define SX920X_DEVICE_STATUS_C_REG	0x8008
+#define SX920X_DEVICE_STATUS_D_REG	0x800C
+
+
+//Status Output Setup
+#define SX920X_STATUS_OUTPUT_0_REG	0x8014
+#define SX920X_STATUS_OUTPUT_1_REG	0x8018
+#define SX920X_STATUS_OUTPUT_2_REG	0x801C
+#define SX920X_STATUS_OUTPUT_3_REG	0x8020
+
+//Phase Enabling
+#define SX920X_SCAN_PERIOD_SETUP_REG	0x8024
+#define SX920X_GENERAL_SETUP_REG		0x8028
+
+//AFE Parameter Setup
+#define SX920X_AFE_PARAMETERS_PH0_REG	0x802C
+#define SX920X_AFE_PARAMETERS_PH1_REG	0x8038
+#define SX920X_AFE_PARAMETERS_PH2_REG	0x8044
+#define SX920X_AFE_PARAMETERS_PH3_REG	0x8050
+#define SX920X_AFE_PARAMETERS_PH4_REG	0x805C
+#define SX920X_AFE_PARAMETERS_PH5_REG	0x8068
+#define SX920X_AFE_PARAMETERS_PH6_REG	0x8074
+#define SX920X_AFE_PARAMETERS_PH7_REG	0x8080
+
+//AFE Connection Setup
+#define SX920X_AFE_CS_USAGE_PH0_REG	0x8034
+#define SX920X_AFE_CS_USAGE_PH1_REG	0x8040
+#define SX920X_AFE_CS_USAGE_PH2_REG	0x804C
+#define SX920X_AFE_CS_USAGE_PH3_REG	0x8058
+#define SX920X_AFE_CS_USAGE_PH4_REG	0x8064
+#define SX920X_AFE_CS_USAGE_PH5_REG	0x8070
+#define SX920X_AFE_CS_USAGE_PH6_REG	0x807C
+#define SX920X_AFE_CS_USAGE_PH7_REG	0x8088
+
+//ADC, RAW Filter and Debounce Filter
+#define SX920X_RAWFILTER_SETUP_PH0_REG	0x808C
+#define SX920X_RAWFILTER_SETUP_PH1_REG	0x80AC
+#define SX920X_RAWFILTER_SETUP_PH2_REG	0x80CC
+#define SX920X_RAWFILTER_SETUP_PH3_REG	0x80EC
+#define SX920X_RAWFILTER_SETUP_PH4_REG	0x810C
+#define SX920X_RAWFILTER_SETUP_PH5_REG	0x812C
+#define SX920X_RAWFILTER_SETUP_PH6_REG	0x814C
+#define SX920X_RAWFILTER_SETUP_PH7_REG	0x816C
+
+//Average Filter
+#define SX920X_AVGFILTER_SETUP_PH0_REG	0x8090
+#define SX920X_AVGFILTER_SETUP_PH1_REG	0x80B0
+#define SX920X_AVGFILTER_SETUP_PH2_REG	0x80D0
+#define SX920X_AVGFILTER_SETUP_PH3_REG	0x80F0
+#define SX920X_AVGFILTER_SETUP_PH4_REG	0x8110
+#define SX920X_AVGFILTER_SETUP_PH5_REG	0x8130
+#define SX920X_AVGFILTER_SETUP_PH6_REG	0x8150
+#define SX920X_AVGFILTER_SETUP_PH7_REG	0x8170
+
+//USE Filter Setup
+#define SX920X_USE_FLT_SETUP_PH0_REG	0x8094
+#define SX920X_USE_FLT_SETUP_PH1_REG	0x80B4
+#define SX920X_USE_FLT_SETUP_PH2_REG	0x80D4
+#define SX920X_USE_FLT_SETUP_PH3_REG	0x80F4
+#define SX920X_USE_FLT_SETUP_PH4_REG	0x8114
+#define SX920X_USE_FLT_SETUP_PH5_REG	0x8134
+#define SX920X_USE_FLT_SETUP_PH6_REG	0x8154
+#define SX920X_USE_FLT_SETUP_PH7_REG	0x8174
+
+//Filter Setup D 
+#define SX920X_ADC_QUICK_FILTER_0_REG	0x81E0
+#define SX920X_ADC_QUICK_FILTER_1_REG	0x81E4
+#define SX920X_ADC_QUICK_FILTER_2_REG	0x81E8
+#define SX920X_ADC_QUICK_FILTER_3_REG	0x81EC
+
+//Steady and Saturation Setup
+#define SX920X_STEADY_AND_SATURATION_PH0_REG	0x809C
+#define SX920X_STEADY_AND_SATURATION_PH1_REG	0x80BC
+#define SX920X_STEADY_AND_SATURATION_PH2_REG	0x80DC
+#define SX920X_STEADY_AND_SATURATION_PH3_REG	0x80FC
+#define SX920X_STEADY_AND_SATURATION_PH4_REG	0x811C
+#define SX920X_STEADY_AND_SATURATION_PH5_REG	0x813C
+#define SX920X_STEADY_AND_SATURATION_PH6_REG	0x815C
+#define SX920X_STEADY_AND_SATURATION_PH7_REG	0x817C
+
+//Failure Threshold Setup
+#define SX920X_FAILURE_THRESHOLD_PH0_REG	0x80A4
+#define SX920X_FAILURE_THRESHOLD_PH1_REG	0x80C4
+#define SX920X_FAILURE_THRESHOLD_PH2_REG	0x80E4
+#define SX920X_FAILURE_THRESHOLD_PH3_REG	0x8104
+#define SX920X_FAILURE_THRESHOLD_PH4_REG	0x8124
+#define SX920X_FAILURE_THRESHOLD_PH5_REG	0x8144
+#define SX920X_FAILURE_THRESHOLD_PH6_REG	0x8164
+#define SX920X_FAILURE_THRESHOLD_PH7_REG	0x8184
+
+//Proximity Threshold
+#define SX920X_PROX_THRESH_PH0_REG	0x809C
+#define SX920X_PROX_THRESH_PH1_REG	0x80BC
+#define SX920X_PROX_THRESH_PH2_REG	0x80DC
+#define SX920X_PROX_THRESH_PH3_REG	0x80FC
+#define SX920X_PROX_THRESH_PH4_REG	0x811C
+#define SX920X_PROX_THRESH_PH5_REG	0x813C
+#define SX920X_PROX_THRESH_PH6_REG	0x815C
+#define SX920X_PROX_THRESH_PH7_REG	0x817C
+
+//Startup Setup
+#define SX920X_STARTUP_PH0_REG	0x8098
+#define SX920X_STARTUP_PH1_REG	0x80B8
+#define SX920X_STARTUP_PH2_REG	0x80D8
+#define SX920X_STARTUP_PH3_REG	0x80F8
+#define SX920X_STARTUP_PH4_REG	0x8118
+#define SX920X_STARTUP_PH5_REG	0x8138
+#define SX920X_STARTUP_PH6_REG	0x8158
+#define SX920X_STARTUP_PH7_REG	0x8178
+
+//Reference Correction Setup A
+#define SX920X_REFERENCE_CORRECTION_PH0_A_REG	0x80A4
+#define SX920X_REFERENCE_CORRECTION_PH1_A_REG	0x80C4
+#define SX920X_REFERENCE_CORRECTION_PH2_A_REG	0x80E4
+#define SX920X_REFERENCE_CORRECTION_PH3_A_REG	0x8104
+#define SX920X_REFERENCE_CORRECTION_PH4_A_REG	0x8124
+#define SX920X_REFERENCE_CORRECTION_PH5_A_REG	0x8144
+#define SX920X_REFERENCE_CORRECTION_PH6_A_REG	0x8164
+#define SX920X_REFERENCE_CORRECTION_PH7_A_REG	0x8184
+
+//Reference Correction Setup B
+#define SX920X_REFERENCE_CORRECTION_PH0_B_REG	0x80A8
+#define SX920X_REFERENCE_CORRECTION_PH1_B_REG	0x80C8
+#define SX920X_REFERENCE_CORRECTION_PH2_B_REG	0x80E8
+#define SX920X_REFERENCE_CORRECTION_PH3_B_REG	0x8108
+#define SX920X_REFERENCE_CORRECTION_PH4_B_REG	0x8128
+#define SX920X_REFERENCE_CORRECTION_PH5_B_REG	0x8148
+#define SX920X_REFERENCE_CORRECTION_PH6_B_REG	0x8168
+#define SX920X_REFERENCE_CORRECTION_PH7_B_REG	0x8188
+
+#define SX920X_REFERENCE_ENG_A_REG	0x819C
+#define SX920X_REFERENCE_ENG_B_REG	0x81A0
+
+#define SX920X_SLIDER_SETUPA_ENG_A_REG	0x818C
+#define SX920X_SLIDER_SETUPA_ENG_B_REG	0x8194
+#define SX920X_SLIDER_SETUPB_ENG_A_REG	0x8190
+#define SX920X_SLIDER_SETUPB_ENG_B_REG	0x8198
+
+#define SX920X_SLIDER_POSITION_REG		0x828C
+
+#define SX920X_SMARTBUTTON_1_REG	0x81FC
+#define SX920X_SMARTBUTTON_2_REG	0x8200
+
+//Smart Human Sensing Setup A
+#define SX920X_ENGINE_1_CONFIG_REG	0x8198
+#define SX920X_ENGINE_1_X0_REG	0x819C
+#define SX920X_ENGINE_1_X1_REG	0x81A0
+#define SX920X_ENGINE_1_X2_REG	0x81A4
+#define SX920X_ENGINE_1_X3_REG	0x81A8
+#define SX920X_ENGINE_1_Y0_REG	0x81AC
+#define SX920X_ENGINE_1_Y1_REG	0x81B0
+#define SX920X_ENGINE_1_Y2_REG	0x81B4
+#define SX920X_ENGINE_1_Y3_REG	0x81B8
+
+//Smart Human Sensing Setup B
+#define SX920X_ENGINE_2_CONFIG_REG	0x81BC
+#define SX920X_ENGINE_2_X0_REG	0x81C0
+#define SX920X_ENGINE_2_X1_REG	0x81C4
+#define SX920X_ENGINE_2_X2_REG	0x81C8
+#define SX920X_ENGINE_2_X3_REG	0x81CC
+#define SX920X_ENGINE_2_Y0_REG	0x81D0
+#define SX920X_ENGINE_2_Y1_REG	0x81D4
+#define SX920X_ENGINE_2_Y2_REG	0x81D8
+#define SX920X_ENGINE_2_Y3_REG	0x81DC
+
+//Offset Readback
+#define SX920X_OFFSET_PH0_REG	0x8030
+#define SX920X_OFFSET_PH1_REG	0x803C
+#define SX920X_OFFSET_PH2_REG	0x8048
+#define SX920X_OFFSET_PH3_REG	0x8054
+#define SX920X_OFFSET_PH4_REG	0x8060
+#define SX920X_OFFSET_PH5_REG	0x806C
+#define SX920X_OFFSET_PH6_REG	0x8078
+#define SX920X_OFFSET_PH7_REG	0x808C
+
+//Useful Readback
+#define SX920X_USEFUL_PH0_REG	0x8208
+#define SX920X_USEFUL_PH1_REG	0x820C
+#define SX920X_USEFUL_PH2_REG	0x8210
+#define SX920X_USEFUL_PH3_REG	0x8214
+#define SX920X_USEFUL_PH4_REG	0x8218
+#define SX920X_USEFUL_PH5_REG	0x821C
+#define SX920X_USEFUL_PH6_REG	0x8220
+#define SX920X_USEFUL_PH7_REG	0x8224
+
+//Average Readback
+#define SX920X_AVERAGE_PH0_REG	0x8228
+#define SX920X_AVERAGE_PH1_REG	0x822C
+#define SX920X_AVERAGE_PH2_REG	0x8230
+#define SX920X_AVERAGE_PH3_REG	0x8234
+#define SX920X_AVERAGE_PH4_REG	0x8238
+#define SX920X_AVERAGE_PH5_REG	0x823C
+#define SX920X_AVERAGE_PH6_REG	0x8240
+#define SX920X_AVERAGE_PH7_REG	0x8244
+
+//Diff Readback
+#define SX920X_DIFF_PH0_REG	0x8248
+#define SX920X_DIFF_PH1_REG	0x824C
+#define SX920X_DIFF_PH2_REG	0x8250
+#define SX920X_DIFF_PH3_REG	0x8254
+#define SX920X_DIFF_PH4_REG	0x8258
+#define SX920X_DIFF_PH5_REG	0x825C
+#define SX920X_DIFF_PH6_REG	0x8260
+#define SX920X_DIFF_PH7_REG	0x8264
+
+//Specialized Readback
+#define SX920X_DEBUG_PHASESEL_REG		0x8290
+#define SX920X_DEBUG_RAW_REG			0x829C
+#define SX920X_DEBUG_DELTA_REG			0x82A0
+#define SX920X_DEBUG_SLDWHL_ENGA_REG	0x82A4
+#define SX920X_DEBUG_SLDWHL_ENGB_REG	0x82A8
+
+/*      Chip ID 	*/
+#define SX920X_WHOAMI_VALUE                   0x9204
+/*command*/
+#define SX920X_PHASE_ENABLE                	0xF
+#define SX920X_COMPENSATION_CONTROL        	0xE
+#define SX920X_PAUSE_CONTROL           		0xD
+#define SX920X_UNPAUSE_CONTROL            	0xC
+
+#define   SX920X_STAT0_PROXSTAT_PH7_FLAG      0x80000000
+#define   SX920X_STAT0_PROXSTAT_PH6_FLAG      0x40000000
+#define   SX920X_STAT0_PROXSTAT_PH5_FLAG      0x20000000
+#define   SX920X_STAT0_PROXSTAT_PH4_FLAG      0x10000000
+#define   SX920X_STAT0_PROXSTAT_PH3_FLAG      0x08000000
+#define   SX920X_STAT0_PROXSTAT_PH2_FLAG      0x04000000
+#define   SX920X_STAT0_PROXSTAT_PH1_FLAG      0x02000000
+#define   SX920X_STAT0_PROXSTAT_PH0_FLAG      0x01000000
+
+//0x8008, StatC -SMART BUTTON
+#define   SX920X_MULTITAP_PH7_FLAG      0x70000000
+#define   SX920X_MULTITAP_PH6_FLAG      0x07000000
+#define   SX920X_MULTITAP_PH5_FLAG      0x00700000
+#define   SX920X_MULTITAP_PH4_FLAG      0x00070000
+#define   SX920X_MULTITAP_PH3_FLAG      0x00007000
+#define   SX920X_MULTITAP_PH2_FLAG      0x00000700
+#define   SX920X_MULTITAP_PH1_FLAG      0x00000070
+#define   SX920X_MULTITAP_PH0_FLAG      0x00000007
+
+#define   SX920X_LONGTOUCH_PH7_FLAG      0x80000000
+#define   SX920X_LONGTOUCH_PH6_FLAG      0x08000000
+#define   SX920X_LONGTOUCH_PH5_FLAG      0x00800000
+#define   SX920X_LONGTOUCH_PH4_FLAG      0x00080000
+#define   SX920X_LONGTOUCH_PH3_FLAG      0x00008000
+#define   SX920X_LONGTOUCH_PH2_FLAG      0x00000800
+#define   SX920X_LONGTOUCH_PH1_FLAG      0x00000080
+#define   SX920X_LONGTOUCH_PH0_FLAG      0x00000008
+
+//0x800C, StatD -SLIDER
+#define   SX920X_STATD_SLDENB_FLAG      	0x00000030
+#define   SX920X_STATD_SLDENB_FWD_FLAG      0x00000020
+#define   SX920X_STATD_SLDENB_BWD_FLAG      0x00000010
+#define   SX920X_STATD_SLDENB_TOUCHED_FLAG  0x00000008
+
+#define   SX920X_STATD_SLDENA_FLAG      	0x00000006
+#define   SX920X_STATD_SLDENA_FWD_FLAG      0x00000004
+#define   SX920X_STATD_SLDENA_BWD_FLAG      0x00000002
+#define   SX920X_STATD_SLDENA_TOUCHED_FLAG  0x00000001
+
+#define   SX920X_I2C_SOFTRESET_VALUE		0xDE
+
+/*========================================================*/
+
+/* ---- Smart Human Sensing (RegStatB @ 0x8004) ---- */
+#define SX920X_SMARTH_A_SHIFT     11    // bits [12:11]
+#define SX920X_SMARTH_B_SHIFT     13    // bits [14:13]
+#define SX920X_SMARTH_MASK        0x3   // 2-bit
+#define SX920X_SMARTH_NONE        0x0
+#define SX920X_SMARTH_BODY        0x1   // 人體
+#define SX920X_SMARTH_TABLE       0x2   // 桌面/低介電
+#define SX920X_STARTUP_ANY_BIT    (1U << 15)  // STARTUPSTATANY
+
+/* ---- IRQ source (RegHostIrqSrc @ 0x4000) ---- */
+#define SX920X_IRQSRC_CLOSEANY    (1U << 6)   // Close rising edge
+#define SX920X_IRQSRC_FARANY      (1U << 5)   // Far falling edge
+
+/* 直觀事件枚舉（中文描述見 sx920x_event_to_str_zh ）*/
+typedef enum {
+    SX920X_EVT_NONE = 0,
+    SX920X_EVT_CLOSE,       // 接近
+    SX920X_EVT_FAR,         // 遠離
+    SX920X_EVT_BODY_CLOSE,  // 人體接近
+    SX920X_EVT_BODY_FAR     // 人體遠離
+} sx920x_event_t;
+
+/* 轉字串方便 log 顯示 */
+const char* sx920x_event_to_str_zh(sx920x_event_t evt);
+
+/* 輕量輪詢：回傳「接近/遠離/人體接近/人體遠離」 */
+int sx920x_poll_event(sx920x_event_t *evt);
+
+/*========================================================*/
+
+struct smtc_reg_data
+{
+    unsigned short reg;
+    unsigned int val;
+};
+
+typedef struct smtc_reg_data smtc_reg_data_t;
+typedef struct smtc_reg_data *psmtc_reg_data_t;
+
+
+struct _buttonInfo
+{
+    /*! The Key to send to the input */
+    int keycode;
+    /*! Mask to look for on Touch Status */
+    int mask;
+    /*! Current state of button. */
+    int state;
+};
+
+struct _sliderInfo
+{
+    /*! The Key to send to the input */
+    int keycode;
+    /*! Mask to look for on Touch Status */
+    int backwardmask;
+    int forwardmask;
+    /*! Current state of button. */
+    int state;
+};
+
+struct _multitap
+{
+    /*! The Key to send to the input */
+    int keycode;
+    /*! Mask to look for on Touch Status */
+    int tapmask;
+    int longtouchmask;
+    /*! Current state of button. */
+    int state;
+};
+
+
+int sx920x_init(void);
+//void sx920x_disable_int(void);
+//void sx920x_enable_int(HAL_GPIO_PIN_IRQ_HANDLER func);
+int sx920x_read_state(u8 *state);
+
+
+/*
+recommend calibration procedure for startup are:
+1. make sure there is no object is near the sensor
+2. copensate the chip by calling sx920x_compensate()
+3. read offset and useful by calling sx920x_factory_cap_get()
+4. put the device near an object as the required distance
+5. read the useful again.
+6. calculate the useful threshold with:
+   useful_threshod = (useful_step3 + useful_step_5)/2
+
+7. store the offset and useful_threshod into the flash.
+8. pass the offset and useful_threshod to sx920x_factory_cap_set
+   after power on the device to enable the startup detection
+*/
+
+int sx920x_compensate(void);
+
+
+#endif

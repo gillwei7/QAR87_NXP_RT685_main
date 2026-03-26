@@ -181,6 +181,41 @@ void Init_I2C_Component(void)
 	                               BatteryReadTimerCb);
 #endif
 
+#if TOUCH_EWD608_ENABLE
+
+	uint16_t fw_ver = 0;
+	int rc = elan_touch_get_fw_version(&fw_ver);
+	if (rc == kStatus_Success) {
+	    PRINTF("[Touch]FW version raw: 0x%04X (%u)\n", fw_ver, fw_ver);
+	} else {
+		PRINTF("[Touch]Read FW version failed, rc=%d\n", rc);
+	}
+
+#endif
+
+
+#if SAR_SX9204_ENABLE
+
+    if (sx920x_init() == 0)
+    {
+        PRINTF("[SAR] Init Success! \r\n");
+
+        if (sx920x_compensate() == 0)
+        {
+            PRINTF("[SAR] Compensation Done!\r\n");
+        }
+        else
+        {
+            PRINTF("[SAR] Compensation Failed!\r\n");
+        }
+
+    }
+    else
+    {
+        PRINTF("[SAR] Init Failed!\r\n");
+    }
+
+#endif
 }
 
 void battery_timer_start(void)
@@ -234,11 +269,53 @@ void I2C_Task(void *pvParameters)
     {
         EventBits_t bits = xEventGroupWaitBits(
             i2c_event_group,
-            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT | LED_EVENT_BIT | AMP_EVENT_BIT,
+            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT | LED_EVENT_BIT | AMP_EVENT_BIT| SAR_EVENT_BIT,
             pdTRUE,     /* clear on exit */
             pdFALSE,    /* wait for any bit */
             pdMS_TO_TICKS(500));
 
+
+        /* --- SAR event --- */
+        if ((bits & SAR_EVENT_BIT) != 0)
+        {
+        	if (sys_bus_mutex != NULL)
+        		{
+					xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
+        		}
+
+            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
+#if SAR_SX9204_ENABLE
+
+               /*
+               uint8_t prox_state = 0;
+               // 收到中斷信號，開始執行 I2C 讀寫
+               if (sx920x_read_state(&prox_state) == 0)
+               {
+                   PRINTF("SAR Task: State = 0x%02X\r\n", prox_state);
+                   // 處理感測邏輯...
+               }
+               */
+                sx920x_event_t evt;
+                if (sx920x_poll_event(&evt) == 0 ) {
+                    PRINTF("[SAR] %s\r\n", sx920x_event_to_str_zh(evt));  // 顯示：接近/人體接近/人體遠離/遠離
+                    /* TODO: 根據 evt 做對應動作，例如：
+                       - SX920X_EVT_BODY_CLOSE: 提高掃描頻率、喚醒系統
+                       - SX920X_EVT_BODY_FAR  : 恢復省電
+                    */
+                }
+
+#endif
+                xSemaphoreGive(i2c_mutex);
+            }
+
+
+            if (sys_bus_mutex != NULL) {
+            	xSemaphoreGive(sys_bus_mutex);
+            }
+
+            GPIO_PinClearInterruptFlag(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
+            GPIO_PinEnableInterrupt(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
+        }
 
         /* --- AMP event --- */
         if ((bits & AMP_EVENT_BIT) != 0) {
@@ -294,6 +371,18 @@ void I2C_Task(void *pvParameters)
 
             if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE)
             {
+#if TOUCH_EWD608_ENABLE
+
+                const uint8_t data_reg = 0xC0;
+                uint8_t buf[EWD_FRAME_MAX_LEN];
+
+        		int rc = hal_i2c_mem_read_impl(EKTF_I2C_ADDR_7BIT, data_reg, buf, EWD_FRAME_MAX_LEN);
+
+                if (rc == kStatus_Success) {
+                    elan_parse_and_report_data(buf, EWD_FRAME_MAX_LEN);
+                }
+
+#endif
 #if TOUCH_AW93305_ENABLE
             	AW93305_EXTI_Callback();
 #endif

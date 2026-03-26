@@ -26,7 +26,8 @@
 #include "bq256xx_charger.h"
 #include "glf70302_driver.h"
 #include "aw88166.h"
-
+#include "elan_ewd608.h"
+#include "sx920x.h"
 
 #define SCAN_I2C_ADDRESS_ENABLE 1
 #define LED_ON 					10
@@ -38,6 +39,7 @@
 #define LED_EVENT_BIT        (1UL << 3)   /* LED task wake-up flag */
 #define AMP_EVENT_BIT     	 (1UL << 4)
 #define GAUGE_2_EVENT_BIT      (1UL << 5)
+#define SAR_EVENT_BIT 		 (1UL << 6)
 
 /*===== AMP ===== */
 typedef enum {

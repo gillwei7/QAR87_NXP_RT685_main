@@ -45,6 +45,7 @@ extern SemaphoreHandle_t spi_streaming_done_semaphore;
 GPIO_HANDLE_DEFINE(s_TouchIntGpioHandle);
 GPIO_HANDLE_DEFINE(s_ChargerIntGpioHandle);
 GPIO_HANDLE_DEFINE(s_GaugeIntGpioHandle);
+GPIO_HANDLE_DEFINE(s_SARIntGpioHandle);
 
 GPIO_HANDLE_DEFINE(s_SPIIntGpioHandle);
 GPIO_HANDLE_DEFINE(s_SPI_CSIntGpioHandle);
@@ -201,6 +202,13 @@ void hal_gpio_interrupt_init(void)
         FG_INT_GLF70302_PIN,
     };
 
+    hal_gpio_pin_config_t sar_int_config = {
+        kHAL_GpioDirectionIn,
+        0,
+		PROX1_INT_N_PORT,
+		PROX1_INT_N_PIN,
+    };
+
     /* workaround for calling GPIO_PortInit may reset the configuration already done for the port */
     CLOCK_EnableClock(kCLOCK_HsGpio0);
     RESET_ClearPeripheralReset(kHSGPIO0_RST_SHIFT_RSTn);
@@ -212,6 +220,7 @@ void hal_gpio_interrupt_init(void)
     HAL_GpioInit(s_TouchIntGpioHandle, &touch_int_config);
     HAL_GpioInit(s_ChargerIntGpioHandle, &charger_int_config);
     HAL_GpioInit(s_GaugeIntGpioHandle, &gauge_int_config);
+    HAL_GpioInit(s_SARIntGpioHandle, &sar_int_config);
 
     HAL_GpioInit(s_SPIIntGpioHandle, &spi_int_config);
     HAL_GpioInit(s_SPI_CSIntGpioHandle, &spi_cs_int_config);
@@ -219,6 +228,7 @@ void hal_gpio_interrupt_init(void)
     HAL_GpioSetTriggerMode(s_TouchIntGpioHandle, kHAL_GpioInterruptFallingEdge);
     HAL_GpioSetTriggerMode(s_ChargerIntGpioHandle, kHAL_GpioInterruptFallingEdge);
     HAL_GpioSetTriggerMode(s_GaugeIntGpioHandle, kHAL_GpioInterruptFallingEdge);
+    HAL_GpioSetTriggerMode(s_SARIntGpioHandle, kHAL_GpioInterruptFallingEdge);
 
     HAL_GpioSetTriggerMode(s_SPI_CSIntGpioHandle, kHAL_GpioInterruptEitherEdge);
     HAL_GpioSetTriggerMode(s_SPIIntGpioHandle, kHAL_GpioInterruptRisingEdge);
@@ -226,6 +236,7 @@ void hal_gpio_interrupt_init(void)
     HAL_GpioInstallCallback(s_TouchIntGpioHandle, touch_post_event, (void *)TOUCH_EVENT_BIT);
     HAL_GpioInstallCallback(s_ChargerIntGpioHandle, charger_post_event, (void *)CHARGER_EVENT_BIT);
     HAL_GpioInstallCallback(s_GaugeIntGpioHandle, hal_gpio_interrupt_callback, (void *)GAUGE_2_EVENT_BIT);
+    HAL_GpioInstallCallback(s_SARIntGpioHandle, hal_gpio_interrupt_callback, (void *)SAR_EVENT_BIT);
 
     HAL_GpioInstallCallback(s_SPIIntGpioHandle, hal_gpio_spi_interrupt_callback, (void *)MASTER_TRANSFER_EVENT_BIT);
     HAL_GpioInstallCallback(s_SPI_CSIntGpioHandle, hal_gpio_spi_interrupt_callback, (void *)SPI_CS_RISE_EVENT_BIT);
