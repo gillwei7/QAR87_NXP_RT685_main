@@ -309,10 +309,12 @@
 /* 直觀事件枚舉（中文描述見 sx920x_event_to_str_zh ）*/
 typedef enum {
     SX920X_EVT_NONE = 0,
-    SX920X_EVT_CLOSE,       // 接近
+    SX920X_EVT_CLOSE,        // 接近 (未知物體)
     SX920X_EVT_FAR,         // 遠離
     SX920X_EVT_BODY_CLOSE,  // 人體接近
-    SX920X_EVT_BODY_FAR     // 人體遠離
+    SX920X_EVT_BODY_FAR,     // 人體遠離
+    SX920X_EVT_TABLE_CLOSE,  // 桌面接近
+    SX920X_EVT_TABLE_FAR     // 桌面遠離
 } sx920x_event_t;
 
 /* 轉字串方便 log 顯示 */
