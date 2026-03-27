@@ -22,3 +22,8 @@ BT_Audio_with_full_audio_path/XtensaInfo/
 BT_Audio_with_full_audio_path/libc_RI-2021.8/
 BT_Audio_with_full_audio_path/Rt685Conversa_handsfree_cm33/.settings/org.eclipse.cdt.managedbuilder.core.prefs
 
+
+Bootloader/evkmimxrt685_ota_mcuboot_basic_cm33/Debug/
+Bootloader/evkmimxrt685_ota_mcuboot_basic_cm33/.settings/language.settings.xml
+
+
