@@ -45,6 +45,7 @@ battery_state_t battery_state = BATTERY_STATE_NORMAL;
 uint8_t is_first_read_battery_level = 1;
 static power_on_reason_t power_on_reason = POWER_ON_UNEXPECTED;
 
+static uint8_t has_sar_event = 0;
 static uint8_t has_amp_event = 0;
 static uint8_t has_led_event = 0;
 static uint8_t has_touch_event = 0;
@@ -130,9 +131,16 @@ void Init_I2C_Component(void)
 #if TOUCH_AW93305_ENABLE
 	hal_touch_aw93305_init(); //Touch Init
 #endif
-#if AMP_AW88166_ENABLE
-	hal_amp_aw88166_power_on();
-	hal_amp_aw88166_init(); // Init AMP
+#if TOUCH_EWD608_ENABLE
+
+	uint16_t fw_ver = 0;
+	int rc = elan_touch_get_fw_version(&fw_ver);
+	if (rc == kStatus_Success) {
+	    PRINTF("[Touch]FW version raw: 0x%04X (%u)\n", fw_ver, fw_ver);
+	} else {
+		PRINTF("[Touch]Read FW version failed, rc=%d\n", rc);
+	}
+
 #endif
 
 	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
@@ -181,16 +189,9 @@ void Init_I2C_Component(void)
 	                               BatteryReadTimerCb);
 #endif
 
-#if TOUCH_EWD608_ENABLE
-
-	uint16_t fw_ver = 0;
-	int rc = elan_touch_get_fw_version(&fw_ver);
-	if (rc == kStatus_Success) {
-	    PRINTF("[Touch]FW version raw: 0x%04X (%u)\n", fw_ver, fw_ver);
-	} else {
-		PRINTF("[Touch]Read FW version failed, rc=%d\n", rc);
-	}
-
+#if AMP_AW88166_ENABLE
+	hal_amp_aw88166_power_on();
+	hal_amp_aw88166_init(); // Init AMP
 #endif
 
 
@@ -253,6 +254,11 @@ void led_post_event(led_event_t e)
 void touch_post_event(void *param)
 {
     has_touch_event = 1;
+}
+
+void sar_post_event(void *param)
+{
+	has_sar_event = 1;
 }
 
 void charger_post_event(void *param)
@@ -686,43 +692,56 @@ void I2C_Task(void *pvParameters)
 
 void i2c_device_handler (void)
 {
-	/* --- AMP event --- */
 
-	if (has_amp_event) {
-		has_amp_event = 0;
-		vTaskDelay(1); /* 確保 g_amp_event 已更新 */
-		amp_event_t evt = g_amp_event;
+    /* --- SAR event --- */
+    if (has_sar_event)
+    {
+    	has_sar_event = 0;
 
-#if AMP_AW88166_ENABLE
-		switch (evt) {
-			case AMP_EVT_MUSIC_START:
-				hal_amp_aw88166_left_start("Music");
-				hal_amp_aw88166_right_start("Music");
-				AmpState=AmpState_ConfiguredAndActive;
-				PRINTF("AMP_EVT_MUSIC_START done\r\n");
-				break;
-			case AMP_EVT_RECEIVER_START:
-				hal_amp_aw88166_left_start("Receiver");
-				hal_amp_aw88166_right_start("Receiver");
-				AmpState=AmpState_ConfiguredAndActive;
-				PRINTF("AMP_EVT_RECEIVER_START done\r\n");
-				break;
-			case AMP_EVT_STOP:
-				hal_amp_aw88166_left_stop();
-				hal_amp_aw88166_right_stop();
-				AmpState=AmpState_UnConfigured;
-				PRINTF("AMP_EVT_STOP done\r\n");
-				break;
-			default:
-				break;
+#if SAR_SX9204_ENABLE
+
+	   /*
+	   uint8_t prox_state = 0;
+	   // 收到中斷信號，開始執行 I2C 讀寫
+	   if (sx920x_read_state(&prox_state) == 0)
+	   {
+		   PRINTF("SAR Task: State = 0x%02X\r\n", prox_state);
+		   // 處理感測邏輯...
+	   }
+	   */
+		sx920x_event_t evt;
+		if (sx920x_poll_event(&evt) == 0 ) {
+			PRINTF("[SAR] %s\r\n", sx920x_event_to_str_zh(evt));  // 顯示：接近/人體接近/人體遠離/遠離
+			/* TODO: 根據 evt 做對應動作，例如：
+			   - SX920X_EVT_BODY_CLOSE: 提高掃描頻率、喚醒系統
+			   - SX920X_EVT_BODY_FAR  : 恢復省電
+			*/
 		}
+
 #endif
-	}
+        GPIO_PinClearInterruptFlag(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
+        GPIO_PinEnableInterrupt(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
+    }
+
 
 	/* --- TOUCH event --- */
 	if (has_touch_event)
 	{
 		has_touch_event = 0;
+
+#if TOUCH_EWD608_ENABLE
+
+		const uint8_t data_reg = 0xC0;
+		uint8_t buf[EWD_FRAME_MAX_LEN];
+
+		int rc = hal_i2c_mem_read_impl(EKTF_I2C_ADDR_7BIT, data_reg, buf, EWD_FRAME_MAX_LEN);
+
+		if (rc == kStatus_Success) {
+			elan_parse_and_report_data(buf, EWD_FRAME_MAX_LEN);
+		}
+
+#endif
+
 #if TOUCH_AW93305_ENABLE
 		AW93305_EXTI_Callback();
 #endif
@@ -807,6 +826,38 @@ void i2c_device_handler (void)
 		GPIO_PinEnableInterrupt(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
 	}
 
+	/* --- AMP event --- */
+
+	if (has_amp_event) {
+		has_amp_event = 0;
+		vTaskDelay(1); /* 確保 g_amp_event 已更新 */
+		amp_event_t evt = g_amp_event;
+
+#if AMP_AW88166_ENABLE
+		switch (evt) {
+			case AMP_EVT_MUSIC_START:
+				hal_amp_aw88166_left_start("Music");
+				hal_amp_aw88166_right_start("Music");
+				AmpState=AmpState_ConfiguredAndActive;
+				PRINTF("AMP_EVT_MUSIC_START done\r\n");
+				break;
+			case AMP_EVT_RECEIVER_START:
+				hal_amp_aw88166_left_start("Receiver");
+				hal_amp_aw88166_right_start("Receiver");
+				AmpState=AmpState_ConfiguredAndActive;
+				PRINTF("AMP_EVT_RECEIVER_START done\r\n");
+				break;
+			case AMP_EVT_STOP:
+				hal_amp_aw88166_left_stop();
+				hal_amp_aw88166_right_stop();
+				AmpState=AmpState_UnConfigured;
+				PRINTF("AMP_EVT_STOP done\r\n");
+				break;
+			default:
+				break;
+		}
+#endif
+	}
 
 	/* --- CHARGER event --- */
 	if (has_charger_event)

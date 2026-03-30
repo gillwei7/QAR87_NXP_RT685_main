@@ -121,6 +121,7 @@ void button_init (void);
 void button_handler (void);
 
 void touch_post_event(void *param);
+void sar_post_event(void *param);
 void charger_post_event(void *param);
 
 #endif /* HAL_DRIVER_H_ */

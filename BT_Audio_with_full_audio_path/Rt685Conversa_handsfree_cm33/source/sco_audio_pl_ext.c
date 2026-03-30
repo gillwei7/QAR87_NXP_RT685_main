@@ -305,13 +305,15 @@ void InitAndStartCodec(int fs, int bits, int Mfreq)
 	//r = initial codec or start codec
 	if(fs==48000)
 	{
-		hal_amp_aw88166_left_start ("Music");
-		hal_amp_aw88166_right_start("Music");
+		amp_post_event(AMP_EVT_MUSIC_START);
+//		hal_amp_aw88166_left_start ("Music");
+//		hal_amp_aw88166_right_start("Music");
 	}else
 	if(fs==16000)
 	{
-		hal_amp_aw88166_left_start ("Receiver");
-		hal_amp_aw88166_right_start("Receiver");
+		amp_post_event(AMP_EVT_RECEIVER_START);
+//		hal_amp_aw88166_left_start ("Receiver");
+//		hal_amp_aw88166_right_start("Receiver");
 	}
 	AmpState=AmpState_ConfiguredAndActive;
 }

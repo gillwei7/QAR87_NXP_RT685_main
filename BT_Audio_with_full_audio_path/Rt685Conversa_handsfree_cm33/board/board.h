@@ -450,7 +450,7 @@
 #if UsingQAR87BoardHwVersion == 0 // Dev Board
 #define FG_GLF70302_ENABLE            0
 #endif
-#define SAR_SX9204_ENABLE			  1
+#define SAR_SX9204_ENABLE             1
 #define LED_KTD2027_ENABLE            1
 #define AMP_AW88166_ENABLE            1
 #define SOC_SPI_ENABLE                1

@@ -3422,6 +3422,27 @@ BOARD_InitDevGpioPins:
 void BOARD_InitDevGpioPins(void)
 {
 
+    const uint32_t port2_pin14_config = (/* Pin is configured as PIO2_14 */
+                                         IOPCTL_PIO_FUNC0 |
+                                         /* Disable pull-up / pull-down function */
+                                         IOPCTL_PIO_PUPD_DI |
+                                         /* Enable pull-down function */
+                                         IOPCTL_PIO_PULLDOWN_EN |
+                                         /* Disable input buffer function */
+										 IOPCTL_PIO_INBUF_EN |
+                                         /* Normal mode */
+                                         IOPCTL_PIO_SLEW_RATE_NORMAL |
+                                         /* Normal drive */
+                                         IOPCTL_PIO_FULLDRIVE_DI |
+                                         /* Analog mux is disabled */
+                                         IOPCTL_PIO_ANAMUX_DI |
+                                         /* Pseudo Output Drain is disabled */
+                                         IOPCTL_PIO_PSEDRAIN_DI |
+                                         /* Input function is not inverted */
+                                         IOPCTL_PIO_INV_DI);
+    /* PORT2 PIN14 (coords: G5) is configured as PIO2_14 */
+    IOPCTL_PinMuxSet(IOPCTL, 2U, 14U, port2_pin14_config);
+
     const uint32_t port0_pin0_config = (/* Pin is configured as PIO0_0 */
                                         IOPCTL_PIO_FUNC0 |
                                         /* Disable pull-up / pull-down function */
@@ -4316,7 +4337,7 @@ void BOARD_InitActualGpioPins(void)
                                          /* Enable pull-down function */
                                          IOPCTL_PIO_PULLDOWN_EN |
                                          /* Disable input buffer function */
-                                         IOPCTL_PIO_INBUF_DI |
+										 IOPCTL_PIO_INBUF_EN |
                                          /* Normal mode */
                                          IOPCTL_PIO_SLEW_RATE_NORMAL |
                                          /* Normal drive */

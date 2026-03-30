@@ -236,7 +236,7 @@ void hal_gpio_interrupt_init(void)
     HAL_GpioInstallCallback(s_TouchIntGpioHandle, touch_post_event, (void *)TOUCH_EVENT_BIT);
     HAL_GpioInstallCallback(s_ChargerIntGpioHandle, charger_post_event, (void *)CHARGER_EVENT_BIT);
     HAL_GpioInstallCallback(s_GaugeIntGpioHandle, hal_gpio_interrupt_callback, (void *)GAUGE_2_EVENT_BIT);
-    HAL_GpioInstallCallback(s_SARIntGpioHandle, hal_gpio_interrupt_callback, (void *)SAR_EVENT_BIT);
+    HAL_GpioInstallCallback(s_SARIntGpioHandle, sar_post_event, (void *)SAR_EVENT_BIT);
 
     HAL_GpioInstallCallback(s_SPIIntGpioHandle, hal_gpio_spi_interrupt_callback, (void *)MASTER_TRANSFER_EVENT_BIT);
     HAL_GpioInstallCallback(s_SPI_CSIntGpioHandle, hal_gpio_spi_interrupt_callback, (void *)SPI_CS_RISE_EVENT_BIT);
