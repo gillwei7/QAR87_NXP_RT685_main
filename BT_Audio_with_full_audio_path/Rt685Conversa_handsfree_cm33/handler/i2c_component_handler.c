@@ -152,6 +152,7 @@ void Init_I2C_Component(void)
 	} else if (power_on_reason == POWER_ON_UNEXPECTED) {
 		bq256xx_enter_ship_mode();
 	}
+	PRINTF("[System] Version= %s \n", HAL_MCU_APP_VERSION);
 
 #if PMIC_GLF70583_ENABLE
 	hal_pmic_glf70583_actual_board_init();

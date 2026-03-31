@@ -344,7 +344,6 @@ void hal_board_init(void)
 	}
 #endif
 
-	PRINTF("[System] Version= %s \n", HAL_MCU_APP_VERSION);
 
 	hal_gpio_init();
 	hal_i3c_init();
