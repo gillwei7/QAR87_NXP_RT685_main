@@ -65,7 +65,7 @@ int RequestToGetIntoAbout=0;
 int RequestToGetOutofAbout=0;
 int RequestToGetIntoHome=0;
 int RequestToGetOutofHome=0;
-static int currentLevel15 = 12;  // 1~15
+static int currentLevel15 = 7;  // 1~15
 
 TDeviceWorkState DeviceWorkStateCur;
 TDeviceWorkState DeviceWorkStatePre;
@@ -717,7 +717,7 @@ void Manager_Task(void *pvParameters)
 	AudioPortIsActive_PcmToBt=0;
 	AmpState=AmpState_UnConfigured;
 
-	VarBlockSharedByDspAndMcu.MasterVolumeGain0To1=0.137322f;		//must set an initial value
+	VarBlockSharedByDspAndMcu.MasterVolumeGain0To1 = MasterVolumeGainTable15[currentLevel15];		//must set an initial value
 
 	spi_command_handler_init();
 	button_init();

@@ -612,7 +612,7 @@ void ringtone_handler (void)
 		}
 	}
 
-	if(general_RingtoneState == Ringtone_StartRecording  && DeviceWorkStateCur == WorkState_VideoRecording){
+	if(general_RingtoneState == Ringtone_StartRecording){
 			general_RingtoneState = Ringtone_No;
 			startOpusPlayIndex(Ringtone_StartRecording-1);
 	}
@@ -847,8 +847,10 @@ void hfp_hf_a2dp_task(void *pvParameters)
     DeviceWorkStateCur=WorkState_Void;
     StartAudioTask();
 
+    hal_soc_enable();
+
 	BaseType_t result = 0;
-	result = xTaskCreate(Manager_Task, "Manager_40ms", 1024, NULL, Manager_TASK_PRIORITY, NULL);
+	result = xTaskCreate(Manager_Task, "Manager_40ms", 1024 * 3, NULL, Manager_TASK_PRIORITY, NULL);
 	assert(pdPASS == result);
 #if UsingQAR87Board == 1
 

@@ -27,7 +27,7 @@ static volatile uint8_t music_status = 0; // 0: off, 1: on
 static volatile uint8_t is_turning_on_camera = 0;
 static volatile uint8_t need_send_state = 0;
 static volatile uint8_t need_send_music_status = 0;
-static volatile uint8_t is_media_playing = 0;
+static volatile uint8_t is_media_playing = MUSIC_PAUSE;
 
 static uint8_t bt_addr_0 = 0;
 static uint8_t bt_addr_1 = 0;
@@ -64,6 +64,7 @@ void ss_set_state(uint8_t state)
 			RequestToGetOutofMediaPlayer = 1;
 			current_usage_state = state;
 			need_send_state = 1;
+			is_media_playing = MUSIC_PAUSE;
 
 		} else if (current_usage_state == USAGE_STATE_VIDEO_RECORDING) {
 			RequestToGetOutofVideoRecording = 1;

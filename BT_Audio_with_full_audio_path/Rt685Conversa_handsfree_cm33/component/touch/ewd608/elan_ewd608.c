@@ -10,6 +10,11 @@
 #include "fsl_debug_console.h"
 #include "fsl_i3c.h"
 #include "board.h"
+#include "spi_handler.h"
+#include "system_status.h"
+#include "WorkStateManager.h"
+
+extern uint8_t Novatek_boot_completed;
 
 /* ==== 靜態/全域 ==== */
 static const elan_hal_t *g_hal = NULL;
@@ -56,25 +61,86 @@ static const char* elan_gesture_to_string(uint8_t gesture_id)
     }
 }
 
+static void elan_gesture_handler (uint8_t gid)
+{
+    PRINTF("Gesture: %s (0x%02X)\r\n", elan_gesture_to_string(gid), gid);
+
+    switch (gid)
+    {
+        case GESTURE_SINGLE_FORWARD:
+            if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+                // Volume up
+                ChangeMasterVolumeLevel15_UpDown(1); // pass positive value to increase volume
+                PRINTF("[Touch] Volume up\r\n");
+            }
+            break;
+
+        case GESTURE_SINGLE_BACKWARD:
+            if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+                // Volume down
+                ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
+                PRINTF("[Touch] Volume down\r\n");
+            }
+            break;
+
+        case GESTURE_SINGLE_PRESS:
+            if (Novatek_boot_completed
+                    && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
+                send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_STOP); // media player: leave
+                ss_set_state(USAGE_STATE_HOME);
+                send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE); // UI: home
+            }
+            break;
+
+        case GESTURE_SINGLE_DOUBLE:
+            if (Novatek_boot_completed
+                    && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
+                send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_NEXT_MEDIA); // media player: next
+            }
+            break;
+
+        case GESTURE_SINGLE_TAP:
+            if (Novatek_boot_completed
+                    && (ss_get_state() == USAGE_STATE_HOME
+                            || ss_get_state() == USAGE_STATE_MENU
+                            || ss_get_state() == USAGE_STATE_ABOUT)) {
+                send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_START); // Start media player
+                ss_set_state(USAGE_STATE_MEDIA_PLAYER);
+            } else if (Novatek_boot_completed
+                    && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
+                send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_PLAY_PAUSE); // media player: play / pause
+            }
+
+            break;
+
+        case GESTURE_TWO_TAP:
+
+            break;
+
+
+        default:
+            break;
+    }
+}
 
 static void print_elan_touch_data(const elan_touch_data_t *data)
 {
-    PRINTF("Touch Count: %u\n", data->touch_count);
+    PRINTF("Touch Count: %u\r\n", data->touch_count);
     for (int i = 0; i < data->touch_count && i < MAX_SUPPORT_FINGERS; ++i) {
         const elan_touch_point_t *pt = &data->points[i];
         if (pt->is_valid) {
-            PRINTF("  Finger %d: X = %u, Y = %u\n", i, pt->x, pt->y);
+            PRINTF("  Finger %d: X = %u, Y = %u\r\n", i, pt->x, pt->y);
         } else {
-            PRINTF("  Finger %d: Invalid\n", i);
+            PRINTF("  Finger %d: Invalid\r\n", i);
         }
     }
 
     if (data->gesture_id != 0) {
-        PRINTF("Gesture: %s (0x%02X)\n", elan_gesture_to_string(data->gesture_id), data->gesture_id);
+        PRINTF("Gesture: %s (0x%02X)\r\n", elan_gesture_to_string(data->gesture_id), data->gesture_id);
     } else {
-        PRINTF("No Gesture\n");
+        PRINTF("No Gesture\r\n");
     }
-    PRINTF("\r\n");
+//    PRINTF("\r\n");
 }
 
 
@@ -151,7 +217,14 @@ void elan_parse_and_report_data(uint8_t *buf, uint16_t len)
             }
         }
     }
-    print_elan_touch_data(&report_data);
+//    print_elan_touch_data(&report_data);
+
+
+    if (report_data.gesture_id != 0)
+    {
+    	elan_gesture_handler(report_data.gesture_id);
+    }
+
     //g_event_callback(&report_data);
 }
 

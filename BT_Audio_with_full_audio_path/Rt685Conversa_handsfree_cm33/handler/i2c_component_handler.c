@@ -52,6 +52,12 @@ static uint8_t has_touch_event = 0;
 static uint8_t has_charger_event = 0;
 static uint8_t has_gauge_event = 0;
 
+//touch
+#if TOUCH_EWD608_ENABLE
+static const uint8_t data_reg = 0xC0;
+static uint8_t buf[EWD_FRAME_MAX_LEN];
+#endif
+
 extern uint32_t s_bq256xx_iindpm_target_ua;
 
 extern RingtoneState general_RingtoneState;
@@ -131,16 +137,10 @@ void Init_I2C_Component(void)
 #if TOUCH_AW93305_ENABLE
 	hal_touch_aw93305_init(); //Touch Init
 #endif
-#if TOUCH_EWD608_ENABLE
 
-	uint16_t fw_ver = 0;
-	int rc = elan_touch_get_fw_version(&fw_ver);
-	if (rc == kStatus_Success) {
-	    PRINTF("[Touch]FW version raw: 0x%04X (%u)\n", fw_ver, fw_ver);
-	} else {
-		PRINTF("[Touch]Read FW version failed, rc=%d\n", rc);
-	}
-
+#if AMP_AW88166_ENABLE
+	hal_amp_aw88166_power_on();
+	hal_amp_aw88166_init(); // Init AMP
 #endif
 
 	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
@@ -157,7 +157,7 @@ void Init_I2C_Component(void)
 	hal_pmic_glf70583_actual_board_init();
 #endif
 
-	hal_soc_enable();
+//	hal_soc_enable();
 
 #if LED_KTD2027_ENABLE
 	hal_led_ktd2027_power_on_indicator(); //White light turns on first
@@ -189,11 +189,18 @@ void Init_I2C_Component(void)
 	                               BatteryReadTimerCb);
 #endif
 
-#if AMP_AW88166_ENABLE
-	hal_amp_aw88166_power_on();
-	hal_amp_aw88166_init(); // Init AMP
-#endif
 
+#if TOUCH_EWD608_ENABLE
+
+	uint16_t fw_ver = 0;
+	int rc = elan_touch_get_fw_version(&fw_ver);
+	if (rc == kStatus_Success) {
+	    PRINTF("[Touch]FW version raw: 0x%04X (%u)\n", fw_ver, fw_ver);
+	} else {
+		PRINTF("[Touch]Read FW version failed, rc=%d\n", rc);
+	}
+
+#endif
 
 #if SAR_SX9204_ENABLE
 
@@ -690,6 +697,28 @@ void I2C_Task(void *pvParameters)
     }
 }
 
+uint8_t touch_get_gesture_state = 0;
+
+void touch_get_gesture_handler (void) {
+	if (touch_get_gesture_state == 0) {
+		return;
+	} else if (touch_get_gesture_state == 2) {
+		int rc = hal_i2c_mem_read_impl(EKTF_I2C_ADDR_7BIT, data_reg, buf, EWD_FRAME_MAX_LEN);
+
+		if (rc == kStatus_Success) {
+			elan_parse_and_report_data(buf, EWD_FRAME_MAX_LEN);
+
+		} else {
+			PRINTF("[Touch] I2C read failed: %d \r\n", rc);
+		}
+		touch_get_gesture_state = 0;
+		has_touch_event = 0;
+
+	} else {
+		touch_get_gesture_state++;
+	}
+}
+
 void i2c_device_handler (void)
 {
 
@@ -727,18 +756,12 @@ void i2c_device_handler (void)
 	/* --- TOUCH event --- */
 	if (has_touch_event)
 	{
-		has_touch_event = 0;
 
 #if TOUCH_EWD608_ENABLE
-
-		const uint8_t data_reg = 0xC0;
-		uint8_t buf[EWD_FRAME_MAX_LEN];
-
-		int rc = hal_i2c_mem_read_impl(EKTF_I2C_ADDR_7BIT, data_reg, buf, EWD_FRAME_MAX_LEN);
-
-		if (rc == kStatus_Success) {
-			elan_parse_and_report_data(buf, EWD_FRAME_MAX_LEN);
+		if (!touch_get_gesture_state) {
+			touch_get_gesture_state = 1;
 		}
+		touch_get_gesture_handler();
 
 #endif
 

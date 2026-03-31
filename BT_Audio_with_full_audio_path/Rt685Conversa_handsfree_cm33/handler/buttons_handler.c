@@ -19,6 +19,7 @@
 #define CAMERA_RECORDING_MS           (1000U)
 #define PRESS_COUNTER_TIMEOUT_MS      (500U)
 #define BUTTON_DEBOUNCE_MS            (40U)
+#define SOC_POWER_OFF_MS              (1000U)
 
 extern volatile SystemStatus ss;
 extern uint8_t Novatek_boot_completed;
@@ -51,6 +52,10 @@ static TickType_t function_button_press_tick = 0;
 // Timers for button debounce
 static TimerHandle_t s_power_button_timer = NULL;
 static TimerHandle_t s_function_button_timer = NULL;
+static TimerHandle_t s_soc_power_off_timer = NULL;
+
+
+static uint8_t oe_status = 1;
 
 // gill
 extern RingtoneState general_RingtoneState;
@@ -96,7 +101,7 @@ static void power_button_timer_callback(TimerHandle_t xTimer)
 {
 	if (pwr_raw_read()) {
 		power_button_tick = xTaskGetTickCount();
-//		PRINTF("[Button] Release Button(%ld)\r\n", power_button_tick);
+		PRINTF("[Button] Release Power Button(%ld)\r\n", power_button_tick);
 
 		// Filter long press
 		if( (power_button_tick - power_button_down_tick) <= LONG_PRESS_MS) {
@@ -112,7 +117,7 @@ static void power_button_timer_callback(TimerHandle_t xTimer)
 		}
 		power_button_press_set = 1;
 
-//		PRINTF("[Button] Press Button(%ld)\r\n", power_button_down_tick);
+		PRINTF("[Button] Press Power Button(%ld)\r\n", power_button_down_tick);
 	}
 }
 
@@ -136,7 +141,7 @@ static void function_button_timer_callback(TimerHandle_t xTimer)
 {
 	if (btn_raw_read()) {
 		function_button_tick = xTaskGetTickCount();
-		PRINTF("[Button] Release Button(%ld)\r\n", function_button_tick);
+		PRINTF("[Button] Release Function Button(%ld)\r\n", function_button_tick);
 
 		// Filter long press
 		if( (function_button_tick - function_button_down_tick) <= LONG_PRESS_MS) {
@@ -151,7 +156,7 @@ static void function_button_timer_callback(TimerHandle_t xTimer)
 			function_button_press_tick = function_button_down_tick;
 		}
 		function_button_press_set = 1;
-		PRINTF("[Button] Press Button(%ld)\r\n", function_button_down_tick);
+		PRINTF("[Button] Press Function Button(%ld)\r\n", function_button_down_tick);
 	}
 }
 
@@ -171,10 +176,36 @@ void function_button_timer_start(void)
 	}
 }
 
+static void soc_power_off_timer_callback(TimerHandle_t xTimer)
+{
+	PRINTF("[Button] Start Power Off sequence\r\n");
+    general_RingtoneState = Ringtone_PowerOFF;
+    vTaskDelay(pdMS_TO_TICKS(200));
+	led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+
+}
+
+static void soc_power_off_timer_init (void)
+{
+	s_soc_power_off_timer = xTimerCreate("SocPowerOffTimer",
+	                               pdMS_TO_TICKS(SOC_POWER_OFF_MS),
+								   pdFALSE,     // auto-reload
+	                               NULL,
+								   soc_power_off_timer_callback);
+}
+
+void soc_power_off_timer_start(void)
+{
+	if (s_soc_power_off_timer != NULL) {
+	    xTimerStart(s_soc_power_off_timer, 0);
+	}
+}
+
 void button_init (void)
 {
 	power_button_timer_init();
 	function_button_timer_init();
+	soc_power_off_timer_init();
 }
 
 void button_press_handler (void)
@@ -186,7 +217,14 @@ void button_press_handler (void)
 #if SOC_SPI_ENABLE
 #if 1
 			if (Novatek_boot_completed) {
-//				send_spi_request(POWER_SHORT_PRESS_HEX_VALUE);
+				if (oe_status = 0) {
+					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_OPEN_OE); // turn OE on
+					oe_status = 1;
+				} else {
+					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_CLOSE_OE); // turn OE off
+					oe_status = 0;
+
+				}
 			}
 #else // use button to switch state
 //			RequestToGetIntoMediaPlayer = 1;
@@ -195,8 +233,8 @@ void button_press_handler (void)
 			RequestToGetIntoVideoRecording = 1;
 #endif
 #endif
-			hfp_RejectCall();
-			PRINTF("[Button] hfp_RejectCall\r\n");
+//			hfp_RejectCall();
+//			PRINTF("[Button] hfp_RejectCall\r\n");
 			PRINTF("[Button] press power button\r\n");
 			// Clear cnt
 			power_button_short_press_cnt = 0;
@@ -213,14 +251,22 @@ void button_press_handler (void)
 				if(function_button_short_press_cnt == 1)
 				{
 					PRINTF("[Button] Single press function button\r\n");
-					PRINTF("[Button] hfp_AnswerCall\r\n");
-					hfp_AnswerCall();
+//					PRINTF("[Button] hfp_AnswerCall\r\n");
+//					hfp_AnswerCall();
 #if SOC_SPI_ENABLE
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
-//					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
-//							ss_get_state() == USAGE_STATE_VIDEO_RECORDING || ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
-//						send_spi_request(SHORT_PRESS_HEX_VALUE); // Stop Recording and Take Photo
-//					}
+					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
+							ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
+						send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_TAKE_PICTURE); // Take Photo
+						led_post_event(LED_EVT_PHOTO_CAPTURE);
+						ss_set_capture_status(COMPONENT_START);
+					}
+					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_VIDEO_RECORDING)) {
+						send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_RECORDING); // Stop Recording
+						hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
+						led_post_event(LED_EVT_REFRESH);
+						ss_set_recording_status(COMPONENT_END);
+					}
 #endif
 #endif
 				}
@@ -278,6 +324,23 @@ void button_press_handler (void)
 	}
 }
 
+uint8_t video_recording_state = 0;
+uint8_t video_recording_press = 0;
+
+void video_recording_handler (void) {
+	if (video_recording_state == 0) {
+		return;
+	} else if (video_recording_state == 5) {
+		ss_set_state(USAGE_STATE_VIDEO_RECORDING);
+		video_recording_state++;
+	} else if (video_recording_state == 10) {
+		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_RECORDING); // Start recording
+		video_recording_state = 0;
+	} else {
+		video_recording_state++;
+	}
+}
+
 void button_press_hold_handler (void)
 {
 	if(power_button_press_set)
@@ -287,9 +350,14 @@ void button_press_hold_handler (void)
 		{
 			if(xTaskGetTickCount() - power_button_down_tick > POWER_OFF_MS)
 			{
+
+				power_button_press_hold_shutdown_set = 1;
+				PRINTF("[Button] power button Press & Hold (%d ms)\r\n", POWER_OFF_MS);
+
 #if SOC_SPI_ENABLE
 				if (Novatek_boot_completed) {
-					//send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
+					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SOFT_POWER_OFF); // Power off
+					soc_power_off_timer_start();
 				} else {
 					general_RingtoneState = Ringtone_PowerOFF;
 					vTaskDelay(pdMS_TO_TICKS(200));
@@ -297,8 +365,6 @@ void button_press_hold_handler (void)
 				}
 #endif
 
-				power_button_press_hold_shutdown_set = 1;
-				PRINTF("[Button] power button Press & Hold (%d ms)\r\n", POWER_OFF_MS);
 			}
 		}
 		if(!power_button_press_hold_1s_set)
@@ -307,6 +373,20 @@ void button_press_hold_handler (void)
 			{
 				power_button_press_hold_1s_set = 1;
 				PRINTF("[Button] power button Press & Hold (1s)\r\n");
+#if SOC_SPI_ENABLE
+#if 0 //QAR88a
+				PRINTF("[Button] ss_get_state (%d), ss_get_capture_status: %d\r\n", ss_get_state(), ss_get_capture_status);
+
+				if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
+						ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
+					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_RECORDING); // Start recording
+					hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
+					led_post_event(LED_EVT_REFRESH);
+					ss_set_recording_status(COMPONENT_START);
+				}
+#endif
+#endif
+
 			}
 		}
 	}
@@ -330,6 +410,9 @@ void button_press_hold_handler (void)
 			{
 				function_button_press_hold_5s_set = 1;
 				PRINTF("[Button] function button Press & Hold (5s)\r\n");
+				if (video_recording_press) {
+					video_recording_press = 0;
+				}
 			}
 		}
 		if(!function_button_press_hold_recording_set)
@@ -337,11 +420,14 @@ void button_press_hold_handler (void)
 			if(xTaskGetTickCount() - function_button_down_tick > CAMERA_RECORDING_MS)
 			{
 #if SOC_SPI_ENABLE
-#if !CES_DEMO || CES_DEMO_FOR_NOVATEK
-				if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT)) {
-					//send_spi_request(LONG_PRESS_HEX_VALUE); // Start Recording
+				PRINTF("[Button] ss_get_state (%d), ss_get_capture_status: %d\r\n", ss_get_state(), ss_get_capture_status);
+
+				if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
+						ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
+					general_RingtoneState = Ringtone_StartRecording;
+					video_recording_press = 1;
+
 				}
-#endif
 #endif
 
 				function_button_press_hold_recording_set = 1;
@@ -357,6 +443,10 @@ void button_press_hold_handler (void)
 			function_button_press_hold_recording_set = 0;
 			function_button_press_hold_5s_set = 0;
 			PRINTF("[Button] function button Press & Hold Release\r\n");
+			if (video_recording_press) {
+				video_recording_press = 0;
+				video_recording_state = 1;
+			}
 		}
 	}
 }
@@ -365,6 +455,7 @@ void button_handler (void)
 {
 	button_press_handler();
 	button_press_hold_handler();
+	video_recording_handler();
 }
 
 /* PINT ISR 回呼：將不同來源的中斷以不同 bit 通知同一個任務 */
