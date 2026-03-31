@@ -217,13 +217,12 @@ void button_press_handler (void)
 #if SOC_SPI_ENABLE
 #if 1
 			if (Novatek_boot_completed) {
-				if (oe_status = 0) {
+				if (oe_status == 0) {
 					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_OPEN_OE); // turn OE on
 					oe_status = 1;
 				} else {
 					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_CLOSE_OE); // turn OE off
 					oe_status = 0;
-
 				}
 			}
 #else // use button to switch state

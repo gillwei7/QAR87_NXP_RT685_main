@@ -25,7 +25,7 @@
 
 /*! @brief Timeout times for waiting flag. */
 #ifndef I3C_RETRY_TIMES
-#define I3C_RETRY_TIMES 0U /* Define to zero means keep waiting until the flag is assert/deassert. */
+#define I3C_RETRY_TIMES 0x1FFFF /* Define to zero means keep waiting until the flag is assert/deassert. */
 #endif
 
 #ifndef I3C_MAX_DEVCNT
