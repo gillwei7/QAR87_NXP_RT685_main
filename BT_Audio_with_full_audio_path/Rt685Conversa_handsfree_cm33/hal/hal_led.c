@@ -8,9 +8,10 @@
 #include "hal_led.h"
 #include "ktd202x_leds.h"
 #include "app_handsfree.h"
+#include "bq256xx_charger.h"
 
 static hal_led_indicator_status_t led_indicator_status_t = HAL_LED_OFF;
-static uint8_t led_situation = HAL_LED_EVENT_OFF;
+static uint8_t led_situation = HAL_LED_STATUS_OFF;
 static uint8_t led_has_new_situation = 1;
 extern RingtoneState general_RingtoneState;
 
@@ -123,11 +124,6 @@ void hal_led_ktd2027_off(void)
 
 }
 
-void hal_led_ktd2027_init(void)
-{
-    ktd202x_probe();
-}
-
 hal_led_indicator_status_t hal_led_get_indicator_status (void)
 {
 	return led_indicator_status_t;
@@ -158,12 +154,12 @@ void hal_led_set_indicator_status (hal_led_indicator_status_t status)
 	}
 }
 
-void hal_led_refresh (void)
+static void hal_led_refresh (void)
 {
 	led_has_new_situation = 1;
 }
 
-void hal_led_status_handler (void) {
+static void hal_led_status_handler (void) {
 
 	if (!led_has_new_situation) {
 		return;
@@ -172,41 +168,70 @@ void hal_led_status_handler (void) {
 	led_has_new_situation = 0;
 
 
-	if (led_situation & HAL_LED_EVENT_PAIRING) {
+	if (led_situation & HAL_LED_STATUS_PAIRING) {
 		hal_led_ktd2027_pairing_indicator();
 		return;
 
-	} else if (led_situation & HAL_LED_EVENT_RECORDING) {
+	} else if (led_situation & HAL_LED_STATUS_RECORDING) {
 		hal_led_ktd2027_recording_indicator();
 		return;
 
-	} else if (led_situation & HAL_LED_EVENT_OTA) {
+	} else if (led_situation & HAL_LED_STATUS_OTA) {
 		hal_led_ktd2027_ota_indicator();
 		return;
 
-	} else if (led_situation & HAL_LED_EVENT_OTA_SUCCESS) {
+	} else if (led_situation & HAL_LED_STATUS_OTA_SUCCESS) {
 		hal_led_ktd2027_ota_success_indicator();
 		return;
 
-	} else if (led_situation & HAL_LED_EVENT_OTA_FAILED) {
+	} else if (led_situation & HAL_LED_STATUS_OTA_FAILED) {
 		hal_led_ktd2027_ota_fail_indicator();
 		return;
 
-	} else if (led_situation & HAL_LED_EVENT_FULL_CHARGED) {
+	} else if (led_situation & HAL_LED_STATUS_FULL_CHARGED) {
 		hal_led_ktd2027_full_charged_indicator();
 		return;
 
-	} else if (led_situation & HAL_LED_EVENT_CHARGING) {
+	} else if (led_situation & HAL_LED_STATUS_CHARGING) {
 		hal_led_ktd2027_charging_indicator();
 		return;
 
-	} else if (led_situation & HAL_LED_EVENT_LOW_BATTERY) {
+	} else if (led_situation & HAL_LED_STATUS_LOW_BATTERY) {
 		hal_led_ktd2027_low_battery_indicator();
 		return;
 
 	} else {
 		hal_led_ktd2027_off();
 		return;
+	}
+}
+
+void hal_led_event_handler (hal_led_event_t event) {
+
+	switch (event) {
+	case HAL_LED_EVENT_POWER_ON_PROGRESS:
+		hal_led_set_indicator_status(HAL_LED_POWER_ON);
+		break;
+	case HAL_LED_EVENT_POWER_OFF_PROGRESS:
+		hal_led_set_indicator_status(HAL_LED_POWER_OFF);
+		//hal_pmic_pca9422_power_down();
+		bq256xx_enter_ship_mode();
+		// Reset the system if the device is charging
+		vTaskDelay(1000);
+		NVIC_SystemReset();
+		break;
+	case HAL_LED_EVENT_PHOTO_CAPTURE:
+		hal_led_set_indicator_status(HAL_LED_TAKE_PHOTO);
+		break;
+	case HAL_LED_EVENT_REFRESH:
+//                  hal_led_set_indicator_status(HAL_LED_REFRESH);
+		hal_led_status_handler();
+		break;
+	case HAL_LED_EVENT_ALL_OFF:
+		hal_led_set_indicator_status(HAL_LED_OFF);
+		break;
+	default:
+		break;
 	}
 }
 
@@ -224,6 +249,11 @@ void hal_led_set_situation (uint8_t situation, uint8_t enable) {
 			PRINTF("[HAL_LED] led_situation: 0x%02x\r\n", led_situation);
 		}
 	}
+}
+
+void hal_led_ktd2027_init(void)
+{
+    ktd202x_probe();
 }
 
 

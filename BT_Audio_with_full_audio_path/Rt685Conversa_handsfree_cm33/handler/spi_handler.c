@@ -245,7 +245,7 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 			Novatek_boot_completed = 1;
 	//			hal_led_refresh();
 			battery_timer_start();
-			led_post_event(LED_EVT_REFRESH);
+			led_post_event(HAL_LED_EVENT_REFRESH);
 			general_RingtoneState = Ringtone_PowerON;
 			break;
 
@@ -255,7 +255,7 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 
 		case CMD_ATOMIC_EVENT_PHOTO_CAPTURED:
 			PRINTF("[SPI][Event] PHOTO_CAPTURED \r\n ");
-			led_post_event(LED_EVT_REFRESH);
+			led_post_event(HAL_LED_EVENT_REFRESH);
 			ss_set_capture_status(COMPONENT_END);
 			break;
 
@@ -265,16 +265,16 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 
 		case CMD_ATOMIC_EVENT_RECORDING_STARTED:
 			PRINTF("[SPI][Event] RECORDING_STARTED \r\n ");
-			hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
-			led_post_event(LED_EVT_REFRESH);
+			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
+			led_post_event(HAL_LED_EVENT_REFRESH);
 			ss_set_recording_status(COMPONENT_START);
 			break;
 
 		case CMD_ATOMIC_EVENT_RECORDING_STOPPED:
 			PRINTF("[SPI][Event] RECORDING_STOPPED \r\n ");
 			ss_set_state(USAGE_STATE_HOME);
-			hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
-			led_post_event(LED_EVT_REFRESH);
+			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
+			led_post_event(HAL_LED_EVENT_REFRESH);
 			ss_set_recording_status(COMPONENT_END);
 			break;
 
@@ -342,29 +342,29 @@ static void spi_process_atomic_command(uint8_t cmd, uint8_t val)
             if (val == 0x00) {
                 PRINTF("[App] CMD:00 VAL:%02X -> Nova do nothing \r\n", val);
                 hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
-                led_post_event(LED_EVT_REFRESH);
+                led_post_event(HAL_LED_EVENT_REFRESH);
             }
             else if (val == 0x01) {
                 PRINTF("[App] CMD:00 VAL:%02X -> Capture Start \r\n", val);
-                led_post_event(LED_EVT_PHOTO_CAPTURE);
+                led_post_event(HAL_LED_EVENT_PHOTO_CAPTURE);
                 // ToDo:使NXP發出 "滴～喀嚓 "聲音
                 ss_set_capture_status(COMPONENT_START);
             }
             else if (val == 0x03) {
                 PRINTF("[App] CMD:00 VAL:%02X -> Capture Completed \r\n", val);
-                led_post_event(LED_EVT_REFRESH);
+                led_post_event(HAL_LED_EVENT_REFRESH);
                 ss_set_capture_status(COMPONENT_END);
             }
             else if (val == 0x04) {
                 PRINTF("[App] CMD:00 VAL:%02X -> Recording Start \r\n", val);
                 hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
-                led_post_event(LED_EVT_REFRESH);
+                led_post_event(HAL_LED_EVENT_REFRESH);
                 ss_set_recording_status(COMPONENT_START);
             }
             else if (val == 0x05) {
                 PRINTF("[App] CMD:00 VAL:%02X -> Recording Completed \r\n", val);
                 hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
-                led_post_event(LED_EVT_REFRESH);
+                led_post_event(HAL_LED_EVENT_REFRESH);
                 ss_set_recording_status(COMPONENT_END);
             }
             else if (val == 0x06) {
@@ -1773,7 +1773,7 @@ static void handle_active_ack_frame(const uint8_t *frame)
             if (val == 0x00) {
                 PRINTF("[Active] ACK:[00 00] Nova close all component(led,Dmic,AMP) \r\n");
                 hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
-                led_post_event(LED_EVT_REFRESH); //While LED ON
+                led_post_event(HAL_LED_EVENT_REFRESH); //While LED ON
                 // TODO: Dmic,AMP
             }
             break;
@@ -1803,30 +1803,30 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 			if (val == 0x00) {
 				PRINTF("[Passive] ACK:[00 %02X] Nova do nothing \r\n",val);
 				hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
-				led_post_event(LED_EVT_REFRESH); //While LED ON
+				led_post_event(HAL_LED_EVENT_REFRESH); //While LED ON
 			}
 			else if (val == 0x01) {
 				PRINTF("[Passive] ACK:[00 %02X] Capture Start \r\n",val);
-				led_post_event(LED_EVT_PHOTO_CAPTURE);//While LED ON
+				led_post_event(HAL_LED_EVENT_PHOTO_CAPTURE);//While LED ON
 				// ToDo:使NXP發出 "滴～喀嚓 "聲音
 				ss_set_capture_status(COMPONENT_START);
 			}
 			else if (val == 0x03) {
 				PRINTF("[Passive] ACK:[00 %02X] Capture Completed \r\n",val);
-				led_post_event(LED_EVT_REFRESH);
+				led_post_event(HAL_LED_EVENT_REFRESH);
 				ss_set_capture_status(COMPONENT_END);
 			}
 			else if (val == 0x04) {
 				PRINTF("[Passive] ACK:[00 %02X] Recording Start \r\n",val);
 				hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
-				led_post_event(LED_EVT_REFRESH); //While LED ON
+				led_post_event(HAL_LED_EVENT_REFRESH); //While LED ON
 				// ToDo:使NXP發出 "登登"聲音
 				ss_set_recording_status(COMPONENT_START);
 			}
 			else if (val == 0x05) {
 				PRINTF("[Passive] ACK:[00 %02X] Recording Completed \r\n",val);
 				hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
-				led_post_event(LED_EVT_REFRESH); //While LED ON
+				led_post_event(HAL_LED_EVENT_REFRESH); //While LED ON
 				// ToDo:使NXP發出 "等登"聲音
 				ss_set_recording_status(COMPONENT_END);
 			}
@@ -2350,7 +2350,7 @@ void spi_handler_task(void *pvParameters)
 		        if (received_value == POWER_LONG_PRESS_HEX_VALUE) {
 		            general_RingtoneState = Ringtone_PowerOFF;
 		            vTaskDelay(pdMS_TO_TICKS(200));
-		        	led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+		        	led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
 		        }
             }
         }
@@ -2456,7 +2456,7 @@ void spi_command_handler(void)
 			if (received_value == POWER_LONG_PRESS_HEX_VALUE) {
 				general_RingtoneState = Ringtone_PowerOFF;
 				vTaskDelay(pdMS_TO_TICKS(200));
-				led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+				led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
 			}
 		}
 	}

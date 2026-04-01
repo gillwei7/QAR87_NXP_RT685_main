@@ -33,7 +33,7 @@ extern SemaphoreHandle_t sys_bus_mutex;
 
 extern volatile bq256xx_status_t charger_status;
 extern volatile BatteryInfo battery_info;
-volatile led_event_t g_led_event = LED_EVT_NONE;
+volatile hal_led_event_t g_led_event = HAL_LED_EVENT_NONE;
 volatile amp_event_t g_amp_event = AMP_EVT_NONE;
 extern volatile struct aw933xx_dev aw933xx;
 
@@ -248,7 +248,7 @@ void amp_post_event(amp_event_t e)
 }
 
 
-void led_post_event(led_event_t e)
+void led_post_event(hal_led_event_t e)
 {
     g_led_event = e;
 #if 0
@@ -277,424 +277,9 @@ void charger_post_event(void *param)
 
 void I2C_Task(void *pvParameters)
 {
-    (void)pvParameters;
-
-    for (;;)
+    while (1)
     {
-        EventBits_t bits = xEventGroupWaitBits(
-            i2c_event_group,
-            TOUCH_EVENT_BIT | CHARGER_EVENT_BIT | GAUGE_EVENT_BIT | LED_EVENT_BIT | AMP_EVENT_BIT| SAR_EVENT_BIT,
-            pdTRUE,     /* clear on exit */
-            pdFALSE,    /* wait for any bit */
-            pdMS_TO_TICKS(500));
-
-
-        /* --- SAR event --- */
-        if ((bits & SAR_EVENT_BIT) != 0)
-        {
-        	if (sys_bus_mutex != NULL)
-        		{
-					xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
-        		}
-
-            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
-#if SAR_SX9204_ENABLE
-
-               /*
-               uint8_t prox_state = 0;
-               // 收到中斷信號，開始執行 I2C 讀寫
-               if (sx920x_read_state(&prox_state) == 0)
-               {
-                   PRINTF("SAR Task: State = 0x%02X\r\n", prox_state);
-                   // 處理感測邏輯...
-               }
-               */
-                sx920x_event_t evt;
-                if (sx920x_poll_event(&evt) == 0 ) {
-                    PRINTF("[SAR] %s\r\n", sx920x_event_to_str_zh(evt));  // 顯示：接近/人體接近/人體遠離/遠離
-                    /* TODO: 根據 evt 做對應動作，例如：
-                       - SX920X_EVT_BODY_CLOSE: 提高掃描頻率、喚醒系統
-                       - SX920X_EVT_BODY_FAR  : 恢復省電
-                    */
-                }
-
-#endif
-                xSemaphoreGive(i2c_mutex);
-            }
-
-
-            if (sys_bus_mutex != NULL) {
-            	xSemaphoreGive(sys_bus_mutex);
-            }
-
-            GPIO_PinClearInterruptFlag(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
-            GPIO_PinEnableInterrupt(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
-        }
-
-        /* --- AMP event --- */
-        if ((bits & AMP_EVENT_BIT) != 0) {
-            vTaskDelay(1); /* 確保 g_amp_event 已更新 */
-            amp_event_t evt = g_amp_event;
-
-            if (sys_bus_mutex != NULL)
-            	{
-            		xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
-            	}
-
-            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
-#if AMP_AW88166_ENABLE
-                switch (evt) {
-                    case AMP_EVT_MUSIC_START:
-                        hal_amp_aw88166_left_start("Music");
-                        hal_amp_aw88166_right_start("Music");
-                        AmpState=AmpState_ConfiguredAndActive;
-                        PRINTF("AMP_EVT_MUSIC_START done\r\n");
-                        break;
-                    case AMP_EVT_RECEIVER_START:
-                        hal_amp_aw88166_left_start("Receiver");
-                        hal_amp_aw88166_right_start("Receiver");
-                        AmpState=AmpState_ConfiguredAndActive;
-                        PRINTF("AMP_EVT_RECEIVER_START done\r\n");
-                        break;
-                    case AMP_EVT_STOP:
-                    	hal_amp_aw88166_left_stop();
-                    	hal_amp_aw88166_right_stop();
-                    	AmpState=AmpState_UnConfigured;
-                    	PRINTF("AMP_EVT_STOP done\r\n");
-                        break;
-                    default:
-                        break;
-                }
-#endif
-                xSemaphoreGive(i2c_mutex);
-            }
-
-            if (sys_bus_mutex != NULL) {
-            	xSemaphoreGive(sys_bus_mutex);
-            }
-        }
-
-
-        /* --- TOUCH event --- */
-        if ((bits & TOUCH_EVENT_BIT) != 0)
-        {
-        	if (sys_bus_mutex != NULL)
-        		{
-					xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
-        		}
-
-            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE)
-            {
-#if TOUCH_EWD608_ENABLE
-
-                const uint8_t data_reg = 0xC0;
-                uint8_t buf[EWD_FRAME_MAX_LEN];
-
-        		int rc = hal_i2c_mem_read_impl(EKTF_I2C_ADDR_7BIT, data_reg, buf, EWD_FRAME_MAX_LEN);
-
-                if (rc == kStatus_Success) {
-                    elan_parse_and_report_data(buf, EWD_FRAME_MAX_LEN);
-                }
-
-#endif
-#if TOUCH_AW93305_ENABLE
-            	AW93305_EXTI_Callback();
-#endif
-                xSemaphoreGive(i2c_mutex);
-
-#if TOUCH_AW93305_ENABLE
-                if(aw933xx.event.click >0)
-                {
-                	unsigned int btn_event = aw933xx.event.click;
-                	PRINTF("[Touch] click= %d \n",btn_event);
-                	if(btn_event==1)
-                	{
-#if SOC_SPI_ENABLE
-                        if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
-                        		ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_HOME)) {
-                	        //send_spi_request(ONE_TOUCH_HEX_VALUE);
-                        }
-#endif
-                	}
-                	else if(btn_event==2)
-                	{
-#if SOC_SPI_ENABLE
-                        if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
-                            //send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
-                        }
-#endif
-                	}
-
-                }
-                else if(aw933xx.event.press)
-                {
-                	PRINTF("[Touch] press \n");
-#if SOC_SPI_ENABLE
-                    if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
-                    		ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
-                    		ss_get_state() == USAGE_STATE_ABOUT)) {
-                    	// Media Player: Go Home (if the OE is on), Wake Up (if the OE is off)
-                    	// Home: Wake Up (if the OE is off)
-                        //send_spi_request(PRESS_TOUCH_HEX_VALUE);
-                    }
-#endif
-                }
-                else if(aw933xx.event.long_press)
-                {
-                	PRINTF("[Touch] long_press \n");
-                }
-                else if(aw933xx.event.super_long_press)
-                {
-                	PRINTF("[Touch] super_long_press \n");
-                }
-                else if(aw933xx.event.right_wareds)
-                {
-                	PRINTF("[Touch] slide_right \n");
-                	ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
-#if SOC_SPI_ENABLE
-                    if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
-                        //send_spi_request(FORWARD_SLIDE_HEX_VALUE);
-                    }
-#endif
-                    if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
-                        // Volume down
-                    	ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
-                        PRINTF("[Touch] Volume down\r\n");
-
-                    }
-                }
-                else if(aw933xx.event.left_wareds)
-                {
-                	PRINTF("[Touch] slide_left \n");
-                	ChangeMasterVolumeLevel15_UpDown(1); // pass positive value to increase volume
-
-#if SOC_SPI_ENABLE
-                    if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
-                        //send_spi_request(BACK_SLIDE_HEX_VALUE);
-                    }
-#endif
-                    if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
-                        // Volume up
-                    	ChangeMasterVolumeLevel15_UpDown(1); // pass positive value to increase volume
-                        PRINTF("[Touch] Volume up\r\n");
-                    }
-                }
-#endif
-
-            }
-
-            if (sys_bus_mutex != NULL) {
-            	xSemaphoreGive(sys_bus_mutex);
-            }
-
-            /* 任務側重新啟用觸控中斷（先清旗標再開） */
-            GPIO_PinClearInterruptFlag(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
-            GPIO_PinEnableInterrupt(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
-        }
-
-
-        /* --- CHARGER event --- */
-        if ((bits & CHARGER_EVENT_BIT) != 0)
-        {
-        	if (sys_bus_mutex != NULL) {
-        		xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
-        	}
-
-            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE)
-            {
-#if CHG_BQ25618_ENABLE
-                vTaskDelay(100); // Wait for the charger to be ready
-            	(void)bq256xx_set_iindpm(s_bq256xx_iindpm_target_ua);
-    			if (bq256xx_poll_status(&charger_status) == kStatus_Success) {
-    				PRINTF("[Charger] Power Good: %s\n", charger_status.power_good ? "Yes" : "No");
-    				PRINTF("[Charger] VBUS Status: 0x%02X\n", charger_status.vbus_stat);
-    				PRINTF("[Charger] Charge Status: 0x%02X\n", charger_status.chg_stat);
-    				PRINTF("[Charger] Fault Status: 0x%02X\n", charger_status.fault_stat);
-    				PRINTF("[Charger] VBUS Good: %s\n", charger_status.vbus_good ? "Yes" : "No");
-    				PRINTF("\n");
-    				if(charger_status.vbus_good)
-    				{
-    					hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_ENABLE);
-    					led_post_event(LED_EVT_REFRESH);
-    					ss_set_charging(true);
-    				}
-    				else
-    				{
-    					hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-    					hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
-    					led_post_event(LED_EVT_REFRESH);
-    					ss_set_charging(false);
-    				}
-    				if(charger_status.chg_stat==0x03)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
-    				{
-    					battery_state = BATTERY_STATE_FULL;
-    					hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-    					hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
-    					led_post_event(LED_EVT_REFRESH);
-    				}
-    				/*
-    			    uint8_t val;
-    			    for (uint8_t reg = 0x00; reg <= 0x0A; reg++)
-    			    {
-    			    	(void)bq256xx_read_reg(reg, &val, 1);
-    			    	 PRINTF("[Debug][bq256xx] REG %u = 0x%02X\r\n", reg, val);
-    			    }
-    				 */
-    			} else {
-    				PRINTF("[Charger] Failed to read charger status.\n");
-    			}
-#endif
-                xSemaphoreGive(i2c_mutex);
-            }
-
-            if (sys_bus_mutex != NULL) {
-            	xSemaphoreGive(sys_bus_mutex);
-            }
-
-            GPIO_PinClearInterruptFlag(GPIO, CHG_INT_N_R_PORT, CHG_INT_N_R_PIN, kGPIO_InterruptA);
-            GPIO_PinEnableInterrupt(GPIO, CHG_INT_N_R_PORT, CHG_INT_N_R_PIN, kGPIO_InterruptA);
-
-        }
-
-        /* --- GAUGE event --- */
-        if ((bits & GAUGE_EVENT_BIT) != 0)
-        {
-
-        	if (sys_bus_mutex != NULL) {
-        		xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(1000));
-        	}
-
-            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE)
-            {
-#if FG_GLF70302_ENABLE
-            	glf70302_polling(&battery_info);
-#if 0
-            	//battery_info.soc = hal_power_get_battery_percentage(battery_info.voltage);
-#endif
-            	uint8_t battery_level = hal_power_get_battery_percentage(battery_info.soc);
-                PRINTF("[Battery] SOC: %d%%, battery_level: %d%%\r\n",battery_info.soc, battery_level);
-                if (ss_is_charging()) {
-                	if (battery_level >= FULLY_CHARGE_PERCENTAGE) {
-                    	battery_state = BATTERY_STATE_FULL;
-                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
-                    	led_post_event(LED_EVT_REFRESH);
-                	}
-                	else if (battery_level > LOW_POWER_PERCENTAGE)
-                	{
-                    	battery_state = BATTERY_STATE_NORMAL;
-                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
-                    	led_post_event(LED_EVT_REFRESH);
-                	}
-                } else {
-                    if (battery_level <= LOW_POWER_PERCENTAGE)
-                    {
-                    	battery_state = BATTERY_STATE_LOW;
-                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
-                    	led_post_event(LED_EVT_REFRESH);
-                    }
-                    else
-                    {
-                    	battery_state = BATTERY_STATE_NORMAL;
-                    	hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-                    	hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
-                    	led_post_event(LED_EVT_REFRESH);
-                    }
-                }
-            	ss_set_battery(battery_level);
-            	if(battery_info.voltage<=3500 && ss_is_charging() == false)//Automatic shutdown when battery voltage drops below 3.5V
-            	{
-            		PRINTF("[Gauge] Low battery, so it shuts down. \r\n");
-#if SOC_SPI_ENABLE
-                        if (Novatek_boot_completed) {
-                            //send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
-                        } else {
-        		            general_RingtoneState = Ringtone_PowerOFF;
-        		            vTaskDelay(pdMS_TO_TICKS(200));
-        		        	led_post_event(LED_EVT_POWER_OFF_PROGRESS);
-                        }
-#endif
-//                        led_post_event(LED_EVT_POWER_OFF_PROGRESS);
-//                        general_RingtoneState = Ringtone_PowerOFF;
-            	}
-#endif
-                if (is_first_read_battery_level) {
-            		Novatek_boot_completed = 1;
-            		is_first_read_battery_level = 0;
-                }
-
-                xSemaphoreGive(i2c_mutex);
-            }
-
-            if (sys_bus_mutex != NULL) {
-            	xSemaphoreGive(sys_bus_mutex);
-            }
-
-            GPIO_PinClearInterruptFlag(GPIO, FG_INT_GLF70302_PORT, FG_INT_GLF70302_PIN, kGPIO_InterruptA);
-            GPIO_PinEnableInterrupt(GPIO, FG_INT_GLF70302_PORT, FG_INT_GLF70302_PIN, kGPIO_InterruptA);
-
-        }
-
-
-        /*--- LED event --- */
-        if ((bits & LED_EVENT_BIT) != 0) {
-            if (sys_bus_mutex != NULL) {
-                xSemaphoreTake(sys_bus_mutex, pdMS_TO_TICKS(500));
-            }
-
-            vTaskDelay(1); /* 確保 g_led_event 已更新 */
-            led_event_t evt = g_led_event;
-
-            if (xSemaphoreTake(i2c_mutex, pdMS_TO_TICKS(500)) == pdTRUE) {
-                /* 根據事件控制 LED */
-#if LED_KTD2027_ENABLE
-                switch (evt) {
-                case LED_EVT_POWER_ON_PROGRESS:
-                    hal_led_set_indicator_status(HAL_LED_POWER_ON);
-                    break;
-                case LED_EVT_POWER_OFF_PROGRESS:
-                    hal_led_set_indicator_status(HAL_LED_POWER_OFF);
-                    //hal_pmic_pca9422_power_down();
-                    bq256xx_enter_ship_mode();
-                    // Reset the system if the device is charging
-                    vTaskDelay(1000);
-                    NVIC_SystemReset();
-                    break;
-                case LED_EVT_PHOTO_CAPTURE:
-                    hal_led_set_indicator_status(HAL_LED_TAKE_PHOTO);
-                    break;
-                case LED_EVT_REFRESH:
-//                  hal_led_set_indicator_status(HAL_LED_REFRESH);
-                    hal_led_status_handler();
-                    break;
-                case LED_EVT_ALL_OFF:
-                    hal_led_set_indicator_status(HAL_LED_OFF);
-                    break;
-                default:
-                    break;
-                }
-#endif
-                xSemaphoreGive(i2c_mutex);
-            }
-
-            if (sys_bus_mutex != NULL) {
-                xSemaphoreGive(sys_bus_mutex);
-            }
-        }
-
-
-        if(System_Status && Novatek_boot_completed)
-        {
-            System_Status=0;
-#if SOC_SPI_ENABLE
-            //send_spi_request(SYSTEM_STATUS_HEX_VALUE);
-#endif
-        }
-
+    	i2c_device_handler();
     }
 }
 
@@ -899,23 +484,23 @@ void i2c_device_handler (void)
 			PRINTF("\n");
 			if(charger_status.vbus_good)
 			{
-				hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_ENABLE);
-				led_post_event(LED_EVT_REFRESH);
+				hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_ENABLE);
+				led_post_event(HAL_LED_EVENT_REFRESH);
 				ss_set_charging(true);
 			}
 			else
 			{
-				hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-				hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
-				led_post_event(LED_EVT_REFRESH);
+				hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_DISABLE);
+				hal_led_set_situation(HAL_LED_STATUS_FULL_CHARGED, SITUATION_DISABLE);
+				led_post_event(HAL_LED_EVENT_REFRESH);
 				ss_set_charging(false);
 			}
 			if(charger_status.chg_stat==0x03)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
 			{
 				battery_state = BATTERY_STATE_FULL;
-				hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-				hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
-				led_post_event(LED_EVT_REFRESH);
+				hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_DISABLE);
+				hal_led_set_situation(HAL_LED_STATUS_FULL_CHARGED, SITUATION_ENABLE);
+				led_post_event(HAL_LED_EVENT_REFRESH);
 			}
 			/*
 			uint8_t val;
@@ -950,13 +535,13 @@ void i2c_device_handler (void)
 				hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
 				hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
 				hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
-				led_post_event(LED_EVT_REFRESH);
+				led_post_event(HAL_LED_EVENT_REFRESH);
 			}
 			else if (battery_level > LOW_POWER_PERCENTAGE)
 			{
 				battery_state = BATTERY_STATE_NORMAL;
 				hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
-				led_post_event(LED_EVT_REFRESH);
+				led_post_event(HAL_LED_EVENT_REFRESH);
 			}
 		} else {
 			if (battery_level <= LOW_POWER_PERCENTAGE)
@@ -965,7 +550,7 @@ void i2c_device_handler (void)
 				hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
 				hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
 				hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
-				led_post_event(LED_EVT_REFRESH);
+				led_post_event(HAL_LED_EVENT_REFRESH);
 			}
 			else
 			{
@@ -973,7 +558,7 @@ void i2c_device_handler (void)
 				hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
 				hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
 				hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
-				led_post_event(LED_EVT_REFRESH);
+				led_post_event(HAL_LED_EVENT_REFRESH);
 			}
 		}
 		ss_set_battery(battery_level);
@@ -986,10 +571,10 @@ void i2c_device_handler (void)
 				} else {
 					general_RingtoneState = Ringtone_PowerOFF;
 					vTaskDelay(pdMS_TO_TICKS(200));
-					led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+					led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
 				}
 #endif
-//                        led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+//                        led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
 //                        general_RingtoneState = Ringtone_PowerOFF;
 		}
 #endif
@@ -1003,35 +588,9 @@ void i2c_device_handler (void)
 	/*--- LED event --- */
 	if (has_led_event) {
 		has_led_event = 0;
-		vTaskDelay(1); /* 確保 g_led_event 已更新 */
-		led_event_t evt = g_led_event;
-
 #if LED_KTD2027_ENABLE
-		switch (evt) {
-		case LED_EVT_POWER_ON_PROGRESS:
-			hal_led_set_indicator_status(HAL_LED_POWER_ON);
-			break;
-		case LED_EVT_POWER_OFF_PROGRESS:
-			hal_led_set_indicator_status(HAL_LED_POWER_OFF);
-			//hal_pmic_pca9422_power_down();
-			bq256xx_enter_ship_mode();
-			// Reset the system if the device is charging
-			vTaskDelay(1000);
-			NVIC_SystemReset();
-			break;
-		case LED_EVT_PHOTO_CAPTURE:
-			hal_led_set_indicator_status(HAL_LED_TAKE_PHOTO);
-			break;
-		case LED_EVT_REFRESH:
-//                  hal_led_set_indicator_status(HAL_LED_REFRESH);
-			hal_led_status_handler();
-			break;
-		case LED_EVT_ALL_OFF:
-			hal_led_set_indicator_status(HAL_LED_OFF);
-			break;
-		default:
-			break;
-		}
+		vTaskDelay(1); /* 確保 g_led_event 已更新 */
+		hal_led_event_handler(g_led_event);
 #endif
 	}
 

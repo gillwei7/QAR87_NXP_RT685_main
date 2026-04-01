@@ -181,7 +181,7 @@ static void soc_power_off_timer_callback(TimerHandle_t xTimer)
 	PRINTF("[Button] Start Power Off sequence\r\n");
     general_RingtoneState = Ringtone_PowerOFF;
     vTaskDelay(pdMS_TO_TICKS(200));
-	led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+	led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
 
 }
 
@@ -257,13 +257,13 @@ void button_press_handler (void)
 					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
 							ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
 						send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_TAKE_PICTURE); // Take Photo
-						led_post_event(LED_EVT_PHOTO_CAPTURE);
+						led_post_event(HAL_LED_EVENT_PHOTO_CAPTURE);
 						ss_set_capture_status(COMPONENT_START);
 					}
 					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_VIDEO_RECORDING)) {
 						send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_RECORDING); // Stop Recording
-						hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
-						led_post_event(LED_EVT_REFRESH);
+						hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
+						led_post_event(HAL_LED_EVENT_REFRESH);
 						ss_set_recording_status(COMPONENT_END);
 					}
 #endif
@@ -360,7 +360,7 @@ void button_press_hold_handler (void)
 				} else {
 					general_RingtoneState = Ringtone_PowerOFF;
 					vTaskDelay(pdMS_TO_TICKS(200));
-					led_post_event(LED_EVT_POWER_OFF_PROGRESS);
+					led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
 				}
 #endif
 
@@ -380,7 +380,7 @@ void button_press_hold_handler (void)
 						ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
 					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_RECORDING); // Start recording
 					hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
-					led_post_event(LED_EVT_REFRESH);
+					led_post_event(HAL_LED_EVENT_REFRESH);
 					ss_set_recording_status(COMPONENT_START);
 				}
 #endif

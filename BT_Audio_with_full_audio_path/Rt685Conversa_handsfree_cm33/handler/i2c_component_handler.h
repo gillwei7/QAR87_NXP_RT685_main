@@ -28,6 +28,7 @@
 #include "aw88166.h"
 #include "elan_ewd608.h"
 #include "sx920x.h"
+#include "hal_led.h"
 
 #define SCAN_I2C_ADDRESS_ENABLE 1
 #define LED_ON 					10
@@ -54,16 +55,6 @@ typedef enum {
     AMP_MODE_RECEIVER = 1,
 } amp_mode_t;
 
-/*===== LED ===== */
-/* LED events (single, centralized event model) */
-typedef enum {
-	LED_EVT_NONE = 0,
-	LED_EVT_POWER_ON_PROGRESS,       /* 白燈常亮直到ready */
-	LED_EVT_POWER_OFF_PROGRESS,      /* 紅燈亮1秒 */
-	LED_EVT_PHOTO_CAPTURE,           /* 白燈閃一次 */
-	LED_EVT_REFRESH,                 /* Refresh the led indicator */
-	LED_EVT_ALL_OFF                  /* 全部關閉 */
-} led_event_t;
 
 
 typedef enum {
@@ -81,7 +72,7 @@ typedef enum {
 void Init_I2C_Component(void);
 
 void battery_timer_start(void);
-void led_post_event(led_event_t e);
+void led_post_event(hal_led_event_t e);
 void amp_post_event(amp_event_t e);
 
 //void Scan_I2C_Devices(I3C_Type *base);
