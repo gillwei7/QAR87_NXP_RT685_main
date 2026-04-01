@@ -17,6 +17,7 @@
 #include "hal_amp.h"
 #include "WorkStateManager.h"
 #include "app_handsfree.h"
+#include "hal_sar.h"
 
 #define BATTERY_READ_PERIOD_MS  (60000U)
 #define FIRST_BATTERY_READ_PERIOD_MS  (6000U)
@@ -204,26 +205,7 @@ void Init_I2C_Component(void)
 #endif
 
 #if SAR_SX9204_ENABLE
-
-    if (sx920x_init() == 0)
-    {
-        PRINTF("[SAR] Init Success! \r\n");
-
-        if (sx920x_compensate() == 0)
-        {
-            PRINTF("[SAR] Compensation Done!\r\n");
-        }
-        else
-        {
-            PRINTF("[SAR] Compensation Failed!\r\n");
-        }
-
-    }
-    else
-    {
-        PRINTF("[SAR] Init Failed!\r\n");
-    }
-
+	hal_sar_init();
 #endif
 }
 
@@ -315,23 +297,7 @@ void i2c_device_handler (void)
 
 #if SAR_SX9204_ENABLE
 
-	   /*
-	   uint8_t prox_state = 0;
-	   // 收到中斷信號，開始執行 I2C 讀寫
-	   if (sx920x_read_state(&prox_state) == 0)
-	   {
-		   PRINTF("SAR Task: State = 0x%02X\r\n", prox_state);
-		   // 處理感測邏輯...
-	   }
-	   */
-		sx920x_event_t evt;
-		if (sx920x_poll_event(&evt) == 0 ) {
-			PRINTF("[SAR] %s\r\n", sx920x_event_to_str_zh(evt));  // 顯示：接近/人體接近/人體遠離/遠離
-			/* TODO: 根據 evt 做對應動作，例如：
-			   - SX920X_EVT_BODY_CLOSE: 提高掃描頻率、喚醒系統
-			   - SX920X_EVT_BODY_FAR  : 恢復省電
-			*/
-		}
+    	hal_sar_handler();
 
 #endif
         GPIO_PinClearInterruptFlag(GPIO, PROX1_INT_N_PORT, PROX1_INT_N_PIN, kGPIO_InterruptA);
