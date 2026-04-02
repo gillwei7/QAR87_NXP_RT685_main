@@ -8,11 +8,6 @@ BT_Audio/XtensaInfo/
 BT_Audio/libc_RI-2021.8/
 BT_Audio/Rt685Conversa_handsfree_cm33/.settings/org.eclipse.cdt.managedbuilder.core.prefs
 
-
-BT_Audio/evkmimxrt685_a2dp_sink_cm33/Debug/
-BT_Audio/evkmimxrt685_a2dp_sink_cm33/.settings/language.settings.xml
-BT_Audio/evkmimxrt685_a2dp_sink_cm33/.settings/org.eclipse.cdt.managedbuilder.core.prefs
-
 BT_Audio_with_full_audio_path/Rt685Conversa_handsfree_cm33/Debug/
 BT_Audio_with_full_audio_path/Rt685Conversa_handsfree_cm33/.settings/language.settings.xml
 BT_Audio_with_full_audio_path/.metabinary/
@@ -25,5 +20,7 @@ BT_Audio_with_full_audio_path/Rt685Conversa_handsfree_cm33/.settings/org.eclipse
 
 Bootloader/evkmimxrt685_ota_mcuboot_basic_cm33/Debug/
 Bootloader/evkmimxrt685_ota_mcuboot_basic_cm33/.settings/language.settings.xml
+Bootloader/evkmimxrt685_mcuboot_opensource_cm33/Debug/
+Bootloader/evkmimxrt685_mcuboot_opensource_cm33/.settings/language.settings.xml
 
 
