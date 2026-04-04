@@ -40,13 +40,11 @@ extern uint8_t led_status;
 extern volatile uint8_t System_Status ;
 extern uint8_t Novatek_boot_completed;
 
-battery_state_t battery_state = BATTERY_STATE_NORMAL;
 uint8_t is_first_read_battery_level = 1;
 static power_on_reason_t power_on_reason = POWER_ON_UNEXPECTED;
 
 static uint8_t has_sar_event = 0;
 static uint8_t has_led_event = 0;
-static uint8_t has_charger_event = 0;
 static uint8_t has_gauge_event = 0;
 
 
@@ -220,10 +218,6 @@ void sar_post_event(void *param)
 	has_sar_event = 1;
 }
 
-void charger_post_event(void *param)
-{
-    has_charger_event = 1;
-}
 
 
 void I2C_Task(void *pvParameters)
@@ -280,50 +274,10 @@ void i2c_device_handler (void)
 	}
 
 	/* --- CHARGER event --- */
-	if (has_charger_event)
+	if (hal_power_charger_has_new_event())
 	{
-		has_charger_event = 0;
 #if CHG_BQ25618_ENABLE
-		vTaskDelay(100); // Wait for the charger to be ready
-		(void)bq256xx_set_iindpm(s_bq256xx_iindpm_target_ua);
-		if (bq256xx_poll_status(&charger_status) == kStatus_Success) {
-			PRINTF("[Charger] Power Good: %s\n", charger_status.power_good ? "Yes" : "No");
-			PRINTF("[Charger] VBUS Status: 0x%02X\n", charger_status.vbus_stat);
-			PRINTF("[Charger] Charge Status: 0x%02X\n", charger_status.chg_stat);
-			PRINTF("[Charger] Fault Status: 0x%02X\n", charger_status.fault_stat);
-			PRINTF("[Charger] VBUS Good: %s\n", charger_status.vbus_good ? "Yes" : "No");
-			PRINTF("\n");
-			if(charger_status.vbus_good)
-			{
-				hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_ENABLE);
-				led_post_event(HAL_LED_EVENT_REFRESH);
-				ss_set_charging(true);
-			}
-			else
-			{
-				hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_DISABLE);
-				hal_led_set_situation(HAL_LED_STATUS_FULL_CHARGED, SITUATION_DISABLE);
-				led_post_event(HAL_LED_EVENT_REFRESH);
-				ss_set_charging(false);
-			}
-			if(charger_status.chg_stat==0x03)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
-			{
-				battery_state = BATTERY_STATE_FULL;
-				hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_DISABLE);
-				hal_led_set_situation(HAL_LED_STATUS_FULL_CHARGED, SITUATION_ENABLE);
-				led_post_event(HAL_LED_EVENT_REFRESH);
-			}
-			/*
-			uint8_t val;
-			for (uint8_t reg = 0x00; reg <= 0x0A; reg++)
-			{
-				(void)bq256xx_read_reg(reg, &val, 1);
-				 PRINTF("[Debug][bq256xx] REG %u = 0x%02X\r\n", reg, val);
-			}
-			 */
-		} else {
-			PRINTF("[Charger] Failed to read charger status.\n");
-		}
+		hal_power_charger_bq25618_handler();
 #endif
 		GPIO_PinClearInterruptFlag(GPIO, CHG_INT_N_R_PORT, CHG_INT_N_R_PIN, kGPIO_InterruptA);
 		GPIO_PinEnableInterrupt(GPIO, CHG_INT_N_R_PORT, CHG_INT_N_R_PIN, kGPIO_InterruptA);
@@ -342,33 +296,33 @@ void i2c_device_handler (void)
 		PRINTF("[Battery] SOC: %d%%, battery_level: %d%%\r\n",battery_info.soc, battery_level);
 		if (ss_is_charging()) {
 			if (battery_level >= FULLY_CHARGE_PERCENTAGE) {
-				battery_state = BATTERY_STATE_FULL;
-				hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-				hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_ENABLE);
-				hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
+				hal_power_set_battery_state(BATTERY_STATE_FULL);
+				hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_DISABLE);
+				hal_led_set_situation(HAL_LED_STATUS_FULL_CHARGED, SITUATION_ENABLE);
+				hal_led_set_situation(HAL_LED_STATUS_LOW_BATTERY, SITUATION_DISABLE);
 				led_post_event(HAL_LED_EVENT_REFRESH);
 			}
 			else if (battery_level > LOW_POWER_PERCENTAGE)
 			{
-				battery_state = BATTERY_STATE_NORMAL;
-				hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
+				hal_power_set_battery_state(BATTERY_STATE_NORMAL);
+				hal_led_set_situation(HAL_LED_STATUS_LOW_BATTERY, SITUATION_DISABLE);
 				led_post_event(HAL_LED_EVENT_REFRESH);
 			}
 		} else {
 			if (battery_level <= LOW_POWER_PERCENTAGE)
 			{
-				battery_state = BATTERY_STATE_LOW;
-				hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_ENABLE);
-				hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-				hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
+				hal_power_set_battery_state(BATTERY_STATE_LOW);
+				hal_led_set_situation(HAL_LED_STATUS_LOW_BATTERY, SITUATION_ENABLE);
+				hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_DISABLE);
+				hal_led_set_situation(HAL_LED_STATUS_FULL_CHARGED, SITUATION_DISABLE);
 				led_post_event(HAL_LED_EVENT_REFRESH);
 			}
 			else
 			{
-				battery_state = BATTERY_STATE_NORMAL;
-				hal_led_set_situation(HAL_LED_EVENT_LOW_BATTERY, SITUATION_DISABLE);
-				hal_led_set_situation(HAL_LED_EVENT_CHARGING, SITUATION_DISABLE);
-				hal_led_set_situation(HAL_LED_EVENT_FULL_CHARGED, SITUATION_DISABLE);
+				hal_power_set_battery_state(BATTERY_STATE_NORMAL);
+				hal_led_set_situation(HAL_LED_STATUS_LOW_BATTERY, SITUATION_DISABLE);
+				hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_DISABLE);
+				hal_led_set_situation(HAL_LED_STATUS_FULL_CHARGED, SITUATION_DISABLE);
 				led_post_event(HAL_LED_EVENT_REFRESH);
 			}
 		}

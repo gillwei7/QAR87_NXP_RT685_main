@@ -10,6 +10,12 @@
 
 #include "hal_common.h"
 
+typedef enum {
+    BATTERY_STATE_NORMAL = 0,       // 一般狀態
+    BATTERY_STATE_LOW,              // 電量過低
+    BATTERY_STATE_FULL              // 已充飽
+} battery_state_t;
+
 
 void hal_power_charger_bq25618_init(void);
 void hal_power_charger_bq25618_get_charging_status(void);
@@ -23,6 +29,10 @@ uint8_t hal_power_get_battery_percentage (uint32_t mv);
 uint8_t hal_power_get_battery_percentage(uint8_t soc);
 uint8_t hal_power_is_power_off_charging_mode(void);
 void hal_power_go_to_power_off_charging(void);
+
+void hal_power_charger_bq25618_handler (void);
+uint8_t hal_power_charger_has_new_event(void);
+void hal_power_set_battery_state(battery_state_t state);
 
 #endif /* HAL_POWER_H_ */
 #endif

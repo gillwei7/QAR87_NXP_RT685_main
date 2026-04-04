@@ -15,7 +15,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include <stdint.h>
-
+#include "i2c_component_handler.h"
 
 #define EN_HIZ_BIT      7
 #define EN_HIZ_MASK     (1u << EN_HIZ_BIT)
@@ -31,6 +31,8 @@ uint32_t s_bq256xx_iindpm_target_ua = 0;
 
 static uint8_t is_booting = 1;
 static uint8_t is_power_off_charging_mode = 0;
+static uint8_t has_charger_event = 0;
+static battery_state_t battery_state = BATTERY_STATE_NORMAL;
 
 
 #define PWR_OFF_CHG_TASK_STACK     (configMINIMAL_STACK_SIZE + 256)
@@ -161,7 +163,70 @@ uint8_t hal_power_is_power_off_charging_mode(void) {
 	return is_power_off_charging_mode;
 }
 
+void hal_power_charger_bq25618_handler (void)
+{
+	has_charger_event = 0;
 
+#if CHG_BQ25618_ENABLE
+	vTaskDelay(100); // Wait for the charger to be ready
+	(void)bq256xx_set_iindpm(s_bq256xx_iindpm_target_ua);
+	if (bq256xx_poll_status(&charger_status) == kStatus_Success) {
+		PRINTF("[Charger] Power Good: %s\n", charger_status.power_good ? "Yes" : "No");
+		PRINTF("[Charger] VBUS Status: 0x%02X\n", charger_status.vbus_stat);
+		PRINTF("[Charger] Charge Status: 0x%02X\n", charger_status.chg_stat);
+		PRINTF("[Charger] Fault Status: 0x%02X\n", charger_status.fault_stat);
+		PRINTF("[Charger] VBUS Good: %s\n", charger_status.vbus_good ? "Yes" : "No");
+		PRINTF("\n");
+		if(charger_status.vbus_good)
+		{
+			hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_ENABLE);
+			led_post_event(HAL_LED_EVENT_REFRESH);
+			ss_set_charging(true);
+		}
+		else
+		{
+			hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_DISABLE);
+			hal_led_set_situation(HAL_LED_STATUS_FULL_CHARGED, SITUATION_DISABLE);
+			led_post_event(HAL_LED_EVENT_REFRESH);
+			ss_set_charging(false);
+		}
+		if(charger_status.chg_stat==0x03)//Charging status: 00 – Not Charging、01 – Pre-charge、10 – Fast Charging、11 – Charge Termination
+		{
+			battery_state = BATTERY_STATE_FULL;
+			hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_DISABLE);
+			hal_led_set_situation(HAL_LED_STATUS_FULL_CHARGED, SITUATION_ENABLE);
+			led_post_event(HAL_LED_EVENT_REFRESH);
+		}
+		/*
+		uint8_t val;
+		for (uint8_t reg = 0x00; reg <= 0x0A; reg++)
+		{
+			(void)bq256xx_read_reg(reg, &val, 1);
+			 PRINTF("[Debug][bq256xx] REG %u = 0x%02X\r\n", reg, val);
+		}
+		 */
+	} else {
+		PRINTF("[Charger] Failed to read charger status.\n");
+	}
+#endif
+
+}
+
+void charger_post_event(void *param)
+{
+    has_charger_event = 1;
+}
+
+uint8_t hal_power_charger_has_new_event(void)
+{
+	return has_charger_event;
+}
+
+
+void hal_power_set_battery_state(battery_state_t state)
+{
+	battery_state = state;
+}
 
 static void PowerOffChargingTask(void *pvParameters)
 {

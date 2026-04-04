@@ -25,11 +25,6 @@
 #define MUSIC_PLAYING          1
 #define MUSIC_PAUSE            0
 
-typedef enum {
-    BATTERY_STATE_NORMAL = 0,       // 一般狀態
-    BATTERY_STATE_LOW,              // 電量過低
-    BATTERY_STATE_FULL              // 已充飽
-} battery_state_t;
 
 typedef enum {
 	USAGE_STATE_HOME = 0,          // 使用 Home

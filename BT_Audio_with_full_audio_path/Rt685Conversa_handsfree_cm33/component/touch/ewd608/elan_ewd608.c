@@ -34,7 +34,7 @@ static int hal_i2c_read_impl(uint16_t addr, uint8_t *buf, uint16_t len) {
 /* 記憶體讀（Repeated-START） */
 int hal_i2c_mem_read_impl(uint16_t addr8, uint8_t reg, uint8_t *buf, uint16_t len) {
     status_t status = BOARD_I3C_Receive(BOARD_PMIC_I3C_BASEADDR, (uint8_t)addr8, reg, 1, buf, (uint8_t)len);
-    return (status == kStatus_Success) ? 0 : -1;
+    return (int)status;
 }
 #endif
 
