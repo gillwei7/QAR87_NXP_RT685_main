@@ -39,19 +39,6 @@
 #define GAUGE_2_EVENT_BIT      (1UL << 5)
 #define SAR_EVENT_BIT 		 (1UL << 6)
 
-/*===== AMP ===== */
-typedef enum {
-    AMP_EVT_NONE = 0,
-    AMP_EVT_MUSIC_START,
-	AMP_EVT_RECEIVER_START,
-    AMP_EVT_STOP,
-} amp_event_t;
-
-typedef enum {
-    AMP_MODE_MUSIC = 0,
-    AMP_MODE_RECEIVER = 1,
-} amp_mode_t;
-
 
 
 typedef enum {
@@ -70,7 +57,6 @@ void Init_I2C_Component(void);
 
 void battery_timer_start(void);
 void led_post_event(hal_led_event_t e);
-void amp_post_event(amp_event_t e);
 
 //void Scan_I2C_Devices(I3C_Type *base);
 void I2C_Task(void *pvParameters);

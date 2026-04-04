@@ -35,7 +35,6 @@ extern SemaphoreHandle_t sys_bus_mutex;
 extern volatile bq256xx_status_t charger_status;
 extern volatile BatteryInfo battery_info;
 volatile hal_led_event_t g_led_event = HAL_LED_EVENT_NONE;
-volatile amp_event_t g_amp_event = AMP_EVT_NONE;
 
 extern uint8_t led_status;
 extern volatile uint8_t System_Status ;
@@ -46,7 +45,6 @@ uint8_t is_first_read_battery_level = 1;
 static power_on_reason_t power_on_reason = POWER_ON_UNEXPECTED;
 
 static uint8_t has_sar_event = 0;
-static uint8_t has_amp_event = 0;
 static uint8_t has_led_event = 0;
 static uint8_t has_charger_event = 0;
 static uint8_t has_gauge_event = 0;
@@ -203,16 +201,6 @@ void battery_timer_start(void)
 #endif
 }
 
-void amp_post_event(amp_event_t e)
-{
-    g_amp_event = e;
-#if 0
-    if (i2c_event_group) {
-        xEventGroupSetBits(i2c_event_group, AMP_EVENT_BIT);
-    }
-#endif
-    has_amp_event = 1;
-}
 
 
 void led_post_event(hal_led_event_t e)
@@ -284,34 +272,10 @@ void i2c_device_handler (void)
 
 	/* --- AMP event --- */
 
-	if (has_amp_event) {
-		has_amp_event = 0;
-		vTaskDelay(1); /* 確保 g_amp_event 已更新 */
-		amp_event_t evt = g_amp_event;
+	if (hal_amp_has_new_event()) {
 
 #if AMP_AW88166_ENABLE
-		switch (evt) {
-			case AMP_EVT_MUSIC_START:
-				hal_amp_aw88166_left_start("Music");
-				hal_amp_aw88166_right_start("Music");
-				AmpState=AmpState_ConfiguredAndActive;
-				PRINTF("AMP_EVT_MUSIC_START done\r\n");
-				break;
-			case AMP_EVT_RECEIVER_START:
-				hal_amp_aw88166_left_start("Receiver");
-				hal_amp_aw88166_right_start("Receiver");
-				AmpState=AmpState_ConfiguredAndActive;
-				PRINTF("AMP_EVT_RECEIVER_START done\r\n");
-				break;
-			case AMP_EVT_STOP:
-				hal_amp_aw88166_left_stop();
-				hal_amp_aw88166_right_stop();
-				AmpState=AmpState_UnConfigured;
-				PRINTF("AMP_EVT_STOP done\r\n");
-				break;
-			default:
-				break;
-		}
+		hal_amp_aw88166_handler();
 #endif
 	}
 

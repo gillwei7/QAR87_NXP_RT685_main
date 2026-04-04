@@ -273,7 +273,7 @@ void button_task(void *pvParameters)
 	                    (void)xTimerStop(sChg5Timer, 0);
 		            }
 				}
-				/* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
+				/* amp_post_event(AMP_EVT_MUSIC); // test amp */
 #endif
             }
             /* 若此時已經在第二次按壓中（btn_is_pressed==true），不回報短按，
@@ -404,7 +404,7 @@ void button_task(void *pvParameters)
                              * uint8_t vv = DOUBLE_CLICK_HEX_VALUE;
                              * (void)xQueueSend(spi_request_queue, &vv, 0);
                              */
-                            /* amp_post_event(AMP_EVT_RECEIVER_START); // test amp */
+                            /* amp_post_event(AMP_EVT_RECEIVER); // test amp */
                         }
                         else
                         {
@@ -455,7 +455,7 @@ void button_task(void *pvParameters)
         		        	led_post_event(LED_EVT_POWER_OFF_PROGRESS);
                         }
 #endif
-                        /* amp_post_event(AMP_EVT_MUSIC_START); // test amp */
+                        /* amp_post_event(AMP_EVT_MUSIC); // test amp */
                         //general_RingtoneState = Ringtone_PowerOFF;
                     }
                     else if (press_dur >= pwr_minShortTicks)
