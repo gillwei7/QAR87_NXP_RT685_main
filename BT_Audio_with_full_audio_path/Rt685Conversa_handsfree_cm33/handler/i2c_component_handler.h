@@ -21,12 +21,9 @@
 #include "pmic_support.h"
 #include "pmic_pca9422.h"
 #include "glf70583.h"
-#include "aw933xx.h"
-#include "aw93305.h"
 #include "bq256xx_charger.h"
 #include "glf70302_driver.h"
 #include "aw88166.h"
-#include "elan_ewd608.h"
 #include "sx920x.h"
 #include "hal_led.h"
 
