@@ -10,6 +10,7 @@
 #include "spi_handler.h"
 #include "WorkStateManager.h"
 #include "system_status.h"
+#include "scenario_state.h"
 #include "app_connect.h"
 #include "app_handsfree.h"
 #include "ringtone_handler.h"
@@ -59,8 +60,6 @@ static TimerHandle_t s_soc_power_off_timer = NULL;
 
 static uint8_t oe_status = 1;
 
-// gill
-extern RingtoneState general_RingtoneState;
 
 /* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
 static inline void delay_ms(uint32_t ms)
@@ -181,7 +180,7 @@ void function_button_timer_start(void)
 static void soc_power_off_timer_callback(TimerHandle_t xTimer)
 {
 	PRINTF("[Button] Start Power Off sequence\r\n");
-    general_RingtoneState = Ringtone_PowerOFF;
+	set_ringtone_state(Ringtone_PowerOFF);
     vTaskDelay(pdMS_TO_TICKS(200));
 	led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
 
@@ -256,13 +255,13 @@ void button_press_handler (void)
 //					hfp_AnswerCall();
 #if SOC_SPI_ENABLE
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
-					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
-							ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
+					if (Novatek_boot_completed && (get_scenario_state() == SCENARIO_STATE_HOME || get_scenario_state() == SCENARIO_STATE_MENU ||
+							get_scenario_state() == SCENARIO_STATE_ABOUT) && !ss_get_capture_status()) {
 						send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_TAKE_PICTURE); // Take Photo
 						led_post_event(HAL_LED_EVENT_PHOTO_CAPTURE);
 						ss_set_capture_status(COMPONENT_START);
 					}
-					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_VIDEO_RECORDING)) {
+					if (Novatek_boot_completed && (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING)) {
 						send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_RECORDING); // Stop Recording
 						hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 						led_post_event(HAL_LED_EVENT_REFRESH);
@@ -332,7 +331,7 @@ void video_recording_handler (void) {
 	if (video_recording_state == 0) {
 		return;
 	} else if (video_recording_state == 5) {
-		ss_set_state(USAGE_STATE_VIDEO_RECORDING);
+		set_scenario_state(SCENARIO_STATE_VIDEO_RECORDING);
 		video_recording_state++;
 	} else if (video_recording_state == 10) {
 		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_RECORDING); // Start recording
@@ -360,7 +359,7 @@ void button_press_hold_handler (void)
 					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SOFT_POWER_OFF); // Power off
 					soc_power_off_timer_start();
 				} else {
-					general_RingtoneState = Ringtone_PowerOFF;
+					set_ringtone_state(Ringtone_PowerOFF);
 					vTaskDelay(pdMS_TO_TICKS(200));
 					led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
 				}
@@ -376,10 +375,10 @@ void button_press_hold_handler (void)
 				PRINTF("[Button] power button Press & Hold (1s)\r\n");
 #if SOC_SPI_ENABLE
 #if 0 //QAR88a
-				PRINTF("[Button] ss_get_state (%d), ss_get_capture_status: %d\r\n", ss_get_state(), ss_get_capture_status);
+				PRINTF("[Button] get_scenario_state (%d), ss_get_capture_status: %d\r\n", get_scenario_state(), ss_get_capture_status);
 
-				if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
-						ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
+				if (Novatek_boot_completed && (get_scenario_state() == SCENARIO_STATE_HOME || get_scenario_state() == SCENARIO_STATE_MENU ||
+						get_scenario_state() == SCENARIO_STATE_ABOUT) && !ss_get_capture_status()) {
 					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_RECORDING); // Start recording
 					hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
 					led_post_event(HAL_LED_EVENT_REFRESH);
@@ -421,11 +420,11 @@ void button_press_hold_handler (void)
 			if(xTaskGetTickCount() - function_button_down_tick > CAMERA_RECORDING_MS)
 			{
 #if SOC_SPI_ENABLE
-				PRINTF("[Button] ss_get_state (%d), ss_get_capture_status: %d\r\n", ss_get_state(), ss_get_capture_status);
+				PRINTF("[Button] get_scenario_state (%d), ss_get_capture_status: %d\r\n", get_scenario_state(), ss_get_capture_status);
 
-				if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
-						ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
-					general_RingtoneState = Ringtone_StartRecording;
+				if (Novatek_boot_completed && (get_scenario_state() == SCENARIO_STATE_HOME || get_scenario_state() == SCENARIO_STATE_MENU ||
+						get_scenario_state() == SCENARIO_STATE_ABOUT) && !ss_get_capture_status()) {
+					set_ringtone_state(Ringtone_StartRecording);
 					video_recording_press = 1;
 
 				}

@@ -15,6 +15,7 @@
 #include "fsl_dma.h"
 #include "hal_common.h"
 #include "ringtone_handler.h"
+#include "scenario_state.h"
 
 #define USE_DMA 1
 
@@ -114,7 +115,6 @@ typedef struct {
 /* 靜態變數，保持狀態跨越多次 handle_passive_receive 調用 */
 static session_ctx_t g_session = { .active = false, .expected_id = 0, .received_bytes = 0 };
 
-extern RingtoneState general_RingtoneState;
 
 msg_notification_info_t g_msg_info = {0};
 
@@ -176,7 +176,7 @@ void application_examples_atomic_exec(void)
 		vTaskDelay(100);
 	}
 
-	ss_set_state(USAGE_STATE_HOME);
+	set_scenario_state(SCENARIO_STATE_HOME);
 	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE);
 
 }
@@ -247,7 +247,7 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 	//			hal_led_refresh();
 			battery_timer_start();
 			led_post_event(HAL_LED_EVENT_REFRESH);
-			general_RingtoneState = Ringtone_PowerON;
+			set_ringtone_state(Ringtone_PowerON);
 			break;
 
 		case CMD_ATOMIC_EVENT_CAMERA_ACTIVATED:
@@ -273,7 +273,7 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 
 		case CMD_ATOMIC_EVENT_RECORDING_STOPPED:
 			PRINTF("[SPI][Event] RECORDING_STOPPED \r\n ");
-			ss_set_state(USAGE_STATE_HOME);
+			set_scenario_state(SCENARIO_STATE_HOME);
 			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 			led_post_event(HAL_LED_EVENT_REFRESH);
 			ss_set_recording_status(COMPONENT_END);
@@ -297,7 +297,7 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 
 		case CMD_ATOMIC_EVENT_WIFI_DISCONNECTED:
 			PRINTF("[SPI][Event] WIFI_DISCONNECTED \r\n ");
-//			general_RingtoneState = Ringtone_WiFi_Disconnected;
+//			set_ringtone_state(Ringtone_WiFi_Disconnected);
 
 			break;
 		case CMD_ATOMIC_EVENT_MSG_NOTIFIED:
@@ -385,7 +385,7 @@ static void spi_process_atomic_command(uint8_t cmd, uint8_t val)
             }
             else if (val == 0x09) {
                 PRINTF("[App] CMD:00 VAL:%02X -> WiFi disconnection \r\n", val);
-                general_RingtoneState = Ringtone_WiFi_Disconnected;
+                set_ringtone_state(Ringtone_WiFi_Disconnected);
             }
             break;
 
@@ -395,13 +395,13 @@ static void spi_process_atomic_command(uint8_t cmd, uint8_t val)
                 Novatek_boot_completed = 1;
                 hal_led_refresh();
                 battery_timer_start();
-                general_RingtoneState = Ringtone_PowerON;
+                set_ringtone_state(Ringtone_PowerON);
             }
             break;
 
         case 0x40: // Novatek update usage state
             PRINTF("[App] CMD:40 VAL:%02X -> Update Usage State \r\n", val);
-            ss_set_state(val);
+            set_scenario_state(val);
             break;
 
         case 0x50: // Update Layer
@@ -625,7 +625,7 @@ static void spi_prepare_command_packet_data(uint8_t msg_type, uint8_t cmd_id)
 
 			 case CMD_ATOMIC_EXEC_SWITCH_UI_PAGE: // SWITCH_UI_PAGE
 				 arg_len = 2;
-				 pArgs[0] = ss_get_state();
+				 pArgs[0] = get_scenario_state();
 				 pArgs[1] = 0x00; // TargetSubPageID
 				 break;
 
@@ -1745,7 +1745,6 @@ QueueSetHandle_t spi_evt_set = NULL;
 
 extern volatile SystemStatus ss ;
 uint8_t Novatek_boot_completed = 0;
-extern RingtoneState general_RingtoneState;
 
 uint8_t received_value;
 passive_evt_t  passive_evt;
@@ -1849,7 +1848,7 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 			}
 			else if (val == 0x09) {
 				PRINTF("[Passive] ACK:[00 %02X] WiFi disconnection \r\n",val);
-				general_RingtoneState = Ringtone_WiFi_Disconnected;
+                set_ringtone_state(Ringtone_WiFi_Disconnected);
 			}
 			break;
 
@@ -1861,12 +1860,12 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 #if UsingQAR87BoardHwVersion == 0 // Dev Board
 				Novatek_boot_completed = 1;
 #endif
-				general_RingtoneState = Ringtone_PowerON;
+                set_ringtone_state(Ringtone_PowerON);
 			}
 			break;
         case 0x40: //Novatek update usage state
 				PRINTF("[Passive] ACK:[40 %02X] Update Usage State \r\n",val);
-				ss_set_state(val);
+				set_scenario_state(val);
 			break;
         case 0x50: //Update Layer
 				PRINTF("[Passive] ACK:[50 %02X] Update Layer \r\n",val);
@@ -2349,7 +2348,7 @@ void spi_handler_task(void *pvParameters)
 	                vTaskDelay(pdMS_TO_TICKS(200));
 		        }
 		        if (received_value == POWER_LONG_PRESS_HEX_VALUE) {
-		            general_RingtoneState = Ringtone_PowerOFF;
+	                set_ringtone_state(Ringtone_PowerOFF);
 		            vTaskDelay(pdMS_TO_TICKS(200));
 		        	led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
 		        }
@@ -2455,7 +2454,7 @@ void spi_command_handler(void)
 				vTaskDelay(pdMS_TO_TICKS(20));
 			}
 			if (received_value == POWER_LONG_PRESS_HEX_VALUE) {
-				general_RingtoneState = Ringtone_PowerOFF;
+                set_ringtone_state(Ringtone_PowerOFF);
 				vTaskDelay(pdMS_TO_TICKS(200));
 				led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
 			}

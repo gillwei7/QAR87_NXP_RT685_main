@@ -13,14 +13,13 @@
 #include "board.h"
 #include "hal_amp.h"
 #include "ringtone_handler.h"
+#include "scenario_state.h"
 
 
-extern RingtoneState general_RingtoneState;
 
 volatile uint8_t System_Status = 0; //Send system status to Novatek
 volatile SystemStatus ss = {0};
 
-static volatile usage_state_t current_usage_state = USAGE_STATE_HOME;
 
 static volatile uint8_t current_state_value = 0;
 static volatile uint8_t capture_status = 0;
@@ -29,7 +28,6 @@ static volatile uint8_t music_status = 0; // 0: off, 1: on
 static volatile uint8_t is_turning_on_camera = 0;
 static volatile uint8_t need_send_state = 0;
 static volatile uint8_t need_send_music_status = 0;
-static volatile uint8_t is_media_playing = MUSIC_PAUSE;
 
 static uint8_t bt_addr_0 = 0;
 static uint8_t bt_addr_1 = 0;
@@ -40,220 +38,9 @@ static uint8_t bt_addr_5 = 0;
 
 extern QueueHandle_t      spi_request_queue;
 
-uint8_t ss_get_state(void)
-{
-	return current_usage_state;
-}
-
-void ss_set_state(uint8_t state)
-{
-	PRINTF("[System] Usage State change: %d to %d \r\n",current_usage_state,state);
-	if (current_usage_state == state) {
-		return;
-	}
-
-	if (state == USAGE_STATE_HOME) {
-		if (current_usage_state == USAGE_STATE_MUSIC_PLAYER) {
-//			RequestToGetOutofA2dpPlay = 1;
-//			current_usage_state = state;
-//			need_send_music_status = 1;
-//			music_status = 0;
-
-		} else
-		if (current_usage_state == USAGE_STATE_MEDIA_PLAYER) {
-			hal_amp_aw88166_left_stop(); //workaround for noise
-			hal_amp_aw88166_right_stop(); //workaround for noise
-			RequestToGetOutofMediaPlayer = 1;
-			current_usage_state = state;
-			need_send_state = 1;
-			is_media_playing = MUSIC_PAUSE;
-
-		} else if (current_usage_state == USAGE_STATE_VIDEO_RECORDING) {
-			RequestToGetOutofVideoRecording = 1;
-			current_usage_state = state;
-			need_send_state = 1;
-
-		} else if (current_usage_state == USAGE_STATE_VIDEO_AI) {
-			RequestToGetOutofVideoAI = 1;
-			current_usage_state = state;
-			need_send_state = 1;
-
-		} else if (current_usage_state == USAGE_STATE_TRANSLATION) {
-			RequestToGetOutofTranslation = 1;
-			current_usage_state = state;
-			need_send_state = 1;
-
-		} else if (current_usage_state == USAGE_STATE_TAKE_PHOTO) {
-			current_usage_state = state;
-			need_send_state = 1;
-
-			if (music_status == COMPONENT_ON) {
-				send_state_to_soc();
-				return;
-			}
-
-			RequestToGetOutofTakePhoto = 1;
-
-		}
-#if ABOUT_STATE_ENABLE
-		else if (current_usage_state == USAGE_STATE_ABOUT) {
-			current_usage_state = state;
-			need_send_state = 1;
-
-			if (music_status == COMPONENT_ON) {
-				send_state_to_soc();
-				return;
-			}
-
-			RequestToGetOutofAbout = 1;
-
-		}
-#endif
-#if MENU_STATE_ENABLE
-		else if (current_usage_state == USAGE_STATE_MENU) {
-			current_usage_state = state;
-			need_send_state = 1;
-
-			if (music_status == COMPONENT_ON) {
-				send_state_to_soc();
-				return;
-			}
-
-			RequestToGetOutofMenu = 1;
-
-		}
-#endif
-	}
-#if MENU_STATE_ENABLE
-	else if (state == USAGE_STATE_MENU && current_usage_state == USAGE_STATE_HOME) {
-		current_usage_state = state;
-		need_send_state = 1;
-
-		if (music_status == COMPONENT_ON) {
-			send_state_to_soc();
-			return;
-		}
-
-		RequestToGetIntoMenu = 1;
-
-	}
-#endif
-#if ABOUT_STATE_ENABLE
-	else if (state == USAGE_STATE_ABOUT && (current_usage_state == USAGE_STATE_HOME || current_usage_state == USAGE_STATE_MENU)) {
-		current_usage_state = state;
-		need_send_state = 1;
-
-		if (music_status == COMPONENT_ON) {
-			send_state_to_soc();
-			return;
-		}
-
-		RequestToGetIntoAbout = 1;
-
-	}
-#endif
-	else if (state == USAGE_STATE_MUSIC_PLAYER && (current_usage_state == USAGE_STATE_HOME
-#if MENU_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_MENU
-#endif
-#if ABOUT_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_ABOUT
-#endif
-			)) {
-//		RequestToGetIntoA2dpPlay = 1;
-//		current_usage_state = state;
-//		need_send_music_status = 1;
-//		music_status = 1;
 
 
-	} else if (state == USAGE_STATE_MEDIA_PLAYER && (current_usage_state == USAGE_STATE_HOME
-#if MENU_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_MENU
-#endif
-#if ABOUT_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_ABOUT
-#endif
-			)) {
-		RequestToGetIntoMediaPlayer = 1;
-		current_usage_state = state;
-		need_send_state = 1;
-		is_media_playing = 1;
 
-	} else if (state == USAGE_STATE_VIDEO_RECORDING && (current_usage_state == USAGE_STATE_HOME
-#if MENU_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_MENU
-#endif
-#if ABOUT_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_ABOUT
-#endif
-			)) {
-		RequestToGetIntoVideoRecording = 1;
-		current_usage_state = state;
-		need_send_state = 1;
-
-	} else if (state == USAGE_STATE_TAKE_PHOTO && (current_usage_state == USAGE_STATE_HOME
-#if MENU_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_MENU
-#endif
-#if ABOUT_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_ABOUT
-#endif
-			)) {
-		current_usage_state = state;
-		need_send_state = 1;
-
-		if (music_status == COMPONENT_ON) {
-			send_state_to_soc();
-			return;
-		}
-
-		RequestToGetIntoTakePhoto = 1;
-
-	} else if (state == USAGE_STATE_VIDEO_AI && (current_usage_state == USAGE_STATE_HOME
-#if MENU_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_MENU
-#endif
-#if ABOUT_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_ABOUT
-#endif
-			)) {
-		RequestToGetIntoVideoAI = 1;
-		current_usage_state = state;
-		need_send_state = 1;
-
-	} else if (state == USAGE_STATE_TRANSLATION && (current_usage_state == USAGE_STATE_HOME
-#if MENU_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_MENU
-#endif
-#if ABOUT_STATE_ENABLE
-			 || current_usage_state == USAGE_STATE_ABOUT
-#endif
-			)) {
-		RequestToGetIntoTranslation = 1;
-		current_usage_state = state;
-		need_send_state = 1;
-
-	}
-
-}
-
-uint8_t get_media_status(void)
-{
-	return is_media_playing;
-}
-
-void set_media_status(uint8_t status)
-{
-	is_media_playing = status;
-
-	if (is_media_playing == MUSIC_PLAYING) {
-		hal_amp_aw88166_left_start("Music");
-		hal_amp_aw88166_right_start("Music");
-	} else {
-		hal_amp_aw88166_left_stop();
-		hal_amp_aw88166_right_stop();
-	}
-}
 
 uint8_t get_music_status(void)
 {
@@ -265,13 +52,14 @@ void set_music_status(uint8_t status)
 	music_status = status;
 }
 
+#if 0
 void send_state_to_soc(void) // send state to soc if both audio path and state are ready
 {
-	PRINTF("[System] send_state_to_soc (%d) \r\n", current_usage_state);
+	PRINTF("[System] send_state_to_soc (%d) \r\n", get_scenario_state());
 
 	if (need_send_state) {
-		PRINTF("[System] need_send_state send_state_to_soc (%d) \r\n", current_usage_state);
-		current_state_value = USAGE_STATE_HEX_VALUE + current_usage_state;
+		PRINTF("[System] need_send_state send_state_to_soc (%d) \r\n", get_scenario_state());
+		current_state_value = USAGE_STATE_HEX_VALUE + get_scenario_state();
 		//send_spi_request(current_state_value);
 		need_send_state = 0;
 
@@ -282,6 +70,7 @@ void send_state_to_soc(void) // send state to soc if both audio path and state a
 //		need_send_music_status = 0;
 //	}
 }
+
 
 void send_music_status_to_soc(void)
 {
@@ -297,6 +86,7 @@ void send_music_status_to_soc(void)
 	//send_spi_request(MUSIC_START_HEX_VALUE); //music start
 	//send_spi_request(MUSIC_STOP_HEX_VALUE); //music stop
 }
+#endif
 
 void ss_set_camera_status(uint8_t status)
 {
@@ -311,7 +101,7 @@ void ss_set_capture_status(uint8_t status)
 	if (status == COMPONENT_START)
 	{
 		capture_status = 1;
-		general_RingtoneState = Ringtone_PhotoCapture;
+        set_ringtone_state(Ringtone_PhotoCapture);
 	}
 	else if (status == COMPONENT_END)
 	{

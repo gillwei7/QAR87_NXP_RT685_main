@@ -78,7 +78,6 @@ static lfs_file_t lfs_file;
 #endif
 
 #define LFS_PAIRED_DEVICES_FILE  "paired_devices"
-extern RingtoneState general_RingtoneState;
 
 void app_hf_set_connectable(void)
 {
@@ -188,7 +187,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 	}else{
 		PRINTF("ACL Connected\r\n");
 	}
-	general_RingtoneState = Ringtone_BT_Connected;
+    set_ringtone_state(Ringtone_BT_Connected);
 	PRINTF("general_RingtoneState = Ringtone_BT_Connected\r\n");
 }
 
@@ -196,7 +195,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 static void disconnected(struct bt_conn *conn, uint8_t reason)
 {
     PRINTF("ACL Disconnection (reason %d)\n", reason);
-    general_RingtoneState = Ringtone_BT_Disconnected;
+    set_ringtone_state(Ringtone_BT_Disconnected);
 
    if(conn_rider_phone == conn)
     {

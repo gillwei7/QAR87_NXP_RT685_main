@@ -13,6 +13,7 @@
 #include "spi_handler.h"
 #include "system_status.h"
 #include "WorkStateManager.h"
+#include "scenario_state.h"
 
 extern uint8_t Novatek_boot_completed;
 
@@ -68,7 +69,7 @@ static void elan_gesture_handler (uint8_t gid)
     switch (gid)
     {
         case GESTURE_SINGLE_FORWARD:
-            if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+            if (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER) {
                 // Volume up
                 ChangeMasterVolumeLevel15_UpDown(1); // pass positive value to increase volume
                 PRINTF("[Touch] Volume up\r\n");
@@ -76,7 +77,7 @@ static void elan_gesture_handler (uint8_t gid)
             break;
 
         case GESTURE_SINGLE_BACKWARD:
-            if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
+            if (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER) {
                 // Volume down
                 ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
                 PRINTF("[Touch] Volume down\r\n");
@@ -85,29 +86,29 @@ static void elan_gesture_handler (uint8_t gid)
 
         case GESTURE_SINGLE_PRESS:
             if (Novatek_boot_completed
-                    && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
+                    && (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER)) {
                 send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_STOP); // media player: leave
-                ss_set_state(USAGE_STATE_HOME);
+                set_scenario_state(SCENARIO_STATE_HOME);
                 send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE); // UI: home
             }
             break;
 
         case GESTURE_SINGLE_DOUBLE:
             if (Novatek_boot_completed
-                    && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
+                    && (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER)) {
                 send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_NEXT_MEDIA); // media player: next
             }
             break;
 
         case GESTURE_SINGLE_TAP:
             if (Novatek_boot_completed
-                    && (ss_get_state() == USAGE_STATE_HOME
-                            || ss_get_state() == USAGE_STATE_MENU
-                            || ss_get_state() == USAGE_STATE_ABOUT)) {
+                    && (get_scenario_state() == SCENARIO_STATE_HOME
+                            || get_scenario_state() == SCENARIO_STATE_MENU
+                            || get_scenario_state() == SCENARIO_STATE_ABOUT)) {
                 send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_START); // Start media player
-                ss_set_state(USAGE_STATE_MEDIA_PLAYER);
+                set_scenario_state(SCENARIO_STATE_MEDIA_PLAYER);
             } else if (Novatek_boot_completed
-                    && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
+                    && (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER)) {
                 send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_PLAY_PAUSE); // media player: play / pause
             }
 

@@ -41,9 +41,10 @@
 #include "SubFunc.h"
 #include "WorkStateManager.h"
 #include "app_handsfree.h"
-#include "system_status.h"
 #include "DefForBothMcuAndDsp.h"
 #if UsingQAR87Board == 1
+#include "system_status.h"
+#include "scenario_state.h"
 #include "ringtone_handler.h"
 #endif
 
@@ -600,9 +601,9 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
 			PRINTF("Invalid volume level. Use: 0 ~ 14\r\n");
 		}
 	}
-    else if(strcmp(argv[1], "ss_get_state") == 0)
+    else if(strcmp(argv[1], "get_scenario_state") == 0)
     {
-        int current_usage_state = ss_get_state();
+        int current_usage_state = get_scenario_state();
         PRINTF("current_usage_state:%d\r\n", current_usage_state);
     }
     else

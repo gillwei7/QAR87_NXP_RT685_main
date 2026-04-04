@@ -44,8 +44,6 @@ extern uint8_t Novatek_boot_completed;
 static uint8_t current_usb_output = 0;
 #endif
 
-// gill
-extern RingtoneState general_RingtoneState;
 
 /* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
 static inline void delay_ms(uint32_t ms)
@@ -230,8 +228,8 @@ void button_task(void *pvParameters)
 //					}
 #if SOC_SPI_ENABLE
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
-					if (Novatek_boot_completed && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
-							ss_get_state() == USAGE_STATE_VIDEO_RECORDING || ss_get_state() == USAGE_STATE_ABOUT) && !ss_get_capture_status()) {
+					if (Novatek_boot_completed && (get_scenario_state() == SCENARIO_STATE_HOME || get_scenario_state() == SCENARIO_STATE_MENU ||
+							get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING || get_scenario_state() == SCENARIO_STATE_ABOUT) && !ss_get_capture_status()) {
 						//send_spi_request(SHORT_PRESS_HEX_VALUE); // Stop Recording and Take Photo
 					}
 #endif
@@ -301,7 +299,7 @@ void button_task(void *pvParameters)
                        LONG_PRESS_HEX_VALUE);
 #if SOC_SPI_ENABLE
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
-				if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_ABOUT)) {
+				if (Novatek_boot_completed && !get_music_status() && (get_scenario_state() == SCENARIO_STATE_HOME || get_scenario_state() == SCENARIO_STATE_MENU || get_scenario_state() == SCENARIO_STATE_ABOUT)) {
 					//send_spi_request(LONG_PRESS_HEX_VALUE); // Start Recording
 				}
 #endif
@@ -450,13 +448,13 @@ void button_task(void *pvParameters)
                         if (Novatek_boot_completed) {
                             //send_spi_request(POWER_LONG_PRESS_HEX_VALUE);
                         } else {
-        		            general_RingtoneState = Ringtone_PowerOFF;
+                        	set_ringtone_state(Ringtone_PowerOFF);
         		            vTaskDelay(pdMS_TO_TICKS(200));
         		        	led_post_event(LED_EVT_POWER_OFF_PROGRESS);
                         }
 #endif
                         /* amp_post_event(AMP_EVT_MUSIC); // test amp */
-                        //general_RingtoneState = Ringtone_PowerOFF;
+//                    	set_ringtone_state(Ringtone_PowerOFF);
                     }
                     else if (press_dur >= pwr_minShortTicks)
                     {

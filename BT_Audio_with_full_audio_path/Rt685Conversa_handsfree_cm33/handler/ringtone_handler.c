@@ -21,7 +21,7 @@
 #define RINGTONE_TIME_DELAY                      5000
 #define CONNECTION_TIMER_TIMEOUT_MILLISECOND     20000
 
-RingtoneState general_RingtoneState = Ringtone_No;
+static RingtoneState general_RingtoneState = Ringtone_No;
 static uint8_t            ringtone_is_played = 0;
 static uint32_t           ringtone_time_count = 0;
 static uint16_t connection_timer_count = 0;
@@ -43,6 +43,11 @@ void startOpusPlayIndex(int opus_index){
     }
     VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
     VarBlockSharedByDspAndMcu.PlayOpusFileIdx=play_opus_index;
+}
+
+void set_ringtone_state (RingtoneState state)
+{
+	general_RingtoneState = state;
 }
 
 void ringtone_handler (void)

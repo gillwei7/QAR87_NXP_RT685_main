@@ -47,8 +47,6 @@ static uint8_t has_led_event = 0;
 
 extern uint32_t s_bq256xx_iindpm_target_ua;
 
-extern RingtoneState general_RingtoneState;
-
 
 
 static power_on_reason_t get_power_on_reason(void)

@@ -22,21 +22,9 @@
 #define FULLY_CHARGE_PERCENTAGE	100
 #define LOW_POWER_PERCENTAGE	30
 
-#define MUSIC_PLAYING          1
-#define MUSIC_PAUSE            0
 
 
-typedef enum {
-	USAGE_STATE_HOME = 0,          // 使用 Home
-	USAGE_STATE_MENU,              // 使用 Menu
-	USAGE_STATE_ABOUT,             // 使用 About
-	USAGE_STATE_MUSIC_PLAYER,      // 使用 Music Player
-	USAGE_STATE_MEDIA_PLAYER,      // 使用 Media Player
-	USAGE_STATE_VIDEO_RECORDING,   // 使用 Video Recording
-	USAGE_STATE_TAKE_PHOTO,        // 使用拍照
-	USAGE_STATE_VIDEO_AI,          // 使用 Video AI
-	USAGE_STATE_TRANSLATION        // 使用翻譯
-} usage_state_t;
+
 
 typedef struct __attribute__((packed)) {
     uint8_t flags;   // byte0: [RSVD3:3][RSVD1:1][MIC:1][BT:1][HA:1][BLE:1]
@@ -103,16 +91,15 @@ bool ss_is_charging();
 void ss_set_battery(uint8_t percent);
 uint8_t ss_get_battery();
 
-uint8_t ss_get_state(void);
-void ss_set_state(uint8_t state);//Change the usage state and send a notification back to Novatek.
 
-uint8_t get_media_status(void);
-void set_media_status(uint8_t status);
+
+
 uint8_t get_music_status(void);
 void set_music_status(uint8_t status);
-
+#if 0
 void send_state_to_soc(void);
 void ss_set_music_status(uint8_t status);
+#endif
 void send_music_status_to_soc(void);
 
 /*
