@@ -31,7 +31,9 @@ uint8_t hal_power_is_power_off_charging_mode(void);
 void hal_power_go_to_power_off_charging(void);
 
 void hal_power_charger_bq25618_handler (void);
+void hal_power_gauge_glf70302_handler (void);
 uint8_t hal_power_charger_has_new_event(void);
+uint8_t hal_power_gauge_has_new_event(void);
 void hal_power_set_battery_state(battery_state_t state);
 
 #endif /* HAL_POWER_H_ */
