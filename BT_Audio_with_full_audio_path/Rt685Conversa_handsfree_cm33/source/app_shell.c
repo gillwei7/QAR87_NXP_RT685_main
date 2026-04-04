@@ -43,6 +43,9 @@
 #include "app_handsfree.h"
 #include "system_status.h"
 #include "DefForBothMcuAndDsp.h"
+#if UsingQAR87Board == 1
+#include "ringtone_handler.h"
+#endif
 
 /*******************************************************************************
  * Definitions

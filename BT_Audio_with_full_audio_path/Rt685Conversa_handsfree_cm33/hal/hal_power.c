@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include "i2c_component_handler.h"
 #include "app_handsfree.h"
+#include "ringtone_handler.h"
 
 #define EN_HIZ_BIT      7
 #define EN_HIZ_MASK     (1u << EN_HIZ_BIT)

@@ -18,6 +18,7 @@
 #include "WorkStateManager.h"
 #include "app_handsfree.h"
 #include "hal_sar.h"
+#include "ringtone_handler.h"
 
 
 /* ===== I2C synchronization objects ===== */
@@ -232,6 +233,7 @@ void i2c_device_handler (void)
 		GPIO_PinEnableInterrupt(GPIO, NXP_TOUCH_INT_PORT, NXP_TOUCH_INT_PIN, kGPIO_InterruptA);
 	}
 
+
 	/* --- AMP event --- */
 
 	if (hal_amp_has_new_event()) {
@@ -240,6 +242,7 @@ void i2c_device_handler (void)
 		hal_amp_aw88166_handler();
 #endif
 	}
+
 
 	/* --- CHARGER event --- */
 	if (hal_power_charger_has_new_event())
@@ -251,6 +254,7 @@ void i2c_device_handler (void)
 		GPIO_PinEnableInterrupt(GPIO, CHG_INT_N_R_PORT, CHG_INT_N_R_PIN, kGPIO_InterruptA);
 	}
 
+
 	/* --- GAUGE event --- */
 	if (hal_power_gauge_has_new_event())
 	{
@@ -259,6 +263,7 @@ void i2c_device_handler (void)
 		GPIO_PinClearInterruptFlag(GPIO, FG_INT_GLF70302_PORT, FG_INT_GLF70302_PIN, kGPIO_InterruptA);
 		GPIO_PinEnableInterrupt(GPIO, FG_INT_GLF70302_PORT, FG_INT_GLF70302_PIN, kGPIO_InterruptA);
 	}
+
 
 	/*--- LED event --- */
 	if (has_led_event) {

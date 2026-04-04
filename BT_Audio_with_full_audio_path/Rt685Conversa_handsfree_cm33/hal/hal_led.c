@@ -9,6 +9,7 @@
 #include "ktd202x_leds.h"
 #include "app_handsfree.h"
 #include "bq256xx_charger.h"
+#include "ringtone_handler.h"
 
 static hal_led_indicator_status_t led_indicator_status_t = HAL_LED_OFF;
 static uint8_t led_situation = HAL_LED_STATUS_OFF;

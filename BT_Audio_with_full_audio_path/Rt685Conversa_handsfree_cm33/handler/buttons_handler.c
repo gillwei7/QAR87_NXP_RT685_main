@@ -12,6 +12,8 @@
 #include "system_status.h"
 #include "app_connect.h"
 #include "app_handsfree.h"
+#include "ringtone_handler.h"
+#
 
 #define SAMPLE_MS                     (10U) // Polling interval 10ms, with simple anti-shake function
 #define LONG_PRESS_MS                 (1000U)

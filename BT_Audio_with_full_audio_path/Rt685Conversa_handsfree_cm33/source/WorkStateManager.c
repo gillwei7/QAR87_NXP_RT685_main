@@ -30,6 +30,7 @@
 #if UsingQAR87Board == 1
 #include "system_status.h"
 #include "hal_common.h"
+#include "ringtone_handler.h"
 #endif
 
 #include "app_handsfree.h"

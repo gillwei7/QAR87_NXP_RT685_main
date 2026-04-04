@@ -12,6 +12,8 @@
 #include "app_handsfree.h"
 #include "board.h"
 #include "hal_amp.h"
+#include "ringtone_handler.h"
+
 
 extern RingtoneState general_RingtoneState;
 

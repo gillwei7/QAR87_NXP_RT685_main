@@ -35,6 +35,9 @@
 #include "littlefs_pl.h"
 #endif
 #include "app_handsfree.h"
+#if UsingQAR87Board == 1
+#include "ringtone_handler.h"
+#endif
 
 static int app_auto_connect_del_addr(bt_addr_t const *addr);
 static void connected(struct bt_conn *conn, uint8_t err);

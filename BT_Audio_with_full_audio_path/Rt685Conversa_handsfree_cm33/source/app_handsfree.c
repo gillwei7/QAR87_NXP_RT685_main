@@ -54,9 +54,6 @@
 #endif
 
 #define Manager_TASK_PRIORITY				2			//this is low
-#define CONNECTION_TIMER_TASK_DELAY              10
-#define CONNECTION_TIMER_TIMEOUT_MILLISECOND     20000
-#define RINGTONE_TIME_DELAY                      5000
 
 #define APP_HFP_HF_INITIAL_VGS_GAIN 12
 #define APP_HFP_HF_INITIAL_VGM_GAIN 12
@@ -64,15 +61,12 @@
 struct bt_conn *conn_rider_phone = NULL;
 static volatile uint8_t s_call_status = 0;
 static  uint8_t s_call_setup_status = 0;
-static uint16_t connection_timer_count = 0;
 
 #if UsingQAR87Board == 1
 extern TaskHandle_t       sI2CTaskHandle  ;
 #endif
 
 static TaskHandle_t       appTaskHandle  = NULL;
-static uint32_t           ringtone_time_count = 0;
-static uint8_t            ringtone_is_played = 0;
 hfp_hf_get_config hfp_hf_config = {
     .bt_hfp_hf_vgs             = APP_HFP_HF_INITIAL_VGS_GAIN,
     .bt_hfp_hf_vgm             = APP_HFP_HF_INITIAL_VGM_GAIN,
@@ -146,10 +140,8 @@ static struct bt_sdp_attribute hfp_hf_attrs[] = {
 };
 static struct bt_sdp_record hfp_hf_rec = BT_SDP_RECORD(hfp_hf_attrs);
 
-RingtoneState general_RingtoneState = Ringtone_No;
 extern TDeviceWorkState DeviceWorkStateCur;
-extern void InitAndStartCodec(int fs, int bits);
-extern void DeInitCodec();
+
 
 void hfp_hf_register_service()
 {
@@ -539,259 +531,11 @@ extern void StartMicSpkTest(void);
 extern void Manager_Task(void *pvParameters);
 extern void connect_paired_device(uint8_t device_index);
 
-void startOpusPlayIndex(int opus_index){
-    int play_opus_index  = 0;
-    if(opus_index < 0){
-        PRINTF("startOpusPlay: opus index < 0\r\n");
-        return;
-    } else if (opus_index > (OPUS_INDEX_MAXIMUM-1)){
-        play_opus_index = OPUS_INDEX_MAXIMUM;
-        PRINTF("startOpusPlay: opus index > %d\r\n", OPUS_INDEX_MAXIMUM-1);
-    } else {
-        play_opus_index = opus_index;
-        PRINTF("startOpusPlay: opus index %d\r\n", play_opus_index);
-    }
-    VarBlockSharedByDspAndMcu.NeedToStartPlayOpus=1;
-    VarBlockSharedByDspAndMcu.PlayOpusFileIdx=play_opus_index;
-}
-
-void connect_handler (void)
-{
-#if !CES_DEMO
-#if AUTO_CONNECT_ENABLE
-        if(connection_timer_count < (CONNECTION_TIMER_TIMEOUT_MILLISECOND/CONNECTION_TIMER_TASK_DELAY) && (conn_rider_phone == NULL)){
-            connection_timer_count++;
-        }else{
-            connection_timer_count = 0;
-            if((g_pairedDeviceCount > 0) && (conn_rider_phone == NULL)){
-#if BT_CONNECTION_LOG
-                PRINTF("Connection timeout. Connect previous paired device\r\n");
-#endif
-                app_auto_connect_paired_devices();
-            }
-        }
-#endif
-#endif
-}
-
-void ringtone_handler (void)
-{
-	if(general_RingtoneState == Ringtone_StartVideoAI && DeviceWorkStateCur == WorkState_VideoAi){
-		general_RingtoneState = Ringtone_No;
-		startOpusPlayIndex(Ringtone_StartVideoAI-1);
-	}
-
-	if(general_RingtoneState == Ringtone_StopVideoAI && DeviceWorkStateCur == WorkState_HomeVitStandby){
-		general_RingtoneState = Ringtone_No;
-		startOpusPlayIndex(Ringtone_StopVideoAI-1);
-	}
-
-	if(general_RingtoneState == Ringtone_StartTranslation && DeviceWorkStateCur == WorkState_Translation){
-		general_RingtoneState = Ringtone_No;
-		startOpusPlayIndex(Ringtone_StartTranslation-1);
-	}
-
-	if(general_RingtoneState == Ringtone_StopTranslation && DeviceWorkStateCur == WorkState_HomeVitStandby){
-		general_RingtoneState = Ringtone_No;
-		startOpusPlayIndex(Ringtone_StopTranslation-1);
-	}
-
-	if(general_RingtoneState == Ringtone_PowerON && DeviceWorkStateCur == WorkState_HomeVitStandby){
-		if(AmpState==AmpState_UnConfigured){
-			InitAndStartCodec(16000, 16);
-		}else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 0){
-			ringtone_time_count = (RINGTONE_TIME_DELAY/CONNECTION_TIMER_TASK_DELAY);
-			ringtone_is_played = 1;
-			startOpusPlayIndex(Ringtone_PowerON-1);
-		}else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count > 0){
-			ringtone_time_count--;
-		}else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count == 0){
-			ringtone_is_played = 0;
-			DeInitCodec();
-			general_RingtoneState = Ringtone_No;
-		}
-	}
-
-	if(general_RingtoneState == Ringtone_StartRecording){
-			general_RingtoneState = Ringtone_No;
-			startOpusPlayIndex(Ringtone_StartRecording-1);
-	}
-
-	if(general_RingtoneState == Ringtone_StopRecording  && DeviceWorkStateCur == WorkState_HomeVitStandby){
-			general_RingtoneState = Ringtone_No;
-			startOpusPlayIndex(Ringtone_StopRecording-1);
-	}
-
-	// No matter on what state, need to play Power Off, Wifi disconnected,  ringtone
-	if(general_RingtoneState == Ringtone_PowerOFF){
-		if(AmpState==AmpState_UnConfigured){
-			InitAndStartCodec(16000, 16);
-		}else if(AmpState==AmpState_ConfiguredAndActive){
-			general_RingtoneState = Ringtone_No;
-			startOpusPlayIndex(Ringtone_PowerOFF-1);
-		}
-	}
-
-	if(general_RingtoneState == Ringtone_WiFi_Disconnected){
-			general_RingtoneState = Ringtone_No;
-			startOpusPlayIndex(Ringtone_WiFi_Disconnected-1);
-	}
-
-	if(general_RingtoneState == Ringtone_BT_Disconnected){
-			general_RingtoneState = Ringtone_No;
-			startOpusPlayIndex(Ringtone_BT_Disconnected-1);
-	}
-
-	if (general_RingtoneState == Ringtone_PhotoCapture) {
-		general_RingtoneState = Ringtone_No;
-		// If not in recording state, play photo capture ringtone
-		if (DeviceWorkStateCur != WorkState_VideoRecording) {
-			startOpusPlayIndex(Ringtone_PhotoCapture - 1);
-		}
-	}
-
-	if(general_RingtoneState == Ringtone_LowBattery){
-		if(AmpState==AmpState_UnConfigured){
-			InitAndStartCodec(16000, 16);
-		}else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 0){
-			ringtone_time_count = (RINGTONE_TIME_DELAY/CONNECTION_TIMER_TASK_DELAY);
-			ringtone_is_played = 1;
-			startOpusPlayIndex(Ringtone_LowBattery-1);
-		}else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count > 0){
-			ringtone_time_count--;
-		}else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count == 0){
-			ringtone_is_played = 0;
-			DeInitCodec();
-			general_RingtoneState = Ringtone_No;
-		}
-	}
-
-	if(general_RingtoneState == Ringtone_BT_Connected){
-			general_RingtoneState = Ringtone_No;
-			startOpusPlayIndex(Ringtone_BT_Connected-1);
-	}
-}
-
-
-static void app_task(void *pvParameters)
-{
-    while(1){
-#if !CES_DEMO
-#if AUTO_CONNECT_ENABLE
-        if(connection_timer_count < (CONNECTION_TIMER_TIMEOUT_MILLISECOND/CONNECTION_TIMER_TASK_DELAY) && (conn_rider_phone == NULL)){
-            connection_timer_count++;
-        }else{
-            connection_timer_count = 0;
-            if((g_pairedDeviceCount > 0) && (conn_rider_phone == NULL)){
-#if BT_CONNECTION_LOG
-                PRINTF("Connection timeout. Connect previous paired device\r\n");
-#endif
-                app_auto_connect_paired_devices();
-            }
-        }
-#endif
-#endif
-        if(general_RingtoneState == Ringtone_StartVideoAI && DeviceWorkStateCur == WorkState_VideoAi){
-            general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_StartVideoAI-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StopVideoAI && DeviceWorkStateCur == WorkState_HomeVitStandby){
-            general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_StopVideoAI-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StartTranslation && DeviceWorkStateCur == WorkState_Translation){
-            general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_StartTranslation-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StopTranslation && DeviceWorkStateCur == WorkState_HomeVitStandby){
-            general_RingtoneState = Ringtone_No;
-            startOpusPlayIndex(Ringtone_StopTranslation-1);
-        }
-
-        if(general_RingtoneState == Ringtone_PowerON && DeviceWorkStateCur == WorkState_HomeVitStandby){
-            if(AmpState==AmpState_UnConfigured){
-                InitAndStartCodec(16000, 16);
-            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 0){
-                ringtone_time_count = (RINGTONE_TIME_DELAY/CONNECTION_TIMER_TASK_DELAY);
-                ringtone_is_played = 1;
-                startOpusPlayIndex(Ringtone_PowerON-1);
-            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count > 0){
-                ringtone_time_count--;
-            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count == 0){
-                ringtone_is_played = 0;
-                DeInitCodec();
-                general_RingtoneState = Ringtone_No;
-            }
-        }
-
-        if(general_RingtoneState == Ringtone_StartRecording  && DeviceWorkStateCur == WorkState_VideoRecording){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_StartRecording-1);
-        }
-
-        if(general_RingtoneState == Ringtone_StopRecording  && DeviceWorkStateCur == WorkState_HomeVitStandby){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_StopRecording-1);
-        }
-
-        // No matter on what state, need to play Power Off, Wifi disconnected,  ringtone
-        if(general_RingtoneState == Ringtone_PowerOFF){
-            if(AmpState==AmpState_UnConfigured){
-                InitAndStartCodec(16000, 16);
-            }else if(AmpState==AmpState_ConfiguredAndActive){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_PowerOFF-1);
-            }
-        }
-
-        if(general_RingtoneState == Ringtone_WiFi_Disconnected){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_WiFi_Disconnected-1);
-        }
-
-        if(general_RingtoneState == Ringtone_BT_Disconnected){
-                general_RingtoneState = Ringtone_No;
-                startOpusPlayIndex(Ringtone_BT_Disconnected-1);
-        }
-
-        if (general_RingtoneState == Ringtone_PhotoCapture) {
-            general_RingtoneState = Ringtone_No;
-            // If not in recording state, play photo capture ringtone
-            if (DeviceWorkStateCur != WorkState_VideoRecording) {
-                startOpusPlayIndex(Ringtone_PhotoCapture - 1);
-            }
-        }
-
-        if(general_RingtoneState == Ringtone_LowBattery){
-            if(AmpState==AmpState_UnConfigured){
-                InitAndStartCodec(16000, 16);
-            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 0){
-                ringtone_time_count = (RINGTONE_TIME_DELAY/CONNECTION_TIMER_TASK_DELAY);
-                ringtone_is_played = 1;
-                startOpusPlayIndex(Ringtone_LowBattery-1);
-            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count > 0){
-                ringtone_time_count--;
-            }else if(AmpState==AmpState_ConfiguredAndActive && ringtone_is_played == 1 && ringtone_time_count == 0){
-                ringtone_is_played = 0;
-                DeInitCodec();
-                general_RingtoneState = Ringtone_No;
-            }
-        }
-
-        if(general_RingtoneState == Ringtone_BT_Connected){
-				general_RingtoneState = Ringtone_No;
-				startOpusPlayIndex(Ringtone_BT_Connected-1);
-		}
 
 
 
 
-        vTaskDelay(pdMS_TO_TICKS(CONNECTION_TIMER_TASK_DELAY));
-    }
-}
+
 
 static void watchdog_task(void *pvParameters)
 {

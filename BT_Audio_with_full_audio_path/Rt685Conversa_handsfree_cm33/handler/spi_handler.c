@@ -14,6 +14,7 @@
 #include "fsl_spi_dma.h"
 #include "fsl_dma.h"
 #include "hal_common.h"
+#include "ringtone_handler.h"
 
 #define USE_DMA 1
 
