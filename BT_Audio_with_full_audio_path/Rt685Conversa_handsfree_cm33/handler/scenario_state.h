@@ -28,6 +28,8 @@ typedef enum {
 
 uint8_t get_scenario_state(void);
 void set_scenario_state(uint8_t state);
+void scenario_state_handler (void);
+
 uint8_t get_media_status(void);
 void set_media_status(uint8_t status);
 #endif /* SCENARIO_STATE_H_ */

@@ -359,7 +359,6 @@ void sbc_deinit()
 	#endif
     RequestToGetOutofA2dpPlay=1;
     set_music_status(COMPONENT_OFF);
-//    ss_set_state(USAGE_STATE_HOME);
 
 	PRINTF("sbc_deinit done\r\n");
 }
@@ -379,7 +378,6 @@ void sbc_deconfigured(int err)
         g_audioInit=0;
 		RequestToGetOutofA2dpPlay=1;
 	    set_music_status(COMPONENT_OFF);
-//		ss_set_state(USAGE_STATE_HOME);
     	PRINTF("sbc_deconfigured done\r\n");
 	}
 	else
@@ -413,7 +411,6 @@ void sbc_stop_play(int err)
 		#endif
 	    RequestToGetOutofA2dpPlay=1;
 	    set_music_status(COMPONENT_OFF);
-//	    ss_set_state(USAGE_STATE_HOME);
 		PRINTF("sbc_stop_play done\r\n");
 	}
 	else
@@ -485,7 +482,6 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 					RequestToGetIntoA2dpPlay=1;
 				    set_music_status(COMPONENT_ON);
 
-//					ss_set_state(USAGE_STATE_MUSIC_PLAYER);
 					//VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 					//VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream
 				}

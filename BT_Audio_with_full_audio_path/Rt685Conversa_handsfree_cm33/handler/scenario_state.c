@@ -9,11 +9,14 @@
 #include "system_status.h"
 #include "hal_amp.h"
 #include "WorkStateManager.h"
+#include "app_avrcp.h"
 
 
 static volatile scenario_state_t current_scenario_state = SCENARIO_STATE_HOME;
 static volatile uint8_t is_media_playing = MUSIC_PAUSE;
 
+static uint8_t media_player_handler_start_state = 0;
+static uint8_t media_player_handler_stop_state = 0;
 
 uint8_t get_scenario_state(void)
 {
@@ -22,7 +25,7 @@ uint8_t get_scenario_state(void)
 
 void set_scenario_state(uint8_t state)
 {
-	PRINTF("[System] Usage State change: %d to %d \r\n",current_scenario_state,state);
+	PRINTF("[System] Usage State change: %d to %d \r\n", current_scenario_state,state);
 	if (current_scenario_state == state) {
 		return;
 	}
@@ -36,12 +39,9 @@ void set_scenario_state(uint8_t state)
 
 		} else
 		if (current_scenario_state == SCENARIO_STATE_MEDIA_PLAYER) {
-			hal_amp_aw88166_left_stop(); //workaround for noise
-			hal_amp_aw88166_right_stop(); //workaround for noise
-			RequestToGetOutofMediaPlayer = 1;
 			current_scenario_state = state;
-//			need_send_state = 1;
-			is_media_playing = MUSIC_PAUSE;
+			media_player_handler_stop_state = 1;
+
 
 		} else if (current_scenario_state == SCENARIO_STATE_VIDEO_RECORDING) {
 			RequestToGetOutofVideoRecording = 1;
@@ -149,10 +149,8 @@ void set_scenario_state(uint8_t state)
 			 || current_scenario_state == SCENARIO_STATE_ABOUT
 #endif
 			)) {
-		RequestToGetIntoMediaPlayer = 1;
 		current_scenario_state = state;
-//		need_send_state = 1;
-		is_media_playing = 1;
+		media_player_handler_start_state = 1;
 
 	} else if (state == SCENARIO_STATE_VIDEO_RECORDING && (current_scenario_state == SCENARIO_STATE_HOME
 #if MENU_STATE_ENABLE
@@ -209,6 +207,61 @@ void set_scenario_state(uint8_t state)
 //		need_send_state = 1;
 
 	}
+}
+
+
+void scenario_media_player_handler (void)
+{
+	//Start
+	if (media_player_handler_start_state == 0) {
+		return;
+
+	} else if (media_player_handler_start_state == 1) {
+		if (get_music_status() == COMPONENT_ON) {
+			avrcp_pause_button(0);
+			PRINTF("[Music] pause the music before starting media player\r\n");
+			media_player_handler_start_state++;
+
+		} else {
+			RequestToGetIntoMediaPlayer = 1;
+			is_media_playing = 1;
+			media_player_handler_start_state = 0;
+		}
+
+	} else if (media_player_handler_start_state == 2) {
+		RequestToGetIntoMediaPlayer = 1;
+		is_media_playing = 1;
+		media_player_handler_start_state = 0;
+
+	} else {
+		media_player_handler_start_state++;
+	}
+
+	//Stop
+	if (media_player_handler_stop_state == 0) {
+		return;
+
+	} else if (media_player_handler_stop_state == 1) {
+		hal_amp_aw88166_left_stop(); //workaround for noise
+		hal_amp_aw88166_right_stop(); //workaround for noise
+
+		media_player_handler_stop_state++;
+
+	} else if (media_player_handler_stop_state == 2) {
+		RequestToGetOutofMediaPlayer = 1;
+//			need_send_state = 1;
+		is_media_playing = MUSIC_PAUSE;
+
+		media_player_handler_stop_state = 0;
+
+	} else {
+		media_player_handler_stop_state++;
+	}
+}
+
+void scenario_state_handler (void)
+{
+	scenario_media_player_handler();
 }
 
 uint8_t get_media_status(void)
