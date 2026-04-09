@@ -24,7 +24,9 @@ volatile SystemStatus ss = {0};
 static volatile uint8_t current_state_value = 0;
 static volatile uint8_t capture_status = 0;
 static volatile uint8_t recording_status = 0;
-static volatile uint8_t music_status = 0; // 0: off, 1: on
+static volatile amp_status_t amp_status = AMP_STATUS_OFF;
+static volatile uint8_t music_status = STATUS_OFF;
+
 static volatile uint8_t is_turning_on_camera = 0;
 static volatile uint8_t need_send_state = 0;
 static volatile uint8_t need_send_music_status = 0;
@@ -40,8 +42,7 @@ extern QueueHandle_t      spi_request_queue;
 
 
 
-
-
+// Only for A2DP
 uint8_t get_music_status(void)
 {
 	return music_status;
@@ -50,6 +51,16 @@ uint8_t get_music_status(void)
 void set_music_status(uint8_t status)
 {
 	music_status = status;
+}
+
+uint8_t get_amp_status(void)
+{
+	return amp_status;
+}
+
+void set_amp_status(uint8_t status)
+{
+	amp_status = status;
 }
 
 #if 0
@@ -90,7 +101,7 @@ void send_music_status_to_soc(void)
 
 void ss_set_camera_status(uint8_t status)
 {
-	if (status == COMPONENT_ON)
+	if (status == STATUS_ON)
 	{
 		is_turning_on_camera = 1;
 	}
@@ -98,12 +109,12 @@ void ss_set_camera_status(uint8_t status)
 
 void ss_set_capture_status(uint8_t status)
 {
-	if (status == COMPONENT_START)
+	if (status == STATUS_START)
 	{
 		capture_status = 1;
         set_ringtone_state(Ringtone_PhotoCapture);
 	}
-	else if (status == COMPONENT_END)
+	else if (status == STATUS_END)
 	{
 		capture_status = 0;
 
@@ -117,11 +128,11 @@ uint8_t ss_get_capture_status(void)
 
 void ss_set_recording_status(uint8_t status)
 {
-	if (status == COMPONENT_START)
+	if (status == STATUS_START)
 	{
 		recording_status = 1;
 	}
-	else if (status == COMPONENT_END)
+	else if (status == STATUS_END)
 	{
 		recording_status = 0;
 	}

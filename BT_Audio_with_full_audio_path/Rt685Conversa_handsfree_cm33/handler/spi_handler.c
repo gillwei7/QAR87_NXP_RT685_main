@@ -257,7 +257,7 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 		case CMD_ATOMIC_EVENT_PHOTO_CAPTURED:
 			PRINTF("[SPI][Event] PHOTO_CAPTURED \r\n ");
 			led_post_event(HAL_LED_EVENT_REFRESH);
-			ss_set_capture_status(COMPONENT_END);
+			ss_set_capture_status(STATUS_END);
 			break;
 
 		case CMD_ATOMIC_EVENT_CAMERA_CLOSED:
@@ -268,7 +268,7 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 			PRINTF("[SPI][Event] RECORDING_STARTED \r\n ");
 			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
 			led_post_event(HAL_LED_EVENT_REFRESH);
-			ss_set_recording_status(COMPONENT_START);
+			ss_set_recording_status(STATUS_START);
 			break;
 
 		case CMD_ATOMIC_EVENT_RECORDING_STOPPED:
@@ -276,7 +276,7 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 			set_scenario_state(SCENARIO_STATE_HOME);
 			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 			led_post_event(HAL_LED_EVENT_REFRESH);
-			ss_set_recording_status(COMPONENT_END);
+			ss_set_recording_status(STATUS_END);
 			break;
 
 		case CMD_ATOMIC_EVENT_VIDEO_PLAY_STARTED:
@@ -349,24 +349,24 @@ static void spi_process_atomic_command(uint8_t cmd, uint8_t val)
                 PRINTF("[App] CMD:00 VAL:%02X -> Capture Start \r\n", val);
                 led_post_event(HAL_LED_EVENT_PHOTO_CAPTURE);
                 // ToDo:使NXP發出 "滴～喀嚓 "聲音
-                ss_set_capture_status(COMPONENT_START);
+                ss_set_capture_status(STATUS_START);
             }
             else if (val == 0x03) {
                 PRINTF("[App] CMD:00 VAL:%02X -> Capture Completed \r\n", val);
                 led_post_event(HAL_LED_EVENT_REFRESH);
-                ss_set_capture_status(COMPONENT_END);
+                ss_set_capture_status(STATUS_END);
             }
             else if (val == 0x04) {
                 PRINTF("[App] CMD:00 VAL:%02X -> Recording Start \r\n", val);
                 hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
                 led_post_event(HAL_LED_EVENT_REFRESH);
-                ss_set_recording_status(COMPONENT_START);
+                ss_set_recording_status(STATUS_START);
             }
             else if (val == 0x05) {
                 PRINTF("[App] CMD:00 VAL:%02X -> Recording Completed \r\n", val);
                 hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
                 led_post_event(HAL_LED_EVENT_REFRESH);
-                ss_set_recording_status(COMPONENT_END);
+                ss_set_recording_status(STATUS_END);
             }
             else if (val == 0x06) {
                 PRINTF("[App] CMD:00 VAL:%02X -> Media Playing \r\n", val);
@@ -1809,26 +1809,26 @@ static void handle_passive_ack_frame(const uint8_t *frame)
 				PRINTF("[Passive] ACK:[00 %02X] Capture Start \r\n",val);
 				led_post_event(HAL_LED_EVENT_PHOTO_CAPTURE);//While LED ON
 				// ToDo:使NXP發出 "滴～喀嚓 "聲音
-				ss_set_capture_status(COMPONENT_START);
+				ss_set_capture_status(STATUS_START);
 			}
 			else if (val == 0x03) {
 				PRINTF("[Passive] ACK:[00 %02X] Capture Completed \r\n",val);
 				led_post_event(HAL_LED_EVENT_REFRESH);
-				ss_set_capture_status(COMPONENT_END);
+				ss_set_capture_status(STATUS_END);
 			}
 			else if (val == 0x04) {
 				PRINTF("[Passive] ACK:[00 %02X] Recording Start \r\n",val);
 				hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
 				led_post_event(HAL_LED_EVENT_REFRESH); //While LED ON
 				// ToDo:使NXP發出 "登登"聲音
-				ss_set_recording_status(COMPONENT_START);
+				ss_set_recording_status(STATUS_START);
 			}
 			else if (val == 0x05) {
 				PRINTF("[Passive] ACK:[00 %02X] Recording Completed \r\n",val);
 				hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_DISABLE);
 				led_post_event(HAL_LED_EVENT_REFRESH); //While LED ON
 				// ToDo:使NXP發出 "等登"聲音
-				ss_set_recording_status(COMPONENT_END);
+				ss_set_recording_status(STATUS_END);
 			}
 			else if (val == 0x06) {
 				PRINTF("[Passive] ACK:[00 %02X] Media Playing \r\n",val);

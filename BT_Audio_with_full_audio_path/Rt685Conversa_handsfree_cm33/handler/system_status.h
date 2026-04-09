@@ -13,17 +13,21 @@
 
 
 
-#define COMPONENT_OFF          0
-#define COMPONENT_ON           1
+#define STATUS_OFF          0
+#define STATUS_ON           1
 
-#define COMPONENT_START        2
-#define COMPONENT_END          3
+#define STATUS_START        2
+#define STATUS_END          3
 
 #define FULLY_CHARGE_PERCENTAGE	100
 #define LOW_POWER_PERCENTAGE	30
 
 
-
+typedef enum {
+	AMP_STATUS_OFF = 0,            // off
+	AMP_STATUS_MUSIC,              // fs = 48000 (A2DP and media player)
+	AMP_STATUS_RECEIVER,           // fs = 16000 (ringtone and hfp)
+} amp_status_t;
 
 
 typedef struct __attribute__((packed)) {
@@ -96,6 +100,8 @@ uint8_t ss_get_battery();
 
 uint8_t get_music_status(void);
 void set_music_status(uint8_t status);
+uint8_t get_amp_status(void);
+void set_amp_status(uint8_t status);
 #if 0
 void send_state_to_soc(void);
 void ss_set_music_status(uint8_t status);

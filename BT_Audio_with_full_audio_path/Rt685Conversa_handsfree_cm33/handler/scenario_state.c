@@ -10,6 +10,7 @@
 #include "hal_amp.h"
 #include "WorkStateManager.h"
 #include "app_avrcp.h"
+#include "spi_handler.h"
 
 
 static volatile scenario_state_t current_scenario_state = SCENARIO_STATE_HOME;
@@ -217,20 +218,16 @@ void scenario_media_player_handler (void)
 		return;
 
 	} else if (media_player_handler_start_state == 1) {
-		if (get_music_status() == COMPONENT_ON) {
+		if (get_music_status() == STATUS_ON) {
 			avrcp_pause_button(0);
 			PRINTF("[Music] pause the music before starting media player\r\n");
-			media_player_handler_start_state++;
-
-		} else {
-			RequestToGetIntoMediaPlayer = 1;
-			is_media_playing = 1;
-			media_player_handler_start_state = 0;
 		}
+		media_player_handler_start_state++;
 
-	} else if (media_player_handler_start_state == 2) {
+	} else if (media_player_handler_start_state == 3) {
 		RequestToGetIntoMediaPlayer = 1;
 		is_media_playing = 1;
+
 		media_player_handler_start_state = 0;
 
 	} else {
@@ -251,6 +248,10 @@ void scenario_media_player_handler (void)
 		RequestToGetOutofMediaPlayer = 1;
 //			need_send_state = 1;
 		is_media_playing = MUSIC_PAUSE;
+
+		media_player_handler_stop_state++;
+
+	} else if (media_player_handler_stop_state == 3) {
 
 		media_player_handler_stop_state = 0;
 

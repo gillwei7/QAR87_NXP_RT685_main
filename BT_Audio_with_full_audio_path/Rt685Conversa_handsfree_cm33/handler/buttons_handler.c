@@ -259,13 +259,13 @@ void button_press_handler (void)
 							get_scenario_state() == SCENARIO_STATE_ABOUT) && !ss_get_capture_status()) {
 						send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_TAKE_PICTURE); // Take Photo
 						led_post_event(HAL_LED_EVENT_PHOTO_CAPTURE);
-						ss_set_capture_status(COMPONENT_START);
+						ss_set_capture_status(STATUS_START);
 					}
 					if (Novatek_boot_completed && (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING)) {
 						send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_RECORDING); // Stop Recording
 						hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 						led_post_event(HAL_LED_EVENT_REFRESH);
-						ss_set_recording_status(COMPONENT_END);
+						ss_set_recording_status(STATUS_END);
 					}
 #endif
 #endif

@@ -30,7 +30,7 @@ typedef enum
 	Ringtone_BT_Connected
 } RingtoneState;
 
-void startOpusPlayIndex(int opus_index);
+void ringtone_test(int opus_index);
 void set_ringtone_state (RingtoneState state);
 
 #endif /* RINGTONE_HANDLER_H_ */

@@ -559,7 +559,7 @@ static shell_status_t shellBt(shell_handle_t shellHandle, int32_t argc, char **a
 
 		if(opus_number >= 0 && opus_number <= (OPUS_INDEX_MAXIMUM-1))
 		{
-		    startOpusPlayIndex(opus_number);
+			ringtone_test(opus_number);
 		}
 		else
 		{
