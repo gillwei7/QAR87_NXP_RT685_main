@@ -244,7 +244,7 @@ void button_press_handler (void)
 	}
 	if(function_button_release_set)
 	{
-		if (!ss_is_charging()) {
+//		if (!ss_is_charging()) {
 			// 250ms Time Out
 			if(xTaskGetTickCount() - function_button_press_tick > PRESS_COUNTER_TIMEOUT_MS)
 			{
@@ -302,7 +302,8 @@ void button_press_handler (void)
 				// Clear flag
 				function_button_release_set = 0;
 			}
-		} else {
+//		} else {
+#if 0
 			if(function_button_short_press_cnt > 5)
 			{
 				PRINTF("[Button] Press the button five times into discoverable mode\r\n");
@@ -319,8 +320,8 @@ void button_press_handler (void)
 				// Clear flag
 				function_button_release_set = 0;
 			}
-
-		}
+#endif
+//		}
 	}
 }
 
