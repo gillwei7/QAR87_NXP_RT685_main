@@ -87,9 +87,7 @@ static void elan_gesture_handler (uint8_t gid)
         case GESTURE_SINGLE_PRESS:
             if (Novatek_boot_completed
                     && (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER)) {
-                send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_STOP); // media player: leave
                 set_scenario_state(SCENARIO_STATE_HOME);
-                send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE); // UI: home
             }
             break;
 
@@ -105,7 +103,6 @@ static void elan_gesture_handler (uint8_t gid)
                     && (get_scenario_state() == SCENARIO_STATE_HOME
                             || get_scenario_state() == SCENARIO_STATE_MENU
                             || get_scenario_state() == SCENARIO_STATE_ABOUT)) {
-                send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_START); // Start media player
                 set_scenario_state(SCENARIO_STATE_MEDIA_PLAYER);
             } else if (Novatek_boot_completed
                     && (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER)) {

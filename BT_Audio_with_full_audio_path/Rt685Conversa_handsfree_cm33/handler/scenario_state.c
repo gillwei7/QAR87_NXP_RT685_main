@@ -213,32 +213,38 @@ void set_scenario_state(uint8_t state)
 
 void scenario_media_player_handler (void)
 {
+	if (media_player_handler_start_state == 0 && media_player_handler_stop_state == 0) {
+			return;
+	}
 	//Start
-	if (media_player_handler_start_state == 0) {
-		return;
-
-	} else if (media_player_handler_start_state == 1) {
+	if (media_player_handler_start_state == 1) {
 		if (get_music_status() == STATUS_ON) {
 			avrcp_pause_button(0);
 			PRINTF("[Music] pause the music before starting media player\r\n");
 		}
+		PRINTF("[MediaPlayer] Start media player...\r\n");
 		media_player_handler_start_state++;
 
 	} else if (media_player_handler_start_state == 3) {
+
 		RequestToGetIntoMediaPlayer = 1;
 		is_media_playing = 1;
 
+		media_player_handler_start_state++;
+
+	} else if (media_player_handler_start_state == 4) {
+		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_START); // Start media player
+
 		media_player_handler_start_state = 0;
 
-	} else {
+	} else if (media_player_handler_start_state > 0) {
 		media_player_handler_start_state++;
 	}
 
 	//Stop
-	if (media_player_handler_stop_state == 0) {
-		return;
+	if (media_player_handler_stop_state == 1) {
+		PRINTF("[MediaPlayer] Stop media player...\r\n");
 
-	} else if (media_player_handler_stop_state == 1) {
 		hal_amp_aw88166_left_stop(); //workaround for noise
 		hal_amp_aw88166_right_stop(); //workaround for noise
 
@@ -252,10 +258,16 @@ void scenario_media_player_handler (void)
 		media_player_handler_stop_state++;
 
 	} else if (media_player_handler_stop_state == 3) {
+		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_STOP); // media player: leave
+
+		media_player_handler_stop_state++;
+
+	} else if (media_player_handler_stop_state == 4) {
+		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE); // UI: home
 
 		media_player_handler_stop_state = 0;
 
-	} else {
+	} else if (media_player_handler_stop_state > 0) {
 		media_player_handler_stop_state++;
 	}
 }
