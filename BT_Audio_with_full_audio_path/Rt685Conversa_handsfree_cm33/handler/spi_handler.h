@@ -196,12 +196,9 @@ typedef struct {
     uint8_t  second; // 秒數 (0-59)
 } rtc_time_info_t;
 
-extern volatile MediaPlayPauseCmd g_media_play_cmd;
 
-extern volatile rtc_time_info_t g_system_time;
-
-extern msg_notification_info_t g_msg_info;
-
+void set_media_state(uint8_t media_state);
+void set_system_time(uint16_t year, uint8_t month,uint8_t day,uint8_t hour,uint8_t minute,uint8_t second);
 void message_processing(app_msg_type_t app_type, const char *title, const char *body);
 
 void application_examples_atomic_status(void);

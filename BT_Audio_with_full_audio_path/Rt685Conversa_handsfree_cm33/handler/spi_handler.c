@@ -116,12 +116,12 @@ typedef struct {
 static session_ctx_t g_session = { .active = false, .expected_id = 0, .received_bytes = 0 };
 
 
-msg_notification_info_t g_msg_info = {0};
+static msg_notification_info_t g_msg_info = {0};
 
-volatile MediaPlayPauseCmd g_media_play_cmd = MEDIA_TOGGLE;
+static MediaPlayPauseCmd g_media_play_cmd = MEDIA_TOGGLE;
 
 /* 宣告全域變數來儲存時間資訊 (可給予預設值) */
-volatile rtc_time_info_t g_system_time = {
+static rtc_time_info_t g_system_time = {
     .year   = 2026,
     .month  = 3,
     .day    = 16,
@@ -130,10 +130,23 @@ volatile rtc_time_info_t g_system_time = {
     .second = 0
 };
 
+void set_media_state(uint8_t media_state)
+{
+	g_media_play_cmd = media_state ;
+}
+
+void set_system_time(uint16_t year, uint8_t month,uint8_t day,uint8_t hour,uint8_t minute,uint8_t second)
+{
+	g_system_time.year = year ;
+	g_system_time.month = month ;
+	g_system_time.day  = day ;
+	g_system_time.hour = hour ;
+	g_system_time.minute = minute ,
+	g_system_time.second = second ;
+}
 
 void application_examples_atomic_status(void)
 {
-
 	send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_SYS_STATUS);
 	vTaskDelay(100);
 
@@ -159,6 +172,7 @@ void application_examples_atomic_status(void)
 }
 void application_examples_atomic_exec(void)
 {
+
     // 建立陣列
     const uint8_t codes[] = {
         0x01, 0x02, 0x04,

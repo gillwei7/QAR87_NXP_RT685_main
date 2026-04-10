@@ -72,7 +72,7 @@ void spi_command_atomic_exec_previous_media(void)
 
 void spi_command_atomic_exec_media_play_pause(uint8_t media_state)
 {
-	g_media_play_cmd = media_state ;
+	set_media_state(media_state);
     send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_PLAY_PAUSE);
 }
 
@@ -115,12 +115,7 @@ void spi_command_atomic_status_time_sync(   uint16_t year,
 											uint8_t  minute,
 											uint8_t  second )
 {
-	g_system_time.year = year ;
-	g_system_time.month = month ;
-	g_system_time.day  = day ;
-	g_system_time.hour = hour ;
-	g_system_time.minute = minute ,
-	g_system_time.second = second ;
+	set_system_time(year, month, day, hour, minute, second);
 	send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_TIME_SYNC);
 
 }
