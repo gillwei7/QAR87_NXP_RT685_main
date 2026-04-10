@@ -42,6 +42,7 @@
 
 #if UsingQAR87Board == 1
 #include "hal_amp.h"
+#include "scenario_state.h"
 #endif
 
 /* Sco loop back, data from sco input to sco output */
@@ -284,15 +285,18 @@ void DeInitCodec(void)
 	//to do...... deinit codec //B36932
 	//r = deinit codec
 	//Not sure if "stop" same with Deinit //B36932
+#if 0 //The AMP on/off control is unified and handled by the scenario_state_handler.
 	hal_amp_aw88166_left_stop();
 	hal_amp_aw88166_right_stop();
-	
+#endif
 	//if(r!=kStatus_Success)
 	//{
 	//	PRINTF("DeInitCodec is failed, %d \r\n",r);
 	//	return;
 	//}
+#if 0 //The AMP on/off control is unified and handled by the scenario_state_handler.
 	AmpState=AmpState_UnConfigured;
+#endif
 }
 void InitAndStartCodec(int fs, int bits, int Mfreq)
 {
@@ -303,6 +307,7 @@ void InitAndStartCodec(int fs, int bits, int Mfreq)
 
 	//to do...... initial or start smart amplifier //B36932
 	//r = initial codec or start codec
+#if 0 //The AMP on/off control is unified and handled by the scenario_state_handler.
 	if(fs==48000)
 	{
 		amp_post_event(AMP_EVT_MUSIC);
@@ -316,6 +321,7 @@ void InitAndStartCodec(int fs, int bits, int Mfreq)
 //		hal_amp_aw88166_right_start("Receiver");
 	}
 	AmpState=AmpState_ConfiguredAndActive;
+#endif
 }
 
 #else
@@ -635,8 +641,11 @@ API_RESULT sco_audio_setup_pl_ext(SCO_AUDIO_EP_INFO *ep_info)
 	BtHfpAudioFs      =ep_info->sampl_freq;
 	BtHfpAudioBitWidth=ep_info->sample_len;
     WasInInComingRingTone=NowInIncomingCallRingTone;
+#if 0
     RequestToGetIntoHfp=1;
-
+#else
+    set_audio_call_handler_start_state();
+#endif
     return API_SUCCESS;
 }
 
@@ -718,7 +727,11 @@ API_RESULT sco_audio_stop_pl_ext(void)
 	PRINTF_M("RT685 MCU: sco_audio_stop_pl_ext \r\n");
 
 	WasInInComingRingTone=0;
+#if 0
 	RequestToGetOutofHfp=1;
+#else
+    set_audio_call_handler_stop_state();
+#endif
 	return API_SUCCESS;
 }
 
@@ -745,19 +758,25 @@ API_RESULT sco_audio_set_speaker_volume_ext(UCHAR volume)
 
 	return API_SUCCESS;
 }
+
 void sco_audio_play_ringtone_pl_ext(void)
 {
-if (NowInIncomingCallRingTone == 0)
-{
-	BtHfpAudioFs=16000;
-	BtHfpAudioBitWidth=16;
-	NowInIncomingCallRingTone = 1;
-	RequestToGetIntoHfp=1;
+	if (NowInIncomingCallRingTone == 0)
+	{
+		BtHfpAudioFs=16000;
+		BtHfpAudioBitWidth=16;
+		NowInIncomingCallRingTone = 1;
+#if 0
+		RequestToGetIntoHfp=1;
+#else
+		set_audio_call_handler_start_state();
+#endif
+	}
+
+	PRINTF_M("sco_audio_play_ringtone_pl_ext, NowInIncomingCallRingTone=%d\r\n",NowInIncomingCallRingTone);
+	return;
 }
 
-PRINTF_M("sco_audio_play_ringtone_pl_ext, NowInIncomingCallRingTone=%d\r\n",NowInIncomingCallRingTone);
-return;
-}
 void sco_audio_play_ringtone_exit_pl_ext(void)
 {
 	PRINTF_M("sco_audio_play_ringtone_exit_pl_ext\r\n");
@@ -769,7 +788,11 @@ void sco_audio_play_ringtone_exit_pl_ext(void)
     {
     	if(WasInInComingRingTone)
     	{
+#if 0
     		RequestToGetOutofHfp=1;
+#else
+    		set_audio_call_handler_stop_state();
+#endif
     		PRINTF_M("sco_audio_play_ringtone_exit_pl_ext RequestToGetOutofHfp=1\r\n");
     	}
     }

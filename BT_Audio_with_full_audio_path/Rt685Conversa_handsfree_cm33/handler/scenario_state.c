@@ -19,6 +19,19 @@ static volatile uint8_t is_media_playing = MUSIC_PAUSE;
 static uint8_t media_player_handler_start_state = 0;
 static uint8_t media_player_handler_stop_state = 0;
 
+static uint8_t music_player_handler_start_state = 0;
+static uint8_t music_player_handler_stop_state = 0;
+
+static uint8_t audio_call_handler_start_state = 0;
+static uint8_t audio_call_handler_stop_state = 0;
+
+static uint8_t video_ai_handler_start_state = 0;
+static uint8_t video_ai_handler_stop_state = 0;
+
+static uint8_t translation_handler_start_state = 0;
+static uint8_t translation_handler_stop_state = 0;
+
+
 uint8_t get_scenario_state(void)
 {
 	return current_scenario_state;
@@ -211,9 +224,9 @@ void set_scenario_state(uint8_t state)
 }
 
 
-void scenario_media_player_handler (void)
+static void scenario_media_player_handler (void)
 {
-	if (media_player_handler_start_state == 0 && media_player_handler_stop_state == 0) {
+	if (media_player_handler_start_state == 0 && audio_call_handler_stop_state == 0) {
 			return;
 	}
 	//Start
@@ -225,14 +238,16 @@ void scenario_media_player_handler (void)
 		PRINTF("[MediaPlayer] Start media player...\r\n");
 		media_player_handler_start_state++;
 
-	} else if (media_player_handler_start_state == 3) {
+	} else if (media_player_handler_start_state == 5) {
 
 		RequestToGetIntoMediaPlayer = 1;
 		is_media_playing = 1;
 
 		media_player_handler_start_state++;
 
-	} else if (media_player_handler_start_state == 4) {
+	} else if (media_player_handler_start_state == 6) {
+		amp_post_event(AMP_EVT_MUSIC);
+
 		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_START); // Start media player
 
 		media_player_handler_start_state = 0;
@@ -244,15 +259,11 @@ void scenario_media_player_handler (void)
 	//Stop
 	if (media_player_handler_stop_state == 1) {
 		PRINTF("[MediaPlayer] Stop media player...\r\n");
-
-		hal_amp_aw88166_left_stop(); //workaround for noise
-		hal_amp_aw88166_right_stop(); //workaround for noise
-
+		amp_post_event(AMP_EVT_STOP);
 		media_player_handler_stop_state++;
 
 	} else if (media_player_handler_stop_state == 2) {
 		RequestToGetOutofMediaPlayer = 1;
-//			need_send_state = 1;
 		is_media_playing = MUSIC_PAUSE;
 
 		media_player_handler_stop_state++;
@@ -272,9 +283,141 @@ void scenario_media_player_handler (void)
 	}
 }
 
+static void scenario_music_player_handler (void)
+{
+	if (music_player_handler_start_state == 0 && music_player_handler_stop_state == 0) {
+			return;
+	}
+	//Start
+	if (music_player_handler_start_state == 1) {
+		if (get_scenario_state() == SCENARIO_STATE_MUSIC_PLAYER) {
+			set_scenario_state(SCENARIO_STATE_HOME);
+			PRINTF("[MediaPlayer] pause the Media Player before starting music player\r\n");
+			music_player_handler_start_state++;
+
+		} else {
+			RequestToGetIntoA2dpPlay = 1;
+
+			music_player_handler_start_state = 6; // go to next state (Enable AMP)
+		}
+		PRINTF("[Music] Start music player...\r\n");
+
+	} else if (music_player_handler_start_state == 5) {
+		RequestToGetIntoA2dpPlay = 1;
+
+		music_player_handler_start_state++;
+
+	} else if (music_player_handler_start_state == 6) {
+		amp_post_event(AMP_EVT_MUSIC);
+
+		music_player_handler_start_state = 0;
+
+	} else if (music_player_handler_start_state > 0) {
+		music_player_handler_start_state++;
+	}
+
+	//Stop
+	if (music_player_handler_stop_state == 1) {
+		PRINTF("[MediaPlayer] Stop music player...\r\n");
+
+		amp_post_event(AMP_EVT_STOP);
+
+		music_player_handler_stop_state++;
+
+	} else if (music_player_handler_stop_state == 2) {
+		RequestToGetOutofA2dpPlay = 1;
+
+		music_player_handler_stop_state = 0;
+
+	} else if (music_player_handler_stop_state > 0) {
+		music_player_handler_stop_state++;
+	}
+}
+
+static void scenario_audio_call_handler (void)
+{
+	if (audio_call_handler_start_state == 0 && audio_call_handler_stop_state == 0) {
+			return;
+	}
+	//Start
+	if (audio_call_handler_start_state == 1) {
+		PRINTF("[MediaPlayer] Start audio call...\r\n");
+	    RequestToGetIntoHfp=1;
+		audio_call_handler_start_state++;
+
+	} else if (audio_call_handler_start_state == 2) {
+		amp_post_event(AMP_EVT_RECEIVER);
+		audio_call_handler_start_state++;
+
+	} else if (audio_call_handler_start_state == 3) {
+		//todo SPI: change UI for audio call
+		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE); // UI: home
+
+		audio_call_handler_start_state = 0;
+
+	} else if (audio_call_handler_start_state > 0) {
+		audio_call_handler_start_state++;
+	}
+
+	//Stop
+	if (audio_call_handler_stop_state == 1) {
+		PRINTF("[MediaPlayer] Stop audio call...\r\n");
+		amp_post_event(AMP_EVT_STOP);
+		audio_call_handler_stop_state++;
+
+	} else if (audio_call_handler_stop_state == 2) {
+		RequestToGetOutofHfp = 1;
+		is_media_playing = MUSIC_PAUSE;
+
+		audio_call_handler_stop_state++;
+
+	} else if (audio_call_handler_stop_state == 3) {
+		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE); // UI: home
+
+		audio_call_handler_stop_state = 0;
+
+	} else if (audio_call_handler_stop_state > 0) {
+		audio_call_handler_stop_state++;
+	}
+}
+
 void scenario_state_handler (void)
 {
 	scenario_media_player_handler();
+	scenario_music_player_handler();
+	scenario_audio_call_handler();
+}
+
+void set_music_player_handler_start_state (void)
+{
+	if (!music_player_handler_start_state) {
+		music_player_handler_stop_state = 0;
+		music_player_handler_start_state = 1;
+	}
+}
+
+void set_music_player_handler_stop_state (void)
+{
+	if (!music_player_handler_stop_state) {
+		music_player_handler_start_state = 0;
+		music_player_handler_stop_state = 1;
+	}
+}
+
+void set_audio_call_handler_start_state (void)
+{
+	if (!audio_call_handler_start_state) {
+		audio_call_handler_stop_state = 0;
+		audio_call_handler_start_state = 1;
+	}
+}
+
+void set_audio_call_handler_stop_state (void)
+{
+	if (!audio_call_handler_stop_state) {
+		audio_call_handler_start_state = 0;
+		audio_call_handler_stop_state = 1;
+	}
 }
 
 uint8_t get_media_status(void)
@@ -288,10 +431,8 @@ void set_media_status(uint8_t status)
 	is_media_playing = status;
 
 	if (is_media_playing == MUSIC_PLAYING) {
-		hal_amp_aw88166_left_start("Music");
-		hal_amp_aw88166_right_start("Music");
+		amp_post_event(AMP_EVT_MUSIC);
 	} else {
-		hal_amp_aw88166_left_stop();
-		hal_amp_aw88166_right_stop();
+		amp_post_event(AMP_EVT_STOP);
 	}
 }

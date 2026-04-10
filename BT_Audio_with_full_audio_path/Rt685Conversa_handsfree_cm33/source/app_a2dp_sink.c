@@ -42,6 +42,7 @@
 
 #if UsingQAR87Board == 1
 #include "system_status.h"
+#include "scenario_state.h"
 
 #endif
 
@@ -357,9 +358,11 @@ void sbc_deinit()
 		HAL_AudioTxDeinit((hal_audio_handle_t)&audio_tx_handle[0]);
 		(void)BOARD_SwitchAudioFreq(0U);
 	#endif
-    RequestToGetOutofA2dpPlay=1;
-    set_music_status(STATUS_OFF);
-
+#if 0
+	RequestToGetOutofA2dpPlay=1;
+#else
+	set_music_player_handler_stop_state();
+#endif
 	PRINTF("sbc_deinit done\r\n");
 }
 void sbc_deconfigured(int err)
@@ -376,8 +379,11 @@ void sbc_deconfigured(int err)
 			(void)BOARD_SwitchAudioFreq(0U);
 		#endif
         g_audioInit=0;
-		RequestToGetOutofA2dpPlay=1;
-	    set_music_status(STATUS_OFF);
+#if 0
+        RequestToGetOutofA2dpPlay=1;
+#else
+		set_music_player_handler_stop_state();
+#endif
     	PRINTF("sbc_deconfigured done\r\n");
 	}
 	else
@@ -409,8 +415,11 @@ void sbc_stop_play(int err)
 		#ifdef A2DP_SINK_AUDIO
 			//HAL_AudioTransferAbortSend((hal_audio_handle_t)&audio_tx_handle[0]);
 		#endif
+#if 0
 	    RequestToGetOutofA2dpPlay=1;
-	    set_music_status(STATUS_OFF);
+#else
+	    set_music_player_handler_stop_state();
+#endif
 		PRINTF("sbc_stop_play done\r\n");
 	}
 	else
@@ -479,8 +488,11 @@ void sbc_streamer_data(uint8_t *data, uint32_t length)
 				{
 					// Get into
 					//this is 3/4 full
+#if 0
 					RequestToGetIntoA2dpPlay=1;
-				    set_music_status(STATUS_ON);
+#else
+					set_music_player_handler_start_state();
+#endif
 
 					//VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
 					//VarBlockSharedByDspAndMcu.PlaySbcFileIdx=0xffff;		//0xffff stands for a2dp sbc stream

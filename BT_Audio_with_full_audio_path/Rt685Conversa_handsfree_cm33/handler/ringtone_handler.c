@@ -73,12 +73,15 @@ static void ringtone_audio_handler (void)
 		amp_post_event(AMP_EVT_RECEIVER);
 		ringtone_audio_handler_state++;
 
-	} else if (ringtone_audio_handler_state == 5) {
-		DeInitCodec();
+	} else if (ringtone_audio_handler_state == 250) {
+		amp_post_event(AMP_EVT_STOP);
+		ringtone_audio_handler_state++;
+
+	} else if (ringtone_audio_handler_state == 251) {
 		general_RingtoneState = Ringtone_No;
 		ringtone_audio_handler_state = 0;
 
-	} else {
+	} else if (ringtone_audio_handler_state > 0) {
 		ringtone_audio_handler_state++;
 	}
 }
@@ -86,7 +89,7 @@ static void ringtone_audio_handler (void)
 void ringtone_handler (void)
 {
 
-
+#if 0
 	if(general_RingtoneState == Ringtone_StartVideoAI){
 //		general_RingtoneState = Ringtone_No;
 		startOpusPlayIndex(Ringtone_StartVideoAI-1);
@@ -178,13 +181,17 @@ void ringtone_handler (void)
 	}
 
 	if(general_RingtoneState == Ringtone_BT_Connected){
-			general_RingtoneState = Ringtone_No;
+//			general_RingtoneState = Ringtone_No;
 			startOpusPlayIndex(Ringtone_BT_Connected-1);
 	}
+#endif
 
-	if (get_amp_status() == AMP_STATUS_OFF) {
+
+	if (get_amp_status() == AMP_STATUS_OFF && general_RingtoneState != Ringtone_No) {
+		startOpusPlayIndex(general_RingtoneState - 1);
 		ringtone_audio_set_state();
-	} else {
+	} else if (general_RingtoneState != Ringtone_No) {
+		startOpusPlayIndex(general_RingtoneState - 1);
 		general_RingtoneState = Ringtone_No;
 	}
 	ringtone_audio_handler();
