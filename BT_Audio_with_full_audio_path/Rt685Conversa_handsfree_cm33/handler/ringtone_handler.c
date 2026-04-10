@@ -73,16 +73,14 @@ static void ringtone_audio_handler (void)
 		amp_post_event(AMP_EVT_RECEIVER);
 		ringtone_audio_handler_state++;
 
-	} else if (ringtone_audio_handler_state == 250) {
-		amp_post_event(AMP_EVT_STOP);
-		ringtone_audio_handler_state++;
-
-	} else if (ringtone_audio_handler_state == 251) {
-		general_RingtoneState = Ringtone_No;
-		ringtone_audio_handler_state = 0;
-
 	} else if (ringtone_audio_handler_state > 0) {
-		ringtone_audio_handler_state++;
+		if (VarBlockSharedByDspAndMcu.NeedToStartPlayOpus == 2) {
+		    PRINTF("[Ringtone] Stop ringtone\r\n");
+			amp_post_event(AMP_EVT_STOP);
+			general_RingtoneState = Ringtone_No;
+			ringtone_audio_handler_state = 0;
+
+		}
 	}
 }
 

@@ -700,7 +700,7 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 			#if EnableOpusDec==1
 				//OPUS decoding temp place here --- later may move to a new task
 				//start Opus decoding, between Opus file 1~6
-				if(PtrVarBlockSharedByDspAndMcu->NeedToStartPlayOpus)
+				if(PtrVarBlockSharedByDspAndMcu->NeedToStartPlayOpus == 1)
 				{
 					if(OpusDecoderIsRunning)
 					{
@@ -788,6 +788,8 @@ int Task_VitAndAudioDec(void * arg, int32_t wake_value)
 					if(OpusDecoderIsRunning==2)
 					{
 						//decoding is finished
+						PtrVarBlockSharedByDspAndMcu->NeedToStartPlayOpus=2; // for cm33: disable amp
+
 						DeInitOpusDecoder();
 						DeInitOpusDecoderForOneOpusFile();
 					}else
