@@ -226,7 +226,7 @@ void set_scenario_state(uint8_t state)
 
 static void scenario_media_player_handler (void)
 {
-	if (media_player_handler_start_state == 0 && audio_call_handler_stop_state == 0) {
+	if (media_player_handler_start_state == 0 && media_player_handler_stop_state == 0) {
 			return;
 	}
 	//Start
