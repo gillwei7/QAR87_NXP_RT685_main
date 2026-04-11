@@ -23,7 +23,8 @@ typedef enum {
 	SCENARIO_STATE_VIDEO_RECORDING,   // 使用 Video Recording
 	SCENARIO_STATE_TAKE_PHOTO,        // 使用拍照
 	SCENARIO_STATE_VIDEO_AI,          // 使用 Video AI
-	SCENARIO_STATE_TRANSLATION        // 使用翻譯
+	SCENARIO_STATE_TRANSLATION,       // 使用翻譯
+	SCENARIO_STATE_VIDEO_CALL
 } scenario_state_t;
 
 uint8_t get_scenario_state(void);

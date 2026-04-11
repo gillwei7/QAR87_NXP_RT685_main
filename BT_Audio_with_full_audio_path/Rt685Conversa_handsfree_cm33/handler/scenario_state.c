@@ -31,6 +31,9 @@ static uint8_t audio_call_handler_stop_state = 0;
 static uint16_t video_recording_handler_start_state = 0;
 static uint16_t video_recording_handler_stop_state = 0;
 
+static uint8_t video_call_handler_start_state = 0;
+static uint8_t video_call_handler_stop_state = 0;
+
 static uint8_t video_ai_handler_start_state = 0;
 static uint8_t video_ai_handler_stop_state = 0;
 
@@ -57,8 +60,7 @@ void set_scenario_state(uint8_t state)
 //			need_send_music_status = 1;
 //			music_status = 0;
 
-		} else
-		if (current_scenario_state == SCENARIO_STATE_MEDIA_PLAYER) {
+		} else if (current_scenario_state == SCENARIO_STATE_MEDIA_PLAYER) {
 			current_scenario_state = state;
 			media_player_handler_stop_state = 1;
 
@@ -66,7 +68,10 @@ void set_scenario_state(uint8_t state)
 		} else if (current_scenario_state == SCENARIO_STATE_VIDEO_RECORDING) {
 			current_scenario_state = state;
 			video_recording_handler_stop_state = 1;
-//			need_send_state = 1;
+
+		} else if (current_scenario_state == SCENARIO_STATE_VIDEO_CALL) {
+			current_scenario_state = state;
+			video_call_handler_stop_state = 1;
 
 		} else if (current_scenario_state == SCENARIO_STATE_VIDEO_AI) {
 			RequestToGetOutofVideoAI = 1;
@@ -183,7 +188,18 @@ void set_scenario_state(uint8_t state)
 		current_scenario_state = state;
 		video_recording_handler_start_state = 1;
 
-//		need_send_state = 1;
+
+	}  else if (state == SCENARIO_STATE_VIDEO_CALL && (current_scenario_state == SCENARIO_STATE_HOME
+#if MENU_STATE_ENABLE
+			 || current_scenario_state == SCENARIO_STATE_MENU
+#endif
+#if ABOUT_STATE_ENABLE
+			 || current_scenario_state == SCENARIO_STATE_ABOUT
+#endif
+			)) {
+		current_scenario_state = state;
+		video_call_handler_start_state = 1;
+
 
 	} else if (state == SCENARIO_STATE_TAKE_PHOTO && (current_scenario_state == SCENARIO_STATE_HOME
 #if MENU_STATE_ENABLE
@@ -463,12 +479,69 @@ static void scenario_video_recording_handler (void)
 	}
 }
 
+static void scenario_video_call_handler (void)
+{
+	if (video_call_handler_start_state == 0 && video_call_handler_stop_state == 0) {
+			return;
+	}
+	//Start: 1. Audio path 2. SPI 3. BLE 4. LED
+	if (video_call_handler_start_state == 1) {
+		PRINTF("[VideoCall] Start video call...\r\n");
+		RequestToGetIntoVideoAI = 1; //Audio path
+		video_call_handler_start_state++;
+
+	} else if (video_call_handler_start_state == 2) {
+		// TODO send SPI command (Start video call) to Novatek
+		video_call_handler_start_state++;
+
+	} else if (video_call_handler_start_state == 3) {
+		// TODO Send a BLE event (Wi-Fi IP) to the phone when the Novatek Wi-Fi IP is ready
+		video_call_handler_start_state++;
+
+	} else if (video_call_handler_start_state == 4) {
+		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
+		led_post_event(HAL_LED_EVENT_REFRESH);
+		video_call_handler_start_state = 0;
+
+	} else if (video_call_handler_start_state > 0) {
+		video_call_handler_start_state++;
+	}
+
+	//Stop: 1. SPI 2. Audio path 3. UI 4. LED
+	if (video_call_handler_stop_state == 1) {
+		PRINTF("[VideoCall] Stop video call...\r\n");
+		// TODO send SPI command (Stop video call) to Novatek
+		video_call_handler_stop_state++;
+
+	} else if (video_call_handler_stop_state == 2) {
+		RequestToGetOutofVideoAI = 1; //Audio path
+
+		video_call_handler_stop_state++;
+
+	} else if (video_call_handler_stop_state == 3) {
+		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
+
+		video_call_handler_stop_state++;
+
+	} else if (video_call_handler_stop_state == 4) {
+		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
+		led_post_event(HAL_LED_EVENT_REFRESH);
+
+		video_call_handler_stop_state++;
+
+	} else if (video_call_handler_stop_state > 0) {
+		video_call_handler_stop_state++;
+
+	}
+}
+
 void scenario_state_handler (void)
 {
 	scenario_media_player_handler();
 	scenario_music_player_handler();
 	scenario_audio_call_handler();
 	scenario_video_recording_handler();
+	scenario_video_call_handler();
 }
 
 void set_music_player_handler_start_state (void)
