@@ -74,9 +74,8 @@ void set_scenario_state(uint8_t state)
 			video_call_handler_stop_state = 1;
 
 		} else if (current_scenario_state == SCENARIO_STATE_VIDEO_AI) {
-			RequestToGetOutofVideoAI = 1;
 			current_scenario_state = state;
-//			need_send_state = 1;
+			video_ai_handler_stop_state = 1;
 
 		} else if (current_scenario_state == SCENARIO_STATE_TRANSLATION) {
 			RequestToGetOutofTranslation = 1;
@@ -227,9 +226,8 @@ void set_scenario_state(uint8_t state)
 			 || current_scenario_state == SCENARIO_STATE_ABOUT
 #endif
 			)) {
-		RequestToGetIntoVideoAI = 1;
 		current_scenario_state = state;
-//		need_send_state = 1;
+		video_ai_handler_start_state = 1;
 
 	} else if (state == SCENARIO_STATE_TRANSLATION && (current_scenario_state == SCENARIO_STATE_HOME
 #if MENU_STATE_ENABLE
@@ -482,7 +480,7 @@ static void scenario_video_call_handler (void)
 	if (video_call_handler_start_state == 0 && video_call_handler_stop_state == 0) {
 			return;
 	}
-	//Start: 1. Audio path 2. SPI 3. BLE 4. LED
+	//Start: 1. Audio path 2. SPI 3. BLE 4. LED and AMP
 	if (video_call_handler_start_state == 1) {
 		PRINTF("[VideoCall] Start video call...\r\n");
 		RequestToGetIntoVideoAI = 1; //Audio path
@@ -497,18 +495,23 @@ static void scenario_video_call_handler (void)
 		video_call_handler_start_state++;
 
 	} else if (video_call_handler_start_state == 4) {
+		// TODO Set LED and AMP when the Novatek RTSP is ready
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
+		amp_post_event(AMP_EVT_MUSIC);
+
 		video_call_handler_start_state = 0;
 
 	} else if (video_call_handler_start_state > 0) {
 		video_call_handler_start_state++;
 	}
 
-	//Stop: 1. SPI 2. Audio path 3. UI 4. LED
+	//Stop: 1. AMP and SPI 2. Audio path 3. UI 4. LED
 	if (video_call_handler_stop_state == 1) {
 		PRINTF("[VideoCall] Stop video call...\r\n");
+		amp_post_event(AMP_EVT_STOP);
 		// TODO send SPI command (Stop video call) to Novatek
+
 		video_call_handler_stop_state++;
 
 	} else if (video_call_handler_stop_state == 2) {
@@ -533,6 +536,66 @@ static void scenario_video_call_handler (void)
 	}
 }
 
+static void scenario_video_ai_handler (void)
+{
+	if (video_ai_handler_start_state == 0 && video_ai_handler_stop_state == 0) {
+			return;
+	}
+	//Start: 1. Audio path 2. SPI 3. BLE 4. LED and AMP
+	if (video_ai_handler_start_state == 1) {
+		PRINTF("[VideoAI] Start video ai...\r\n");
+		RequestToGetIntoVideoAI = 1; //Audio path
+		video_ai_handler_start_state++;
+
+	} else if (video_ai_handler_start_state == 2) {
+		// TODO send SPI command (Start video call) to Novatek
+		video_ai_handler_start_state++;
+
+	} else if (video_ai_handler_start_state == 3) {
+		// TODO Send a BLE event (Wi-Fi IP) to the phone when the Novatek Wi-Fi IP is ready
+		video_ai_handler_start_state++;
+
+	} else if (video_ai_handler_start_state == 4) {
+		// TODO Set LED and AMP when the Novatek RTSP is ready
+		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
+		led_post_event(HAL_LED_EVENT_REFRESH);
+		amp_post_event(AMP_EVT_MUSIC);
+
+		video_ai_handler_start_state = 0;
+
+	} else if (video_ai_handler_start_state > 0) {
+		video_ai_handler_start_state++;
+	}
+
+	//Stop: 1. AMP and SPI 2. Audio path 3. UI 4. LED
+	if (video_ai_handler_stop_state == 1) {
+		PRINTF("[VideoAI] Stop video ai...\r\n");
+		amp_post_event(AMP_EVT_STOP);
+		// TODO send SPI command (Stop video call) to Novatek
+		video_ai_handler_stop_state++;
+
+	} else if (video_ai_handler_stop_state == 2) {
+		RequestToGetOutofVideoAI = 1; //Audio path
+
+		video_ai_handler_stop_state++;
+
+	} else if (video_ai_handler_stop_state == 3) {
+		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
+
+		video_ai_handler_stop_state++;
+
+	} else if (video_ai_handler_stop_state == 4) {
+		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
+		led_post_event(HAL_LED_EVENT_REFRESH);
+
+		video_ai_handler_stop_state++;
+
+	} else if (video_ai_handler_stop_state > 0) {
+		video_ai_handler_stop_state++;
+
+	}
+}
+
 void scenario_state_handler (void)
 {
 	scenario_media_player_handler();
@@ -540,6 +603,7 @@ void scenario_state_handler (void)
 	scenario_audio_call_handler();
 	scenario_video_recording_handler();
 	scenario_video_call_handler();
+	scenario_video_ai_handler();
 }
 
 void set_music_player_handler_start_state (void)
