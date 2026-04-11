@@ -12,20 +12,6 @@
 volatile amp_event_t g_amp_event = AMP_EVT_STOP;
 static uint8_t has_amp_event = 0;
 
-
-void hal_amp_aw88166_power_on(void) {
-    GPIO_PinWrite(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, 1);
-}
-
-void hal_amp_aw88166_power_off(void) {
-    GPIO_PinWrite(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, 0);
-}
-
-void hal_amp_aw88166_init(void) {
-    init_aw88166();
-    PRINTF("[AMP][AW88166] init OK\r\n");
-}
-
 /* prof_name: 1. "Music", 2. "Receiver" */
 static void hal_amp_aw88166_left_start(char *prof_name) {
     start_aw88166_pa(AW_DEV_0, prof_name);
@@ -68,6 +54,20 @@ static void hal_amp_aw88166_all_stop (void) {
 	set_amp_status(AMP_STATUS_OFF);
 	AmpState=AmpState_UnConfigured;
 	PRINTF("AMP_EVT_STOP done\r\n");
+}
+
+void hal_amp_aw88166_power_on(void) {
+    GPIO_PinWrite(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, 1);
+}
+
+void hal_amp_aw88166_power_off(void) {
+    GPIO_PinWrite(GPIO, GPIO_AMP_RESET_R_PORT, GPIO_AMP_RESET_R_PIN, 0);
+}
+
+void hal_amp_aw88166_init(void) {
+    init_aw88166();
+    PRINTF("[AMP][AW88166] init OK\r\n");
+    hal_amp_aw88166_all_stop();
 }
 
 void hal_amp_aw88166_handler (void) {
