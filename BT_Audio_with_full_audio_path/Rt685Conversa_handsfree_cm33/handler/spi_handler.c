@@ -16,6 +16,7 @@
 #include "hal_common.h"
 #include "ringtone_handler.h"
 #include "scenario_state.h"
+#include "spi_command_set.h"
 
 #define USE_DMA 1
 
@@ -134,6 +135,7 @@ void set_media_state(uint8_t media_state)
 {
 	g_media_play_cmd = media_state ;
 }
+
 
 void set_system_time(uint16_t year, uint8_t month,uint8_t day,uint8_t hour,uint8_t minute,uint8_t second)
 {
@@ -639,7 +641,7 @@ static void spi_prepare_command_packet_data(uint8_t msg_type, uint8_t cmd_id)
 
 			 case CMD_ATOMIC_EXEC_SWITCH_UI_PAGE: // SWITCH_UI_PAGE
 				 arg_len = 2;
-				 pArgs[0] = get_scenario_state();
+				 pArgs[0] = get_ui_page_id();
 				 pArgs[1] = 0x00; // TargetSubPageID
 				 break;
 

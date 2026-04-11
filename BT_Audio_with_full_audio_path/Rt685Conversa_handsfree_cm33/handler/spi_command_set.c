@@ -9,6 +9,7 @@
 #include "spi_command_set.h"
 #include "scenario_state.h"
 
+static spi_command_ui_page_t s_ui_page_id = SPI_COMMAND_UI_PAGE_HOME;
 
 void spi_command_atomic_exec_open_oe(void)
 {
@@ -94,7 +95,7 @@ void spi_command_atomic_exec_start_recording(void)
 
 void spi_command_atomic_exec_switch_ui_page(uint8_t state)
 {
-    set_scenario_state(state);
+    s_ui_page_id = state;
     send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE);
 }
 
@@ -127,3 +128,7 @@ void spi_command_atomic_status_message_notification(app_msg_type_t app_type, con
 }
 
 
+spi_command_ui_page_t get_ui_page_id(void)
+{
+	return s_ui_page_id;
+}
