@@ -440,7 +440,7 @@ static void scenario_video_recording_handler (void)
 		}
 	}
 
-	//Stop: 1. SPI 2. Audio path 3. Ringtone 4. UI 5. LED
+	//Stop: 1. SPI 2. Audio path 3. LED, Ringtone and UI
 	if (video_recording_handler_stop_state == 1) {
 		PRINTF("[VideoRecording] Stop video recording...\r\n");
 		spi_command_atomic_exec_stop_recording(); // Stop Recording
@@ -451,13 +451,7 @@ static void scenario_video_recording_handler (void)
 		RequestToGetOutofVideoRecording = 1;
 
 		video_recording_handler_stop_state++;
-	} else if (video_recording_handler_stop_state == 3) {
-		set_ringtone_state(Ringtone_StopRecording);
-
-		video_recording_handler_stop_state++;
-
 	} else if (video_recording_handler_stop_state == 4) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
 
 		video_recording_handler_stop_state++;
 
@@ -465,11 +459,15 @@ static void scenario_video_recording_handler (void)
 		if (ss_get_recording_status() == STATUS_OFF) {
 			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 			led_post_event(HAL_LED_EVENT_REFRESH);
+			set_ringtone_state(Ringtone_StopRecording);
+			spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
+
 			video_recording_handler_stop_state = 0;
 
 		} else if (video_recording_handler_stop_state > 200) {
 			//TODO Retry 5 time
 			PRINTF("[VideoRecording] Stop video recording Failed...\r\n");
+			spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
 
 			video_recording_handler_stop_state = 0;
 
