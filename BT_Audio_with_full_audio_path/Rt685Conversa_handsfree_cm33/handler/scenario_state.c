@@ -11,6 +11,7 @@
 #include "WorkStateManager.h"
 #include "app_avrcp.h"
 #include "spi_handler.h"
+#include "spi_command_set.h"
 
 
 static volatile scenario_state_t current_scenario_state = SCENARIO_STATE_HOME;
@@ -247,8 +248,10 @@ static void scenario_media_player_handler (void)
 
 	} else if (media_player_handler_start_state == 6) {
 		amp_post_event(AMP_EVT_MUSIC);
+		media_player_handler_start_state++;
 
-		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_START); // Start media player
+	} else if (media_player_handler_start_state == 7) {
+		spi_command_atomic_exec_media_start; // Start media player
 
 		media_player_handler_start_state = 0;
 
@@ -269,13 +272,12 @@ static void scenario_media_player_handler (void)
 		media_player_handler_stop_state++;
 
 	} else if (media_player_handler_stop_state == 3) {
-		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_STOP); // media player: leave
+		spi_command_atomic_exec_media_stop(); // media player: leave
 
 		media_player_handler_stop_state++;
 
 	} else if (media_player_handler_stop_state == 4) {
-		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE); // UI: home
-
+		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME);
 		media_player_handler_stop_state = 0;
 
 	} else if (media_player_handler_stop_state > 0) {
@@ -351,7 +353,7 @@ static void scenario_audio_call_handler (void)
 
 	} else if (audio_call_handler_start_state == 3) {
 		//todo SPI: change UI for audio call
-		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE); // UI: home
+		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
 
 		audio_call_handler_start_state = 0;
 
@@ -372,7 +374,7 @@ static void scenario_audio_call_handler (void)
 		audio_call_handler_stop_state++;
 
 	} else if (audio_call_handler_stop_state == 3) {
-		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE); // UI: home
+		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
 
 		audio_call_handler_stop_state = 0;
 

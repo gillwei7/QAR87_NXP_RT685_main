@@ -46,7 +46,7 @@ void spi_command_atomic_exec_take_picture(void);
 void spi_command_atomic_exec_stop_recording(void);
 void spi_command_atomic_exec_start_recording(void);
 
-void spi_command_atomic_exec_switch_ui_page(uint8_t state);
+void spi_command_atomic_exec_switch_ui_page(spi_command_ui_page_t state);
 
 
 void spi_command_atomic_status_version_info(void);

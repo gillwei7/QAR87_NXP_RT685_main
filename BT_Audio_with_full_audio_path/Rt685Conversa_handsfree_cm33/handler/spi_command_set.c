@@ -93,7 +93,7 @@ void spi_command_atomic_exec_start_recording(void)
 }
 
 
-void spi_command_atomic_exec_switch_ui_page(uint8_t state)
+void spi_command_atomic_exec_switch_ui_page(spi_command_ui_page_t state)
 {
     s_ui_page_id = state;
     send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SWITCH_UI_PAGE);
