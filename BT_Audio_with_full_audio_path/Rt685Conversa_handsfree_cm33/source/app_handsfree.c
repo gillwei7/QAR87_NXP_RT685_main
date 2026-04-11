@@ -47,6 +47,7 @@
 #include "button_handler.h"
 #include "i2c_component_handler.h"
 #include "hal_common.h"
+#include "hal_amp.h"
 #include "app_connect.h"
 #include "system_status.h"
 #include "WorkStateManager.h"
@@ -541,8 +542,11 @@ static void watchdog_task(void *pvParameters)
 {
     while(1){
     	PRINTF("[Watchdog] 3s (%ld)\n", xTaskGetTickCount());
-
-        vTaskDelay(pdMS_TO_TICKS(3000));
+#if 0 // Only for check status
+    	vTaskDelay(pdMS_TO_TICKS(10));
+    	PRINTF("get_amp_status(): %d\r\n", get_amp_status());
+#endif
+    	vTaskDelay(pdMS_TO_TICKS(3000));
     }
 }
 
