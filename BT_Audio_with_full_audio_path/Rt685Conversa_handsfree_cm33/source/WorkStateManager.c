@@ -240,7 +240,6 @@ void WorkStateDeInit(int WhichState, U32 Opt)
 		#if EnableWorkState_Translation==1
 			case WorkState_Translation:
 				DeInitAudioInterface_Translation(0);
-				set_ringtone_state(Ringtone_StopTranslation);
 
 				PRINTF_M("    Mcu: WorkState_Translation DeInit is done\r\n");
 				break;
@@ -254,7 +253,6 @@ void WorkStateDeInit(int WhichState, U32 Opt)
 		#if EnableWorkState_VideoAi==1
 			case WorkState_VideoAi:
 				DeInitAudioInterface_VideoAi(0);
-				set_ringtone_state(Ringtone_StopVideoAI);
 				PRINTF_M("    Mcu: WorkState_VideoAi DeInit is done\r\n");
 				break;
 		#endif
@@ -307,7 +305,6 @@ int WorkStateInit(int WhichState, U32 Opt)
 		#if EnableWorkState_Translation==1
 			case WorkState_Translation_Pre:
 				InitAudioInterface_Translation(0);
-				set_ringtone_state(Ringtone_StartTranslation);
 				PRINTF_M("    Mcu: WorkState_Translation Init is done\r\n");
 				return(WorkState_Translation);
 				break;
@@ -322,7 +319,6 @@ int WorkStateInit(int WhichState, U32 Opt)
 		#if EnableWorkState_VideoAi==1
 			case WorkState_VideoAi_Pre:
 				InitAudioInterface_VideoAi(0);
-				set_ringtone_state(Ringtone_StartVideoAI);
 				PRINTF_M("    Mcu: WorkState_VideoAi Init is done\r\n");
 				return(WorkState_VideoAi);
 				break;
@@ -1136,7 +1132,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_Translation_Pre;
 								WorkStateIsChanged=1;
-								set_ringtone_state(Ringtone_StartTranslation);
 							}
 						#endif
 						#if EnableWorkState_AiConversation==1
@@ -1155,7 +1150,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_VideoAi_Pre;
 								WorkStateIsChanged=1;
-								set_ringtone_state(Ringtone_StartVideoAI);
 							}
 						#endif
 						break;
@@ -1214,7 +1208,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
-								set_ringtone_state(Ringtone_StopTranslation);
 							}
 						#endif
 						break;
@@ -1237,7 +1230,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
-								set_ringtone_state(Ringtone_StopVideoAI);
 							}
 						#endif
 						break;
