@@ -26,6 +26,7 @@ static volatile uint8_t capture_status = 0;
 static volatile uint8_t recording_status = 0;
 static volatile amp_status_t amp_status = AMP_STATUS_OFF;
 static volatile uint8_t music_status = STATUS_OFF;
+static volatile uint8_t audio_call_status = STATUS_OFF;
 
 static volatile uint8_t is_turning_on_camera = 0;
 static volatile uint8_t need_send_state = 0;
@@ -51,6 +52,17 @@ uint8_t get_music_status(void)
 void set_music_status(uint8_t status)
 {
 	music_status = status;
+}
+
+// Only for HFP
+uint8_t get_audio_call_status(void)
+{
+	return audio_call_status;
+}
+
+void set_audio_call_status(uint8_t status)
+{
+	audio_call_status = status;
 }
 
 uint8_t get_amp_status(void)
@@ -111,12 +123,12 @@ void ss_set_capture_status(uint8_t status)
 {
 	if (status == STATUS_START)
 	{
-		capture_status = 1;
+		capture_status = STATUS_ON;
         set_ringtone_state(Ringtone_PhotoCapture);
 	}
 	else if (status == STATUS_END)
 	{
-		capture_status = 0;
+		capture_status = STATUS_OFF;
 
 	}
 }
@@ -130,11 +142,11 @@ void ss_set_recording_status(uint8_t status)
 {
 	if (status == STATUS_START)
 	{
-		recording_status = 1;
+		recording_status = STATUS_ON;
 	}
 	else if (status == STATUS_END)
 	{
-		recording_status = 0;
+		recording_status = STATUS_OFF;
 	}
 }
 

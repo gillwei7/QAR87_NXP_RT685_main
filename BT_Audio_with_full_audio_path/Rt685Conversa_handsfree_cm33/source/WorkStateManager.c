@@ -221,7 +221,7 @@ void WorkStateDeInit(int WhichState, U32 Opt)
 		#if EnableWorkState_VideoRecording==1
 			case WorkState_VideoRecording:
 				DeInitAudioInterface_VideoRecording(0);
-				set_ringtone_state(Ringtone_StopRecording);
+
 				PRINTF_M("    Mcu: WorkState_VideoRecording DeInit is done\r\n");
 				break;
 		#endif
@@ -286,7 +286,6 @@ int WorkStateInit(int WhichState, U32 Opt)
 		#if EnableWorkState_VideoRecording==1
 			case WorkState_VideoRecording_Pre:
 				InitAudioInterface_VideoRecording(0);
-				set_ringtone_state(Ringtone_StartRecording);
 				PRINTF_M("    Mcu: WorkState_VideoRecording Init is done\r\n");
 				return(WorkState_VideoRecording);
 				break;
@@ -1116,7 +1115,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_VideoRecording_Pre;
 								WorkStateIsChanged=1;
-								set_ringtone_state(Ringtone_StartRecording);
 							}
 						#endif
 						#if EnableWorkState_MediaPlayer==1
@@ -1182,7 +1180,7 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStatePre=DeviceWorkStateCur;
 								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;
 								WorkStateIsChanged=1;
-								set_ringtone_state(Ringtone_StopRecording);
+
 							}
 						#endif
 						break;

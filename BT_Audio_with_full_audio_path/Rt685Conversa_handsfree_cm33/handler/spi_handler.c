@@ -282,16 +282,11 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 
 		case CMD_ATOMIC_EVENT_RECORDING_STARTED:
 			PRINTF("[SPI][Event] RECORDING_STARTED \r\n ");
-			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
-			led_post_event(HAL_LED_EVENT_REFRESH);
 			ss_set_recording_status(STATUS_START);
 			break;
 
 		case CMD_ATOMIC_EVENT_RECORDING_STOPPED:
 			PRINTF("[SPI][Event] RECORDING_STOPPED \r\n ");
-			set_scenario_state(SCENARIO_STATE_HOME);
-			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
-			led_post_event(HAL_LED_EVENT_REFRESH);
 			ss_set_recording_status(STATUS_END);
 			break;
 

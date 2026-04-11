@@ -14,24 +14,29 @@ static uint8_t has_amp_event = 0;
 
 /* prof_name: 1. "Music", 2. "Receiver" */
 static void hal_amp_aw88166_left_start(char *prof_name) {
+	// TODO return status
     start_aw88166_pa(AW_DEV_0, prof_name);
 }
 
 static void hal_amp_aw88166_right_start(char *prof_name) {
+	// TODO return status
     start_aw88166_pa(AW_DEV_1, prof_name);
 }
 
 static void hal_amp_aw88166_left_stop(void) {
+	// TODO return status
     close_aw88166_pa(AW_DEV_0);
 
 }
 static void hal_amp_aw88166_right_stop(void) {
+	// TODO return status
     close_aw88166_pa(AW_DEV_1);
 
 }
 
 // The AMP must be enabled after I2S, so it can be enabled within the handler
 static void hal_amp_aw88166_all_start_music (void) {
+	// TODO Return the status, and update the AMP status only if enabling succeeds
 	hal_amp_aw88166_left_start("Music");
 	hal_amp_aw88166_right_start("Music");
 	set_amp_status(AMP_STATUS_MUSIC);
@@ -40,6 +45,7 @@ static void hal_amp_aw88166_all_start_music (void) {
 }
 
 static void hal_amp_aw88166_all_start_receiver (void) {
+	// TODO Return the status, and update the AMP status only if enabling succeeds
 	hal_amp_aw88166_left_start("Receiver");
 	hal_amp_aw88166_right_start("Receiver");
 	set_amp_status(AMP_STATUS_RECEIVER);
@@ -49,6 +55,7 @@ static void hal_amp_aw88166_all_start_receiver (void) {
 
 //The AMP must be disabled before I2S
 static void hal_amp_aw88166_all_stop (void) {
+	// TODO Return the status, and update the AMP status only if enabling succeeds
 	hal_amp_aw88166_left_stop();
 	hal_amp_aw88166_right_stop();
 	set_amp_status(AMP_STATUS_OFF);

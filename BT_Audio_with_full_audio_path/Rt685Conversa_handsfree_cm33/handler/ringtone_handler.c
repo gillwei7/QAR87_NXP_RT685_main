@@ -28,7 +28,8 @@ static uint8_t            ringtone_is_played = 0;
 static uint32_t           ringtone_time_count = 0;
 static uint16_t connection_timer_count = 0;
 
-static uint8_t ringtone_audio_handler_state = 0;
+static uint16_t ringtone_audio_handler_state = 0;
+static uint8_t ringtone_is_playing = 0;
 
 
 
@@ -59,16 +60,24 @@ static void ringtone_audio_set_state (void)
 	}
 }
 
+uint8_t is_playing_ringtone (void)
+{
+	return ringtone_is_playing;
+}
+
 void set_ringtone_state (RingtoneState state)
 {
 	general_RingtoneState = state;
 
 	if (get_amp_status() == AMP_STATUS_OFF && general_RingtoneState != Ringtone_No) {
 		ringtone_audio_set_state();
+		ringtone_is_playing = 1;
 
 	} else if (general_RingtoneState != Ringtone_No) {
 		startOpusPlayIndex(general_RingtoneState - 1);
 		general_RingtoneState = Ringtone_No;
+		ringtone_is_playing = 1;
+
 	}
 }
 
@@ -86,12 +95,18 @@ static void ringtone_audio_handler (void)
 		ringtone_audio_handler_state++;
 
 	} else if (ringtone_audio_handler_state > 0) {
-		if (VarBlockSharedByDspAndMcu.NeedToStartPlayOpus == 2) {
+		if (VarBlockSharedByDspAndMcu.NeedToStartPlayOpus == 2 || ringtone_audio_handler_state > 2000) {
+			// TODO: Check AMP disable conditions based on the active scenario
 			amp_post_event(AMP_EVT_STOP);
 			general_RingtoneState = Ringtone_No;
 			ringtone_audio_handler_state = 0;
 			PRINTF("[Ringtone] Stop ringtone\r\n");
+		} else {
+			ringtone_audio_handler_state++;
 		}
+	}
+	if (ringtone_is_playing && VarBlockSharedByDspAndMcu.NeedToStartPlayOpus == 2) {
+		ringtone_is_playing = 0;
 	}
 }
 

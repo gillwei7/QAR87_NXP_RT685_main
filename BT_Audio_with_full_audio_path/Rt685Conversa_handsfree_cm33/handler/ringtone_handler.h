@@ -32,5 +32,6 @@ typedef enum
 
 void ringtone_test(int opus_index);
 void set_ringtone_state (RingtoneState state);
+uint8_t is_playing_ringtone (void);
 
 #endif /* RINGTONE_HANDLER_H_ */

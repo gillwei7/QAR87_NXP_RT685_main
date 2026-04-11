@@ -100,6 +100,9 @@ uint8_t ss_get_battery();
 
 uint8_t get_music_status(void);
 void set_music_status(uint8_t status);
+uint8_t get_audio_call_status(void);
+void set_audio_call_status(uint8_t status);
+
 uint8_t get_amp_status(void);
 void set_amp_status(uint8_t status);
 #if 0

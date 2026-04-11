@@ -57,6 +57,7 @@ static TimerHandle_t s_power_button_timer = NULL;
 static TimerHandle_t s_function_button_timer = NULL;
 static TimerHandle_t s_soc_power_off_timer = NULL;
 
+static uint8_t video_recording_press = 0;
 
 static uint8_t oe_status = 1;
 
@@ -262,10 +263,7 @@ void button_press_handler (void)
 						ss_set_capture_status(STATUS_START);
 					}
 					if (Novatek_boot_completed && (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING)) {
-						send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_RECORDING); // Stop Recording
-						hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
-						led_post_event(HAL_LED_EVENT_REFRESH);
-						ss_set_recording_status(STATUS_END);
+						set_scenario_state(SCENARIO_STATE_HOME);
 					}
 #endif
 #endif
@@ -325,23 +323,6 @@ void button_press_handler (void)
 	}
 }
 
-uint8_t video_recording_state = 0;
-uint8_t video_recording_press = 0;
-
-void video_recording_handler (void) {
-	if (video_recording_state == 0) {
-		return;
-	} else if (video_recording_state == 5) {
-		set_scenario_state(SCENARIO_STATE_VIDEO_RECORDING);
-		video_recording_state++;
-	} else if (video_recording_state == 10) {
-		send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_RECORDING); // Start recording
-		video_recording_state = 0;
-	} else {
-		video_recording_state++;
-	}
-}
-
 void button_press_hold_handler (void)
 {
 	if(power_button_press_set)
@@ -354,7 +335,11 @@ void button_press_hold_handler (void)
 
 				power_button_press_hold_shutdown_set = 1;
 				PRINTF("[Button] power button Press & Hold (%d ms)\r\n", POWER_OFF_MS);
-
+#if 0 //QAR88a
+				if (video_recording_press) {
+					video_recording_press = 0;
+				}
+#endif
 #if SOC_SPI_ENABLE
 				if (Novatek_boot_completed) {
 					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SOFT_POWER_OFF); // Power off
@@ -380,10 +365,9 @@ void button_press_hold_handler (void)
 
 				if (Novatek_boot_completed && (get_scenario_state() == SCENARIO_STATE_HOME || get_scenario_state() == SCENARIO_STATE_MENU ||
 						get_scenario_state() == SCENARIO_STATE_ABOUT) && !ss_get_capture_status()) {
-					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_RECORDING); // Start recording
-					hal_led_set_situation(HAL_LED_EVENT_RECORDING, SITUATION_ENABLE);
-					led_post_event(HAL_LED_EVENT_REFRESH);
-					ss_set_recording_status(COMPONENT_START);
+					set_ringtone_state(Ringtone_StartRecording);
+					video_recording_press = 1;
+
 				}
 #endif
 #endif
@@ -399,6 +383,13 @@ void button_press_hold_handler (void)
 			power_button_press_hold_1s_set = 0;
 			power_button_press_hold_shutdown_set = 0;
 			PRINTF("[Button] power button Press & Hold Release\r\n");
+#if 0//QAR88a
+			if (video_recording_press) {
+				video_recording_press = 0;
+				set_scenario_state(SCENARIO_STATE_VIDEO_RECORDING);
+			}
+#endif
+
 		}
 	}
 
@@ -411,9 +402,11 @@ void button_press_hold_handler (void)
 			{
 				function_button_press_hold_5s_set = 1;
 				PRINTF("[Button] function button Press & Hold (5s)\r\n");
+#if 1//QAR88m, QAR88n
 				if (video_recording_press) {
 					video_recording_press = 0;
 				}
+#endif
 			}
 		}
 		if(!function_button_press_hold_recording_set)
@@ -421,6 +414,8 @@ void button_press_hold_handler (void)
 			if(xTaskGetTickCount() - function_button_down_tick > CAMERA_RECORDING_MS)
 			{
 #if SOC_SPI_ENABLE
+#if 1//QAR88m, QAR88n
+
 				PRINTF("[Button] get_scenario_state (%d), ss_get_capture_status: %d\r\n", get_scenario_state(), ss_get_capture_status);
 
 				if (Novatek_boot_completed && (get_scenario_state() == SCENARIO_STATE_HOME || get_scenario_state() == SCENARIO_STATE_MENU ||
@@ -429,6 +424,7 @@ void button_press_hold_handler (void)
 					video_recording_press = 1;
 
 				}
+#endif
 #endif
 
 				function_button_press_hold_recording_set = 1;
@@ -444,10 +440,12 @@ void button_press_hold_handler (void)
 			function_button_press_hold_recording_set = 0;
 			function_button_press_hold_5s_set = 0;
 			PRINTF("[Button] function button Press & Hold Release\r\n");
+#if 1//QAR88m, QAR88n
 			if (video_recording_press) {
 				video_recording_press = 0;
-				video_recording_state = 1;
+				set_scenario_state(SCENARIO_STATE_VIDEO_RECORDING);
 			}
+#endif
 		}
 	}
 }
@@ -456,7 +454,6 @@ void button_handler (void)
 {
 	button_press_handler();
 	button_press_hold_handler();
-	video_recording_handler();
 }
 
 /* PINT ISR 回呼：將不同來源的中斷以不同 bit 通知同一個任務 */
