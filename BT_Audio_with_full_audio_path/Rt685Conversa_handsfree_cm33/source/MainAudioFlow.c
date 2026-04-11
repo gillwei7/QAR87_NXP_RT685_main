@@ -1552,10 +1552,15 @@ void InitAudioInterface_HfpCall(int Opt)
 	VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples    =AudioFrameSizeInSamplePerCh_16KHz;
 
     int TimeOutInMs=100;
+#if 1
 	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
 	if(WaitForDspFinishesItsJob(ConversaTuningCfg_HfpVoiceCall,TimeOutInMs))
 		PRINTF_M("set ConversaTuningCfg_HfpVoiceCall time out in %d ms\r\n", TimeOutInMs);
-
+#else // For debug
+	VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_AdaptiveMode;
+	if(WaitForDspFinishesItsJob(ConversaTuningCfg_AdaptiveMode,TimeOutInMs))
+		PRINTF_M("set ConversaTuningCfg_AdaptiveMode time out in %d ms\r\n", TimeOutInMs);
+#endif
 	return;
 }
 void InitAudioInterface_HomeVitStandby(int Opt)
