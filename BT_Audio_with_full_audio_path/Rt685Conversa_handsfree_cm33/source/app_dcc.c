@@ -50,21 +50,10 @@ static void passkey_display(struct bt_conn *conn, unsigned int passkey)
     PRINTF("Passkey %06u\n", passkey);
 }
 
-#if 0
-static void passkey_confirm(struct bt_conn *conn, unsigned int passkey)
-{
-    char addr[BT_ADDR_LE_STR_LEN];
-
-    bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
-
-    PRINTF("Confirm passkey for %s: %06u", addr, passkey);
-    s_passkeyConfirm = 1;
-}
-#endif
-
 static struct bt_conn_auth_cb auth_cb_display = {
-    .cancel = auth_cancel, .passkey_display = passkey_display, /* Passkey display callback */
-                                                               //  .passkey_confirm = passkey_confirm,
+    .cancel = auth_cancel,
+    .passkey_display = NULL, //passkey_display, /* Passkey display callback */
+    //  .passkey_confirm = passkey_confirm,
 };
 
 extern void connect_paired_device(uint8_t device_index);
