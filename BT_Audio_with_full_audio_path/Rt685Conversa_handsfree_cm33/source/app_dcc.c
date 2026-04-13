@@ -112,7 +112,7 @@ void bt_ready(int err)
     	PRINTF("Failed to read FW version");
     }
 
-    	a2dp_sink_ready();
+    a2dp_sink_ready();
     hfp_hf_init();
     app_connect_init();
     bt_conn_auth_cb_register(&auth_cb_display);
@@ -130,54 +130,4 @@ void bt_ready(int err)
     peripheral_gls_le_adv_start();
 #endif
     app_a2dp_hf_auto_connect();
-    //app_clear_paired_devices(); // For test
-#if 0
-   // if(g_pairedDeviceCount)
-   // {
-   // 	PRINTF("Trying connect paired device at startup\n");
-    	//try to connect paired device at startup
-   //  	connect_paired_device(paired_devices[0].addr[0]);
-   // }else
-   // {
-    	//configure BT discoverable and connectable at startup
-    	bt_br_set_connectable(false);
-    	if (bt_br_set_connectable(true))
-    	{
-    	   PRINTF("BR/EDR set/reset connectable failed\n");
-    	   return;
-    	}
-    	if (bt_br_set_discoverable(true))
-    	{
-    	  PRINTF("BR/EDR set discoverable failed\n");
-    	   return;
-    	}
-    	PRINTF("BR/EDR set connectable and discoverable done\n");
-
-        if(g_pairedDeviceCount)
-        {
-        	PRINTF("Trying connect paired device at startup\n");
-        	//try to connect paired device at startup
-         	connect_paired_device(paired_devices[0].addr[0]);
-        }
-    //}
-#endif
 }
-
-#if 0
-void hfp_hf_a2dp_task(void *pvParameters)
-{
-    int err = 0;
-    (void)err;
-
-    PRINTF("HFP+A2DP SINK Demo started...\n");
-
-    /* Initializate BT Host stack */
-    err = bt_enable(bt_ready);
-    if (err) {
-        PRINTF("Bluetooth init failed (err %d)\n", err);
-        return;
-    }
-
-    vTaskDelete(NULL);
-}
-#endif

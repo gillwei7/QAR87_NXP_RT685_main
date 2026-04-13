@@ -142,7 +142,7 @@ static struct bt_sdp_attribute hfp_hf_attrs[] = {
 static struct bt_sdp_record hfp_hf_rec = BT_SDP_RECORD(hfp_hf_attrs);
 
 extern TDeviceWorkState DeviceWorkStateCur;
-
+extern void bt_ready(int err);
 
 void hfp_hf_register_service()
 {
@@ -150,35 +150,6 @@ void hfp_hf_register_service()
 }
 
 
-static void auth_cancel(struct bt_conn *conn)
-{
-    char addr[BT_ADDR_LE_STR_LEN];
-
-    bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
-
-    PRINTF("Pairing cancelled: %s\n", addr);
-}
-
-static void passkey_display(struct bt_conn *conn, unsigned int passkey)
-{
-    PRINTF("Passkey %06u\n", passkey);
-}
-
-#if 0
-static void passkey_confirm(struct bt_conn *conn, unsigned int passkey)
-{
-    char addr[BT_ADDR_LE_STR_LEN];
-
-    bt_addr_le_to_str(bt_conn_get_dst(conn), addr, sizeof(addr));
-
-    PRINTF("Confirm passkey for %s: %06u", addr, passkey);
-    s_passkeyConfirm = 1;
-}
-#endif
-static struct bt_conn_auth_cb auth_cb_display = {
-    .cancel = auth_cancel, .passkey_display = passkey_display, /* Passkey display callback */
-                                                               //  .passkey_confirm = passkey_confirm,
-};
 static void connected(struct bt_conn *conn, int err)
 {
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
@@ -399,53 +370,6 @@ int app_hfp_hf_discover(struct bt_conn *conn, uint8_t channel)
     return err;
 }
 
-#if 0
-static void bt_ready(int err)
-{
-    struct net_buf *buf = NULL;
-    struct bt_hci_cp_write_class_of_device *cp;
-
-    if (err)
-    {
-        PRINTF("Bluetooth init failed (err %d)\n", err);
-        return;
-    }
-
-#if (defined(CONFIG_BT_SETTINGS) && (CONFIG_BT_SETTINGS > 0))
-    settings_load();
-#endif /* CONFIG_BT_SETTINGS */
-
-    PRINTF("Bluetooth initialized\n");
-
-    buf = bt_hci_cmd_create(BT_HCI_OP_WRITE_CLASS_OF_DEVICE, sizeof(*cp));
-    if (buf != NULL)
-    {
-        cp = net_buf_add(buf, sizeof(*cp));
-        sys_put_le24(HFP_CLASS_OF_DEVICE, &cp->class_of_device[0]);
-        err = bt_hci_cmd_send_sync(BT_HCI_OP_WRITE_CLASS_OF_DEVICE, buf, NULL);
-    }
-    else
-    {
-        err = -ENOBUFS;
-    }
-
-    if (err)
-    {
-        PRINTF("setting class of device failed\n");
-    }
-
-    app_connect_init();
-    bt_conn_auth_cb_register(&auth_cb_display);
-    bt_sdp_register_service(&hfp_hf_rec);
-    handsfree_enable();
-    app_shell_init();
-    app_a2dp_hf_auto_connect();
-    
-}
-#else
-extern void bt_ready(int err);
-#endif
-
 void hfp_AnswerCall(void)
 {
     bt_hfp_hf_send_cmd(conn_rider_phone, BT_HFP_HF_ATA);
@@ -532,12 +456,6 @@ extern void StartMicSpkTest(void);
 extern void Manager_Task(void *pvParameters);
 extern void connect_paired_device(uint8_t device_index);
 
-
-
-
-
-
-
 static void watchdog_task(void *pvParameters)
 {
     while(1){
@@ -565,28 +483,6 @@ void hfp_hf_a2dp_task(void *pvParameters)
     {
         PRINTF("Bluetooth init failed (err %d)\n", err);
         return;
-    }
-#endif
-#if 0
-    if(g_pairedDeviceCount)
-    {
-    	//try to connect paired device at startup
-    	connect_paired_device(1);
-    }else
-    {
-		//configure BT discoverable and connectable at startup
-		bt_br_set_connectable(false);
-		if (bt_br_set_connectable(true))
-		{
-		   PRINTF("BR/EDR set/reset connectable failed\n");
-		   return;
-		}
-		if (bt_br_set_discoverable(true))
-		{
-		  PRINTF("BR/EDR set discoverable failed\n");
-		   return;
-		}
-		PRINTF("BR/EDR set connectable and discoverable done\n");
     }
 #endif
 
