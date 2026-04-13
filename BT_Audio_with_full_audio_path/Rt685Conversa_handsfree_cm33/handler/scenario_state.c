@@ -541,21 +541,27 @@ static void scenario_video_ai_handler (void)
 	if (video_ai_handler_start_state == 0 && video_ai_handler_stop_state == 0) {
 			return;
 	}
-	//Start: 1. Audio path 2. SPI 3. BLE 4. LED and AMP
+	//Start: 1. Ringtone 2. Audio path 3. SPI 4. BLE 5. LED and AMP
 	if (video_ai_handler_start_state == 1) {
 		PRINTF("[VideoAI] Start video ai...\r\n");
-		RequestToGetIntoVideoAI = 1; //Audio path
+		set_ringtone_state(Ringtone_StartVideoAI);
 		video_ai_handler_start_state++;
 
 	} else if (video_ai_handler_start_state == 2) {
-		// TODO send SPI command (Start video call) to Novatek
-		video_ai_handler_start_state++;
+		if (!is_playing_ringtone()) { // Wait for the ringtone to finish
+			RequestToGetIntoVideoAI = 1; //Audio path
+			video_ai_handler_start_state++;
+		}
 
 	} else if (video_ai_handler_start_state == 3) {
-		// TODO Send a BLE event (Wi-Fi IP) to the phone when the Novatek Wi-Fi IP is ready
+		// TODO send SPI command (Start video ai) to Novatek
 		video_ai_handler_start_state++;
 
 	} else if (video_ai_handler_start_state == 4) {
+		// TODO Send a BLE event (Wi-Fi IP) to the phone when the Novatek Wi-Fi IP is ready
+		video_ai_handler_start_state++;
+
+	} else if (video_ai_handler_start_state == 5) {
 		// TODO Set LED and AMP when the Novatek RTSP is ready
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
@@ -567,11 +573,11 @@ static void scenario_video_ai_handler (void)
 		video_ai_handler_start_state++;
 	}
 
-	//Stop: 1. AMP and SPI 2. Audio path 3. UI 4. LED
+	//Stop: 1. AMP and SPI 2. Audio path 3. UI 4. LED and Ringtone
 	if (video_ai_handler_stop_state == 1) {
 		PRINTF("[VideoAI] Stop video ai...\r\n");
 		amp_post_event(AMP_EVT_STOP);
-		// TODO send SPI command (Stop video call) to Novatek
+		// TODO send SPI command (Stop video ai) to Novatek
 		video_ai_handler_stop_state++;
 
 	} else if (video_ai_handler_stop_state == 2) {
@@ -587,6 +593,7 @@ static void scenario_video_ai_handler (void)
 	} else if (video_ai_handler_stop_state == 4) {
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
+		set_ringtone_state(Ringtone_StopVideoAI);
 
 		video_ai_handler_stop_state++;
 
