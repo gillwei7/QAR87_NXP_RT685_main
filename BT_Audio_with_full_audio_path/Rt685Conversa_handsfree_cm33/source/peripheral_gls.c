@@ -31,8 +31,6 @@
 #include "sdmmc_config.h"
 #endif /* APP_MEM_POWER_OPT */
 
-#define CONFIG_BT_SERVICE_NAME "QAR88n_07F3_BLE"//"Glasses Service"
-
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -41,12 +39,13 @@
 // TODO Need to get Wi-Fi AP IP and SSID
 const char* get_device_ip() { return "192.168.1.1"; }
 const char* get_device_ssid() { return "Quanta_Demo_2026_5G_907df2"; }
+extern uint8_t bt_id_read_public_addr(bt_addr_le_t *addr);
 
 /*******************************************************************************
  * Variables
  ******************************************************************************/
 //struct bt_conn *default_conn;
-
+static char ble_service_name[20]; // Buffer to hold "QAR88a_XXXX_BLE"
 static const struct bt_data ad[] = {
     BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
 //    BT_DATA_BYTES(BT_DATA_UUID128_ALL,
@@ -57,10 +56,9 @@ static const struct bt_data ad[] = {
 			BT_UUID_16_ENCODE(BT_UUID_DIS_VAL)),
 };
 
-static const struct bt_data sd[] = {
-	BT_DATA(BT_DATA_NAME_COMPLETE, CONFIG_BT_SERVICE_NAME, sizeof(CONFIG_BT_SERVICE_NAME) - 1),
+static struct bt_data sd[] = {
+    BT_DATA(BT_DATA_NAME_COMPLETE, ble_service_name, 0),
 };
-
 
 #if defined(APP_MEM_POWER_OPT) && (APP_MEM_POWER_OPT > 0)
 extern mmc_card_t g_mmc;
@@ -69,8 +67,27 @@ extern mmc_card_t g_mmc;
 /*******************************************************************************
  * Code
  ******************************************************************************/
+void peripheral_gls_init_ble_name(void)
+{
+    bt_addr_le_t addrs[1];
+
+    // Get the current identity address
+    bt_id_read_public_addr(addrs);
+
+    // Format the name: QAR88a_ + 2 bytes of address + _BLE
+    // Using val[1] and val[0] as per your bt_pal_br.c logic
+    snprintf(ble_service_name, sizeof(ble_service_name), "QAR88a_%02X%02X_BLE",
+             addrs[0].a.val[1], addrs[0].a.val[0]);
+
+    // Update the length in the advertising data structure
+    sd[0].data_len = strlen(ble_service_name);
+
+    PRINTF("[BLE]BLE Service Device Name set to: %s\n", ble_service_name);
+}
+
 void peripheral_gls_le_adv_start()
 {
+    peripheral_gls_init_ble_name();
     //int err = bt_le_adv_start(&adv_params, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
     int err = bt_le_adv_start(BT_LE_ADV_CONN, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
     if (err)

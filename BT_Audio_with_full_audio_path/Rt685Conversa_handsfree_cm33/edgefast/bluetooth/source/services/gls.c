@@ -166,7 +166,7 @@ void bt_status_notify()
 	if(notif_enabled_char2)
 	{
 
-			PRINTF("Status is %s\n", statusChar2);
+			//PRINTF("Status is %s\n", statusChar2);
 
 			// Prepare status_update structure
 			status_update_min.flags = 0x00;
