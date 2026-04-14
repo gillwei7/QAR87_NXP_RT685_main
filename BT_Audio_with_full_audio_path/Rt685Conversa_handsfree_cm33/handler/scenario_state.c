@@ -54,13 +54,7 @@ void set_scenario_state(uint8_t state)
 	}
 
 	if (state == SCENARIO_STATE_HOME) {
-		if (current_scenario_state == SCENARIO_STATE_MUSIC_PLAYER) {
-//			RequestToGetOutofA2dpPlay = 1;
-//			current_scenario_state = state;
-//			need_send_music_status = 1;
-//			music_status = 0;
-
-		} else if (current_scenario_state == SCENARIO_STATE_MEDIA_PLAYER) {
+		if (current_scenario_state == SCENARIO_STATE_MEDIA_PLAYER) {
 			current_scenario_state = state;
 			media_player_handler_stop_state = 1;
 
@@ -80,21 +74,10 @@ void set_scenario_state(uint8_t state)
 			current_scenario_state = state;
 			translation_handler_stop_state = 1;
 
-		} else if (current_scenario_state == SCENARIO_STATE_TAKE_PHOTO) {
-			current_scenario_state = state;
-			RequestToGetOutofTakePhoto = 1;
-
 		}
 #if ABOUT_STATE_ENABLE
 		else if (current_scenario_state == SCENARIO_STATE_ABOUT) {
 			current_scenario_state = state;
-			need_send_state = 1;
-
-			if (music_status == COMPONENT_ON) {
-				send_state_to_soc();
-				return;
-			}
-
 			RequestToGetOutofAbout = 1;
 
 		}
@@ -102,13 +85,6 @@ void set_scenario_state(uint8_t state)
 #if MENU_STATE_ENABLE
 		else if (current_scenario_state == SCENARIO_STATE_MENU) {
 			current_scenario_state = state;
-			need_send_state = 1;
-
-			if (music_status == COMPONENT_ON) {
-				send_state_to_soc();
-				return;
-			}
-
 			RequestToGetOutofMenu = 1;
 
 		}
@@ -117,13 +93,6 @@ void set_scenario_state(uint8_t state)
 #if MENU_STATE_ENABLE
 	else if (state == SCENARIO_STATE_MENU && current_scenario_state == SCENARIO_STATE_HOME) {
 		current_scenario_state = state;
-		need_send_state = 1;
-
-		if (music_status == COMPONENT_ON) {
-			send_state_to_soc();
-			return;
-		}
-
 		RequestToGetIntoMenu = 1;
 
 	}
@@ -131,32 +100,11 @@ void set_scenario_state(uint8_t state)
 #if ABOUT_STATE_ENABLE
 	else if (state == SCENARIO_STATE_ABOUT && (current_scenario_state == SCENARIO_STATE_HOME || current_scenario_state == SCENARIO_STATE_MENU)) {
 		current_scenario_state = state;
-		need_send_state = 1;
-
-		if (music_status == COMPONENT_ON) {
-			send_state_to_soc();
-			return;
-		}
-
 		RequestToGetIntoAbout = 1;
 
 	}
 #endif
-	else if (state == SCENARIO_STATE_MUSIC_PLAYER && (current_scenario_state == SCENARIO_STATE_HOME
-#if MENU_STATE_ENABLE
-			 || current_scenario_state == SCENARIO_STATE_MENU
-#endif
-#if ABOUT_STATE_ENABLE
-			 || current_scenario_state == SCENARIO_STATE_ABOUT
-#endif
-			)) {
-//		RequestToGetIntoA2dpPlay = 1;
-//		current_scenario_state = state;
-//		need_send_music_status = 1;
-//		music_status = 1;
-
-
-	} else if (state == SCENARIO_STATE_MEDIA_PLAYER && (current_scenario_state == SCENARIO_STATE_HOME
+	else if (state == SCENARIO_STATE_MEDIA_PLAYER && (current_scenario_state == SCENARIO_STATE_HOME
 #if MENU_STATE_ENABLE
 			 || current_scenario_state == SCENARIO_STATE_MENU
 #endif
@@ -200,13 +148,7 @@ void set_scenario_state(uint8_t state)
 #endif
 			)) {
 		current_scenario_state = state;
-//		need_send_state = 1;
-#if 0
-		if (music_status == COMPONENT_ON) {
-			send_state_to_soc();
-			return;
-		}
-#endif
+
 		RequestToGetIntoTakePhoto = 1;
 
 	} else if (state == SCENARIO_STATE_VIDEO_AI && (current_scenario_state == SCENARIO_STATE_HOME
