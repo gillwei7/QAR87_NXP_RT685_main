@@ -139,7 +139,7 @@ void set_scenario_state(uint8_t state)
 		video_call_handler_start_state = 1;
 
 
-	} else if (state == SCENARIO_STATE_TAKE_PHOTO && (current_scenario_state == SCENARIO_STATE_HOME
+	} else if ((current_scenario_state == SCENARIO_STATE_HOME
 #if MENU_STATE_ENABLE
 			 || current_scenario_state == SCENARIO_STATE_MENU
 #endif
@@ -243,7 +243,7 @@ static void scenario_music_player_handler (void)
 	}
 	//Start
 	if (music_player_handler_start_state == 1) {
-		if (get_scenario_state() == SCENARIO_STATE_MUSIC_PLAYER) {
+		if (get_scenario_state() == SCENARIO_STATE_MUSIC) {
 			set_scenario_state(SCENARIO_STATE_HOME);
 			PRINTF("[MediaPlayer] pause the Media Player before starting music player\r\n");
 			music_player_handler_start_state++;

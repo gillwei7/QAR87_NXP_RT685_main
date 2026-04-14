@@ -800,8 +800,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING) {
 								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_TAKE_PHOTO) {
-								DeviceWorkStateCur=WorkState_TakePhoto_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI) {
 								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
@@ -854,8 +852,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_About;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING) {
 								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_TAKE_PHOTO) {
-								DeviceWorkStateCur=WorkState_TakePhoto_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI) {
 								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
@@ -893,8 +889,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING) {
 								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_TAKE_PHOTO) {
-								DeviceWorkStateCur=WorkState_TakePhoto_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI) {
 								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
 							}
@@ -930,8 +924,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING) {
 								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_TAKE_PHOTO) {
-								DeviceWorkStateCur=WorkState_TakePhoto_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
 								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
 							}
@@ -965,8 +957,6 @@ void Manager_Task(void *pvParameters)
 								DeviceWorkStateCur=WorkState_About;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER) {
 								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_TAKE_PHOTO) {
-								DeviceWorkStateCur=WorkState_TakePhoto_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI) {
 								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
 							} else if (get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
