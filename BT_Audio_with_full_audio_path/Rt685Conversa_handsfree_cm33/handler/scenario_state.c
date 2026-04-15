@@ -19,6 +19,15 @@
 static volatile scenario_state_t current_scenario_state = SCENARIO_STATE_HOME;
 static volatile uint8_t is_media_playing = MUSIC_PAUSE;
 
+static uint8_t menu_handler_start_state = 0;
+static uint8_t menu_handler_stop_state = 0;
+
+static uint8_t settings_handler_start_state = 0;
+static uint8_t settings_handler_stop_state = 0;
+
+static uint8_t about_handler_start_state = 0;
+static uint8_t about_handler_stop_state = 0;
+
 static uint8_t media_player_handler_start_state = 0;
 static uint8_t media_player_handler_stop_state = 0;
 
@@ -39,6 +48,7 @@ static uint8_t video_ai_handler_stop_state = 0;
 
 static uint8_t translation_handler_start_state = 0;
 static uint8_t translation_handler_stop_state = 0;
+
 
 
 uint8_t get_scenario_state(void)
@@ -175,6 +185,31 @@ void set_scenario_state(uint8_t state)
 	}
 }
 
+static void scenario_menu_handler (void)
+{
+	if (menu_handler_start_state == 0 && menu_handler_stop_state == 0) {
+			return;
+	}
+	//Start: 1. UI
+	if (menu_handler_start_state == 1) {
+		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_LAUNCHER);
+
+		menu_handler_start_state = 0;
+
+	} else if (menu_handler_start_state > 0) {
+		menu_handler_start_state++;
+	}
+
+	//Stop: 1. UI
+	if (menu_handler_stop_state == 1) {
+		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME);
+
+		menu_handler_stop_state = 0;
+
+	} else if (menu_handler_stop_state > 0) {
+		menu_handler_stop_state++;
+	}
+}
 
 static void scenario_media_player_handler (void)
 {
@@ -603,6 +638,7 @@ static void scenario_translation_handler (void)
 
 void scenario_state_handler (void)
 {
+	scenario_menu_handler();
 	scenario_media_player_handler();
 	scenario_music_player_handler();
 	scenario_audio_call_handler();
