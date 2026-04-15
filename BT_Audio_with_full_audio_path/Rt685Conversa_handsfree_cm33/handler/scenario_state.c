@@ -86,16 +86,21 @@ void set_scenario_state(uint8_t state)
 
 		}
 #if ABOUT_STATE_ENABLE
+		else if (current_scenario_state == SCENARIO_STATE_SETTINGS) {
+			current_scenario_state = state;
+			settings_handler_stop_state = 1;
+
+		}
 		else if (current_scenario_state == SCENARIO_STATE_ABOUT) {
 			current_scenario_state = state;
-			RequestToGetOutofAbout = 1;
+			about_handler_stop_state = 1;
 
 		}
 #endif
 #if MENU_STATE_ENABLE
 		else if (current_scenario_state == SCENARIO_STATE_MENU) {
 			current_scenario_state = state;
-			RequestToGetOutofMenu = 1;
+			menu_handler_stop_state = 1;
 
 		}
 #endif
@@ -103,16 +108,19 @@ void set_scenario_state(uint8_t state)
 #if MENU_STATE_ENABLE
 	else if (state == SCENARIO_STATE_MENU && current_scenario_state == SCENARIO_STATE_HOME) {
 		current_scenario_state = state;
-		RequestToGetIntoMenu = 1;
-
+		menu_handler_start_state = 1;
 	}
 #endif
 #if ABOUT_STATE_ENABLE
+	else if (state == SCENARIO_STATE_SETTINGS && (current_scenario_state == SCENARIO_STATE_HOME || current_scenario_state == SCENARIO_STATE_MENU)) {
+		current_scenario_state = state;
+		settings_handler_start_state = 1;
+	}
 	else if (state == SCENARIO_STATE_ABOUT && (current_scenario_state == SCENARIO_STATE_HOME || current_scenario_state == SCENARIO_STATE_MENU)) {
 		current_scenario_state = state;
-		RequestToGetIntoAbout = 1;
-
+		about_handler_start_state = 1;
 	}
+
 #endif
 	else if (state == SCENARIO_STATE_MEDIA_PLAYER && (current_scenario_state == SCENARIO_STATE_HOME
 #if MENU_STATE_ENABLE
@@ -148,18 +156,6 @@ void set_scenario_state(uint8_t state)
 		current_scenario_state = state;
 		video_call_handler_start_state = 1;
 
-
-	} else if ((current_scenario_state == SCENARIO_STATE_HOME
-#if MENU_STATE_ENABLE
-			 || current_scenario_state == SCENARIO_STATE_MENU
-#endif
-#if ABOUT_STATE_ENABLE
-			 || current_scenario_state == SCENARIO_STATE_ABOUT
-#endif
-			)) {
-		current_scenario_state = state;
-
-		RequestToGetIntoTakePhoto = 1;
 
 	} else if (state == SCENARIO_STATE_VIDEO_AI && (current_scenario_state == SCENARIO_STATE_HOME
 #if MENU_STATE_ENABLE
