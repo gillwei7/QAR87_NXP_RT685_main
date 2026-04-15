@@ -238,6 +238,32 @@ static void scenario_settings_handler (void)
 	}
 }
 
+static void scenario_about_handler (void)
+{
+	if (about_handler_start_state == 0 && about_handler_stop_state == 0) {
+			return;
+	}
+	//Start: 1. UI
+	if (about_handler_start_state == 1) {
+		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_ABOUT);
+
+		about_handler_start_state = 0;
+
+	} else if (about_handler_start_state > 0) {
+		about_handler_start_state++;
+	}
+
+	//Stop: 1. UI
+	if (about_handler_stop_state == 1) {
+		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME);
+
+		about_handler_stop_state = 0;
+
+	} else if (about_handler_stop_state > 0) {
+		about_handler_stop_state++;
+	}
+}
+
 static void scenario_media_player_handler (void)
 {
 	if (media_player_handler_start_state == 0 && media_player_handler_stop_state == 0) {
@@ -667,6 +693,7 @@ void scenario_state_handler (void)
 {
 	scenario_menu_handler();
 	scenario_settings_handler();
+	scenario_about_handler();
 	scenario_media_player_handler();
 	scenario_music_player_handler();
 	scenario_audio_call_handler();
