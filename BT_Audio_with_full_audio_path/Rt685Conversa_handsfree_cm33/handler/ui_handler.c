@@ -12,7 +12,7 @@
 static volatile ui_view_t current_ui_view = UI_VIEW_HOME;
 
 
-void update_ui_view (void) {
+static void update_ui_view (void) {
 	switch (current_ui_view) {
 		case UI_VIEW_HOME:
 			spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME);
