@@ -11,6 +11,7 @@
 #include "WorkStateManager.h"
 #include "app_avrcp.h"
 #include "spi_command_set.h"
+#include "ui_handler.h"
 #include "hal_led.h"
 #include "i2c_component_handler.h"
 #include "ringtone_handler.h"
@@ -188,7 +189,7 @@ static void scenario_menu_handler (void)
 	}
 	//Start: 1. UI
 	if (menu_handler_start_state == 1) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_LAUNCHER);
+		set_ui_view(UI_VIEW_MENU_MEDIA);
 		current_scenario_state = SCENARIO_STATE_MENU;
 		menu_handler_start_state = 0;
 
@@ -198,7 +199,7 @@ static void scenario_menu_handler (void)
 
 	//Stop: 1. UI
 	if (menu_handler_stop_state == 1) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME);
+		set_ui_view(UI_VIEW_HOME);
 		current_scenario_state = SCENARIO_STATE_HOME;
 
 		menu_handler_stop_state = 0;
@@ -216,7 +217,7 @@ static void scenario_settings_handler (void)
 	//Start: 1. UI
 	if (settings_handler_start_state == 1) {
 		//TODO Need to add UI for settings
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_ABOUT);
+		set_ui_view(UI_VIEW_ABOUT);
 		current_scenario_state = SCENARIO_STATE_SETTINGS;
 
 		settings_handler_start_state = 0;
@@ -227,7 +228,7 @@ static void scenario_settings_handler (void)
 
 	//Stop: 1. UI
 	if (settings_handler_stop_state == 1) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME);
+		set_ui_view(UI_VIEW_HOME);
 		current_scenario_state = SCENARIO_STATE_HOME;
 
 		settings_handler_stop_state = 0;
@@ -244,7 +245,7 @@ static void scenario_about_handler (void)
 	}
 	//Start: 1. UI
 	if (about_handler_start_state == 1) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_ABOUT);
+		set_ui_view(UI_VIEW_ABOUT);
 		current_scenario_state = SCENARIO_STATE_ABOUT;
 
 		about_handler_start_state = 0;
@@ -255,7 +256,7 @@ static void scenario_about_handler (void)
 
 	//Stop: 1. UI
 	if (about_handler_stop_state == 1) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME);
+		set_ui_view(UI_VIEW_HOME);
 		current_scenario_state = SCENARIO_STATE_HOME;
 
 		about_handler_stop_state = 0;
@@ -318,7 +319,7 @@ static void scenario_media_player_handler (void)
 		media_player_handler_stop_state++;
 
 	} else if (media_player_handler_stop_state == 4) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME);
+		set_ui_view(UI_VIEW_HOME);
 		current_scenario_state = SCENARIO_STATE_HOME;
 
 		media_player_handler_stop_state = 0;
@@ -398,7 +399,7 @@ static void scenario_audio_call_handler (void)
 
 	} else if (audio_call_handler_start_state == 3) {
 		//TODO SPI: change UI for audio call
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
+		set_ui_view(UI_VIEW_HOME); // UI: home
 		set_audio_call_status(STATUS_ON);
 		current_scenario_state = SCENARIO_STATE_AUDIO_CALL;
 
@@ -422,7 +423,7 @@ static void scenario_audio_call_handler (void)
 		audio_call_handler_stop_state++;
 
 	} else if (audio_call_handler_stop_state == 3) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
+		set_ui_view(UI_VIEW_HOME); // UI: home
 		current_scenario_state = SCENARIO_STATE_HOME;
 
 		audio_call_handler_stop_state = 0;
@@ -488,7 +489,7 @@ static void scenario_video_recording_handler (void)
 			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 			led_post_event(HAL_LED_EVENT_REFRESH);
 			set_ringtone_state(Ringtone_StopRecording);
-			spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
+			set_ui_view(UI_VIEW_HOME); // UI: home
 			current_scenario_state = SCENARIO_STATE_HOME;
 
 			video_recording_handler_stop_state = 0;
@@ -496,7 +497,7 @@ static void scenario_video_recording_handler (void)
 		} else if (video_recording_handler_stop_state > 200) {
 			//TODO Retry 5 time
 			PRINTF("[VideoRecording] Stop video recording Failed...\r\n");
-			spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
+			set_ui_view(UI_VIEW_HOME); // UI: home
 			current_scenario_state = SCENARIO_STATE_HOME;
 
 			video_recording_handler_stop_state = 0;
@@ -553,7 +554,7 @@ static void scenario_video_call_handler (void)
 		video_call_handler_stop_state++;
 
 	} else if (video_call_handler_stop_state == 3) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
+		set_ui_view(UI_VIEW_HOME); // UI: home
 
 		video_call_handler_stop_state++;
 
@@ -621,7 +622,7 @@ static void scenario_video_ai_handler (void)
 		video_ai_handler_stop_state++;
 
 	} else if (video_ai_handler_stop_state == 3) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
+		set_ui_view(UI_VIEW_HOME); // UI: home
 
 		video_ai_handler_stop_state++;
 
@@ -690,7 +691,7 @@ static void scenario_translation_handler (void)
 		translation_handler_stop_state++;
 
 	} else if (translation_handler_stop_state == 3) {
-		spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_HOME); // UI: home
+		set_ui_view(UI_VIEW_HOME); // UI: home
 
 		translation_handler_stop_state++;
 
