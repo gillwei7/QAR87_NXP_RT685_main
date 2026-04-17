@@ -23,7 +23,6 @@ typedef struct {
     uint32_t last_update_ms;
     ble_msg_type_t active_type;
     bool     is_assembling;
-    ble_msg_callback_t on_msg_ready;
 } ble_parse_ctx_t;
 
 static ble_parse_ctx_t g_ctx;
@@ -60,13 +59,15 @@ static uint32_t ble_calculate_crc32(const uint8_t *data, size_t length)
 
 }
 
-static uint16_t be16_to_cpu(const uint8_t *p) { return (p[0] << 8) | p[1]; }
-static uint32_t be32_to_cpu(const uint8_t *p) {
+//Read Uint16 Big-Endian
+static uint16_t read_u16_big_endian(const uint8_t *p) { return (p[0] << 8) | p[1]; }
+//Read Uint32 Big-Endian
+static uint32_t read_u32_big_endian(const uint8_t *p) {
     return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
 
 // --- 核心解析函式 ---
-int ble_parse_handle_packet(const uint8_t *buf, uint16_t len, ble_msg_callback_t callback) {
+int ble_packet_parse(const uint8_t *buf, uint16_t len) {
     // Stage 0: 接收基礎檢查
 	BLE_GATT_PARSE_DEBUG("Received packet, len = %d\n", len);
 
@@ -81,8 +82,8 @@ int ble_parse_handle_packet(const uint8_t *buf, uint16_t len, ble_msg_callback_t
 
     uint8_t type = buf[1];
     uint8_t flags = buf[2];
-    uint16_t seq = be16_to_cpu(&buf[4]);
-    uint16_t total_pkts = be16_to_cpu(&buf[6]);
+    uint16_t seq = read_u16_big_endian(&buf[4]);
+    uint16_t total_pkts = read_u16_big_endian(&buf[6]);
     uint32_t payload_offset = BLE_PROTO_HDR_SIZE;
 
     BLE_GATT_PARSE_DEBUG(" Header -> Type: 0x%02X, Flags: 0x%02X, Seq: %d/%d\n", type, flags, seq, total_pkts);
@@ -94,8 +95,8 @@ int ble_parse_handle_packet(const uint8_t *buf, uint16_t len, ble_msg_callback_t
             return -3;
         }
 
-        g_ctx.expected_total_len = be32_to_cpu(&buf[8]);
-        g_ctx.expected_crc32 = be32_to_cpu(&buf[12]);
+        g_ctx.expected_total_len = read_u32_big_endian(&buf[8]);
+        g_ctx.expected_crc32 = read_u32_big_endian(&buf[12]);
         g_ctx.current_len = 0;
         g_ctx.active_type = (ble_msg_type_t)type;
         g_ctx.is_assembling = true;
@@ -147,13 +148,9 @@ int ble_parse_handle_packet(const uint8_t *buf, uint16_t len, ble_msg_callback_t
         	BLE_GATT_PARSE_WARN("Expected CRC was 0. Skipping CRC check.\n");
         }
 
-        // 解析完成，觸發回調
-        if (callback) {
-        	BLE_GATT_PARSE_DEBUG("Dispatching message type 0x%02X to callback...\n", g_ctx.active_type);
-            callback(g_ctx.active_type, g_ctx.buffer, g_ctx.current_len);
-        } else {
-        	BLE_GATT_PARSE_WARN("No callback registered!\n");
-        }
+        //解析訊息
+    	BLE_GATT_PARSE_DEBUG("Dispatching message type 0x%02X to message parse...\n", g_ctx.active_type);
+    	ble_message_parse(g_ctx.active_type, g_ctx.buffer, g_ctx.current_len);
 
         // 重置狀態迎接下一則訊息
         g_ctx.is_assembling = false;
@@ -163,7 +160,7 @@ int ble_parse_handle_packet(const uint8_t *buf, uint16_t len, ble_msg_callback_t
     return 0;
 }
 
-void ble_app_handler(ble_msg_type_t type, const uint8_t *data, size_t len)
+void ble_message_parse(ble_msg_type_t type, const uint8_t *data, size_t len)
 {
     if (type == BLE_MSG_TYPE_AI_RESPONSE) {
     	PRINTF("[BLE][App] BLE_MSG_TYPE_AI_RESPONSE \r\n");

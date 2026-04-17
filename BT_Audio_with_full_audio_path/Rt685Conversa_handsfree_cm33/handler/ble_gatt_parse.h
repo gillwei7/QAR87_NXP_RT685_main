@@ -51,12 +51,9 @@ typedef enum {
     BLE_MSG_TYPE_HEARTBEAT   = 0x40
 } ble_msg_type_t;
 
-// 解析結果的回撥函式原型
-typedef void (*ble_msg_callback_t)(ble_msg_type_t type, const uint8_t *data, size_t len);
-
 // 解析函式
-int ble_parse_handle_packet(const uint8_t *buf, uint16_t len, ble_msg_callback_t callback);
-void ble_app_handler(ble_msg_type_t type, const uint8_t *data, size_t len);
+int ble_packet_parse(const uint8_t *buf, uint16_t len);
+void ble_message_parse(ble_msg_type_t type, const uint8_t *data, size_t len);
 
 
 #endif /* BLE_GATT_PARSE_H_ */
