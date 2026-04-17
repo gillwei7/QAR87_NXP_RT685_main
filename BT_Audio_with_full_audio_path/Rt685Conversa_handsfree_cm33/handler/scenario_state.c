@@ -292,7 +292,7 @@ static void scenario_media_player_handler (void)
 		media_player_handler_start_state++;
 
 	} else if (media_player_handler_start_state == 7) {
-		spi_command_atomic_exec_media_start; // Start media player
+		spi_command_atomic_exec_media_start(); // Start media player
 		current_scenario_state = SCENARIO_STATE_MEDIA_PLAYER;
 
 		media_player_handler_start_state = 0;
@@ -357,6 +357,8 @@ static void scenario_music_player_handler (void)
 		amp_post_event(AMP_EVT_MUSIC);
 		current_scenario_state = SCENARIO_STATE_MUSIC;
 
+		set_ui_view(UI_VIEW_MUSIC_PLAYER); // UI: music
+
 		music_player_handler_start_state = 0;
 
 	} else if (music_player_handler_start_state > 0) {
@@ -399,7 +401,7 @@ static void scenario_audio_call_handler (void)
 
 	} else if (audio_call_handler_start_state == 3) {
 		//TODO SPI: change UI for audio call
-		set_ui_view(UI_VIEW_HOME); // UI: home
+		set_ui_view(UI_VIEW_AUDIO_CALL); // UI: call
 		set_audio_call_status(STATUS_ON);
 		current_scenario_state = SCENARIO_STATE_AUDIO_CALL;
 
@@ -453,6 +455,7 @@ static void scenario_video_recording_handler (void)
 
 	} else if (video_recording_handler_start_state > 0) {
 		if (ss_get_recording_status() == STATUS_ON) {
+			set_ui_view(UI_VIEW_VIDEO_RECORDING); // UI: recording
 			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
 			led_post_event(HAL_LED_EVENT_REFRESH);
 			current_scenario_state = SCENARIO_STATE_VIDEO_RECORDING;
