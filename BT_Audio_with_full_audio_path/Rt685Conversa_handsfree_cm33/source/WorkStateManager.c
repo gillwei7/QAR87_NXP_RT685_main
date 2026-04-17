@@ -791,22 +791,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_MusicPlayer)
 						{
-							if (get_scenario_state() == SCENARIO_STATE_HOME) {
-								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MENU) {
-								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_ABOUT) {
-								DeviceWorkStateCur=WorkState_About;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER) {
-								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING) {
-								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI) {
-								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
-								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
-							}
-
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_MusicPlayer;
 							WorkStateIsChanged=1;
 						}
@@ -845,19 +830,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_MediaPlayer)
 						{
-							if (get_scenario_state() == SCENARIO_STATE_HOME) {
-								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MENU) {
-								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_ABOUT) {
-								DeviceWorkStateCur=WorkState_About;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING) {
-								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI) {
-								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
-								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
-							}
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_MediaPlayer;
 							WorkStateIsChanged=1;
 						}
@@ -880,19 +853,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_Translation)
 						{
-							if (get_scenario_state() == SCENARIO_STATE_HOME) {
-								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MENU) {
-								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_ABOUT) {
-								DeviceWorkStateCur=WorkState_About;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER) {
-								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING) {
-								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI) {
-								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
-							}
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_Translation;
 							WorkStateIsChanged=1;
 						}
@@ -915,19 +876,7 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_VideoAi)
 						{
-							if (get_scenario_state() == SCENARIO_STATE_HOME) {
-								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MENU) {
-								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_ABOUT) {
-								DeviceWorkStateCur=WorkState_About;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER) {
-								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING) {
-								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
-								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
-							}
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_VideoAi;
 							WorkStateIsChanged=1;
 						}
@@ -950,64 +899,13 @@ void Manager_Task(void *pvParameters)
 					{
 						if(DeviceWorkStateCur==WorkState_VideoRecording)
 						{
-							if (get_scenario_state() == SCENARIO_STATE_HOME) {
-								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MENU) {
-								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_ABOUT) {
-								DeviceWorkStateCur=WorkState_About;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER) {
-								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI) {
-								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
-								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
-							}
+							DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
 							DeviceWorkStatePre=WorkState_VideoRecording;
 							WorkStateIsChanged=1;
 						}
 						RequestToGetOutofVideoRecording=0;
 					}
 				#endif // #if EnableWorkState_VideoRecording == 1
-
-				#if EnableWorkState_TakePhoto == 1
-					if(RequestToGetIntoTakePhoto)
-					{
-						if(DeviceWorkStateCur!=WorkState_TakePhoto)
-						{
-							DeviceWorkStatePre=DeviceWorkStateCur;
-							DeviceWorkStateCur=WorkState_TakePhoto;
-							WorkStateIsChanged=1;
-						}
-						RequestToGetIntoTakePhoto=0;
-						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-					}
-					if(RequestToGetOutofTakePhoto)
-					{
-						if(DeviceWorkStateCur==WorkState_TakePhoto)
-						{
-							if (get_scenario_state() == SCENARIO_STATE_HOME) {
-								DeviceWorkStateCur=WorkState_HomeVitStandby_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MENU) {
-								DeviceWorkStateCur=WorkState_Menu;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_ABOUT) {
-								DeviceWorkStateCur=WorkState_About;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER) {
-								DeviceWorkStateCur=WorkState_MediaPlayer_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_RECORDING) {
-								DeviceWorkStateCur=WorkState_VideoRecording_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI) {
-								DeviceWorkStateCur=WorkState_VideoAi_Pre;		//this gives _pre
-							} else if (get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
-								DeviceWorkStateCur=WorkState_Translation_Pre;		//this gives _pre
-							}
-							DeviceWorkStatePre=WorkState_TakePhoto;
-							WorkStateIsChanged=1;
-						}
-						RequestToGetOutofTakePhoto=0;
-						PRINTF_M("    Mcu: Now in: %s\r\n",WorkStateName[DeviceWorkStateCur]);
-					}
-				#endif // #if EnableWorkState_TakePhoto == 1
 
 					if(RequestToGetIntoAbout)
 					{
