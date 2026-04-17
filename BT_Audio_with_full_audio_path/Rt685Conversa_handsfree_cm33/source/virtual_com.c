@@ -34,7 +34,7 @@
 #include "SubFunc.h"
 #include "CircularBufManagement.h"
 #include "CircularBuf.h"
-
+#include "peripheral_gls.h"
 
 #define TuningComAudioIsCrc32
 /*******************************************************************************
@@ -47,7 +47,9 @@
 extern usb_device_endpoint_struct_t g_cdcVcomDicEndpoints[];
 
 // For USB shell command use
-extern int app_clear_paired_devices(void);
+extern void app_clear_paired_devices(void);
+extern void app_clear_device_enter_discoverable(void);
+extern void app_hf_set_connectable(void);
 
 /* Line coding of cdc device */
 USB_DMA_INIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE) static uint8_t s_lineCoding[LINE_CODING_SIZE] = {
@@ -603,21 +605,11 @@ const char *ComPrintInfo_Info2[]=
 };
 const char *ComPrintInfo_Info3[]=
 {
-"[BT]Clear All pairing\r\n",
+"app_clear_paired_devices()\r\n",
 };
 const char *ComPrintInfo_Info4[]=
 {
-"command d is pressed.\r\n",
-};
-
-const char *ComPrintInfo_Help[]=
-{
-"\r\n\
-Type for below shell commands\r\n\
-a:[Audio]Play OPUS ID:N, N max 12\r\n\
-b:[Audio]Play SBC File ID:N, N max 2\r\n",
-"c:[BT]Clear All Paired device\r\n",
-"\r\n"
+"app_hf_set_connectable.\r\n",
 };
 
 #if PRINTF_GoesToUsbCom==1
@@ -663,14 +655,21 @@ void USB_DeviceCdcVcomTask(void)
             // [BT]Clear All pairing
             case 'c':
            		ComPrintInfoPtr=ComPrintInfo_Info3[0];
-                app_clear_paired_devices();
+           		app_clear_paired_devices();
             	break;
             case 'd':
            		ComPrintInfoPtr=ComPrintInfo_Info4[0];
+           		app_hf_set_connectable();
             	break;
-
+            case 'e':
+            	peripheral_gls_le_adv_stop();
+				break;
+            case 'f':
+			    peripheral_gls_le_adv_start();
+				break;
 			default:
-	            ComPrintInfoPtr=ComPrintInfo_Help[0];
+	            //ComPrintInfoPtr=ComPrintInfo_Help[0];
+			    //PRINTF("a:opus\r\nb:sbc\r\nc:app_clear_paired_devices\r\nd:app_hf_set_connectable\r\ne:peripheral_gls_le_adv_stop\r\nf:peripheral_gls_le_adv_start\r\n");
             	break;
             }
             s_recvSize = 0;

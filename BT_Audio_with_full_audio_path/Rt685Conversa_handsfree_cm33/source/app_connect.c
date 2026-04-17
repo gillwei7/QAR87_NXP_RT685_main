@@ -85,6 +85,7 @@ void app_hf_set_connectable(void)
     
     if (g_connectableSet)
     {
+        PRINTF("app_hf_set_connectable error.g_connectableSet = 1\r\n");
         return;
     }
 
@@ -158,8 +159,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
 	 if (info.type == BT_CONN_TYPE_BR && g_connectInitRiderPhone)
 	{
-		PRINTF("Glasses trigger ACL Connection Successful\r\n");
-		PRINTF("ACL Connection Successful with Rider Phone,Role: %d\n",info.role);
+		PRINTF("BTC Connected.Role:%d\r\n", info.role);
 		g_connectInitRiderPhone = 0U;
 		conn_rider_phone = conn;
 
@@ -174,7 +174,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 		sdp_discover_for_hfp_hf(&info);
 	} else if (info.type == BT_CONN_TYPE_LE)
 	{
-		PRINTF("\nLE Connected...\n");
+		PRINTF("LE Connected\r\n");
 		phone_le_conn= conn;
 
 #if CONFIG_BT_SMP
@@ -185,7 +185,7 @@ static void connected(struct bt_conn *conn, uint8_t err)
 #endif
 
 	}else{
-		PRINTF("ACL Connected\r\n");
+		PRINTF("ACL Connected.Connection Type:%d\r\n",info.type);
 	}
     set_ringtone_state(Ringtone_BT_Connected);
 	PRINTF("general_RingtoneState = Ringtone_BT_Connected\r\n");

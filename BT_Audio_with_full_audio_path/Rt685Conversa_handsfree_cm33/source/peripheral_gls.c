@@ -85,6 +85,18 @@ void peripheral_gls_init_ble_name(void)
     PRINTF("[BLE]BLE Service Device Name set to: %s\n", ble_service_name);
 }
 
+void peripheral_gls_le_adv_stop(void)
+{
+    int err = bt_le_adv_stop();
+    if (err)
+    {
+        PRINTF("Advertising failed to stop (err %d)\n", err);
+        return;
+    }else
+    PRINTF("Advertising Stop\r\n");
+}
+
+
 void peripheral_gls_le_adv_start()
 {
     peripheral_gls_init_ble_name();
