@@ -68,14 +68,14 @@ static uint32_t be32_to_cpu(const uint8_t *p) {
 // --- 核心解析函式 ---
 int ble_parse_handle_packet(const uint8_t *buf, uint16_t len, ble_msg_callback_t callback) {
     // Stage 0: 接收基礎檢查
-    PRINTF("[BLE_PARSE] Received packet, len = %d\n", len);
+	BLE_GATT_PARSE_DEBUG("Received packet, len = %d\n", len);
 
     if (len < BLE_PROTO_HDR_SIZE) {
-        PRINTF("[BLE_PARSE] [Error] Packet too short (%d bytes), drop it.\n", len);
+    	BLE_GATT_PARSE_ERROR("Packet too short (%d bytes), drop it.\n", len);
         return -1;
     }
     if (buf[0] != BLE_PROTO_VERSION) {
-        PRINTF("[BLE_PARSE] [Error] Version mismatch! Expected: 0x01, Got: 0x%02X\n", buf[0]);
+    	BLE_GATT_PARSE_ERROR("Version mismatch! Expected: 0x01, Got: 0x%02X\n", buf[0]);
         return -2;
     }
 
@@ -85,12 +85,12 @@ int ble_parse_handle_packet(const uint8_t *buf, uint16_t len, ble_msg_callback_t
     uint16_t total_pkts = be16_to_cpu(&buf[6]);
     uint32_t payload_offset = BLE_PROTO_HDR_SIZE;
 
-    PRINTF("[BLE_PARSE] Header -> Type: 0x%02X, Flags: 0x%02X, Seq: %d/%d\n", type, flags, seq, total_pkts);
+    BLE_GATT_PARSE_DEBUG(" Header -> Type: 0x%02X, Flags: 0x%02X, Seq: %d/%d\n", type, flags, seq, total_pkts);
 
     // Stage 1: 處理起始包 (First Packet)
     if (flags & FLAG_FIRST_PACKET) {
         if (len < (BLE_PROTO_HDR_SIZE + BLE_PROTO_EXTRA_HDR)) {
-            PRINTF("[BLE_PARSE] [Error] First packet too short for extra header.\n");
+        	BLE_GATT_PARSE_ERROR("First packet too short for extra header.\n");
             return -3;
         }
 
@@ -102,62 +102,62 @@ int ble_parse_handle_packet(const uint8_t *buf, uint16_t len, ble_msg_callback_t
 
         payload_offset += BLE_PROTO_EXTRA_HDR;
 
-        PRINTF("[BLE_PARSE] >>> First Packet detected! Total Len: %lu bytes, Expected CRC: 0x%08lX\n",
+        BLE_GATT_PARSE_DEBUG(" >>> First Packet detected! Total Len: %lu bytes, Expected CRC: 0x%08lX\n",
                 g_ctx.expected_total_len, g_ctx.expected_crc32);
     }
 
     // 防護：檢查當前是否處於重組狀態
     if (!g_ctx.is_assembling) {
-        PRINTF("[BLE_PARSE] [Warning] Received sequence without First Packet. Dropping.\n");
+    	BLE_GATT_PARSE_WARN("Received sequence without First Packet. Dropping.\n");
         return -4;
     }
 
     // Stage 2: 累加 Payload 到緩衝區
     uint32_t payload_len = len - payload_offset;
     if (g_ctx.current_len + payload_len > MAX_MSG_BUFFER_SIZE) {
-        PRINTF("[BLE_PARSE] [Error] Buffer overflow! Attempted to exceed %d bytes.\n", MAX_MSG_BUFFER_SIZE);
+    	BLE_GATT_PARSE_ERROR("Buffer overflow! Attempted to exceed %d bytes.\n", MAX_MSG_BUFFER_SIZE);
         g_ctx.is_assembling = false; // 溢出重置
         return -5;
     }
 
     memcpy(&g_ctx.buffer[g_ctx.current_len], &buf[payload_offset], payload_len);
 
-    PRINTF("[BLE_PARSE] Appended %lu bytes. Current accumulated size: %lu/%lu\n",
+    BLE_GATT_PARSE_DEBUG("Appended %lu bytes. Current accumulated size: %lu/%lu\n",
             payload_len, (g_ctx.current_len + payload_len), g_ctx.expected_total_len);
 
     g_ctx.current_len += payload_len;
 
     // Stage 3: 處理結束包 (Last Packet)
     if (flags & FLAG_LAST_PACKET) {
-        PRINTF("[BLE_PARSE] <<< Last Packet detected. Verifying full message...\n");
+    	BLE_GATT_PARSE_DEBUG(" <<< Last Packet detected. Verifying full message...\n");
 
         // 校驗 CRC32
         if (g_ctx.expected_crc32 != 0) {
-            PRINTF("[BLE_PARSE] Calculating CRC32 for %lu bytes...\n", g_ctx.current_len);
+        	BLE_GATT_PARSE_DEBUG("Calculating CRC32 for %lu bytes...\n", g_ctx.current_len);
             uint32_t actual_crc = ble_calculate_crc32(g_ctx.buffer, g_ctx.current_len);
 
             if (actual_crc != g_ctx.expected_crc32) {
-                PRINTF("[BLE_PARSE] [Error] CRC Mismatch! Expected: 0x%08lX, Got: 0x%08lX\n",
+            	BLE_GATT_PARSE_ERROR("CRC Mismatch! Expected: 0x%08lX, Got: 0x%08lX\n",
                         g_ctx.expected_crc32, actual_crc);
                 g_ctx.is_assembling = false;
                 return -6;
             }
-            PRINTF("[BLE_PARSE] CRC Check Passed (0x%08lX)!\n", actual_crc);
+            BLE_GATT_PARSE_DEBUG("CRC Check Passed (0x%08lX)!\n", actual_crc);
         } else {
-            PRINTF("[BLE_PARSE] Warning: Expected CRC was 0. Skipping CRC check.\n");
+        	BLE_GATT_PARSE_WARN("Expected CRC was 0. Skipping CRC check.\n");
         }
 
         // 解析完成，觸發回調
         if (callback) {
-            PRINTF("[BLE_PARSE] Dispatching message type 0x%02X to callback...\n", g_ctx.active_type);
+        	BLE_GATT_PARSE_DEBUG("Dispatching message type 0x%02X to callback...\n", g_ctx.active_type);
             callback(g_ctx.active_type, g_ctx.buffer, g_ctx.current_len);
         } else {
-            PRINTF("[BLE_PARSE] Warning: No callback registered to receive message!\n");
+        	BLE_GATT_PARSE_WARN("No callback registered!\n");
         }
 
         // 重置狀態迎接下一則訊息
         g_ctx.is_assembling = false;
-        PRINTF("[BLE_PARSE] Message process completed. Context reset.\n");
+        BLE_GATT_PARSE_DEBUG("Message process completed. Context reset.\n");
     }
 
     return 0;

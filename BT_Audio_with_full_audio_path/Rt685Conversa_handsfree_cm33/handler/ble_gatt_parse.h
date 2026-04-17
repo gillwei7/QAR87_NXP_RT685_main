@@ -11,6 +11,30 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define BLE_LOG_ERROR_ENABLE  1
+#define BLE_LOG_WARN_ENABLE   1
+#define BLE_LOG_DEBUG_ENABLE  0  // 預設關閉 Debug，只看 Error 和 Warn
+
+// 巨集定義
+#if BLE_LOG_ERROR_ENABLE
+    #define BLE_GATT_PARSE_ERROR(...) do { PRINTF("[BLE_PARSE][Error]  "); PRINTF(__VA_ARGS__); } while(0)
+#else
+    #define BLE_GATT_PARSE_ERROR(...)
+#endif
+
+#if BLE_LOG_WARN_ENABLE
+    #define BLE_GATT_PARSE_WARN(...)  do { PRINTF("[BLE_PARSE][Warning] "); PRINTF(__VA_ARGS__); } while(0)
+#else
+    #define BLE_GATT_PARSE_WARN(...)
+#endif
+
+#if BLE_LOG_DEBUG_ENABLE
+    #define BLE_GATT_PARSE_DEBUG(...) do { PRINTF("[BLE_PARSE][Debug] "); PRINTF(__VA_ARGS__); } while(0)
+#else
+    #define BLE_GATT_PARSE_DEBUG(...)
+#endif
+
+
 // 協定常數
 #define BLE_PROTO_VERSION    0x01
 #define BLE_PROTO_HDR_SIZE   8
