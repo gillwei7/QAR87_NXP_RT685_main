@@ -32,6 +32,7 @@
 #include "hal_common.h"
 #include "ringtone_handler.h"
 #include "scenario_state.h"
+#include "touch_handler.h"
 #endif
 
 #include "app_handsfree.h"
@@ -1375,6 +1376,7 @@ void Manager_Task(void *pvParameters)
 		//------------------------------------step 3, i2c devices handling----------------------------------------------
 		//---beg---
 			i2c_device_handler();
+			touch_gesture_handler();
 		//---end---
 		//----------------------------------------------------------------------------------------------------------------------------
 

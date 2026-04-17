@@ -10,10 +10,7 @@
 #include "fsl_debug_console.h"
 #include "fsl_i3c.h"
 #include "board.h"
-#include "spi_handler.h"
-#include "system_status.h"
-#include "WorkStateManager.h"
-#include "scenario_state.h"
+#include "touch_handler.h"
 
 extern uint8_t Novatek_boot_completed;
 
@@ -69,52 +66,35 @@ static void elan_gesture_handler (uint8_t gid)
     switch (gid)
     {
         case GESTURE_SINGLE_FORWARD:
-            if (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER) {
-                // Volume up
-                ChangeMasterVolumeLevel15_UpDown(1); // pass positive value to increase volume
-                PRINTF("[Touch] Volume up\r\n");
-            }
+        	set_touch_gesture(TOUCH_GESTURE_SINGLE_FORWARD);
             break;
-
         case GESTURE_SINGLE_BACKWARD:
-            if (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER) {
-                // Volume down
-                ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
-                PRINTF("[Touch] Volume down\r\n");
-            }
+        	set_touch_gesture(TOUCH_GESTURE_SINGLE_BACKWARD);
             break;
-
         case GESTURE_SINGLE_PRESS:
-            if (Novatek_boot_completed
-                    && (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER)) {
-                set_scenario_state(SCENARIO_STATE_HOME);
-            }
+        	set_touch_gesture(TOUCH_GESTURE_SINGLE_PRESS_HOLD);
             break;
-
-        case GESTURE_SINGLE_DOUBLE:
-            if (Novatek_boot_completed
-                    && (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER)) {
-                send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_NEXT_MEDIA); // media player: next
-            }
-            break;
-
         case GESTURE_SINGLE_TAP:
-            if (Novatek_boot_completed
-                    && (get_scenario_state() == SCENARIO_STATE_HOME
-                            || get_scenario_state() == SCENARIO_STATE_MENU
-                            || get_scenario_state() == SCENARIO_STATE_ABOUT)) {
-                set_scenario_state(SCENARIO_STATE_MEDIA_PLAYER);
-            } else if (Novatek_boot_completed
-                    && (get_scenario_state() == SCENARIO_STATE_MEDIA_PLAYER)) {
-                send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_PLAY_PAUSE); // media player: play / pause
-            }
-
+        	set_touch_gesture(TOUCH_GESTURE_SINGLE_TAP);
             break;
-
+        case GESTURE_SINGLE_DOUBLE:
+        	set_touch_gesture(TOUCH_GESTURE_SINGLE_DOUBLE_TAP);
+            break;
+        case GESTURE_SINGLE_TRIPLE:
+        	set_touch_gesture(TOUCH_GESTURE_SINGLE_TRIPLE_TAP);
+            break;
         case GESTURE_TWO_TAP:
-
+        	set_touch_gesture(TOUCH_GESTURE_TWO_TAP);
             break;
-
+        case GESTURE_TWO_FORWARD:
+        	set_touch_gesture(TOUCH_GESTURE_TWO_FORWARD);
+            break;
+        case GESTURE_TWO_BACKWARD:
+        	set_touch_gesture(TOUCH_GESTURE_TWO_BACKWARD);
+            break;
+        case GESTURE_TWO_PRESS:
+        	set_touch_gesture(TOUCH_GESTURE_TWO_PRESS_HOLD);
+            break;
 
         default:
             break;
