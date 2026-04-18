@@ -10,12 +10,14 @@
 
 #include "hal_common.h"
 
-
+#if TOUCH_AW93305_ENABLE
 void hal_touch_aw93305_init(void);
 void hal_touch_aw93305_handler(void);
-
+#endif
+#if TOUCH_EWD608_ENABLE
 void hal_touch_ewd608_init (void);
 void hal_touch_ewd608_handler (void);
+#endif
 void hal_touch_ewd608_set_state (void);
 uint8_t hal_touch_has_new_event(void);
 

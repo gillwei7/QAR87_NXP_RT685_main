@@ -439,20 +439,36 @@
 
 #define EXAMPLE_DMA            DMA0
 
+/*****  Components  *****/
 #define PMIC_GLF70583_ENABLE          1
 #define PMIC_PCA9422_ENABLE           1
-#define TOUCH_AW93305_ENABLE          0
-#define TOUCH_EWD608_ENABLE           1
 #define CHG_BQ25618_ENABLE            1
-#if UsingQAR87BoardHwVersion == 1 // Actual Board
-#define FG_GLF70302_ENABLE            1
-#endif
-#if UsingQAR87BoardHwVersion == 0 // Dev Board
-#define FG_GLF70302_ENABLE            0
-#endif
-#define SAR_SX9204_ENABLE             1
 #define LED_KTD2027_ENABLE            1
 #define AMP_AW88166_ENABLE            1
+
+#if UsingQAR87BoardHwVersion == 1 // Actual Board
+#define FG_GLF70302_ENABLE            1 //Gauge
+
+#if QAR88n == 1
+#define TOUCH_AW93305_ENABLE          1
+#define TOUCH_EWD608_ENABLE           0
+#define SAR_SX9204_ENABLE             0
+#endif //QAR88n == 1 endif
+#if QAR88a == 1 || QAR88m == 1
+#define TOUCH_AW93305_ENABLE          1
+#define TOUCH_EWD608_ENABLE           0
+#define SAR_SX9204_ENABLE             1
+#endif //QAR88a == 1 || QAR88m == 1 endif
+#endif //UsingQAR87BoardHwVersion == 1 endif
+
+#if UsingQAR87BoardHwVersion == 0 // Dev Board
+#define TOUCH_AW93305_ENABLE          0
+#define TOUCH_EWD608_ENABLE           1
+#define FG_GLF70302_ENABLE            0
+#define SAR_SX9204_ENABLE             0
+#endif //UsingQAR87BoardHwVersion == 0 endif
+
+/*****  Feature  *****/
 #define SOC_SPI_ENABLE                1
 #define MENU_STATE_ENABLE             1
 #define ABOUT_STATE_ENABLE            1

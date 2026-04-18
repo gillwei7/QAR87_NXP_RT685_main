@@ -11,6 +11,7 @@
 #include "system_status.h"
 #include "WorkStateManager.h"
 #include "elan_ewd608.h"
+#include "touch_handler.h"
 
 
 extern volatile struct aw933xx_dev aw933xx;
@@ -24,7 +25,7 @@ static const uint8_t data_reg = 0xC0;
 static uint8_t buf[EWD_FRAME_MAX_LEN];
 #endif
 
-
+#if TOUCH_AW93305_ENABLE
 void hal_touch_aw93305_init(void)
 {
 #if TOUCH_AW93305_ENABLE
@@ -43,35 +44,18 @@ void hal_touch_aw93305_handler(void)
 		PRINTF("[Touch] click= %d \n",btn_event);
 		if(btn_event==1)
 		{
-#if SOC_SPI_ENABLE
-			if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
-					ss_get_state() == USAGE_STATE_MENU || ss_get_state() == USAGE_STATE_HOME)) {
-				//send_spi_request(ONE_TOUCH_HEX_VALUE);
-			}
-#endif
+        	set_touch_gesture(TOUCH_GESTURE_SINGLE_TAP);
 		}
 		else if(btn_event==2)
 		{
-#if SOC_SPI_ENABLE
-			if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER)) {
-				//send_spi_request(DOUBLE_TOUCH_HEX_VALUE);
-			}
-#endif
+        	set_touch_gesture(TOUCH_GESTURE_SINGLE_DOUBLE_TAP);
 		}
 
 	}
 	else if(aw933xx.event.press)
 	{
 		PRINTF("[Touch] press \n");
-#if SOC_SPI_ENABLE
-		if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MEDIA_PLAYER ||
-				ss_get_state() == USAGE_STATE_HOME || ss_get_state() == USAGE_STATE_MENU ||
-				ss_get_state() == USAGE_STATE_ABOUT)) {
-			// Media Player: Go Home (if the OE is on), Wake Up (if the OE is off)
-			// Home: Wake Up (if the OE is off)
-			//send_spi_request(PRESS_TOUCH_HEX_VALUE);
-		}
-#endif
+    	set_touch_gesture(TOUCH_GESTURE_SINGLE_PRESS_HOLD);
 	}
 	else if(aw933xx.event.long_press)
 	{
@@ -83,37 +67,20 @@ void hal_touch_aw93305_handler(void)
 	}
 	else if(aw933xx.event.right_wareds)
 	{
-		PRINTF("[Touch] slide_right \n");
-#if SOC_SPI_ENABLE
-		if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
-			//send_spi_request(FORWARD_SLIDE_HEX_VALUE);
-		}
-#endif
-		if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
-			// Volume down
-			ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
-			PRINTF("[Touch] Volume down\r\n");
-
-		}
+		PRINTF("[Touch] slide_right (backward) \n");
+    	set_touch_gesture(TOUCH_GESTURE_SINGLE_BACKWARD);
 	}
 	else if(aw933xx.event.left_wareds)
 	{
-		PRINTF("[Touch] slide_left \n");
-#if SOC_SPI_ENABLE
-		if (Novatek_boot_completed && !get_music_status() && (ss_get_state() == USAGE_STATE_MENU)) {
-			//send_spi_request(BACK_SLIDE_HEX_VALUE);
-		}
-#endif
-		if (ss_get_state() == USAGE_STATE_MEDIA_PLAYER) {
-			// Volume up
-			ChangeMasterVolumeLevel15_UpDown(1); // pass positive value to increase volume
-			PRINTF("[Touch] Volume up\r\n");
-		}
+		PRINTF("[Touch] slide_left (forward) \n");
+    	set_touch_gesture(TOUCH_GESTURE_SINGLE_FORWARD);
 	}
 
 #endif
 }
+#endif
 
+#if TOUCH_EWD608_ENABLE
 void hal_touch_ewd608_init (void)
 {
 	uint16_t fw_ver = 0;
@@ -149,6 +116,7 @@ void hal_touch_ewd608_handler (void)
 #endif
 }
 
+
 void hal_touch_ewd608_set_state (void)
 {
 #if TOUCH_EWD608_ENABLE
@@ -157,6 +125,7 @@ void hal_touch_ewd608_set_state (void)
 	}
 #endif
 }
+#endif
 
 void touch_post_event(void *param)
 {
