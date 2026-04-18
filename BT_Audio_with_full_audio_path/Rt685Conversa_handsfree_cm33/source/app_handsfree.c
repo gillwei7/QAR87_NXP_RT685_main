@@ -52,6 +52,8 @@
 #include "system_status.h"
 #include "WorkStateManager.h"
 #include "DefForBothMcuAndDsp.h"
+#include "bluetooth_handler.h"
+
 #endif
 
 #define Manager_TASK_PRIORITY				2			//this is low
@@ -491,6 +493,8 @@ void hfp_hf_a2dp_task(void *pvParameters)
     DeviceWorkStateCur=WorkState_Void;
     StartAudioTask();
 
+    bluetooth_reconnect_timer_init();
+    bluetooth_reconnect_timer_start();
     hal_soc_enable();
 
 	BaseType_t result = 0;

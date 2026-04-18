@@ -33,6 +33,7 @@
 #include "ringtone_handler.h"
 #include "scenario_state.h"
 #include "touch_handler.h"
+#include "bluetooth_handler.h"
 #endif
 
 #include "app_handsfree.h"
@@ -1283,9 +1284,9 @@ void Manager_Task(void *pvParameters)
 			spi_command_handler();
 		//---end---
 		//----------------------------------------------------------------------------------------------------------------------------
-		//------------------------------------step 5, connection handling----------------------------------------------
+		//------------------------------------step 5, BT connection handling----------------------------------------------
 		//---beg---
-			connect_handler();
+			bluetooth_reconnect_handler();
 		//---end---
 		//----------------------------------------------------------------------------------------------------------------------------
 		//------------------------------------step 6, ringtone handling----------------------------------------------
