@@ -174,6 +174,86 @@ void ble_message_parse(ble_msg_type_t type, const uint8_t *data, size_t len)
         {
         	PRINTF("[BLE][App][CMD] Start_AP \r\n");
         }
+        else if(strcmp(data, "Start_AP_IP") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] Start_AP_IP \r\n");
+        }
+        else if (strcmp(data, "WIFI_CONNECTED") == 0)
+        {
+            PRINTF("[BLE][App][CMD] WIFI_CONNECTED \r\n");
+        }
+        else if (strcmp(data, "STOP_VIDEOCHAT") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] STOP_VIDEOCHAT \r\n");
+        }
+        else if (strcmp(data, "stopTranslation") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] stopTranslation \r\n");
+        }
+        else if (strcmp(data, "TAKE_PICTURE") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] TAKE_PICTURE \r\n");
+        }
+        else if (strcmp(data, "START_RECORDING") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] START_RECORDING \r\n");
+        }
+        else if (strcmp(data, "startFileSync") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] startFileSync \r\n");
+        }
+        else if (strcmp(data, "NEW_MEDIA") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] NEW_MEDIA \r\n");
+        }
+        else if (strcmp(data, "STOP_RECORDING") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] STOP_RECORDING \r\n");
+        }
+        else if (strcmp(data, "RTSP_AUDIO_ONLY_ON") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] RTSP_AUDIO_ONLY_ON \r\n");
+        }
+        else if (strcmp(data, "RTSP_AV") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] RTSP_AV \r\n");
+        }
+        else if (strcmp(data, "FileSync") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] FileSync \r\n");
+        }
+        else if (strncmp(data, "RECV:", 5) == 0)
+        {
+        	PRINTF("[BLE][App][CMD] RECV \r\n");
+        }
+        else if (strcmp(data, "RTSP_RECV_STOP") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] RTSP_RECV_STOP \r\n");
+        }
+        else if (strcmp(data, "Stop_AP") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] RTStop_APSP_AV \r\n");
+        }
+        else if (strcmp(data, "PHONE_PREVIEW_SHOW") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] PHONE_PREVIEW_SHOW \r\n");
+        }
+        else if (strcmp(data, "PHONE_PREVIEW_HIDE") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] PHONE_PREVIEW_HIDE \r\n");
+        }
+        else if (strcmp(data, "ACTION_GLASS_BLACK_PREVIEW") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] ACTION_GLASS_BLACK_PREVIEW \r\n");
+        }
+        else if (strcmp(data, "ACTION_GLASS_CLEAR_BLACK_PREVIEW") == 0)
+        {
+        	PRINTF("[BLE][App][CMD] ACTION_GLASS_CLEAR_BLACK_PREVIEW \r\n");
+        }
+        else {
+            PRINTF("[BLE][App][CMD] Unknown command: %s\n", data);
+        }
+
     }
 
 
