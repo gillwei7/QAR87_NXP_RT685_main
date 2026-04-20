@@ -124,6 +124,8 @@ void Init_I2C_Component(void)
 		hal_power_go_to_power_off_charging();
 	} else if (power_on_reason == POWER_ON_UNEXPECTED) {
 		bq256xx_enter_ship_mode();
+	} else if (power_on_reason == POWER_ON_BUTTON_AND_CHARGER){
+		hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_ENABLE);
 	}
 	PRINTF("[System] Version= %s \n", HAL_MCU_APP_VERSION);
 
