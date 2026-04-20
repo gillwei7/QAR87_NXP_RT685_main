@@ -21,6 +21,8 @@
 #include <fsl_debug_console.h>
 #include <host_msd_fatfs.h>
 
+#include "ble_command_set.h"
+
 #if defined(APP_LOWPOWER_ENABLED) && (APP_LOWPOWER_ENABLED > 0)
 #include "PWR_Interface.h"
 #include "fwk_platform_lowpower.h"
@@ -30,6 +32,7 @@
 #include "fsl_mmc.h"
 #include "sdmmc_config.h"
 #endif /* APP_MEM_POWER_OPT */
+
 
 /*******************************************************************************
  * Prototypes
@@ -126,17 +129,14 @@ void peripheral_gls_handle_ble_command(const struct bt_gatt_attr *attr, const ch
     bool should_notify = false;
 
     if (strcmp(cmd, "Start_AP") == 0) {
-        strcpy(response, "ACK:HOTSPOT_ON");
-        should_notify = true;
+    	bt_notify_hotspot_on(response, &should_notify);
     }
     else if (strcmp(cmd, "Start_AP_IP") == 0) {
     	// TODO: Need IP and SSID from Novatek
-        snprintf(response, sizeof(response), "ACK:IP:%s:SSID:%s", get_device_ip(), get_device_ssid());
-        should_notify = true;
+    	bt_notify_ip_ssid(response, &should_notify,get_device_ip(), get_device_ssid());
     }
     else if (strcmp(cmd, "WIFI_CONNECTED") == 0) {
-        // When Camera is using, return "CAMERA_USE"
-    	//strcpy(response, "CAMERA_USE");
+    	bt_notify_camera_use(response, &should_notify);
     }
     else if (strcmp(cmd, "STOP_VIDEOCHAT") == 0) {
         // TODO Stop videochat, No Return to APP
@@ -147,14 +147,18 @@ void peripheral_gls_handle_ble_command(const struct bt_gatt_attr *attr, const ch
     else if (strcmp(cmd, "TAKE_PHOTO") == 0) {
         // TODO Need to Check Camera state?
         // Valid returns: CAMERA_STATE:TAKING_PHOTO, CAMERA_STATE:IDLE, or CAMERA_STATE:ERROR
-        strcpy(response, "CAMERA_STATE:IDLE");
-        should_notify = true;
+
+    	bt_notify_camera_state_idle(response, &should_notify);
+    	//bt_notify_camera_state_taking_photo(response, &should_notify);
+    	//bt_notify_camera_state_error(response, &should_notify);
+
     }
     else if (strcmp(cmd, "START_RECORDING") == 0) {
     	PRINTF("");
     	// TODO: Need to check Camera state?
-        strcpy(response, "CAMERA_STATE:RECORDING");
-        should_notify = true;
+
+    	bt_notify_camera_state_recording(response, &should_notify);
+    	//bt_notify_camera_state_error(response, &should_notify);
     }
     else if (strcmp(cmd, "startFileSync") == 0) {
         // TODO Send Sync media to Novatek, No Return to APP
@@ -166,8 +170,9 @@ void peripheral_gls_handle_ble_command(const struct bt_gatt_attr *attr, const ch
         PRINTF("Opening Wi-Fi Socket...\n");
     }
     else if (strcmp(cmd, "STOP_RECORDING") == 0) {
-        strcpy(response, "CAMERA_STATE:IDLE");
-        should_notify = true;
+
+    	bt_notify_camera_state_idle(response, &should_notify);
+    	//bt_notify_camera_state_error(response, &should_notify);
     }
     else if (strcmp(cmd, "RTSP_AUDIO_ONLY_ON") == 0) {
         // TODO Switch RTSP to audio. No return to APP
