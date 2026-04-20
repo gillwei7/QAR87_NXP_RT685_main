@@ -183,10 +183,10 @@ void hal_pmic_glf70583_cutoff_nt98532 (void)
 	PRINTF("[HW] config_status: %d \r\n", config_status);
 
 	if (config_status == 0) {
-		PRINTF("[PMIC] GLF70583 correct \r\n");
+		PRINTF("[PMIC] GLF70583 correct cutoff soc\r\n");
 		hal_pmic_glf70583_cutoff_nt98532_power(GLF70583_A_I2C_ADDR, GLF70583_B_I2C_ADDR);
 	} else if (config_status == 1) {
-		PRINTF("[PMIC] GLF70583 reverse \r\n");
+		PRINTF("[PMIC] GLF70583 reverse cutoff soc\r\n");
 		hal_pmic_glf70583_cutoff_nt98532_power(GLF70583_B_I2C_ADDR, GLF70583_A_I2C_ADDR);
 	}
 }
@@ -197,10 +197,10 @@ void hal_pmic_glf70583_turn_on_nt98532 (void)
 	PRINTF("[HW] config_status: %d \r\n", config_status);
 
 	if (config_status == 0) {
-		PRINTF("[PMIC] GLF70583 correct \r\n");
+		PRINTF("[PMIC] GLF70583 correct turn on soc\r\n");
 		hal_pmic_glf70583_turn_on_nt98532_power(GLF70583_A_I2C_ADDR, GLF70583_B_I2C_ADDR);
 	} else if (config_status == 1) {
-		PRINTF("[PMIC] GLF70583 reverse \r\n");
+		PRINTF("[PMIC] GLF70583 reverse turn on soc\r\n");
 		hal_pmic_glf70583_turn_on_nt98532_power(GLF70583_B_I2C_ADDR, GLF70583_A_I2C_ADDR);
 	}
 }

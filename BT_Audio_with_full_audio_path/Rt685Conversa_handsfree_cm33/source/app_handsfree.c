@@ -48,6 +48,7 @@
 #include "i2c_component_handler.h"
 #include "hal_common.h"
 #include "hal_amp.h"
+#include "soc_handler.h"
 #include "app_connect.h"
 #include "system_status.h"
 #include "WorkStateManager.h"
@@ -495,10 +496,10 @@ void hfp_hf_a2dp_task(void *pvParameters)
 
     bluetooth_reconnect_timer_init();
     bluetooth_reconnect_timer_start();
-    hal_soc_enable();
+    soc_power_on(SOC_POWER_ON_ACTION_OE);
 
 	BaseType_t result = 0;
-	result = xTaskCreate(Manager_Task, "Manager_40ms", 1024 * 3, NULL, Manager_TASK_PRIORITY, NULL);
+	result = xTaskCreate(Manager_Task, "Manager_40ms", 1024 * 4, NULL, Manager_TASK_PRIORITY, NULL);
 	assert(pdPASS == result);
 #if UsingQAR87Board == 1
 
