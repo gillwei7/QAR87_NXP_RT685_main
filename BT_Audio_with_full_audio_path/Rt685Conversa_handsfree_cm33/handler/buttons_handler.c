@@ -231,6 +231,7 @@ void button_press_handler (void)
 					oe_status = 0;
 				}
 			}
+//			ss_get_device_name(); // for test only
 //			soc_power_toggle(); // for test only
 #else // use button to switch state
 //			RequestToGetIntoMediaPlayer = 1;

@@ -14,12 +14,15 @@
 #include "hal_amp.h"
 #include "ringtone_handler.h"
 #include "scenario_state.h"
+#include "porting.h"
 
 
 
 volatile uint8_t System_Status = 0; //Send system status to Novatek
 volatile SystemStatus ss = {0};
 
+static uint8_t device_name[50] = "QAR88a_0000";
+static uint8_t set_device_name = 0;
 
 static volatile uint8_t current_state_value = 0;
 static volatile uint8_t capture_status = 0;
@@ -155,34 +158,30 @@ uint8_t ss_get_recording_status(void)
 	return recording_status;
 }
 
-void ss_set_bt_addr_0 (uint8_t addr)
+static void ss_set_device_name (void)
 {
-	bt_addr_0 = addr;
+	snprintf(device_name, sizeof(device_name), "QAR88a_%02X%02X", bt_addr_1, bt_addr_0);
+	set_device_name = 1;
 }
 
-void ss_set_bt_addr_1 (uint8_t addr)
+void ss_set_bt_addr (uint8_t addr_0, uint8_t addr_1, uint8_t addr_2, uint8_t addr_3, uint8_t addr_4, uint8_t addr_5)
 {
-	bt_addr_1 = addr;
+	bt_addr_0 = addr_0;
+	bt_addr_1 = addr_1;
+	bt_addr_2 = addr_2;
+	bt_addr_3 = addr_3;
+	bt_addr_4 = addr_4;
+	bt_addr_5 = addr_5;
+	ss_set_device_name();
 }
 
-void ss_set_bt_addr_2 (uint8_t addr)
-{
-	bt_addr_2 = addr;
+uint8_t has_set_device_name (void) {
+	return set_device_name;
 }
-
-void ss_set_bt_addr_3 (uint8_t addr)
+uint8_t * ss_get_device_name (void)
 {
-	bt_addr_3 = addr;
-}
-
-void ss_set_bt_addr_4 (uint8_t addr)
-{
-	bt_addr_4 = addr;
-}
-
-void ss_set_bt_addr_5 (uint8_t addr)
-{
-	bt_addr_5 = addr;
+	PRINTF("Device name: %s\r\n", device_name);
+	return device_name;
 }
 
 void ss_print_bt_addr (void)
