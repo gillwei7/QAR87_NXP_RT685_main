@@ -200,6 +200,9 @@ status_t bq256xx_poll_status(bq256xx_status_t *stat)
 
 status_t bq256xx_enter_ship_mode(void)
 {
+#if QAR88m == 1 // Due to the use of a slide switch, the charger is designed to remain continuously powered
+	return kStatus_Success;
+#endif
 #if ENABLE_POWER_DOWN
     status_t ret;
 
