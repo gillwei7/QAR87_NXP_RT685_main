@@ -57,9 +57,9 @@ static power_on_reason_t get_power_on_reason(void)
 		if (pin_state == 0U)
 		{
 			/* 按鍵為低（按下）→ 需連續 2 秒才允許離開 ship mode */
-			if (power_key_low_for_ms(BOOT_LONG_PRESS_MS))
+			if (power_key_low_for_ms(BOOT_LONG_PRESS_TIMEOUT_MS))
 			{
-				PRINTF("[PCA9422] PCA9422 leave ship mode (press >= %u ms)\r\n", BOOT_LONG_PRESS_MS);
+				PRINTF("[PCA9422] PCA9422 leave ship mode (press >= %u ms)(%u)\r\n", BOOT_LONG_PRESS_TICK_MS, xTaskGetTickCount());
 
 				if (hal_power_is_power_off_charging_mode()) {
 					return POWER_ON_BUTTON_AND_CHARGER;
@@ -69,7 +69,8 @@ static power_on_reason_t get_power_on_reason(void)
 			else
 			{
 				/* 沒達到 2 秒長按 → 進入 ship mode */
-				PRINTF("[PCA9422] Power key (press < %u ms)\r\n", BOOT_LONG_PRESS_MS);
+				PRINTF("[PCA9422] Power key (press < %u ms)(%u)\r\n", BOOT_LONG_PRESS_TICK_MS, xTaskGetTickCount());
+
 				//hal_pmic_pca9422_enter_ship_mode();
 				//hal_pmic_pca9422_power_down();
 //				bq256xx_enter_ship_mode();
