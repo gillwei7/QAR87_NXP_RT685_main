@@ -84,6 +84,9 @@ void spi_command_atomic_status_time_sync(   uint16_t year,
 											uint8_t  minute,
 											uint8_t  second );
 
+uint8_t spi_command_get_args_and_len (uint8_t msg_type, uint8_t cmd_id, char *pArgs);
+
+void application_examples_atomic_status(void);
 
 spi_command_ui_page_t get_ui_page_id(void);
 spi_command_media_play_pause_t get_media_play_pause_cmd(void);

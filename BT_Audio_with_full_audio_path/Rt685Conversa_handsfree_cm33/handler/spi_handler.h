@@ -174,9 +174,7 @@ typedef struct {
 /*=================================================================*/
 
 void set_system_time(uint16_t year, uint8_t month,uint8_t day,uint8_t hour,uint8_t minute,uint8_t second);
-void message_processing(app_msg_type_t app_type, const char *title, const char *body);
 
-void application_examples_atomic_status(void);
 void application_examples_atomic_exec(void);
 
 /*=======================================================================*/
