@@ -10,6 +10,8 @@
 #include "scenario_state.h"
 
 static spi_command_ui_page_t s_ui_page_id = SPI_COMMAND_UI_PAGE_HOME;
+static spi_command_media_play_pause_t s_media_play_pause = SPI_COMMAND_MEDIA_PLAY_TOGGLE;
+
 
 void spi_command_atomic_exec_open_oe(void)
 {
@@ -73,7 +75,7 @@ void spi_command_atomic_exec_previous_media(void)
 
 void spi_command_atomic_exec_media_play_pause(uint8_t media_state)
 {
-	set_media_state(media_state);
+	s_media_play_pause = media_state;
     send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_MEDIA_PLAY_PAUSE);
 }
 
@@ -127,8 +129,12 @@ void spi_command_atomic_status_message_notification(app_msg_type_t app_type, con
 	send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_MSG_NOTIFICATION);
 }
 
-
 spi_command_ui_page_t get_ui_page_id(void)
 {
 	return s_ui_page_id;
+}
+
+spi_command_media_play_pause_t get_media_play_pause_cmd(void)
+{
+	return s_media_play_pause;
 }

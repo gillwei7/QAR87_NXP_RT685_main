@@ -28,7 +28,7 @@ static void touch_gesture_media_player_handler (void) {
 			ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
 			PRINTF("[Touch] Volume down\r\n");
 		} else if (current_touch_gesture == TOUCH_GESTURE_SINGLE_TAP) {
-			spi_command_atomic_exec_media_play_pause(MEDIA_TOGGLE);
+			spi_command_atomic_exec_media_play_pause(SPI_COMMAND_MEDIA_PLAY_TOGGLE);
 			PRINTF("[Touch] Media Player play/pause\r\n");
 		} else if (current_touch_gesture == TOUCH_GESTURE_SINGLE_DOUBLE_TAP) {
 			spi_command_atomic_exec_next_media();

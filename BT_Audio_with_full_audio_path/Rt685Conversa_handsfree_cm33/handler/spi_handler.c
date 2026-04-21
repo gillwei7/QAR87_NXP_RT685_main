@@ -119,10 +119,9 @@ static session_ctx_t g_session = { .active = false, .expected_id = 0, .received_
 
 static msg_notification_info_t g_msg_info = {0};
 
-static MediaPlayPauseCmd g_media_play_cmd = MEDIA_TOGGLE;
 
 /* 宣告全域變數來儲存時間資訊 (可給予預設值) */
-static rtc_time_info_t g_system_time = {
+static spi_command_time_info_t s_system_time = {
     .year   = 2026,
     .month  = 3,
     .day    = 16,
@@ -131,20 +130,14 @@ static rtc_time_info_t g_system_time = {
     .second = 0
 };
 
-void set_media_state(uint8_t media_state)
-{
-	g_media_play_cmd = media_state ;
-}
-
-
 void set_system_time(uint16_t year, uint8_t month,uint8_t day,uint8_t hour,uint8_t minute,uint8_t second)
 {
-	g_system_time.year = year ;
-	g_system_time.month = month ;
-	g_system_time.day  = day ;
-	g_system_time.hour = hour ;
-	g_system_time.minute = minute ,
-	g_system_time.second = second ;
+	s_system_time.year = year ;
+	s_system_time.month = month ;
+	s_system_time.day  = day ;
+	s_system_time.hour = hour ;
+	s_system_time.minute = minute ,
+	s_system_time.second = second ;
 }
 
 void application_examples_atomic_status(void)
@@ -152,10 +145,10 @@ void application_examples_atomic_status(void)
 	send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_SYS_STATUS);
 	vTaskDelay(100);
 
-	g_system_time.day  = 17;
-	g_system_time.hour = 11;
-	g_system_time.minute = 11,
-	g_system_time.second = 11;
+	s_system_time.day  = 17;
+	s_system_time.hour = 11;
+	s_system_time.minute = 11,
+	s_system_time.second = 11;
 	send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_TIME_SYNC);
 	vTaskDelay(100);
 
@@ -642,7 +635,7 @@ static void spi_prepare_command_packet_data(uint8_t msg_type, uint8_t cmd_id)
 
              case CMD_ATOMIC_EXEC_MEDIA_PLAY_PAUSE: // MEDIA PLAY/PAUSE
                  arg_len = 1;
-                 pArgs[0] = g_media_play_cmd; // 0x00: Toggle, 0x01: Force Play, 0x02: Force Pause (請依實際需求帶入)
+                 pArgs[0] = get_media_play_pause_cmd(); // 0x00: Toggle, 0x01: Force Play, 0x02: Force Pause (請依實際需求帶入)
                  break;
 
              default:
@@ -668,23 +661,23 @@ static void spi_prepare_command_packet_data(uint8_t msg_type, uint8_t cmd_id)
 
                  /* Args[0-1]: Year (uint16_t, Big Endian) */
                  /* Big Endian: 高位元組存放在低記憶體位址 (pArgs[0]) */
-                 pArgs[0] = (uint8_t)((g_system_time.year >> 8) & 0xFF);
-                 pArgs[1] = (uint8_t)(g_system_time.year & 0xFF);
+                 pArgs[0] = (uint8_t)((s_system_time.year >> 8) & 0xFF);
+                 pArgs[1] = (uint8_t)(s_system_time.year & 0xFF);
 
                  /* Args[2]: Month (1-12) */
-                 pArgs[2] = g_system_time.month;
+                 pArgs[2] = s_system_time.month;
 
                  /* Args[3]: Day (1-31) */
-                 pArgs[3] = g_system_time.day;
+                 pArgs[3] = s_system_time.day;
 
                  /* Args[4]: Hour (0-23) */
-                 pArgs[4] = g_system_time.hour;
+                 pArgs[4] = s_system_time.hour;
 
                  /* Args[5]: Minute (0-59) */
-                 pArgs[5] = g_system_time.minute;
+                 pArgs[5] = s_system_time.minute;
 
                  /* Args[6]: Second (0-59) */
-                 pArgs[6] = g_system_time.second;
+                 pArgs[6] = s_system_time.second;
                  break;
 
              case CMD_ATOMIC_STATUS_MSG_NOTIFICATION: // MSG NOTIFICATION

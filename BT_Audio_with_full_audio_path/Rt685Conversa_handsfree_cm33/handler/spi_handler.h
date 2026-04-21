@@ -173,31 +173,6 @@ typedef struct {
 
 /*=================================================================*/
 
-/**
- * @brief Media Play/Pause control command (0x00~0x02).
- *
- * 0x00: Toggle       - 若播放中則暫停，若暫停則播放。
- * 0x01: Force Play   - 確保進入播放狀態。
- * 0x02: Force Pause  - 確保進入暫停狀態。
- */
-typedef enum {
-    MEDIA_TOGGLE      = 0x00,  ///< Toggle (切換)
-    MEDIA_FORCE_PLAY  = 0x01,  ///< Force Play (播放)
-    MEDIA_FORCE_PAUSE = 0x02,  ///< Force Pause (暫停)
-} MediaPlayPauseCmd;
-
-/* 定義系統時間結構體 */
-typedef struct {
-    uint16_t year;   // 年份 (例如 2026)
-    uint8_t  month;  // 月份 (1-12)
-    uint8_t  day;    // 日期 (1-31)
-    uint8_t  hour;   // 小時 (0-23)
-    uint8_t  minute; // 分鐘 (0-59)
-    uint8_t  second; // 秒數 (0-59)
-} rtc_time_info_t;
-
-
-void set_media_state(uint8_t media_state);
 void set_system_time(uint16_t year, uint8_t month,uint8_t day,uint8_t hour,uint8_t minute,uint8_t second);
 void message_processing(app_msg_type_t app_type, const char *title, const char *body);
 
