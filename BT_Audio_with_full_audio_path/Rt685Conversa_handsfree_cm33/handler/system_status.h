@@ -62,6 +62,7 @@ uint8_t ss_get_recording_status(void);
 void ss_set_bt_addr (uint8_t addr_0, uint8_t addr_1, uint8_t addr_2, uint8_t addr_3, uint8_t addr_4, uint8_t addr_5);
 uint8_t has_set_device_name (void);
 uint8_t * ss_get_device_name (void);
+uint8_t * ss_get_wifi_ssid (void);
 void ss_print_bt_addr (void);
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */

@@ -232,6 +232,7 @@ void button_press_handler (void)
 				}
 			}
 //			ss_get_device_name(); // for test only
+//			ss_get_wifi_ssid(); // for test only
 //			soc_power_toggle(); // for test only
 #else // use button to switch state
 //			RequestToGetIntoMediaPlayer = 1;

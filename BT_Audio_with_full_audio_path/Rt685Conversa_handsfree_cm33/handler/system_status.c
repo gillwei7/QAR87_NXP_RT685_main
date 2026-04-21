@@ -21,7 +21,8 @@
 volatile uint8_t System_Status = 0; //Send system status to Novatek
 volatile SystemStatus ss = {0};
 
-static uint8_t device_name[50] = "QAR88a_0000";
+static uint8_t device_name[248] = "QAR88a_0000";
+static uint8_t wifi_ssid[248] = "QAR88a_5G_0000";
 static uint8_t set_device_name = 0;
 
 static volatile uint8_t current_state_value = 0;
@@ -161,6 +162,7 @@ uint8_t ss_get_recording_status(void)
 static void ss_set_device_name (void)
 {
 	snprintf(device_name, sizeof(device_name), "QAR88a_%02X%02X", bt_addr_1, bt_addr_0);
+	snprintf(wifi_ssid, sizeof(wifi_ssid), "QAR88a_5G_%02X%02X", bt_addr_1, bt_addr_0);
 	set_device_name = 1;
 }
 
@@ -178,10 +180,17 @@ void ss_set_bt_addr (uint8_t addr_0, uint8_t addr_1, uint8_t addr_2, uint8_t add
 uint8_t has_set_device_name (void) {
 	return set_device_name;
 }
+
 uint8_t * ss_get_device_name (void)
 {
 	PRINTF("Device name: %s\r\n", device_name);
 	return device_name;
+}
+
+uint8_t * ss_get_wifi_ssid (void)
+{
+	PRINTF("Wi-Fi SSID: %s\r\n", wifi_ssid);
+	return wifi_ssid;
 }
 
 void ss_print_bt_addr (void)
