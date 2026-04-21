@@ -22,7 +22,8 @@
 #include "hal_common.h"
 #include "hal_led.h"
 
-#define BOOT_LONG_PRESS_MS            (2000U)  // Press and hold the button for 3 seconds to power on (1 s to exit ship mode + 2 s hold)
+#define BOOT_LONG_PRESS_TIMEOUT_MS         (2000U)  // Press and hold the button for 3 seconds to power on (1 s to exit ship mode + 2 s hold)
+#define BOOT_LONG_PRESS_TICK_MS            (2000U)  // Press and hold the button for 3 seconds to power on (1 s to exit ship mode + 2 s hold)
 
 #define POWER_BUTTON_PINT_CH          0   // PINT channel
 #define FUNCTION_BUTTON_PINT_CH       1   // PINT channel

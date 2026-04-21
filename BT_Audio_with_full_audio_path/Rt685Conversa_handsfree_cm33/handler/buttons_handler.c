@@ -82,6 +82,9 @@ bool power_key_low_for_ms(uint32_t ms)
         {
             return false; /* 中途釋放，長按失敗 */
         }
+        if (xTaskGetTickCount() > BOOT_LONG_PRESS_TICK_MS) {
+        	return true;
+        }
         delay_ms(SAMPLE_MS);
         elapsed += SAMPLE_MS;
     }
