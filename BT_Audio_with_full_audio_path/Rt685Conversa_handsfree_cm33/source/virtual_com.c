@@ -35,6 +35,7 @@
 #include "CircularBufManagement.h"
 #include "CircularBuf.h"
 #include "peripheral_gls.h"
+#include "app_avrcp.h"
 
 #define TuningComAudioIsCrc32
 /*******************************************************************************
@@ -78,7 +79,7 @@ USB_DMA_NONINIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE) static uint8_t s_currSendBuf[DAT
 volatile static uint32_t s_recvSize = 0;
 volatile unsigned int s_sendSize = 0;
 extern usb_device_composite_struct_t *PtrUsbDevComposite;
-
+static int test_current_volume = 0x30;
 /*******************************************************************************
 * Code
 ******************************************************************************/
@@ -667,6 +668,23 @@ void USB_DeviceCdcVcomTask(void)
             case 'f':
 			    peripheral_gls_le_adv_start();
 				break;
+            case 'g':
+                if(test_current_volume < 0x7F){
+                    test_current_volume++;
+                    avrcp_tg_notify(13, test_current_volume);
+                }else{
+                    test_current_volume = 0;
+                }
+                break;
+            case 'h':
+                if(test_current_volume > 0){
+                    test_current_volume--;
+                    avrcp_tg_notify(13, test_current_volume);
+                }else{
+                    test_current_volume = 0;
+                }
+                break;
+                break;
 			default:
 	            //ComPrintInfoPtr=ComPrintInfo_Help[0];
 			    //PRINTF("a:opus\r\nb:sbc\r\nc:app_clear_paired_devices\r\nd:app_hf_set_connectable\r\ne:peripheral_gls_le_adv_stop\r\nf:peripheral_gls_le_adv_start\r\n");

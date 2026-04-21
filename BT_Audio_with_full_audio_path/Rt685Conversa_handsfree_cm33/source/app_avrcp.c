@@ -47,7 +47,7 @@ static uint8_t parse_buf[PARSE_BUF_SIZE];
 #define SDP_CLIENT_USER_BUF_LEN        512U
 NET_BUF_POOL_FIXED_DEFINE(app_sdp_client_pool, CONFIG_BT_MAX_CONN,SDP_CLIENT_USER_BUF_LEN,CONFIG_NET_BUF_USER_DATA_SIZE, NULL);
 NET_BUF_POOL_FIXED_DEFINE(app_avrcp_continue_pool, 1u, 1024u, CONFIG_NET_BUF_USER_DATA_SIZE,NULL);
-
+#define APP_AVRCP_DEBUG_EN 1
 
 #if (defined(CONFIG_BT_BREDR) && ((CONFIG_BT_BREDR) > 0U))
 
@@ -2417,7 +2417,8 @@ void avrcp_control_connected(struct bt_conn *conn, int err)
 
 		/*"BT_AVRCP_EVENT_TRACK_CHANGED"*/
 		avrcp_ct_register_notification(conn_rider_phone, BT_AVRCP_EVENT_TRACK_CHANGED);
-
+		// No use
+		//avrcp_ct_register_notification(conn_rider_phone, BT_AVRCP_EVENT_VOLUME_CHANGED);
 	}
 
 }
@@ -3638,10 +3639,13 @@ int avrcp_tg_notify(uint8_t event,uint8_t value)
 	default:
 		break;
 	}
-//TODO: //needtobecheck
-	//bt_avrcp_response_vendor_dependent(conn_rider_hs, BT_AVRCP_PDU_ID_REGISTER_NOTIFICATION,
-	//		registered_events[event - 1][1], BT_AVRCP_RESPONSE_TYPE_CHANGED,
-	//		rsp, rsp_len);
+//TODO: //needtobecheck conn_rider_phone
+//	bt_avrcp_response_vendor_dependent(conn_rider_hs, BT_AVRCP_PDU_ID_REGISTER_NOTIFICATION,
+//			registered_events[event - 1][1], BT_AVRCP_RESPONSE_TYPE_CHANGED,
+//			rsp, rsp_len);
+	bt_avrcp_response_vendor_dependent(conn_rider_phone, BT_AVRCP_PDU_ID_REGISTER_NOTIFICATION,
+	            registered_events[event - 1][1], BT_AVRCP_RESPONSE_TYPE_CHANGED,
+	            rsp, rsp_len);
 	return 0;
 }
 
