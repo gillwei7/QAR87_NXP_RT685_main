@@ -11,7 +11,7 @@ void bt_notify_ip_ssid(char *resp_buf, size_t resp_buf_size, bool *notify_flag,c
 {
     if (resp_buf == NULL || notify_flag == NULL) return;
 
-    snprintf(resp_buf, sizeof(char) * resp_buf_size, "ACK:IP:%s:SSID:%s", ip, ssid);
+    snprintf(resp_buf, resp_buf_size, "ACK:IP:%s:SSID:%s", ip, ssid);
     *notify_flag = true;
 }
 
