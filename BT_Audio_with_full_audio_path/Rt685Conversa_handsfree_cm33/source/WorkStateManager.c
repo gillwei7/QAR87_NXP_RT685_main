@@ -720,6 +720,7 @@ void Manager_Task(void *pvParameters)
 
 	spi_command_handler_init();
 	button_init();
+	i2c_device_boot();
 
 	while(1)
 	{

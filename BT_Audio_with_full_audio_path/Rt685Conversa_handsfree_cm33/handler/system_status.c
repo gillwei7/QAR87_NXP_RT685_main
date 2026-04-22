@@ -290,7 +290,7 @@ uint8_t ss_get_layer() {
 }
 
 /* ====== 充電與電量：設定與讀取 ====== */
-  void ss_set_charging(bool on) {
+void ss_set_charging(bool on) {
     if (on) {
     	ss.batt |= SS_CHARGER_BIT;
     }
@@ -299,18 +299,20 @@ uint8_t ss_get_layer() {
     }
     System_Status=1;
 }
-  bool ss_is_charging() {
+
+bool ss_is_charging() {
     return (ss.batt & SS_CHARGER_BIT) != 0;
 }
 
-  void ss_set_battery(uint8_t percent) {
+void ss_set_battery(uint8_t percent) {
     if (percent > 100) {
     	percent = 100; // clamp 到 0..100
     }
     ss.batt = (uint8_t)((ss.batt & SS_CHARGER_BIT) | (percent << SS_LEVEL_SHIFT));
     System_Status=1;
 }
-  uint8_t ss_get_battery() {
+
+uint8_t ss_get_battery() {
     return (uint8_t)((ss.batt & SS_LEVEL_MASK) >> SS_LEVEL_SHIFT);
 }
 

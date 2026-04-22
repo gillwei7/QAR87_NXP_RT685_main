@@ -126,6 +126,7 @@ void Init_I2C_Component(void)
 	} else if (power_on_reason == POWER_ON_UNEXPECTED) {
 		bq256xx_enter_ship_mode();
 	} else if (power_on_reason == POWER_ON_BUTTON_AND_CHARGER){
+		ss_set_charging(true);
 		hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_ENABLE);
 	}
 	PRINTF("[System] Version= %s \n", HAL_MCU_APP_VERSION);
@@ -147,18 +148,6 @@ void Init_I2C_Component(void)
 #endif
 	ss_set_battery(hal_power_get_battery_percentage(battery_info.soc));
 #endif
-
-
-#if CHG_BQ25618_ENABLE
-
-	hal_power_charger_bq25618_get_charging_status();
-	if(charger_status.vbus_good)
-	{
-		ss_set_charging(true);
-	}
-#endif
-
-
 
 #if TOUCH_EWD608_ENABLE
 	hal_touch_ewd608_init();
@@ -198,7 +187,21 @@ void I2C_Task(void *pvParameters)
     }
 }
 
-
+void i2c_device_boot (void)
+{
+	//Check charging status on boot
+#if CHG_BQ25618_ENABLE
+	hal_power_charger_bq25618_get_charging_status();
+	if(charger_status.vbus_good)
+	{
+		ss_set_charging(true);
+		hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_ENABLE);
+	} else {
+		ss_set_charging(false);
+		hal_led_set_situation(HAL_LED_STATUS_CHARGING, SITUATION_DISABLE);
+	}
+#endif
+}
 
 void i2c_device_handler (void)
 {
