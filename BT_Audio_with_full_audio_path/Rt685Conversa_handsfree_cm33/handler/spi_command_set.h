@@ -73,6 +73,10 @@ void spi_command_atomic_exec_start_recording(void);
 
 void spi_command_atomic_exec_switch_ui_page(spi_command_ui_page_t state);
 
+void spi_command_atomic_exec_start_video_call(const char *url);
+void spi_command_atomic_exec_stop_video_call(void);
+void spi_command_atomic_exec_start_wifi_ap(const char *ip, const char *ssid);
+void spi_command_atomic_exec_stop_wifi_ap(void);
 
 void spi_command_atomic_status_version_info(void);
 void spi_command_atomic_status_sys_status(void);

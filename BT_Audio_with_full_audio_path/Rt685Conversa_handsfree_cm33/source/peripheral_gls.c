@@ -21,7 +21,9 @@
 #include <fsl_debug_console.h>
 #include <host_msd_fatfs.h>
 
+#include "system_status.h"
 #include "ble_command_set.h"
+#include "spi_command_set.h"
 
 #if defined(APP_LOWPOWER_ENABLED) && (APP_LOWPOWER_ENABLED > 0)
 #include "PWR_Interface.h"
@@ -129,6 +131,9 @@ void peripheral_gls_handle_ble_command(const struct bt_gatt_attr *attr, const ch
     bool should_notify = false;
 
     if (strcmp(cmd, "Start_AP") == 0) {
+
+    	//spi_command_atomic_exec_start_wifi_ap(get_device_ip(), ss_get_wifi_ssid());
+
     	bt_notify_hotspot_on(response, &should_notify);
     }
     else if (strcmp(cmd, "Start_AP_IP") == 0) {
@@ -180,6 +185,10 @@ void peripheral_gls_handle_ble_command(const struct bt_gatt_attr *attr, const ch
     else if (strcmp(cmd, "RTSP_AV") == 0) {
         // TODO Switch RTSP to A/V. No return to APP
     }
+	else if (strncmp(cmd, "Start_Video_Call_URL:", 21) == 0)
+	{
+		//spi_command_atomic_exec_start_video_call("rtsp://192.168.1.22:8554/mystream");
+	}
     else {
         PRINTF("Unknown command: %s\n", cmd);
     }

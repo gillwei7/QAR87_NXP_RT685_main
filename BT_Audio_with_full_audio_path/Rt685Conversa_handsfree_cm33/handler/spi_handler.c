@@ -207,6 +207,13 @@ static void spi_process_atomic_event(uint8_t event_id,const uint8_t *args)
 			PRINTF("[SPI][Event] OTA_FINISHED \r\n ");
 			break;
 
+		case CMD_ATOMIC_EVENT_WIFI_AP_OPEN:
+			PRINTF("[SPI][Event] WIFI_AP_OPEN \r\n ");
+			break;
+		case CMD_ATOMIC_EVENT_WIFI_AP_CLOSE:
+			PRINTF("[SPI][Event] WIFI_AP_CLOSE \r\n ");
+			break;
+
 		case CMD_ATOMIC_EVENT_UNKNOWN_CMD_ERROR:
 			PRINTF("[SPI][Event] UNKNOWN_CMD_ERROR \r\n ");
 			break;

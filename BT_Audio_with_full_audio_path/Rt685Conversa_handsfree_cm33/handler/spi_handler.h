@@ -107,6 +107,11 @@ extern volatile slave_fsm_state_t g_slave_state;
 #define CMD_ATOMIC_EXEC_STOP_RECORDING          0x22  // 停止錄影
 #define CMD_ATOMIC_EXEC_START_RECORDING         0x23  // 開始錄影
 
+#define CMD_ATOMIC_EXEC_START_VIDEO_CALL        0x28  // 視訊會議開始 (包含傳送URL)
+#define CMD_ATOMIC_EXEC_STOP_VIDEO_CALL         0x29  // 視訊會議停止
+#define CMD_ATOMIC_EXEC_START_WIFI_AP           0x2A  // 開啟WIFI AP (包含傳送IP、SSID)
+#define CMD_ATOMIC_EXEC_STOP_WIFI_AP            0x2B  // 關閉WIFI AP
+
 #define CMD_ATOMIC_EXEC_SWITCH_UI_PAGE          0x30  // 要求切換至指定 UI 頁面
 
 /* ------------------------------------------------------------------------- *
@@ -143,6 +148,9 @@ extern volatile slave_fsm_state_t g_slave_state;
 #define CMD_ATOMIC_EVENT_OTA_STARTED            0x38  // 回報：韌體更新開始
 #define CMD_ATOMIC_EVENT_OTA_FINISHED           0x39  // 回報：韌體更新結果
 
+#define CMD_ATOMIC_EVENT_WIFI_AP_OPEN           0x40  // 回報: WIFI AP開啟
+#define CMD_ATOMIC_EVENT_WIFI_AP_CLOSE          0x41  // 回報: WIFI AP關閉
+
 #define CMD_ATOMIC_EVENT_UNKNOWN_CMD_ERROR      0xFF  // 錯誤回報：未知的指令
 
 
@@ -151,6 +159,10 @@ extern volatile slave_fsm_state_t g_slave_state;
 #define MAX_MSG_TITLE_LEN 64	// 標題維持 64 Bytes (約 21 個中文字)
 #define MAX_MSG_BODY_LEN  440	// 內文大幅擴充！約 146 個中文字
 /* (計算公式：512(Payload) - 4(Payload Header) - 1(AppType) - 1(TitleLen) - 2(BodyLen) - 64(Title) = 440 Bytes) */
+
+#define MAX_IP_LEN 	 32
+#define MAX_SSID_LEN 64
+#define MAX_URL_LEN  64
 
 /* App 類型列舉 */
 typedef enum {
@@ -170,6 +182,20 @@ typedef struct {
     char title[MAX_MSG_TITLE_LEN];    // 標題緩衝區
     char body[MAX_MSG_BODY_LEN];      // 內文緩衝區
 } msg_notification_info_t;
+
+/* ip ssid 資料結構 */
+typedef struct {
+    uint8_t ip_len;                   // IP Length
+    uint8_t ssid_len;                 // SSID Length
+    char ip[MAX_IP_LEN];
+    char ssid[MAX_SSID_LEN];
+} ip_ssid_info_t;
+
+/* url 資料結構 */
+typedef struct {
+    uint8_t url_len;                   // URL Length (N)
+    char url[MAX_URL_LEN];
+} url_info_t;
 
 /*=================================================================*/
 

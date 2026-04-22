@@ -14,6 +14,9 @@ static spi_command_ui_page_t s_ui_page_id = SPI_COMMAND_UI_PAGE_HOME;
 static spi_command_media_play_pause_t s_media_play_pause = SPI_COMMAND_MEDIA_PLAY_TOGGLE;
 static msg_notification_info_t g_msg_info = {0};
 
+static ip_ssid_info_t g_ip_ssid_info = {0};
+static url_info_t g_url_info = {0};
+
 static uint8_t args_buff[BUFFER_SIZE];
 
 /* 宣告全域變數來儲存時間資訊 (可給予預設值) */
@@ -34,6 +37,72 @@ void set_system_time(uint16_t year, uint8_t month,uint8_t day,uint8_t hour,uint8
 	s_system_time.hour = hour ;
 	s_system_time.minute = minute ,
 	s_system_time.second = second ;
+}
+
+static void url_processing(const char *url)
+{
+    // 1. 清空緩衝區
+    memset(g_url_info.url, 0, MAX_URL_LEN);
+
+    // 2. 處理 URL 字串
+    if (url != NULL && url[0] != '\0') {
+        size_t u_len = strlen(url);
+
+        // 確保長度不超過 Buffer，預留 1 byte 給 \0
+        if (u_len >= MAX_URL_LEN) {
+            u_len = MAX_URL_LEN - 1;
+        }
+
+        // 拷貝字串內容
+        memcpy(g_url_info.url, url, u_len);
+
+        // 確保結尾為 \0 (雖然 memset 已經處理，但手動指定更安全)
+        g_url_info.url[u_len] = '\0';
+
+        // 儲存實際長度
+        g_url_info.url_len = (uint8_t)u_len;
+    } else {
+        g_url_info.url_len = 0;
+    }
+}
+
+static void ip_ssid_processing(const char *ip, const char *ssid)
+{
+    // 1. 清空緩衝區
+    memset(g_ip_ssid_info.ip, 0, MAX_IP_LEN);
+    memset(g_ip_ssid_info.ssid, 0, MAX_SSID_LEN);
+
+    // 2. 處理 IP
+    if (ip != NULL && ip[0] != '\0') {
+        size_t i_len = strlen(ip);
+
+        // 如果長度大於等於 MAX_IP_LEN，截斷並預留 1 byte 給 \0
+        if (i_len >= MAX_IP_LEN) {
+            i_len = MAX_IP_LEN - 1;
+        }
+
+        memcpy(g_ip_ssid_info.ip, ip, i_len);
+        g_ip_ssid_info.ip[i_len] = '\0'; // 補上字串結束符
+        g_ip_ssid_info.ip_len = (uint8_t)i_len;
+    } else {
+        g_ip_ssid_info.ip_len = 0;
+    }
+
+    // 3. 處理 SSID
+    if (ssid != NULL && ssid[0] != '\0') {
+        size_t s_len = strlen(ssid);
+
+        // 如果長度大於等於 MAX_SSID_LEN，截斷並預留 1 byte 給 \0
+        if (s_len >= MAX_SSID_LEN) {
+            s_len = MAX_SSID_LEN - 1;
+        }
+
+        memcpy(g_ip_ssid_info.ssid, ssid, s_len);
+        g_ip_ssid_info.ssid[s_len] = '\0'; // 補上字串結束符
+        g_ip_ssid_info.ssid_len = (uint8_t)s_len;
+    } else {
+        g_ip_ssid_info.ssid_len = 0;
+    }
 }
 
 static void message_processing(app_msg_type_t app_type, const char *title, const char *body)
@@ -87,6 +156,26 @@ static void message_processing(app_msg_type_t app_type, const char *title, const
     } else {
         g_msg_info.body_len = 0;
     }
+}
+
+
+void spi_command_atomic_exec_start_video_call(const char *url)
+{
+	url_processing(url);
+	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_VIDEO_CALL);
+}
+void spi_command_atomic_exec_stop_video_call(void)
+{
+	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_VIDEO_CALL);
+}
+void spi_command_atomic_exec_start_wifi_ap(const char *ip, const char *ssid)
+{
+	ip_ssid_processing(ip,ssid);
+	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_WIFI_AP);
+}
+void spi_command_atomic_exec_stop_wifi_ap(void)
+{
+	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_WIFI_AP);
 }
 
 void spi_command_atomic_exec_open_oe(void)
@@ -225,6 +314,42 @@ uint8_t spi_command_get_args_and_len (uint8_t msg_type, uint8_t cmd_id, char *pA
                  arg_len = 1;
                  pArgs[0] = get_media_play_pause_cmd(); // 0x00: Toggle, 0x01: Force Play, 0x02: Force Pause (請依實際需求帶入)
                  break;
+
+             case CMD_ATOMIC_EXEC_START_VIDEO_CALL: // START VIDEO_CALL
+
+                 /* arg_len = 1 (URL_Len) + N */
+                 arg_len = 1 + g_url_info.url_len;
+
+                 /* Args[0]: URL Length (N) */
+                 pArgs[0] = g_url_info.url_len;
+
+                 /* 複製 URL 內容 */
+                 if (g_url_info.url_len > 0) {
+                     memcpy(&pArgs[1], g_url_info.url, g_url_info.url_len);
+                 }
+
+                 break;
+
+             case CMD_ATOMIC_EXEC_START_WIFI_AP: // START_WIFI_AP
+                 /* arg_len = 2 (IP_Len + SSID_Len) + N + M */
+                 arg_len = 2 + g_ip_ssid_info.ip_len + g_ip_ssid_info.ssid_len;
+
+                 /* Args[0]: IP Length (N) */
+                 pArgs[0] = g_ip_ssid_info.ip_len;
+
+                 /* Args[1]: SSID Length (M) */
+                 pArgs[1] = g_ip_ssid_info.ssid_len;
+
+                 /* 複製 IP 字串內容 */
+                 if (g_ip_ssid_info.ip_len > 0) {
+                     memcpy(&pArgs[2], g_ip_ssid_info.ip, g_ip_ssid_info.ip_len);
+                 }
+
+                 /* 複製 SSID 字串內容，起始位置在 pArgs[2 + IP長度] */
+                 if (g_ip_ssid_info.ssid_len > 0) {
+                     memcpy(&pArgs[2 + g_ip_ssid_info.ip_len], g_ip_ssid_info.ssid, g_ip_ssid_info.ssid_len);
+                 }
+                  break;
 
              default:
                  // 其他控制指令如 OPEN OE(0x01), TAKE PICTURE(0x21) 等，無參數
