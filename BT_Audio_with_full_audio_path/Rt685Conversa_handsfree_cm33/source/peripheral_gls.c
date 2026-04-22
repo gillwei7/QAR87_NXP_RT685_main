@@ -33,6 +33,7 @@
 #include "sdmmc_config.h"
 #endif /* APP_MEM_POWER_OPT */
 
+#define RESPONSE_BUFF_SIZE 128
 
 /*******************************************************************************
  * Prototypes
@@ -125,7 +126,7 @@ void peripheral_gls_task(void *pvParameters) {
 
 void peripheral_gls_handle_ble_command(const struct bt_gatt_attr *attr, const char *cmd)
 {
-    char response[128] = {0};
+	char response[RESPONSE_BUFF_SIZE] = {0};
     bool should_notify = false;
 
     if (strcmp(cmd, "Start_AP") == 0) {
@@ -133,7 +134,7 @@ void peripheral_gls_handle_ble_command(const struct bt_gatt_attr *attr, const ch
     }
     else if (strcmp(cmd, "Start_AP_IP") == 0) {
     	// TODO: Need IP and SSID from Novatek
-    	bt_notify_ip_ssid(response, &should_notify,get_device_ip(), get_device_ssid());
+    	bt_notify_ip_ssid(response, RESPONSE_BUFF_SIZE, &should_notify,get_device_ip(), get_device_ssid());
     }
     else if (strcmp(cmd, "WIFI_CONNECTED") == 0) {
     	bt_notify_camera_use(response, &should_notify);
@@ -183,7 +184,7 @@ void peripheral_gls_handle_ble_command(const struct bt_gatt_attr *attr, const ch
     else {
         PRINTF("Unknown command: %s\n", cmd);
     }
-
+    //PRINTF("should_notify : %s,\t response : %s\n",should_notify?"true":"false",response);
     // Send the notification if the table requires a return string
     if (should_notify && strlen(response) > 0) {
         int rc = bt_gatt_notify(NULL, attr, response, strlen(response));

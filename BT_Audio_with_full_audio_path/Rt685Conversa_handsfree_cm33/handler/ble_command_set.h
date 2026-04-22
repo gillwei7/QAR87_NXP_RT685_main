@@ -26,7 +26,7 @@
 #include <fsl_debug_console.h>
 #include <host_msd_fatfs.h>
 
-void bt_notify_ip_ssid(char *resp_buf, bool *notify_flag,const char* ip,const char* ssid);
+void bt_notify_ip_ssid(char *resp_buf, size_t resp_buf_size, bool *notify_flag,const char* ip,const char* ssid);
 
 void bt_notify_hotspot_on(char *resp_buf, bool *notify_flag);
 void bt_notify_hotspot_off(char *resp_buf, bool *notify_flag);
