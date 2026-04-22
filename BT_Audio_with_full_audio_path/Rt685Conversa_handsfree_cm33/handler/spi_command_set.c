@@ -9,6 +9,12 @@
 #include "spi_command_set.h"
 #include "scenario_state.h"
 #include "system_status.h"
+#include "hal_common.h"
+#include "ringtone_handler.h"
+#include "scenario_state.h"
+#include "i2c_component_handler.h"
+#include "app_handsfree.h"
+#include "hal_led.h"
 
 static spi_command_ui_page_t s_ui_page_id = SPI_COMMAND_UI_PAGE_HOME;
 static spi_command_media_play_pause_t s_media_play_pause = SPI_COMMAND_MEDIA_PLAY_TOGGLE;
@@ -18,6 +24,7 @@ static ip_ssid_info_t g_ip_ssid_info = {0};
 static url_info_t g_url_info = {0};
 
 static uint8_t args_buff[BUFFER_SIZE];
+uint8_t Novatek_boot_completed = 0;
 
 /* 宣告全域變數來儲存時間資訊 (可給予預設值) */
 static spi_command_time_info_t s_system_time = {
@@ -292,6 +299,99 @@ void spi_command_atomic_status_message_notification(app_msg_type_t app_type, con
 {
 	message_processing(app_type, title, body);
 	send_spi_request(CMD_ATOMIC_STATUS, CMD_ATOMIC_STATUS_MSG_NOTIFICATION);
+}
+
+void spi_command_atomic_event_parser (uint8_t event_id, const uint8_t *args)
+{
+	switch (event_id) {
+
+		case CMD_ATOMIC_EVENT_SYSTEM_BOOT_DONE:
+
+			PRINTF("[App] Nova boot completed\r\n");
+			Novatek_boot_completed = 1;
+	//			hal_led_refresh();
+			battery_timer_start();
+			led_post_event(HAL_LED_EVENT_REFRESH);
+			set_ringtone_state(Ringtone_PowerON);
+			break;
+
+		case CMD_ATOMIC_EVENT_CAMERA_ACTIVATED:
+			PRINTF("[SPI][Event] CAMERA_ACTIVATED \r\n ");
+			break;
+
+		case CMD_ATOMIC_EVENT_PHOTO_CAPTURED:
+			PRINTF("[SPI][Event] PHOTO_CAPTURED \r\n ");
+			led_post_event(HAL_LED_EVENT_REFRESH);
+			ss_set_capture_status(STATUS_END);
+			break;
+
+		case CMD_ATOMIC_EVENT_CAMERA_CLOSED:
+			PRINTF("[SPI][Event] CAMERA_CLOSED \r\n ");
+			break;
+
+		case CMD_ATOMIC_EVENT_RECORDING_STARTED:
+			PRINTF("[SPI][Event] RECORDING_STARTED \r\n ");
+			ss_set_recording_status(STATUS_START);
+			break;
+
+		case CMD_ATOMIC_EVENT_RECORDING_STOPPED:
+			PRINTF("[SPI][Event] RECORDING_STOPPED \r\n ");
+			ss_set_recording_status(STATUS_END);
+			break;
+
+		case CMD_ATOMIC_EVENT_VIDEO_PLAY_STARTED:
+			PRINTF("[SPI][Event] VIDEO_PLAY_STARTED \r\n ");
+			break;
+		case CMD_ATOMIC_EVENT_VIDEO_PLAY_PAUSED:
+			PRINTF("[SPI][Event] VIDEO_PLAY_PAUSED \r\n ");
+			if (get_media_status() == MUSIC_PAUSE) {
+				set_media_status(MUSIC_PLAYING);
+			} else if (get_media_status() == MUSIC_PLAYING) {
+				set_media_status(MUSIC_PAUSE);
+			}
+			break;
+
+		case CMD_ATOMIC_EVENT_WIFI_CONNECTED:
+			PRINTF("[SPI][Event] WIFI_CONNECTED \r\n ");
+			break;
+
+		case CMD_ATOMIC_EVENT_WIFI_DISCONNECTED:
+			PRINTF("[SPI][Event] WIFI_DISCONNECTED \r\n ");
+//			set_ringtone_state(Ringtone_WiFi_Disconnected);
+
+			break;
+		case CMD_ATOMIC_EVENT_MSG_NOTIFIED:
+			PRINTF("[SPI][Event] MSG_NOTIFIED \r\n ");
+			break;
+
+		case CMD_ATOMIC_EVENT_UI_PAGE_CHANGED:
+
+			uint8_t CurrentPageID,CurrentSubPageID ,ChangeReason ,ResultCode ;
+
+			CurrentPageID = args[0];
+			CurrentSubPageID = args[1];
+			ChangeReason  = args[2];
+			ResultCode = args[3];
+
+			PRINTF("[App] UI Page Changed: \r\n ");
+			PRINTF("\t CurrentPageID:0x%02X CurrentSubPageID:0x%02X \r\n",CurrentPageID,CurrentSubPageID);
+			PRINTF("\t ChangeReason:0x%02X  ResultCode:0x%02X \r\n",ChangeReason,ResultCode);
+
+			break;
+
+		case CMD_ATOMIC_EVENT_OTA_STARTED:
+			PRINTF("[SPI][Event] OTA_STARTED \r\n ");
+			break;
+
+		case CMD_ATOMIC_EVENT_OTA_FINISHED:
+			PRINTF("[SPI][Event] OTA_FINISHED \r\n ");
+			break;
+
+		case CMD_ATOMIC_EVENT_UNKNOWN_CMD_ERROR:
+			PRINTF("[SPI][Event] UNKNOWN_CMD_ERROR \r\n ");
+			break;
+
+	}
 }
 
 uint8_t spi_command_get_args_and_len (uint8_t msg_type, uint8_t cmd_id, char *pArgs)

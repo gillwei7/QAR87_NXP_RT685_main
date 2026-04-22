@@ -88,6 +88,8 @@ void spi_command_atomic_status_time_sync(   uint16_t year,
 											uint8_t  minute,
 											uint8_t  second );
 
+void spi_command_atomic_event_parser (uint8_t event_id, const uint8_t *args);
+
 uint8_t spi_command_get_args_and_len (uint8_t msg_type, uint8_t cmd_id, char *pArgs);
 
 void application_examples_atomic_status(void);
