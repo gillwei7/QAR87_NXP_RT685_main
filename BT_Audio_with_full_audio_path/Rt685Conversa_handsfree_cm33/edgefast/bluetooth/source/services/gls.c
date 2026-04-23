@@ -27,7 +27,7 @@
 #define BT_DIS_SN        "BLESN01"
 
 #define BT_DIS_STR_MAX   (20U)
-#define BT_CHAR_VALUE_MAX_LEN  30
+#define BT_CHAR_VALUE_MAX_LEN  128
 
 /*******************************************************************************
  * Variables
@@ -39,6 +39,8 @@ static uint8_t sn[BT_DIS_STR_MAX] = BT_DIS_SN;
 static uint16_t g_char1DataLength = 0;
 static uint16_t g_char2DataLength = 0;
 
+//static bool notify_ack = false;
+//static char buff[128] = {0};
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -140,49 +142,73 @@ static void glasses_char2_cfg_changed(const struct bt_gatt_attr *attr,
 }
 
 
-void bt_status_notify()
-{
-	int rc;
-	if(notif_enabled_char1)
-	{
+//void bt_status_notify()
+//{
+//	int rc;
+//	if(notif_enabled_char1)
+//	{
+//
+//		PRINTF("Status is %s\n", statusChar1);
+//
+//		// Prepare status_update structure
+//		status_update.flags = 0x00;
+//		memcpy(status_update.status, statusChar1, 15);
+//
+//		// Notify the status update
+//		rc = bt_gatt_notify(NULL, &glasses_svc.attrs[2],
+//							(uint8_t *)&status_update, sizeof(status_update));
+//
+//		if (rc < 0 && rc != -ENOTCONN)
+//		{
+//		    PRINTF("Char1 notify failed: %d\n", rc);
+//		}
+//
+//	}
+//
+//	if(notif_enabled_char2)
+//	{
+//
+//			//PRINTF("Status is %s\n", statusChar2);
+//
+//			// Prepare status_update structure
+//			status_update_min.flags = 0x00;
+//			memcpy(status_update_min.status, statusChar2, 15);
+//
+//			// Notify the status update
+//			rc = bt_gatt_notify(NULL, &glasses_svc.attrs[5],
+//								(uint8_t *)&status_update_min, sizeof(status_update_min));
+//
+//			if (rc < 0 && rc != -ENOTCONN)
+//			{
+//			    PRINTF("Char2 notify failed: %d\n", rc);
+//			}
+//	}
+//
+//}
 
-		PRINTF("Status is %s\n", statusChar1);
-
-		// Prepare status_update structure
-		status_update.flags = 0x00;
-		memcpy(status_update.status, statusChar1, 15);
-
-		// Notify the status update
-		rc = bt_gatt_notify(NULL, &glasses_svc.attrs[2],
-							(uint8_t *)&status_update, sizeof(status_update));
-
-		if (rc < 0 && rc != -ENOTCONN)
-		{
-		    PRINTF("Char1 notify failed: %d\n", rc);
-		}
-
-	}
-
-	if(notif_enabled_char2)
-	{
-
-			//PRINTF("Status is %s\n", statusChar2);
-
-			// Prepare status_update structure
-			status_update_min.flags = 0x00;
-			memcpy(status_update_min.status, statusChar2, 15);
-
-			// Notify the status update
-			rc = bt_gatt_notify(NULL, &glasses_svc.attrs[5],
-								(uint8_t *)&status_update_min, sizeof(status_update_min));
-
-			if (rc < 0 && rc != -ENOTCONN)
-			{
-			    PRINTF("Char2 notify failed: %d\n", rc);
-			}
-	}
-
-}
+//void bt_status_notify()
+//{
+//	int rc;
+//	if(! notify_ack){return;}
+//	if(notif_enabled_char2)
+//	{
+//		status_update_min.flags = 0x00;
+//		//memcpy(status_update_min.status, statusChar2, 15);
+//
+//
+//		rc = bt_gatt_notify(NULL, &glasses_svc.attrs[5],
+//							(uint8_t *)notify_response, sizeof(notify_response));
+//
+//		memset(notify_response, 0, sizeof(notify_response));
+//
+//		if (rc < 0 && rc != -ENOTCONN)
+//		{
+//			PRINTF("Char2 notify failed: %d\n", rc);
+//		}
+//	}
+//	notify_ack = false;
+//
+//}
 
 static ssize_t read_char(struct bt_conn *conn, const struct bt_gatt_attr *attr,
           void *buf, uint16_t len, uint16_t offset)
@@ -245,7 +271,13 @@ ssize_t write_char2(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 
     PRINTF("BLE Char2 write: %s, Length: %d\n", char2_data, len);
 
-    peripheral_gls_handle_ble_command(&glasses_svc.attrs[5], (const char *)char2_data);
+    char buff[128] = {0};
+    uint8_t cmd_id = peripheral_ble_get_cmd_id((const char *)char2_data,buff,sizeof(buff));
+    peripheral_ble_cmd_parser(cmd_id, &glasses_svc.attrs[5],(uint8_t*)buff);
+
+//    peripheral_gls_handle_ble_command(&glasses_svc.attrs[5],
+//    		(const char *)char2_data, (uint8_t *)notify_response,
+//			sizeof(notify_response), &notify_ack);
 //    // Prepare status_update structure
 //    char test_char[] = "ACK:HOTSPOT_ON";
 //
