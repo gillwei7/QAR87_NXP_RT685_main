@@ -51,6 +51,9 @@ extern uint32_t s_bq256xx_iindpm_target_ua;
 
 static power_on_reason_t get_power_on_reason(void)
 {
+#if APP_DISABLE_POWER_OFF_CHARGING_MODE
+    return POWER_ON_BUTTON;
+#else
 	/* 讀取當下按鍵狀態 */
 	uint8_t pin_state = (uint8_t)GPIO_PinRead(GPIO, NXP_BQ_MR_N_PORT, NXP_BQ_MR_N_PIN);
 
@@ -91,6 +94,7 @@ static power_on_reason_t get_power_on_reason(void)
 			return POWER_ON_UNEXPECTED;
 
 		}
+#endif
 }
 
 void Init_I2C_Component(void)

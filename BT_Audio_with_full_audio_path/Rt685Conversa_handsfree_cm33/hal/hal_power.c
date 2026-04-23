@@ -189,6 +189,9 @@ uint8_t hal_power_get_battery_percentage(uint8_t soc) {
 
 
 uint8_t hal_power_is_power_off_charging_mode(void) {
+#if APP_DISABLE_POWER_OFF_CHARGING_MODE
+    return 0;
+#else
 	if (is_booting) {
 		uint8_t is_charging = 0;
 
@@ -205,6 +208,7 @@ uint8_t hal_power_is_power_off_charging_mode(void) {
 		}
 	}
 	return is_power_off_charging_mode;
+#endif
 }
 
 void hal_power_charger_bq25618_handler (void)

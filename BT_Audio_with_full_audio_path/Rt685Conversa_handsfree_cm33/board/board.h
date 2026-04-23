@@ -21,6 +21,14 @@
 #define BOARD_NAME      "MIMXRT685-EVK"
 #define BOARD_I3C_CODEC (1)
 
+/*
+ * Set to 1 to bypass power-off charging / ship-mode boot gating.
+ * Device will boot directly into normal application flow.
+ */
+#ifndef APP_DISABLE_POWER_OFF_CHARGING_MODE
+#define APP_DISABLE_POWER_OFF_CHARGING_MODE 1
+#endif
+
 /*! @brief The UART to use for debug messages. */
 #if UsingQAR87Board == 1
 
