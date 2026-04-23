@@ -138,6 +138,14 @@ static void hal_pmic_glf70583_init (uint8_t glf70583_a_i2c_addr, uint8_t glf7058
     GPIO_PinWrite(GPIO, NXP_532_PWR_PMIC1_PORT, NXP_532_PWR_PMIC1_PIN, 1); //Enable GLF70583
 }
 
+static void hal_pmic_glf70583_cutoff_all_power (uint8_t glf70583_a_i2c_addr, uint8_t glf70583_b_i2c_addr)
+{
+    // 0x25: Disable All
+    glf70583_i2c_write(glf70583_a_i2c_addr, 0x26, 0x00);
+    // 0x26: Disable All
+    glf70583_i2c_write(glf70583_b_i2c_addr, 0x26, 0x00);
+}
+
 static void hal_pmic_glf70583_cutoff_nt98532_power (uint8_t glf70583_a_i2c_addr, uint8_t glf70583_b_i2c_addr)
 {
     // 0x25: Disable All
@@ -205,6 +213,19 @@ void hal_pmic_glf70583_turn_on_nt98532 (void)
 	}
 }
 
+void hal_pmic_glf70583_cutoff_all (void)
+{
+	config_status = (uint8_t)GPIO_PinRead(GPIO, HW_CONFIG_03_PORT, HW_CONFIG_03_PIN);
+	PRINTF("[HW] config_status: %d \r\n", config_status);
+
+	if (config_status == 0) {
+		PRINTF("[PMIC] GLF70583 correct cutoff soc\r\n");
+		hal_pmic_glf70583_cutoff_all_power(GLF70583_A_I2C_ADDR, GLF70583_B_I2C_ADDR);
+	} else if (config_status == 1) {
+		PRINTF("[PMIC] GLF70583 reverse cutoff soc\r\n");
+		hal_pmic_glf70583_cutoff_all_power(GLF70583_B_I2C_ADDR, GLF70583_A_I2C_ADDR);
+	}
+}
 
 void BOARD_InitPMICs(void)
 {

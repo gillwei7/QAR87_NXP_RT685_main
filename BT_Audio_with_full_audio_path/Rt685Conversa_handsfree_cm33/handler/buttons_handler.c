@@ -23,7 +23,6 @@
 #define CAMERA_RECORDING_MS           (1000U)
 #define PRESS_COUNTER_TIMEOUT_MS      (500U)
 #define BUTTON_DEBOUNCE_MS            (40U)
-#define SOC_POWER_OFF_MS              (1000U)
 
 extern volatile SystemStatus ss;
 extern uint8_t Novatek_boot_completed;
@@ -56,7 +55,6 @@ static TickType_t function_button_press_tick = 0;
 // Timers for button debounce
 static TimerHandle_t s_power_button_timer = NULL;
 static TimerHandle_t s_function_button_timer = NULL;
-static TimerHandle_t s_soc_power_off_timer = NULL;
 
 static uint8_t video_recording_press = 0;
 
@@ -182,36 +180,10 @@ void function_button_timer_start(void)
 	}
 }
 
-static void soc_power_off_timer_callback(TimerHandle_t xTimer)
-{
-	PRINTF("[Button] Start Power Off sequence\r\n");
-	set_ringtone_state(Ringtone_PowerOFF);
-    vTaskDelay(pdMS_TO_TICKS(200));
-	led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
-
-}
-
-static void soc_power_off_timer_init (void)
-{
-	s_soc_power_off_timer = xTimerCreate("SocPowerOffTimer",
-	                               pdMS_TO_TICKS(SOC_POWER_OFF_MS),
-								   pdFALSE,     // auto-reload
-	                               NULL,
-								   soc_power_off_timer_callback);
-}
-
-void soc_power_off_timer_start(void)
-{
-	if (s_soc_power_off_timer != NULL) {
-	    xTimerStart(s_soc_power_off_timer, 0);
-	}
-}
-
 void button_init (void)
 {
 	power_button_timer_init();
 	function_button_timer_init();
-	soc_power_off_timer_init();
 }
 
 void button_press_handler (void)
@@ -347,17 +319,7 @@ void button_press_hold_handler (void)
 					video_recording_press = 0;
 				}
 #endif
-#if SOC_SPI_ENABLE
-				if (Novatek_boot_completed) {
-					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SOFT_POWER_OFF); // Power off
-					soc_power_off_timer_start();
-				} else {
-					set_ringtone_state(Ringtone_PowerOFF);
-					vTaskDelay(pdMS_TO_TICKS(200));
-					led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
-				}
-#endif
-
+				set_power_off_handler_state();
 			}
 		}
 		if(!power_button_press_hold_1s_set)

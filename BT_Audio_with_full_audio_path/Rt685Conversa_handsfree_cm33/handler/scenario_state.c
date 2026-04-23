@@ -13,12 +13,18 @@
 #include "spi_command_set.h"
 #include "ui_handler.h"
 #include "hal_led.h"
+#include "hal_pmic.h"
 #include "i2c_component_handler.h"
 #include "ringtone_handler.h"
 
+extern uint8_t Novatek_boot_completed;
 
 static volatile scenario_state_t current_scenario_state = SCENARIO_STATE_HOME;
 static volatile uint8_t is_media_playing = MUSIC_PAUSE;
+
+
+static uint8_t power_off_handler_state = 0;
+
 
 static uint8_t menu_handler_start_state = 0;
 static uint8_t menu_handler_stop_state = 0;
@@ -179,6 +185,58 @@ void set_scenario_state(uint8_t state)
 #endif
 			)) {
 		translation_handler_start_state = 1;
+	}
+}
+
+static TickType_t power_off_tick = 0;
+static void scenario_power_off_handler (void)
+{
+	if (power_off_handler_state == 0) {
+			return;
+	}
+
+	// 1. SPI + UI, 2. Ringtone, 3. LED, 4. wait 5 s, 5. disable PMIC, 6. LED off, 7. shipmode
+	if (power_off_handler_state == 1) {
+		if (Novatek_boot_completed) {
+#if SOC_SPI_ENABLE
+			send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SOFT_POWER_OFF); // Power off
+#endif
+			power_off_handler_state++;
+		} else {
+			set_ringtone_state(Ringtone_PowerOFF);
+			power_off_handler_state += 2; //Jump to 3
+		}
+
+	} else if (power_off_handler_state == 2) {
+		set_ringtone_state(Ringtone_PowerOFF);
+		power_off_handler_state++;
+
+	} else if (power_off_handler_state == 3) {
+		led_post_event(HAL_LED_EVENT_POWER_OFF_PROGRESS);
+        PRINTF("xTaskGetTickCount(): %d \r\n", xTaskGetTickCount());
+
+		power_off_tick = xTaskGetTickCount();
+		power_off_handler_state++;
+
+	} else if (power_off_handler_state == 4) {
+		if (xTaskGetTickCount() - power_off_tick > 5000) {
+			power_off_handler_state++;
+		}
+
+	} else if (power_off_handler_state == 5) {
+		hal_pmic_glf70583_cutoff_all(); //Disable power to the SoC and Wi-Fi/BT module
+		power_off_handler_state++;
+
+	} else if (power_off_handler_state == 6) {
+		led_post_event(HAL_LED_EVENT_ALL_OFF);
+		power_off_handler_state++;
+
+	} else if (power_off_handler_state == 10) {
+		NVIC_SystemReset(); //Reboot (Defer the power-on and power-off decision to post-boot evaluation)
+		power_off_handler_state = 0;
+
+	} else if (power_off_handler_state > 0) {
+		power_off_handler_state++;
 	}
 }
 
@@ -724,6 +782,12 @@ void scenario_state_handler (void)
 	scenario_video_call_handler();
 	scenario_video_ai_handler();
 	scenario_translation_handler();
+	scenario_power_off_handler();
+}
+
+void set_power_off_handler_state (void)
+{
+	power_off_handler_state = 1;
 }
 
 void set_music_player_handler_start_state (void)

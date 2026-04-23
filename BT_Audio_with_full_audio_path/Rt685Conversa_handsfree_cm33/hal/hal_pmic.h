@@ -22,6 +22,7 @@ void hal_pmic_pca9422_enter_ship_mode(void);
 void hal_pmic_glf70583_actual_board_init (void);
 void hal_pmic_glf70583_cutoff_nt98532 (void);
 void hal_pmic_glf70583_turn_on_nt98532 (void);
+void hal_pmic_glf70583_cutoff_all (void);
 void BOARD_InitPMICs(void);
 
 

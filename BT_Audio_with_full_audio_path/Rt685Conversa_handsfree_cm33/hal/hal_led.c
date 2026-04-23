@@ -37,8 +37,6 @@ static void hal_led_ktd2027_power_off_indicator(void)
 {
     ktd202x_led_off();
     ktd202x_ch2_led_on(LED_CURRENT_CH2);
-    vTaskDelay(pdMS_TO_TICKS(10000));
-    ktd202x_ch2_led_off();
 }
 
 void hal_led_ktd2027_charging_indicator(void)
@@ -214,11 +212,6 @@ void hal_led_event_handler (hal_led_event_t event) {
 		break;
 	case HAL_LED_EVENT_POWER_OFF_PROGRESS:
 		hal_led_set_indicator_status(HAL_LED_POWER_OFF);
-		//hal_pmic_pca9422_power_down();
-		bq256xx_enter_ship_mode();
-		// Reset the system if the device is charging
-		vTaskDelay(1000);
-		NVIC_SystemReset();
 		break;
 	case HAL_LED_EVENT_PHOTO_CAPTURE:
 		hal_led_set_indicator_status(HAL_LED_TAKE_PHOTO);
