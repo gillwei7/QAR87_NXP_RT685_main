@@ -151,7 +151,7 @@
 									<listOptionValue builtIn="false" value="__NEWLIB__"/>
 									<listOptionValue builtIn="false" value="USB_STACK_USE_DEDICATED_RAM=1"/>
 									<listOptionValue builtIn="false" value="Using_UART5ToPrint=0"/>
-									<listOptionValue builtIn="false" value="Using_UART2ToPrint=0"/>
+									<listOptionValue builtIn="false" value="Using_UART2ToPrint=1"/>
 								</option>
 								<option id="com.crt.advproject.gcc.fpu.183191050" name="Floating point" superClass="com.crt.advproject.gcc.fpu" useByScannerDiscovery="true" value="com.crt.advproject.gcc.fpu.fpv5sp.hard" valueType="enumerated"/>
 								<option id="com.crt.advproject.gcc.thumb.2031422085" name="Thumb mode" superClass="com.crt.advproject.gcc.thumb" useByScannerDiscovery="false" value="true" valueType="boolean"/>
@@ -1980,9 +1980,9 @@
 &lt;vendor&gt;NXP&lt;/vendor&gt;&#13;
 &lt;memory can_program="true" id="Flash" is_ro="true" size="0" type="Flash"/&gt;&#13;
 &lt;memory id="RAM" size="4608" type="RAM"/&gt;&#13;
-&lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="BOARD_FLASH" location="0x8000000" size="0x300000"/&gt;&#13;
-&lt;memoryInstance derived_from="Flash" edited="true" id="BOARD_FLASH_DspBin" location="0x8300000" size="0x300000"/&gt;&#13;
-&lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="LITTLEFS_FLASH_region" location="0x8600000" size="0x200000"/&gt;&#13;
+&lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="BOARD_FLASH" location="0x8040400" size="0x300000"/&gt;&#13;
+&lt;memoryInstance derived_from="Flash" edited="true" id="BOARD_FLASH_DspBin" location="0x8340400" size="0x300000"/&gt;&#13;
+&lt;memoryInstance derived_from="Flash" driver="MIMXRT600_FlexSPI_A_SFDP_QSPI.cfx" edited="true" id="LITTLEFS_FLASH_region" location="0x8640400" size="0x200000"/&gt;&#13;
 &lt;memoryInstance derived_from="RAM" edited="true" id="SRAM" location="0x80000" size="0x100000"/&gt;&#13;
 &lt;memoryInstance derived_from="RAM" edited="true" id="Audio_IO_Data" location="0x20000000" size="0x40000"/&gt;&#13;
 &lt;memoryInstance derived_from="RAM" edited="true" id="RamSharedWithDsp" location="0x20060000" size="0x20000"/&gt;&#13;
