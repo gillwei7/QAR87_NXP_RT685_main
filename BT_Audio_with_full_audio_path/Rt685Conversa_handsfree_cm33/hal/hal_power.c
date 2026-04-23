@@ -445,13 +445,18 @@ void hal_power_go_to_power_off_charging(void)
 //        uint8_t charger_status = (uint8_t)GPIO_PinRead(GPIO, 0U, 19U);
 //        if(charger_status==1)
         {
-//        	vTaskDelay(pdMS_TO_TICKS(100));
-        	if (button_count > 10) { //Press and hold the button for 10 seconds
-        		NVIC_SystemReset(); //Reboot
+        	if (button_count > 9) { //Press and hold the button for 900 ms
+        	    PRINTF("[System] Press Button to Boot up (RTOS Task) \r\n");
+        	    //It follows the same 1-second timing as exiting ship mode
+        	    vTaskDelay(pdMS_TO_TICKS(100));
+
+        	    NVIC_SystemReset(); //Reboot
+        	    vTaskSuspend(NULL);
         	}
             if (battery_level_delay > 300 || battery_level_delay == 0) {
-        		battery_level_delay = 0;
-                hal_power_gauge_glf70302_get_battery_level();
+        	    battery_level_delay = 0;
+        	    PRINTF("[System] charging (RTOS Task) \r\n");
+        	    hal_power_gauge_glf70302_get_battery_level();
             }
             switch (LED_state) {
                 case 0:
@@ -477,21 +482,19 @@ void hal_power_go_to_power_off_charging(void)
         else
         {
             hal_led_ktd2027_off();
+            PRINTF("[System] stop charging (RTOS Task) \r\n");
             PRINTF("[System] power off charging -> power down \r\n");
-            vTaskDelay(pdMS_TO_TICKS(100));
+
+            vTaskDelay(pdMS_TO_TICKS(1000)); //It follows the same 1-second timing as exiting ship mode
 
             //hal_pmic_pca9422_power_down();
-            bq256xx_enter_ship_mode();
+    		NVIC_SystemReset(); //Reboot (Defer the power-on and power-off decision to post-boot evaluation)
             vTaskSuspend(NULL);
 
         }
         vTaskDelay(pdMS_TO_TICKS(100));
         battery_level_delay++;
     }
-
-
 }
-
-
 
 #endif
