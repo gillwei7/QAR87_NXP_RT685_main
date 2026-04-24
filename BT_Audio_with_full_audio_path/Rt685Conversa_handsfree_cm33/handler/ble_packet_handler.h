@@ -5,8 +5,8 @@
  *      Author: 11301026
  */
 
-#ifndef BLE_GATT_PARSE_H_
-#define BLE_GATT_PARSE_H_
+#ifndef BLE_PACKET_HANDLER_H_
+#define BLE_PACKET_HANDLER_H_
 
 #include <stdint.h>
 #include <stddef.h>
@@ -84,4 +84,4 @@ int ble_packet_parser (const uint8_t *buf, uint16_t len);
 void ble_message_parser (ble_msg_type_t type, const uint8_t *data, size_t len);
 
 
-#endif /* BLE_GATT_PARSE_H_ */
+#endif /* BLE_PACKET_HANDLER_H_ */

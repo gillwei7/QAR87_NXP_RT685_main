@@ -47,4 +47,4 @@ void ble_send_event_preview_hide(void);
 void ble_send_event_action_glass_black_preview(void);
 void ble_send_event_action_glass_clear_black_preview(void);
 
-#endif /* BLE_COMMAND_SET_H_ */
+#endif /* BLE_EVENT_HANDLER_H_ */

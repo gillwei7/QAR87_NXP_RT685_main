@@ -154,6 +154,8 @@ void send_ble_data (uint8_t * ble_data, uint16_t ble_data_len)
 		if (rc < 0 && rc != -ENOTCONN)
 		{
 			PRINTF("send_ble_data failed: %d\n", rc);
+		} else {
+			PRINTF("send_ble_data: %s\n", ble_data);
 		}
 	}
 }

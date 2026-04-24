@@ -1,3 +1,4 @@
+#include <ble_event_handler.h>
 /*
  * Copyright (c) 2015-2016 Intel Corporation
  * Copyright 2021-2023 NXP
@@ -22,7 +23,6 @@
 #include <host_msd_fatfs.h>
 
 #include "system_status.h"
-#include "ble_command_set.h"
 #include "spi_command_set.h"
 #include "peripheral_gls.h"
 

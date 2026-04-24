@@ -1,3 +1,5 @@
+#include <ble_event_handler.h>
+#include <ble_packet_handler.h>
 /*
  * ble_gatt_parse.c
  *
@@ -11,13 +13,11 @@
 #include <toolchain.h>
 #include <porting.h>
 
-#include "ble_gatt_parse.h"
 #include "fsl_debug_console.h"
 #include "fsl_crc.h"
 #include <string.h>
 #include "spi_command_set.h"
 #include "system_status.h"
-#include "ble_command_set.h"
 
 
 static uint8_t video_call_url[128] = {0};
