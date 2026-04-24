@@ -26,6 +26,8 @@ static url_info_t g_url_info = {0};
 static uint8_t args_buff[BUFFER_SIZE];
 uint8_t Novatek_boot_completed = 0;
 
+static uint8_t start_ap_request = 0;
+
 /* 宣告全域變數來儲存時間資訊 (可給予預設值) */
 static spi_command_time_info_t s_system_time = {
     .year   = 2026,
@@ -175,9 +177,9 @@ void spi_command_atomic_exec_stop_video_call(void)
 {
 	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_VIDEO_CALL);
 }
-void spi_command_atomic_exec_start_wifi_ap(const char *ip, const char *ssid)
+void spi_command_atomic_exec_start_wifi_ap(void)
 {
-	ip_ssid_processing(ip,ssid);
+	ip_ssid_processing(ss_get_wifi_ip(), ss_get_wifi_ssid());
 	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_WIFI_AP);
 }
 void spi_command_atomic_exec_stop_wifi_ap(void)
@@ -412,15 +414,15 @@ uint8_t spi_command_get_args_and_len (uint8_t msg_type, uint8_t cmd_id, char *pA
          switch (cmd_id)
          {
 
-			 case CMD_ATOMIC_EXEC_SWITCH_UI_PAGE: // SWITCH_UI_PAGE
+             case CMD_ATOMIC_EXEC_SWITCH_UI_PAGE: // SWITCH_UI_PAGE
 				 arg_len = 2;
-				 pArgs[0] = get_ui_page_id();
+				 pArgs[0] = s_ui_page_id;
 				 pArgs[1] = 0x00; // TargetSubPageID
 				 break;
 
              case CMD_ATOMIC_EXEC_MEDIA_PLAY_PAUSE: // MEDIA PLAY/PAUSE
                  arg_len = 1;
-                 pArgs[0] = get_media_play_pause_cmd(); // 0x00: Toggle, 0x01: Force Play, 0x02: Force Pause (請依實際需求帶入)
+                 pArgs[0] = s_media_play_pause; // 0x00: Toggle, 0x01: Force Play, 0x02: Force Pause (請依實際需求帶入)
                  break;
 
              case CMD_ATOMIC_EXEC_START_VIDEO_CALL: // START VIDEO_CALL
@@ -619,12 +621,16 @@ void application_examples_atomic_exec(void)
 
 }
 
-spi_command_ui_page_t get_ui_page_id(void)
+uint8_t get_start_wifi_ap_request (void)
 {
-	return s_ui_page_id;
+	return start_ap_request;
 }
 
-spi_command_media_play_pause_t get_media_play_pause_cmd(void)
+void set_start_wifi_ap_request (uint8_t on)
 {
-	return s_media_play_pause;
+	if (on) {
+		start_ap_request = 1;
+	} else {
+		start_ap_request = 0;
+	}
 }

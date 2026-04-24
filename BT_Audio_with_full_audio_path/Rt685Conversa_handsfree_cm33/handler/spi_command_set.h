@@ -75,7 +75,7 @@ void spi_command_atomic_exec_switch_ui_page(spi_command_ui_page_t state);
 
 void spi_command_atomic_exec_start_video_call(const char *url);
 void spi_command_atomic_exec_stop_video_call(void);
-void spi_command_atomic_exec_start_wifi_ap(const char *ip, const char *ssid);
+void spi_command_atomic_exec_start_wifi_ap(void);
 void spi_command_atomic_exec_stop_wifi_ap(void);
 
 void spi_command_atomic_status_version_info(void);
@@ -92,9 +92,7 @@ void spi_command_atomic_event_parser (uint8_t event_id, const uint8_t *args);
 
 uint8_t spi_command_get_args_and_len (uint8_t msg_type, uint8_t cmd_id, char *pArgs);
 
-void application_examples_atomic_status(void);
-
-spi_command_ui_page_t get_ui_page_id(void);
-spi_command_media_play_pause_t get_media_play_pause_cmd(void);
+uint8_t get_start_wifi_ap_request (void);
+void set_start_wifi_ap_request (uint8_t on);
 
 #endif /* SPI_COMMAND_SET_H_ */
