@@ -7,7 +7,6 @@
 
 #include "buttons_handler.h"
 #include "i2c_component_handler.h"
-#include "spi_handler.h"
 #include "WorkStateManager.h"
 #include "system_status.h"
 #include "scenario_state.h"
@@ -15,6 +14,7 @@
 #include "app_handsfree.h"
 #include "ringtone_handler.h"
 #include "soc_handler.h"
+#include "spi_command_set.h"
 
 
 #define SAMPLE_MS                     (10U) // Polling interval 10ms, with simple anti-shake function
@@ -196,10 +196,10 @@ void button_press_handler (void)
 #if 1
 			if (Novatek_boot_completed) {
 				if (oe_status == 0) {
-					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_OPEN_OE); // turn OE on
+					spi_command_atomic_exec_open_oe(); // turn OE on
 					oe_status = 1;
 				} else {
-					send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_CLOSE_OE); // turn OE off
+					spi_command_atomic_exec_close_oe(); // turn OE off
 					oe_status = 0;
 				}
 			}
@@ -237,7 +237,7 @@ void button_press_handler (void)
 #if !CES_DEMO || CES_DEMO_FOR_NOVATEK
 					if (Novatek_boot_completed && (get_scenario_state() == SCENARIO_STATE_HOME || get_scenario_state() == SCENARIO_STATE_MENU ||
 							get_scenario_state() == SCENARIO_STATE_ABOUT) && !ss_get_capture_status()) {
-						send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_TAKE_PICTURE); // Take Photo
+						spi_command_atomic_exec_take_picture(); // Take Photo
 						led_post_event(HAL_LED_EVENT_PHOTO_CAPTURE);
 						ss_set_capture_status(STATUS_START);
 					}
