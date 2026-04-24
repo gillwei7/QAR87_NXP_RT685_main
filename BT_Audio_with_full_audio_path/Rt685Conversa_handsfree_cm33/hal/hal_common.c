@@ -352,4 +352,16 @@ void hal_board_init(void)
 //	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
 }
 
+void hal_main_handler (void)
+{
+	i2c_device_handler();
+	touch_gesture_handler();
+	spi_command_handler();
+	bluetooth_reconnect_handler();
+	ringtone_handler();
+	button_handler();
+	scenario_state_handler();
+
+}
+
 #endif

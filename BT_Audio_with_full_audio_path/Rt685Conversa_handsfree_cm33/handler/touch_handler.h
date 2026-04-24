@@ -25,7 +25,7 @@ typedef enum {
     TOUCH_GESTURE_TWO_PRESS_HOLD,
 } touch_gesture_t;
 
-void touch_gesture_handler (void);
+
 void set_touch_gesture (touch_gesture_t touch_gesture);
 
 #endif /* TOUCH_HANDLER_H_ */

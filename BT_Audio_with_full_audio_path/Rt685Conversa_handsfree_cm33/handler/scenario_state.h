@@ -31,7 +31,7 @@ typedef enum {
 
 uint8_t get_scenario_state(void);
 void set_scenario_state(uint8_t state);
-void scenario_state_handler (void);
+
 
 void set_power_off_handler_state (void);
 void set_music_player_handler_start_state (void);

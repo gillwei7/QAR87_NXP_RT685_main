@@ -110,8 +110,14 @@ void hal_log_message(const int level,const char *file, const char *func, uint8_t
 
 // Board Init
 void hal_board_init(void);
+void hal_main_handler (void);
+
 
 void i2c_device_boot (void);
+
+void scenario_state_handler (void);
+void bluetooth_reconnect_handler (void);
+void touch_gesture_handler (void);
 void i2c_device_handler (void);
 void spi_command_handler_init(void);
 void spi_command_handler(void);

@@ -364,8 +364,7 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 		case BLE_CMD_ID_START_VIDEO_CALL_URL :
 			size_t url_len = strlen("Start_Video_Call_URL:");
 			snprintf((char *)video_call_url, sizeof(video_call_url), "%s", &ble_data[url_len]);
-		    PRINTF("[BLE] URL(%d)(%d)(%d): %s\n", strlen(video_call_url), sizeof(video_call_url), url_len, video_call_url);
-//			PRINTF("[BLE Parser] START_VIDEO_CALL_URL : %s\n",(char*)parameters);
+			PRINTF("[BLE] URL: %s\n", video_call_url);
 
 			spi_command_atomic_exec_start_video_call(video_call_url);
 			break;
