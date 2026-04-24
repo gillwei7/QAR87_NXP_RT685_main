@@ -64,6 +64,7 @@ uint8_t has_set_device_name (void);
 uint8_t * ss_get_device_name (void);
 uint8_t * ss_get_wifi_ssid (void);
 void ss_print_bt_addr (void);
+uint8_t * ss_get_wifi_ip (void);
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
 void ss_ble_on();

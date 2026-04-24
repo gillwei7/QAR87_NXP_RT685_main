@@ -23,6 +23,8 @@ volatile SystemStatus ss = {0};
 
 static uint8_t device_name[248] = "QAR88a_0000";
 static uint8_t wifi_ssid[248] = "QAR88a_5G_0000";
+static uint8_t wifi_ip[100] = "192.168.1.1";
+
 static uint8_t set_device_name = 0;
 
 static volatile uint8_t current_state_value = 0;
@@ -197,6 +199,11 @@ void ss_print_bt_addr (void)
 {
 	PRINTF("BT Address: %02X:%02X:%02X:%02X:%02X:%02X\r\n", bt_addr_5, bt_addr_4, bt_addr_3, bt_addr_2, bt_addr_1, bt_addr_0);
 
+}
+
+uint8_t * ss_get_wifi_ip (void)
+{
+	return wifi_ip;
 }
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
