@@ -4,11 +4,24 @@
  *  Created on: 2026年4月14日
  *      Author: 11301026
  */
+#include <stdio.h>
+#include <stddef.h>
+#include <string.h>
+#include <errno/errno.h>
+#include <toolchain.h>
+#include <porting.h>
 
 #include "ble_gatt_parse.h"
 #include "fsl_debug_console.h"
 #include "fsl_crc.h"
 #include <string.h>
+#include "spi_command_set.h"
+#include "system_status.h"
+#include "ble_command_set.h"
+
+
+static uint8_t video_call_url[128] = {0};
+
 
 // 標籤位遮罩
 #define FLAG_FIRST_PACKET 0x01
@@ -67,7 +80,7 @@ static uint32_t read_u32_big_endian(const uint8_t *p) {
 }
 
 // --- 核心解析函式 ---
-int ble_packet_parse(const uint8_t *buf, uint16_t len) {
+int ble_packet_parser (const uint8_t *buf, uint16_t len) {
     // Stage 0: 接收基礎檢查
 	BLE_GATT_PARSE_DEBUG("Received packet, len = %d\n", len);
 
@@ -150,7 +163,7 @@ int ble_packet_parse(const uint8_t *buf, uint16_t len) {
 
         //解析訊息
     	BLE_GATT_PARSE_DEBUG("Dispatching message type 0x%02X to message parse...\n", g_ctx.active_type);
-    	ble_message_parse(g_ctx.active_type, g_ctx.buffer, g_ctx.current_len);
+    	ble_message_parser(g_ctx.active_type, g_ctx.buffer, g_ctx.current_len);
 
         // 重置狀態迎接下一則訊息
         g_ctx.is_assembling = false;
@@ -160,7 +173,7 @@ int ble_packet_parse(const uint8_t *buf, uint16_t len) {
     return 0;
 }
 
-void ble_message_parse(ble_msg_type_t type, const uint8_t *data, size_t len)
+void ble_message_parser (ble_msg_type_t type, const uint8_t *data, size_t len)
 {
     if (type == BLE_MSG_TYPE_AI_RESPONSE) {
     	PRINTF("[BLE][App] BLE_MSG_TYPE_AI_RESPONSE \r\n");
@@ -255,6 +268,164 @@ void ble_message_parse(ble_msg_type_t type, const uint8_t *data, size_t len)
         }
 
     }
-
-
 }
+
+static uint8_t peripheral_ble_get_cmd_id(uint8_t * ble_data)
+{
+	if (strcmp(ble_data, "Start_AP") == 0)
+	{
+		return BLE_CMD_ID_START_AP;
+	}
+	else if (strcmp(ble_data, "Start_AP_IP") == 0)
+	{
+		return BLE_CMD_ID_START_AP_IP;
+	}
+	else if (strcmp(ble_data, "WIFI_CONNECTED") == 0)
+	{
+		return BLE_CMD_ID_WIFI_CONNECTED;
+	}
+	else if (strcmp(ble_data, "RTSP_AV") == 0)
+	{
+		return BLE_CMD_ID_RTSP_AV;
+	}
+	else if(strstr(ble_data,"Start_Video_Call_URL:") != NULL)
+	{
+		return BLE_CMD_ID_START_VIDEO_CALL_URL ;
+	}
+	else if(strcmp(ble_data, "Stop_Video_Call") == 0)
+	{
+		return BLE_CMD_ID_STOP_VIDEO_CALL;
+	}
+	else if (strcmp(ble_data, "Enter_Video_Call") == 0)
+	{
+		return BLE_CMD_ID_ENTER_VIDEO_CALL;
+	}
+	else if (strcmp(ble_data, "Leave_Video_Call") == 0)
+	{
+		return BLE_CMD_ID_LEAVE_VIDEO_CALL;
+	}
+    else if (strcmp(ble_data, "STOP_VIDEOCHAT") == 0) {
+		return BLE_CMD_ID_LEAVE_VIDEO_CALL;
+    }
+    else if (strcmp(ble_data, "stopTranslation") == 0) {
+		return BLE_CMD_ID_STOP_TRANSLATION;
+    }
+    else if (strcmp(ble_data, "TAKE_PHOTO") == 0) {
+		return BLE_CMD_ID_TAKE_PHOTO;
+    }
+    else if (strcmp(ble_data, "START_RECORDING") == 0) {
+		return BLE_CMD_ID_START_RECORDING;
+    }
+    else if (strcmp(ble_data, "startFileSync") == 0) {
+		return BLE_CMD_ID_START_FILE_SYNC;
+    }
+    else if (strcmp(ble_data, "NEW_MEDIA") == 0) {
+		return BLE_CMD_ID_NEW_MEDIA;
+    }
+    else if (strcmp(ble_data, "STOP_RECORDING") == 0) {
+		return BLE_CMD_ID_STOP_RECORDING;
+    }
+    else if (strcmp(ble_data, "RTSP_AUDIO_ONLY_ON") == 0) {
+		return BLE_CMD_ID_RTSP_AUDIO_ONLY_ON;
+    }
+
+	return BLE_CMD_ID_UNKNOWN ;
+}
+
+void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
+{
+	uint8_t cmd_id = peripheral_ble_get_cmd_id(ble_data);
+
+	switch(cmd_id)
+	{
+		case BLE_CMD_ID_ENTER_VIDEO_CALL :
+			PRINTF("[BLE Parser] ENTER_VIDEO_CALL_URL\n");
+			/*NXP 更改 Audio Path 設定 */
+			break;
+
+		case BLE_CMD_ID_START_AP :
+			PRINTF("[BLE Parser] Start_AP\n");
+			spi_command_atomic_exec_start_wifi_ap();
+			break;
+
+		case BLE_CMD_ID_START_AP_IP :
+			PRINTF("[BLE Parser] Start_AP_IP\n");
+			ble_send_event_ip_ssid();
+			break;
+
+		case BLE_CMD_ID_WIFI_CONNECTED :
+			PRINTF("[BLE Parser] WIFI_CONNECTED\n");
+			break;
+
+		case BLE_CMD_ID_RTSP_AV :
+			PRINTF("[BLE Parser] RTSP_AV\n");
+			break;
+
+		case BLE_CMD_ID_START_VIDEO_CALL_URL :
+			size_t url_len = strlen("Start_Video_Call_URL:");
+			snprintf((char *)video_call_url, sizeof(video_call_url), "%s", &ble_data[url_len]);
+		    PRINTF("[BLE] URL(%d)(%d)(%d): %s\n", strlen(video_call_url), sizeof(video_call_url), url_len, video_call_url);
+//			PRINTF("[BLE Parser] START_VIDEO_CALL_URL : %s\n",(char*)parameters);
+
+			spi_command_atomic_exec_start_video_call(video_call_url);
+			break;
+
+		case BLE_CMD_ID_STOP_VIDEO_CALL :
+			PRINTF("[BLE Parser] STOP_VIDEO_CALL\n");
+			spi_command_atomic_exec_stop_video_call();
+			break;
+
+		case BLE_CMD_ID_LEAVE_VIDEO_CALL :
+			PRINTF("[BLE Parser] LEAVE_VIDEO_CALL\n");
+			/*NXP 恢復 Audio Path 設定 */
+			spi_command_atomic_exec_stop_wifi_ap();
+			break;
+
+		case BLE_CMD_ID_STOP_VIDEOCHAT :
+			PRINTF("[BLE Parser] STOP_VIDEOCHAT\n");
+
+			break;
+
+		case BLE_CMD_ID_STOP_TRANSLATION :
+			PRINTF("[BLE Parser] STOP_TRANSLATION\n");
+
+			break;
+
+		case BLE_CMD_ID_TAKE_PHOTO :
+			PRINTF("[BLE Parser] TAKE_PHOTO\n");
+
+			break;
+
+		case BLE_CMD_ID_START_RECORDING :
+			PRINTF("[BLE Parser] START_RECORDING\n");
+
+			break;
+
+		case BLE_CMD_ID_STOP_RECORDING :
+			PRINTF("[BLE Parser] STOP_RECORDING\n");
+
+			break;
+
+		case BLE_CMD_ID_START_FILE_SYNC :
+			PRINTF("[BLE Parser] START_FILE_SYNC\n");
+
+			break;
+
+		case BLE_CMD_ID_NEW_MEDIA :
+			PRINTF("[BLE Parser] NEW_MEDIA\n");
+
+			break;
+
+		case BLE_CMD_ID_RTSP_AUDIO_ONLY_ON :
+			PRINTF("[BLE Parser] RTSP_AUDIO_ONLY_ON\n");
+
+			break;
+
+		case BLE_CMD_ID_UNKNOWN :
+			PRINTF("[BLE Parser] Unknown BLE Command\n");
+			break;
+		default:
+			break;
+	}
+}
+

@@ -133,82 +133,30 @@ static void glasses_char2_cfg_changed(const struct bt_gatt_attr *attr,
 {
    	ARG_UNUSED(attr);
 
-   	notif_enabled_char2 = (value == BT_GATT_CCC_NOTIFY);
+   	if (value == BT_GATT_CCC_NOTIFY) {
+   		notif_enabled_char2 = 1;
+   		PRINTF(" CH2 Notifications enabled(%d)\r\n", value);
 
-	PRINTF(" CH2 Notifications %s", notif_enabled_char2 ? "enabled\n" : "disabled\n");
-
-    (void)notif_enabled_char2;
-
+   	} else {
+   		notif_enabled_char2 = 0;
+   		PRINTF(" CH2 Notifications disabled(%d)\r\n", value);
+   	}
 }
 
+//BLE data sent to phone
+void send_ble_data (uint8_t * ble_data, uint16_t ble_data_len)
+{
+	int rc;
+	if(notif_enabled_char2) //Verify BLE notify enabled
+	{
+		rc = bt_gatt_notify(NULL, &glasses_svc.attrs[5], ble_data, ble_data_len);
 
-//void bt_status_notify()
-//{
-//	int rc;
-//	if(notif_enabled_char1)
-//	{
-//
-//		PRINTF("Status is %s\n", statusChar1);
-//
-//		// Prepare status_update structure
-//		status_update.flags = 0x00;
-//		memcpy(status_update.status, statusChar1, 15);
-//
-//		// Notify the status update
-//		rc = bt_gatt_notify(NULL, &glasses_svc.attrs[2],
-//							(uint8_t *)&status_update, sizeof(status_update));
-//
-//		if (rc < 0 && rc != -ENOTCONN)
-//		{
-//		    PRINTF("Char1 notify failed: %d\n", rc);
-//		}
-//
-//	}
-//
-//	if(notif_enabled_char2)
-//	{
-//
-//			//PRINTF("Status is %s\n", statusChar2);
-//
-//			// Prepare status_update structure
-//			status_update_min.flags = 0x00;
-//			memcpy(status_update_min.status, statusChar2, 15);
-//
-//			// Notify the status update
-//			rc = bt_gatt_notify(NULL, &glasses_svc.attrs[5],
-//								(uint8_t *)&status_update_min, sizeof(status_update_min));
-//
-//			if (rc < 0 && rc != -ENOTCONN)
-//			{
-//			    PRINTF("Char2 notify failed: %d\n", rc);
-//			}
-//	}
-//
-//}
-
-//void bt_status_notify()
-//{
-//	int rc;
-//	if(! notify_ack){return;}
-//	if(notif_enabled_char2)
-//	{
-//		status_update_min.flags = 0x00;
-//		//memcpy(status_update_min.status, statusChar2, 15);
-//
-//
-//		rc = bt_gatt_notify(NULL, &glasses_svc.attrs[5],
-//							(uint8_t *)notify_response, sizeof(notify_response));
-//
-//		memset(notify_response, 0, sizeof(notify_response));
-//
-//		if (rc < 0 && rc != -ENOTCONN)
-//		{
-//			PRINTF("Char2 notify failed: %d\n", rc);
-//		}
-//	}
-//	notify_ack = false;
-//
-//}
+		if (rc < 0 && rc != -ENOTCONN)
+		{
+			PRINTF("send_ble_data failed: %d\n", rc);
+		}
+	}
+}
 
 static ssize_t read_char(struct bt_conn *conn, const struct bt_gatt_attr *attr,
           void *buf, uint16_t len, uint16_t offset)
@@ -252,7 +200,7 @@ ssize_t write_char1(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 
 }
 
-
+// Received BLE data from phone
 ssize_t write_char2(struct bt_conn *conn, const struct bt_gatt_attr *attr,
              const void *buf, uint16_t len, uint16_t offset, uint8_t flags)
 {
@@ -271,28 +219,7 @@ ssize_t write_char2(struct bt_conn *conn, const struct bt_gatt_attr *attr,
 
     PRINTF("BLE Char2 write: %s, Length: %d\n", char2_data, len);
 
-    char buff[128] = {0};
-    uint8_t cmd_id = peripheral_ble_get_cmd_id((const char *)char2_data,buff,sizeof(buff));
-    peripheral_ble_cmd_parser(cmd_id, &glasses_svc.attrs[5],(uint8_t*)buff);
-
-//    peripheral_gls_handle_ble_command(&glasses_svc.attrs[5],
-//    		(const char *)char2_data, (uint8_t *)notify_response,
-//			sizeof(notify_response), &notify_ack);
-//    // Prepare status_update structure
-//    char test_char[] = "ACK:HOTSPOT_ON";
-//
-//    // Notify the status update
-//    int rc = bt_gatt_notify(NULL,
-//                        &glasses_svc.attrs[5],
-//                        test_char,
-//                        strlen(test_char));
-//
-//    PRINTF("notify result:%d\r\n", rc);
-//
-//    if (rc < 0 && rc != -ENOTCONN)
-//    {
-//        PRINTF("Char2 notify failed: %d\r\n", rc);
-//    }
+    peripheral_ble_cmd_parser(char2_data, len);
 
     return len;
 

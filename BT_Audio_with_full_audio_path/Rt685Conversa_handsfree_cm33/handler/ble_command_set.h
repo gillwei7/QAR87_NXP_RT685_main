@@ -26,25 +26,25 @@
 #include <fsl_debug_console.h>
 #include <host_msd_fatfs.h>
 
-void bt_notify_ip_ssid(char *resp_buf, size_t resp_buf_size, bool *notify_flag,const char* ip,const char* ssid);
+void ble_send_event_ip_ssid(void);
 
-void bt_notify_hotspot_on(char *resp_buf, bool *notify_flag);
-void bt_notify_hotspot_off(char *resp_buf, bool *notify_flag);
-void bt_notify_hotspot_off_done(char *resp_buf, bool *notify_flag);
+void ble_send_event_hotspot_on(void);
+void ble_send_event_hotspot_off(void);
+void ble_send_event_hotspot_off_done(void);
 
-void bt_notify_rtsp_recv(char *resp_buf, bool *notify_flag);
-void bt_notify_rtsp_recv_stop(char *resp_buf, bool *notify_flag);
+void ble_send_event_rtsp_recv(void);
+void ble_send_event_rtsp_recv_stop(void);
 
-void bt_notify_camera_use(char *resp_buf, bool *notify_flag);
-void bt_notify_camera_state_taking_photo(char *resp_buf, bool *notify_flag);
-void bt_notify_camera_state_recording(char *resp_buf, bool *notify_flag);
-void bt_notify_camera_state_idle(char *resp_buf, bool *notify_flag);
-void bt_notify_camera_state_error(char *resp_buf, bool *notify_flag);
+void ble_send_event_camera_use(void);
+void ble_send_event_camera_state_taking_photo(void);
+void ble_send_event_camera_state_recording(void);
+void ble_send_event_camera_state_idle(void);
+void ble_send_event_camera_state_error(void);
 
-void bt_notify_phone_preview_show(char *resp_buf, bool *notify_flag);
-void bt_notify_phone_preview_hide(char *resp_buf, bool *notify_flag);
+void ble_send_event_preview_show(void);
+void ble_send_event_preview_hide(void);
 
-void bt_notify_phone_action_glass_black_preview(char *resp_buf, bool *notify_flag);
-void bt_notify_phone_action_glass_clear_black_preview(char *resp_buf, bool *notify_flag);
+void ble_send_event_action_glass_black_preview(void);
+void ble_send_event_action_glass_clear_black_preview(void);
 
 #endif /* BLE_COMMAND_SET_H_ */

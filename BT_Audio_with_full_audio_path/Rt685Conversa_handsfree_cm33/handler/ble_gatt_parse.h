@@ -51,9 +51,37 @@ typedef enum {
     BLE_MSG_TYPE_HEARTBEAT   = 0x40
 } ble_msg_type_t;
 
+typedef enum {
+	BLE_CMD_ID_START_AP,
+	BLE_CMD_ID_START_AP_IP,
+	BLE_CMD_ID_WIFI_CONNECTED,
+	BLE_CMD_ID_RTSP_AV,
+
+	BLE_CMD_ID_START_VIDEO_CALL_URL,
+	BLE_CMD_ID_STOP_VIDEO_CALL,
+
+	BLE_CMD_ID_ENTER_VIDEO_CALL,
+	BLE_CMD_ID_LEAVE_VIDEO_CALL,
+
+	BLE_CMD_ID_STOP_VIDEOCHAT,
+	BLE_CMD_ID_STOP_TRANSLATION,
+
+	BLE_CMD_ID_TAKE_PHOTO,
+	BLE_CMD_ID_START_RECORDING,
+	BLE_CMD_ID_STOP_RECORDING,
+
+	BLE_CMD_ID_START_FILE_SYNC,
+	BLE_CMD_ID_NEW_MEDIA,
+
+	BLE_CMD_ID_RTSP_AUDIO_ONLY_ON,
+
+	BLE_CMD_ID_UNKNOWN = 0xFF,
+} ble_cmd_id_t;
+
+
 // 解析函式
-int ble_packet_parse(const uint8_t *buf, uint16_t len);
-void ble_message_parse(ble_msg_type_t type, const uint8_t *data, size_t len);
+int ble_packet_parser (const uint8_t *buf, uint16_t len);
+void ble_message_parser (ble_msg_type_t type, const uint8_t *data, size_t len);
 
 
 #endif /* BLE_GATT_PARSE_H_ */
