@@ -198,10 +198,12 @@ static void scenario_power_off_handler (void)
 	// 1. SPI + UI, 2. Ringtone, 3. LED, 4. wait 5 s, 5. disable PMIC, 6. LED off, 7. shipmode
 	if (power_off_handler_state == 1) {
 		if (Novatek_boot_completed) {
+			if (spi_protocol_get_status() == S_IDLE) {
 #if SOC_SPI_ENABLE
-			send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_SOFT_POWER_OFF); // Power off
+				spi_command_atomic_exec_soft_power_off(); // Power off
 #endif
-			power_off_handler_state++;
+				power_off_handler_state++;
+			}
 		} else {
 			set_ringtone_state(Ringtone_PowerOFF);
 			power_off_handler_state += 2; //Jump to 3
@@ -247,21 +249,23 @@ static void scenario_menu_handler (void)
 	}
 	//Start: 1. UI
 	if (menu_handler_start_state == 1) {
-		set_ui_view(UI_VIEW_MENU_MEDIA);
-		current_scenario_state = SCENARIO_STATE_MENU;
-		menu_handler_start_state = 0;
-
+		if (spi_protocol_get_status() == S_IDLE) {
+			set_ui_view(UI_VIEW_MENU_MEDIA);
+			current_scenario_state = SCENARIO_STATE_MENU;
+			menu_handler_start_state = 0;
+		}
 	} else if (menu_handler_start_state > 0) {
 		menu_handler_start_state++;
 	}
 
 	//Stop: 1. UI
 	if (menu_handler_stop_state == 1) {
-		set_ui_view(UI_VIEW_HOME);
-		current_scenario_state = SCENARIO_STATE_HOME;
+		if (spi_protocol_get_status() == S_IDLE) {
+			set_ui_view(UI_VIEW_HOME);
+			current_scenario_state = SCENARIO_STATE_HOME;
 
-		menu_handler_stop_state = 0;
-
+			menu_handler_stop_state = 0;
+		}
 	} else if (menu_handler_stop_state > 0) {
 		menu_handler_stop_state++;
 	}
@@ -275,22 +279,26 @@ static void scenario_settings_handler (void)
 	//Start: 1. UI
 	if (settings_handler_start_state == 1) {
 		//TODO Need to add UI for settings
-		set_ui_view(UI_VIEW_ABOUT);
-		current_scenario_state = SCENARIO_STATE_SETTINGS;
+		if (spi_protocol_get_status() == S_IDLE) {
 
-		settings_handler_start_state = 0;
+			set_ui_view(UI_VIEW_ABOUT);
+			current_scenario_state = SCENARIO_STATE_SETTINGS;
 
+			settings_handler_start_state = 0;
+		}
 	} else if (settings_handler_start_state > 0) {
 		settings_handler_start_state++;
 	}
 
 	//Stop: 1. UI
 	if (settings_handler_stop_state == 1) {
-		set_ui_view(UI_VIEW_HOME);
-		current_scenario_state = SCENARIO_STATE_HOME;
+		if (spi_protocol_get_status() == S_IDLE) {
 
-		settings_handler_stop_state = 0;
+			set_ui_view(UI_VIEW_HOME);
+			current_scenario_state = SCENARIO_STATE_HOME;
 
+			settings_handler_stop_state = 0;
+		}
 	} else if (settings_handler_stop_state > 0) {
 		settings_handler_stop_state++;
 	}
@@ -303,22 +311,24 @@ static void scenario_about_handler (void)
 	}
 	//Start: 1. UI
 	if (about_handler_start_state == 1) {
-		set_ui_view(UI_VIEW_ABOUT);
-		current_scenario_state = SCENARIO_STATE_ABOUT;
+		if (spi_protocol_get_status() == S_IDLE) {
+			set_ui_view(UI_VIEW_ABOUT);
+			current_scenario_state = SCENARIO_STATE_ABOUT;
 
-		about_handler_start_state = 0;
-
+			about_handler_start_state = 0;
+		}
 	} else if (about_handler_start_state > 0) {
 		about_handler_start_state++;
 	}
 
 	//Stop: 1. UI
 	if (about_handler_stop_state == 1) {
-		set_ui_view(UI_VIEW_HOME);
-		current_scenario_state = SCENARIO_STATE_HOME;
+		if (spi_protocol_get_status() == S_IDLE) {
+			set_ui_view(UI_VIEW_HOME);
+			current_scenario_state = SCENARIO_STATE_HOME;
 
-		about_handler_stop_state = 0;
-
+			about_handler_stop_state = 0;
+		}
 	} else if (about_handler_stop_state > 0) {
 		about_handler_stop_state++;
 	}
@@ -350,11 +360,11 @@ static void scenario_media_player_handler (void)
 		media_player_handler_start_state++;
 
 	} else if (media_player_handler_start_state == 7) {
-		spi_command_atomic_exec_media_start(); // Start media player
-		current_scenario_state = SCENARIO_STATE_MEDIA_PLAYER;
-
-		media_player_handler_start_state = 0;
-
+		if (spi_protocol_get_status() == S_IDLE) {
+			spi_command_atomic_exec_media_start(); // Start media player
+			current_scenario_state = SCENARIO_STATE_MEDIA_PLAYER;
+			media_player_handler_start_state = 0;
+		}
 	} else if (media_player_handler_start_state > 0) {
 		media_player_handler_start_state++;
 	}
@@ -372,16 +382,19 @@ static void scenario_media_player_handler (void)
 		media_player_handler_stop_state++;
 
 	} else if (media_player_handler_stop_state == 3) {
-		spi_command_atomic_exec_media_stop(); // media player: leave
-
-		media_player_handler_stop_state++;
+		if (spi_protocol_get_status() == S_IDLE) {
+			spi_command_atomic_exec_media_stop(); // media player: leave
+			media_player_handler_stop_state++;
+		}
 
 	} else if (media_player_handler_stop_state == 4) {
-		set_ui_view(UI_VIEW_HOME);
-		current_scenario_state = SCENARIO_STATE_HOME;
+		if (spi_protocol_get_status() == S_IDLE) {
 
-		media_player_handler_stop_state = 0;
+			set_ui_view(UI_VIEW_HOME);
+			current_scenario_state = SCENARIO_STATE_HOME;
 
+			media_player_handler_stop_state = 0;
+		}
 	} else if (media_player_handler_stop_state > 0) {
 		media_player_handler_stop_state++;
 	}
@@ -412,13 +425,17 @@ static void scenario_music_player_handler (void)
 		music_player_handler_start_state++;
 
 	} else if (music_player_handler_start_state == 6) {
+
 		amp_post_event(AMP_EVT_MUSIC);
-		current_scenario_state = SCENARIO_STATE_MUSIC;
+		music_player_handler_start_state++;
 
-		set_ui_view(UI_VIEW_MUSIC_PLAYER); // UI: music
+	} else if (music_player_handler_start_state == 7) {
+		if (spi_protocol_get_status() == S_IDLE) {
+			current_scenario_state = SCENARIO_STATE_MUSIC;
+			set_ui_view(UI_VIEW_MUSIC_PLAYER); // UI: music
 
-		music_player_handler_start_state = 0;
-
+			music_player_handler_start_state = 0;
+		}
 	} else if (music_player_handler_start_state > 0) {
 		music_player_handler_start_state++;
 	}
@@ -459,12 +476,13 @@ static void scenario_audio_call_handler (void)
 
 	} else if (audio_call_handler_start_state == 3) {
 		//TODO SPI: change UI for audio call
-		set_ui_view(UI_VIEW_AUDIO_CALL); // UI: call
-		set_audio_call_status(STATUS_ON);
-		current_scenario_state = SCENARIO_STATE_AUDIO_CALL;
+		if (spi_protocol_get_status() == S_IDLE) {
+			set_ui_view(UI_VIEW_AUDIO_CALL); // UI: call
+			set_audio_call_status(STATUS_ON);
+			current_scenario_state = SCENARIO_STATE_AUDIO_CALL;
 
-		audio_call_handler_start_state = 0;
-
+			audio_call_handler_start_state = 0;
+		}
 	} else if (audio_call_handler_start_state > 0) {
 		audio_call_handler_start_state++;
 	}
@@ -483,11 +501,12 @@ static void scenario_audio_call_handler (void)
 		audio_call_handler_stop_state++;
 
 	} else if (audio_call_handler_stop_state == 3) {
-		set_ui_view(UI_VIEW_HOME); // UI: home
-		current_scenario_state = SCENARIO_STATE_HOME;
+		if (spi_protocol_get_status() == S_IDLE) {
+			set_ui_view(UI_VIEW_HOME); // UI: home
+			current_scenario_state = SCENARIO_STATE_HOME;
 
-		audio_call_handler_stop_state = 0;
-
+			audio_call_handler_stop_state = 0;
+		}
 	} else if (audio_call_handler_stop_state > 0) {
 		audio_call_handler_stop_state++;
 	}
@@ -508,18 +527,20 @@ static void scenario_video_recording_handler (void)
 		}
 
 	} else if (video_recording_handler_start_state == 2) {
-		spi_command_atomic_exec_start_recording(); // Start recording
-		video_recording_handler_start_state++;
-
+		if (spi_protocol_get_status() == S_IDLE) {
+			spi_command_atomic_exec_start_recording(); // Start recording
+			video_recording_handler_start_state++;
+		}
 	} else if (video_recording_handler_start_state > 0) {
 		if (ss_get_recording_status() == STATUS_ON) {
-			set_ui_view(UI_VIEW_VIDEO_RECORDING); // UI: recording
-			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
-			led_post_event(HAL_LED_EVENT_REFRESH);
-			current_scenario_state = SCENARIO_STATE_VIDEO_RECORDING;
+			if (spi_protocol_get_status() == S_IDLE) {
+				set_ui_view(UI_VIEW_VIDEO_RECORDING); // UI: recording
+				hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
+				led_post_event(HAL_LED_EVENT_REFRESH);
+				current_scenario_state = SCENARIO_STATE_VIDEO_RECORDING;
 
-			video_recording_handler_start_state = 0;
-
+				video_recording_handler_start_state = 0;
+			}
 		} else if (video_recording_handler_start_state > 200) {
 			//TODO Retry 5 time
 			PRINTF("[VideoRecording] Start video recording Failed...\r\n");
@@ -532,11 +553,12 @@ static void scenario_video_recording_handler (void)
 
 	//Stop: 1. SPI 2. Audio path 3. LED, Ringtone and UI
 	if (video_recording_handler_stop_state == 1) {
-		PRINTF("[VideoRecording] Stop video recording...\r\n");
-		spi_command_atomic_exec_stop_recording(); // Stop Recording
+		if (spi_protocol_get_status() == S_IDLE) {
+			PRINTF("[VideoRecording] Stop video recording...\r\n");
+			spi_command_atomic_exec_stop_recording(); // Stop Recording
 
-		video_recording_handler_stop_state++;
-
+			video_recording_handler_stop_state++;
+		}
 	} else if (video_recording_handler_stop_state == 2) {
 		RequestToGetOutofVideoRecording = 1;
 
@@ -547,22 +569,26 @@ static void scenario_video_recording_handler (void)
 
 	} else if (video_recording_handler_stop_state > 0) { // Wait for Novatek ready
 		if (ss_get_recording_status() == STATUS_OFF) {
-			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
-			led_post_event(HAL_LED_EVENT_REFRESH);
-			set_ringtone_state(Ringtone_StopRecording);
-			set_ui_view(UI_VIEW_HOME); // UI: home
-			current_scenario_state = SCENARIO_STATE_HOME;
+			if (spi_protocol_get_status() == S_IDLE) {
+				hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
+				led_post_event(HAL_LED_EVENT_REFRESH);
+				set_ringtone_state(Ringtone_StopRecording);
 
-			video_recording_handler_stop_state = 0;
+				set_ui_view(UI_VIEW_HOME); // UI: home
+				current_scenario_state = SCENARIO_STATE_HOME;
 
+				video_recording_handler_stop_state = 0;
+			}
 		} else if (video_recording_handler_stop_state > 200) {
 			//TODO Retry 5 time
-			PRINTF("[VideoRecording] Stop video recording Failed...\r\n");
-			set_ui_view(UI_VIEW_HOME); // UI: home
-			current_scenario_state = SCENARIO_STATE_HOME;
+			if (spi_protocol_get_status() == S_IDLE) {
 
-			video_recording_handler_stop_state = 0;
+				PRINTF("[VideoRecording] Stop video recording Failed...\r\n");
+				set_ui_view(UI_VIEW_HOME); // UI: home
+				current_scenario_state = SCENARIO_STATE_HOME;
 
+				video_recording_handler_stop_state = 0;
+			}
 		} else {
 			video_recording_handler_stop_state++;
 		}
@@ -615,11 +641,14 @@ static void scenario_video_call_handler (void)
 		video_call_handler_stop_state++;
 
 	} else if (video_call_handler_stop_state == 3) {
-		set_ui_view(UI_VIEW_HOME); // UI: home
+		if (spi_protocol_get_status() == S_IDLE) {
 
-		video_call_handler_stop_state++;
+			set_ui_view(UI_VIEW_HOME); // UI: home
 
+			video_call_handler_stop_state++;
+		}
 	} else if (video_call_handler_stop_state == 4) {
+
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
 		current_scenario_state = SCENARIO_STATE_HOME;
@@ -683,10 +712,12 @@ static void scenario_video_ai_handler (void)
 		video_ai_handler_stop_state++;
 
 	} else if (video_ai_handler_stop_state == 3) {
-		set_ui_view(UI_VIEW_HOME); // UI: home
+		if (spi_protocol_get_status() == S_IDLE) {
 
-		video_ai_handler_stop_state++;
+			set_ui_view(UI_VIEW_HOME); // UI: home
 
+			video_ai_handler_stop_state++;
+		}
 	} else if (video_ai_handler_stop_state == 4) {
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
@@ -752,10 +783,12 @@ static void scenario_translation_handler (void)
 		translation_handler_stop_state++;
 
 	} else if (translation_handler_stop_state == 3) {
-		set_ui_view(UI_VIEW_HOME); // UI: home
+		if (spi_protocol_get_status() == S_IDLE) {
 
-		translation_handler_stop_state++;
+			set_ui_view(UI_VIEW_HOME); // UI: home
 
+			translation_handler_stop_state++;
+		}
 	} else if (translation_handler_stop_state == 4) {
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);

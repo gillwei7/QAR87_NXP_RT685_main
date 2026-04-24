@@ -28,15 +28,26 @@ static void touch_gesture_media_player_handler (void) {
 			ChangeMasterVolumeLevel15_UpDown(0); // pass zero or negative value to decrease volume
 			PRINTF("[Touch] Volume down\r\n");
 		} else if (current_touch_gesture == TOUCH_GESTURE_SINGLE_TAP) {
-			spi_command_atomic_exec_media_play_pause(SPI_COMMAND_MEDIA_PLAY_TOGGLE);
-			PRINTF("[Touch] Media Player play/pause\r\n");
+			if (spi_protocol_get_status() == S_IDLE) {
+				spi_command_atomic_exec_media_play_pause(SPI_COMMAND_MEDIA_PLAY_TOGGLE);
+				PRINTF("[Touch] Media Player play/pause\r\n");
+			} else {
+				return;
+			}
 		} else if (current_touch_gesture == TOUCH_GESTURE_SINGLE_DOUBLE_TAP) {
-			spi_command_atomic_exec_next_media();
-			PRINTF("[Touch] Media Player next media\r\n");
+			if (spi_protocol_get_status() == S_IDLE) {
+				spi_command_atomic_exec_next_media();
+				PRINTF("[Touch] Media Player next media\r\n");
+			} else {
+				return;
+			}
+
 		} else if (current_touch_gesture == TOUCH_GESTURE_SINGLE_PRESS_HOLD) {
 			set_scenario_state(SCENARIO_STATE_HOME);
 			PRINTF("[Touch] Media Player leave\r\n");
 		}
+		has_new_gesture = 0;
+		current_touch_gesture = TOUCH_GESTURE_NOTHING;
 	}
 }
 
@@ -162,6 +173,8 @@ static void touch_gesture_music_handler (void) {
 				//TODO leave and go to music ui
 			}
 		}
+		has_new_gesture = 0;
+		current_touch_gesture = TOUCH_GESTURE_NOTHING;
 	}
 }
 
@@ -249,6 +262,8 @@ static void touch_gesture_audio_call_handler (void) {
 				//TODO leave and go to audio call ui
 			}
 		}
+		has_new_gesture = 0;
+		current_touch_gesture = TOUCH_GESTURE_NOTHING;
 	}
 }
 
@@ -284,6 +299,8 @@ static void touch_gesture_video_recording_handler (void) {
 				//TODO leave and go to video recording ui
 			}
 		}
+		has_new_gesture = 0;
+		current_touch_gesture = TOUCH_GESTURE_NOTHING;
 	}
 }
 
@@ -298,6 +315,8 @@ static void touch_gesture_home_handler (void) {
 			PRINTF("[Touch] Home enter Media Player \r\n");
 		}
 #endif
+		has_new_gesture = 0;
+		current_touch_gesture = TOUCH_GESTURE_NOTHING;
 	}
 }
 
@@ -312,6 +331,8 @@ static void touch_gesture_menu_handler (void) {
 		} else if (current_touch_gesture == TOUCH_GESTURE_TWO_TAP) {
 			//TODO enter
 		}
+		has_new_gesture = 0;
+		current_touch_gesture = TOUCH_GESTURE_NOTHING;
 	}
 }
 
@@ -326,6 +347,8 @@ static void touch_gesture_settings_handler (void) {
 		} else if (current_touch_gesture == TOUCH_GESTURE_TWO_TAP) {
 			//TODO change status
 		}
+		has_new_gesture = 0;
+		current_touch_gesture = TOUCH_GESTURE_NOTHING;
 	}
 }
 
@@ -334,6 +357,8 @@ static void touch_gesture_about_handler (void) {
 		if (current_touch_gesture == TOUCH_GESTURE_TWO_PRESS_HOLD) {
 			//TODO leave and go to settings scenario
 		}
+		has_new_gesture = 0;
+		current_touch_gesture = TOUCH_GESTURE_NOTHING;
 	}
 }
 
@@ -351,6 +376,8 @@ static void touch_gesture_video_ai_handler (void) {
 		} else if (current_touch_gesture == TOUCH_GESTURE_TWO_PRESS_HOLD) {
 			//TODO leave and go to menu scenario
 		}
+		has_new_gesture = 0;
+		current_touch_gesture = TOUCH_GESTURE_NOTHING;
 	}
 }
 
@@ -368,8 +395,7 @@ void touch_gesture_handler (void) {
 	touch_gesture_about_handler();
 	touch_gesture_video_ai_handler();
 
-	has_new_gesture = 0;
-	current_touch_gesture = TOUCH_GESTURE_NOTHING;
+
 }
 
 void set_touch_gesture (touch_gesture_t touch_gesture) {

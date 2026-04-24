@@ -221,6 +221,8 @@ typedef struct {
 // 宣告這個函數，供 button_task 呼叫
 void start_spi_streaming_test(void); 
 
+slave_fsm_state_t spi_protocol_get_status (void);
+
 #endif /* SPI_HANDLER_H_ */
 
 #endif

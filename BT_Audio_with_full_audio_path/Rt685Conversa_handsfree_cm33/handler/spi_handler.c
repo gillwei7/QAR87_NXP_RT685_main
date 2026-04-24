@@ -1328,6 +1328,11 @@ void spi_command_handler(void)
     */
 }
 
+slave_fsm_state_t spi_protocol_get_status (void)
+{
+	return g_slave_state;
+}
+
 #if 0
 /* ============= 被動模式相關定義 ============= */
 typedef enum {
