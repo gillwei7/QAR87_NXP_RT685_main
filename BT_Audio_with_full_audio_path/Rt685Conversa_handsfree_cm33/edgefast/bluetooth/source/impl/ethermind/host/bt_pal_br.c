@@ -933,7 +933,7 @@ int bt_br_init(void)
 
 
 	name_cp = net_buf_add(buf, sizeof(*name_cp));
-	strncpy((char *)name_cp->local_name, ss_get_device_name(), sizeof(ss_get_device_name()));
+	strncpy((char *)name_cp->local_name, ss_get_device_name(), ss_get_device_name_size());
 
 
 	//name_cp = net_buf_add(buf, sizeof(*name_cp));

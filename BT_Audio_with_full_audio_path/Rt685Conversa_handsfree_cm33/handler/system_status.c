@@ -189,6 +189,11 @@ uint8_t * ss_get_device_name (void)
 	return device_name;
 }
 
+size_t ss_get_device_name_size (void)
+{
+	return strlen(device_name);
+}
+
 uint8_t * ss_get_wifi_ssid (void)
 {
 	PRINTF("Wi-Fi SSID: %s\r\n", wifi_ssid);
