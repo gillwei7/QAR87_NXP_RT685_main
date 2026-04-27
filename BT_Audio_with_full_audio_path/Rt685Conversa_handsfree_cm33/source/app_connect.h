@@ -47,6 +47,10 @@ void app_connect_init(void);
 void app_connect(uint8_t profile,uint8_t *addr);
 void app_disconnect(uint8_t profile);
 void app_a2dp_hf_auto_connect(void);
+void app_connect_set_connectable();
+void app_connect_set_non_connectable_and_discoverable();
+void app_connect_set_discoverable();
+void app_connect_set_non_discoverable();
 
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
 void app_lfs_init(void);

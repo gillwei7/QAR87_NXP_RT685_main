@@ -69,7 +69,6 @@ paired_device_t paired_devices[MAX_PAIRED_DEVICES] = {0};
 int g_pairedDeviceCount = 0;
 
 static uint8_t g_defaultConnectInitialized;
-static uint8_t g_connectableSet;
 static bt_addr_t g_autoConnectDevice;
 #if !((defined AUTO_CONNECT_USE_BOND_INFO) && (AUTO_CONNECT_USE_BOND_INFO))
 static lfs_t * lfs;
@@ -79,33 +78,56 @@ static lfs_file_t lfs_file;
 
 #define LFS_PAIRED_DEVICES_FILE  "paired_devices"
 
-void app_hf_set_connectable(void)
+void app_connect_set_connectable(void)
+{
+	int err;
+	err = bt_br_set_connectable(true);
+	if(err)
+	{
+		PRINTF("BR/EDR set connectable failed (err %d)\n", err);
+		return;
+	}
+	PRINTF("BR/EDR set connectable done\r\n");
+}
+
+void app_connect_set_non_connectable_and_discoverable(void)
+{
+	int err;
+	err = bt_br_set_connectable(false);
+	if(err)
+	{
+		PRINTF("BR/EDR set non connectable and discoverable failed (err %d)\n", err);
+		return;
+	}
+	PRINTF("BR/EDR set non connectable and discoverable done\n");
+}
+
+void app_connect_set_discoverable(void)
+{
+	int err;
+
+	err = bt_br_set_discoverable(true);
+	if (err)
+	{
+		PRINTF("BR/EDR set discoverable failed (err %d)\n", err);
+		return;
+	}
+	PRINTF("BR/EDR set discoverable done\n");
+}
+
+void app_connect_set_non_discoverable(void)
 {
     int err;
-    
-    if (g_connectableSet)
-    {
-        PRINTF("app_hf_set_connectable error.g_connectableSet = 1\r\n");
-        return;
-    }
 
-    g_connectableSet = 1U;
-
-    err = bt_br_set_connectable(true);
+    err = bt_br_set_discoverable(false);
     if (err)
     {
-        PRINTF("BR/EDR set/rest connectable failed (err %d)\n", err);
+        PRINTF("BR/EDR disable discoverable failed (err %d)\n", err);
         return;
     }
-    err = bt_br_set_discoverable(true);
-    if (err)
-    {
-        PRINTF("BR/EDR set discoverable failed (err %d)\n", err);
-        return;
-    }
-    PRINTF("BR/EDR set connectable and discoverable done\n");
-    PRINTF("Wait for connection\r\n");
+    PRINTF("BR/EDR set non-discoverable done\n");
 }
+
 
 void sdp_discover_for_hfp_hf(struct bt_conn_info *info)
 {
@@ -659,7 +681,8 @@ void app_a2dp_hf_auto_connect(void)
     }
     else
     {
-        app_hf_set_connectable();
+    	app_connect_set_connectable();
+    	app_connect_set_discoverable();
     }
 #else
     lfs = lfs_pl_init();
@@ -681,7 +704,8 @@ void app_a2dp_hf_auto_connect(void)
     }
     else
     {
-        app_hf_set_connectable();
+        app_connect_set_connectable();
+        app_connect_set_discoverable();
     }
 #endif
 }
@@ -721,5 +745,6 @@ void app_clear_device_enter_discoverable(void){
     }
 #endif
 
-    app_hf_set_connectable();
+    app_connect_set_connectable();
+    app_connect_set_discoverable();
 }

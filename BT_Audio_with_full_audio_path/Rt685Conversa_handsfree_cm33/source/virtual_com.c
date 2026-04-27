@@ -36,6 +36,8 @@
 #include "CircularBuf.h"
 #include "peripheral_gls.h"
 #include "app_avrcp.h"
+#include "app_connect.h"
+#include <bluetooth/bluetooth.h>
 
 #define TuningComAudioIsCrc32
 /*******************************************************************************
@@ -46,11 +48,6 @@
 * Variables
 ******************************************************************************/
 extern usb_device_endpoint_struct_t g_cdcVcomDicEndpoints[];
-
-// For USB shell command use
-extern void app_clear_paired_devices(void);
-extern void app_clear_device_enter_discoverable(void);
-extern void app_hf_set_connectable(void);
 
 /* Line coding of cdc device */
 USB_DMA_INIT_DATA_ALIGN(USB_DATA_ALIGN_SIZE) static uint8_t s_lineCoding[LINE_CODING_SIZE] = {
@@ -604,14 +601,23 @@ const char *ComPrintInfo_Info2[]=
 {
 "to start an SBC file play\r\n",
 };
-const char *ComPrintInfo_Info3[]=
+
+const char *ComPrintInfo_Help[]=
 {
-"app_clear_paired_devices()\r\n",
+"\r\n\
+Type for below shell commands\r\n\
+a:[Audio]Play OPUS ID:N, N max 12\r\n\
+b:[Audio]Play SBC File ID:N, N max 2\r\n\
+c:[BT]Clear All Paired device\r\n\
+d:[BT]Set device connectable and discoverable\r\n\
+e:[BT]Set device non-discoverable\r\n\
+f:[BLE]Stop advertising\r\n\
+g:[BLE]Start advertising\r\n\
+h:[AVRCP]Volume up notify (0x00~0x7F)\r\n\
+i:[AVRCP]Volume down notify (0x00~0x7F)\r\n\
+\r\n"
 };
-const char *ComPrintInfo_Info4[]=
-{
-"app_hf_set_connectable.\r\n",
-};
+
 
 #if PRINTF_GoesToUsbCom==1
 __attribute__((section("CodeQuickAccess")))
@@ -627,7 +633,7 @@ void USB_DeviceCdcVcomTask(void)
 	#if LetComConnectTuningTool==1
 		return;
 	#endif
-    const char *ComPrintInfoPtr;
+    const char *ComPrintInfoPtr = ComPrintInfo_Help[0];
     usb_status_t error = kStatus_USB_Error;
     if (1 == PtrUsbDevComposite->cdcVcom.attach)
     {
@@ -653,22 +659,24 @@ void USB_DeviceCdcVcomTask(void)
             		VarBlockSharedByDspAndMcu.PlaySbcFileIdx = 2;
            		ComPrintInfoPtr=ComPrintInfo_Info2[0];
             	break;
-            // [BT]Clear All pairing
             case 'c':
-           		ComPrintInfoPtr=ComPrintInfo_Info3[0];
+            	// [BT]Clear All pairing
            		app_clear_paired_devices();
             	break;
             case 'd':
-           		ComPrintInfoPtr=ComPrintInfo_Info4[0];
-           		app_hf_set_connectable();
+            	app_connect_set_connectable();
+            	app_connect_set_discoverable();
             	break;
             case 'e':
-            	peripheral_gls_le_adv_stop();
+            	app_connect_set_non_discoverable();
 				break;
             case 'f':
-			    peripheral_gls_le_adv_start();
+            	peripheral_gls_le_adv_stop();
 				break;
             case 'g':
+            	peripheral_gls_le_adv_start();
+                break;
+            case 'h':
                 if(test_current_volume < 0x7F){
                     test_current_volume++;
                     avrcp_tg_notify(13, test_current_volume);
@@ -676,7 +684,7 @@ void USB_DeviceCdcVcomTask(void)
                     test_current_volume = 0;
                 }
                 break;
-            case 'h':
+            case 'i':
                 if(test_current_volume > 0){
                     test_current_volume--;
                     avrcp_tg_notify(13, test_current_volume);
@@ -684,9 +692,8 @@ void USB_DeviceCdcVcomTask(void)
                     test_current_volume = 0;
                 }
                 break;
-                break;
 			default:
-	            //ComPrintInfoPtr=ComPrintInfo_Help[0];
+	            ComPrintInfoPtr=ComPrintInfo_Help[0];
 			    //PRINTF("a:opus\r\nb:sbc\r\nc:app_clear_paired_devices\r\nd:app_hf_set_connectable\r\ne:peripheral_gls_le_adv_stop\r\nf:peripheral_gls_le_adv_start\r\n");
             	break;
             }
