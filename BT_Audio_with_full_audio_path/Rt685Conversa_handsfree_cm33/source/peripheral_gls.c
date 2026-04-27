@@ -36,7 +36,10 @@
 #include "sdmmc_config.h"
 #endif /* APP_MEM_POWER_OPT */
 
-
+#define BLE_ADV_TIMEOUT_ENABLE 0
+#if BLE_ADV_TIMEOUT_ENABLE
+    #define BLE_ADV_TIMEOUT_SECONDS 20
+#endif
 /*******************************************************************************
  * Prototypes
  ******************************************************************************/
@@ -66,6 +69,9 @@ static struct bt_data sd[] = {
     BT_DATA(BT_DATA_NAME_COMPLETE, ble_service_name, 0),
 };
 
+static void le_adv_timeout_handler(struct k_work *work);
+static K_WORK_DELAYABLE_DEFINE(le_adv_timeout_work, le_adv_timeout_handler);
+
 #if defined(APP_MEM_POWER_OPT) && (APP_MEM_POWER_OPT > 0)
 extern mmc_card_t g_mmc;
 #endif /* APP_MEM_POWER_OPT */
@@ -93,6 +99,9 @@ void peripheral_gls_init_ble_name(void)
 
 void peripheral_gls_le_adv_stop(void)
 {
+#if BLE_ADV_TIMEOUT_ENABLE
+	(void)k_work_cancel_delayable(&le_adv_timeout_work);
+#endif
     int err = bt_le_adv_stop();
     if (err)
     {
@@ -102,10 +111,19 @@ void peripheral_gls_le_adv_stop(void)
     PRINTF("Advertising Stop\r\n");
 }
 
+static void le_adv_timeout_handler(struct k_work *work)
+{
+    ARG_UNUSED(work);
+    PRINTF("[BLE]Advertising timeout, stop advertising.\n");
+    peripheral_gls_le_adv_stop();
+}
 
 void peripheral_gls_le_adv_start()
 {
     peripheral_gls_init_ble_name();
+#if BLE_ADV_TIMEOUT_ENABLE
+    (void)k_work_cancel_delayable(&le_adv_timeout_work);
+#endif
     //int err = bt_le_adv_start(&adv_params, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
     int err = bt_le_adv_start(BT_LE_ADV_CONN, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
     if (err)
@@ -113,8 +131,12 @@ void peripheral_gls_le_adv_start()
         PRINTF("Advertising failed to start (err %d)\n", err);
         return;
     }
-
-    PRINTF("Advertising successfully started\n");
+#if BLE_ADV_TIMEOUT_ENABLE
+    k_work_schedule(&le_adv_timeout_work, K_SECONDS(BLE_ADV_TIMEOUT_SECONDS));
+    PRINTF("Advertising successfully started. Timeout:%d seconds\n",BLE_ADV_TIMEOUT_SECONDS );
+#else
+    PRINTF("Advertising successfully started.\r\n");
+#endif
 }
 
 void peripheral_gls_task(void *pvParameters) {
