@@ -339,6 +339,7 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 		case BLE_CMD_ID_ENTER_VIDEO_CALL :
 			PRINTF("[BLE Parser] ENTER_VIDEO_CALL_URL\n");
 			/*NXP 更改 Audio Path 設定 */
+			set_enter_video_call_request(1);
 			break;
 
 		case BLE_CMD_ID_START_AP :
@@ -382,6 +383,7 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 		case BLE_CMD_ID_LEAVE_VIDEO_CALL :
 			PRINTF("[BLE Parser] LEAVE_VIDEO_CALL\n");
 			/*NXP 恢復 Audio Path 設定 */
+			set_leave_video_call_request(1);
 			break;
 
 		case BLE_CMD_ID_STOP_VIDEOCHAT :

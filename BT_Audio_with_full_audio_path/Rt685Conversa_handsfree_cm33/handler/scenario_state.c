@@ -902,17 +902,29 @@ static void wifi_request_handler (void)
 
 static void phone_page_request_handler (void)
 {
-	if (leave_video_ai_request || leave_video_ai_request || leave_translation_request) {
+	if (leave_video_call_request) {
 		phone_page_status = PHONE_PAGE_STATUS_HOME;
+		leave_video_call_request = 0;
+	}
+	if (leave_video_ai_request) {
+		phone_page_status = PHONE_PAGE_STATUS_HOME;
+		leave_video_ai_request = 0;
+	}
+	if (leave_translation_request) {
+		phone_page_status = PHONE_PAGE_STATUS_HOME;
+		leave_translation_request = 0;
 	}
 	if (enter_video_call_request) {
 		phone_page_status = PHONE_PAGE_STATUS_VIDEO_CALL;
+		enter_video_call_request = 0;
 	}
 	if (enter_video_ai_request) {
 		phone_page_status = PHONE_PAGE_STATUS_VIDEO_AI;
+		enter_video_ai_request = 0;
 	}
 	if (enter_translation_request) {
 		phone_page_status = PHONE_PAGE_STATUS_TRANSLATION;
+		enter_translation_request = 0;
 	}
 }
 
