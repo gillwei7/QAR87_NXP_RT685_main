@@ -28,10 +28,16 @@ typedef enum {
 	SCENARIO_STATE_VIDEO_RECORDING,
 } scenario_state_t;
 
+typedef enum {
+	PHONE_PAGE_STATUS_HOME = 0,
+	PHONE_PAGE_STATUS_VIDEO_AI,
+	PHONE_PAGE_STATUS_TRANSLATION,
+	PHONE_PAGE_STATUS_VIDEO_CALL,
+} phone_page_status_t;
 
 uint8_t get_scenario_state(void);
 void set_scenario_state(uint8_t state);
-
+phone_page_status_t get_phone_page_status (void);
 
 void set_power_off_handler_state (void);
 void set_music_player_handler_start_state (void);
@@ -72,7 +78,46 @@ uint8_t get_start_video_call_request (void);
 void set_start_video_call_request (uint8_t on);
 
 // Request command from Phone (BLE)
+uint8_t get_start_video_ai_request (void);
+void set_start_video_ai_request (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_start_translation_request (void);
+void set_start_translation_request (uint8_t on);
+
+// Request command from Phone (BLE)
 uint8_t get_stop_video_call_request (void);
 void set_stop_video_call_request (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_stop_video_ai_request (void);
+void set_stop_video_ai_request (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_stop_translation_request (void);
+void set_stop_translation_request (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_enter_video_call_request (void);
+void set_enter_video_call_request (uint8_t on);
+// Request command from Phone (BLE)
+uint8_t get_leave_video_call_request (void);
+void set_leave_video_call_request (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_enter_video_ai_request (void);
+void set_enter_video_ai_request (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_leave_video_ai_request (void);
+void set_leave_video_ai_request (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_enter_translation_request (void);
+void set_enter_translation_request (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_leave_translation_request (void);
+void set_leave_translation_request (uint8_t on);
 
 #endif /* SCENARIO_STATE_H_ */

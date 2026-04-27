@@ -58,6 +58,8 @@ static uint8_t video_ai_handler_stop_state = 0;
 static uint8_t translation_handler_start_state = 0;
 static uint8_t translation_handler_stop_state = 0;
 
+static phone_page_status_t phone_page_status = PHONE_PAGE_STATUS_HOME;
+
 static uint8_t start_wifi_ap_request = 0;
 static uint8_t stop_wifi_ap_request = 0;
 static uint8_t soc_wifi_ap_opened_status = 0;
@@ -66,6 +68,18 @@ static uint8_t phone_wifi_connected_status = 0;
 static uint8_t soc_wifi_connected_status = 0;
 static uint8_t start_video_call_request = 0;
 static uint8_t stop_video_call_request = 0;
+static uint8_t start_video_ai_request = 0;
+static uint8_t stop_video_ai_request = 0;
+static uint8_t start_translation_request = 0;
+static uint8_t stop_translation_request = 0;
+
+static uint8_t enter_video_call_request = 0;
+static uint8_t leave_video_call_request = 0;
+static uint8_t enter_video_ai_request = 0;
+static uint8_t leave_video_ai_request = 0;
+static uint8_t enter_translation_request = 0;
+static uint8_t leave_translation_request = 0;
+
 
 uint8_t get_scenario_state(void)
 {
@@ -863,6 +877,29 @@ static void wifi_request_handler (void)
 			stop_wifi_ap_request = 0;
 		}
 	}
+	//TODO Add a 60-second timer to close the Wi-Fi AP.
+
+}
+
+static void phone_page_request_handler (void)
+{
+	if (leave_video_ai_request || leave_video_ai_request || leave_translation_request) {
+		phone_page_status = PHONE_PAGE_STATUS_HOME;
+	}
+	if (enter_video_call_request) {
+		phone_page_status = PHONE_PAGE_STATUS_VIDEO_CALL;
+	}
+	if (enter_video_ai_request) {
+		phone_page_status = PHONE_PAGE_STATUS_VIDEO_AI;
+	}
+	if (enter_translation_request) {
+		phone_page_status = PHONE_PAGE_STATUS_TRANSLATION;
+	}
+}
+
+phone_page_status_t get_phone_page_status (void)
+{
+	return phone_page_status;
 }
 
 // For Backup
@@ -927,6 +964,7 @@ void scenario_state_handler (void)
 	scenario_translation_handler();
 	scenario_power_off_handler();
 	wifi_request_handler();
+	phone_page_request_handler();
 #if 0
 	video_call_request_handler();
 #endif
@@ -1102,6 +1140,40 @@ void set_start_video_call_request (uint8_t on)
 }
 
 // Request command from Phone (BLE)
+uint8_t get_start_video_ai_request (void)
+{
+	return start_video_ai_request;
+
+}
+
+void set_start_video_ai_request (uint8_t on)
+{
+	if (on) {
+		start_video_ai_request = 1;
+	} else {
+		start_video_ai_request = 0;
+	}
+
+}
+
+// Request command from Phone (BLE)
+uint8_t get_start_translation_request (void)
+{
+	return start_translation_request;
+
+}
+
+void set_start_translation_request (uint8_t on)
+{
+	if (on) {
+		start_translation_request = 1;
+	} else {
+		start_translation_request = 0;
+	}
+
+}
+
+// Request command from Phone (BLE)
 uint8_t get_stop_video_call_request (void)
 {
 	return stop_video_call_request;
@@ -1116,4 +1188,134 @@ void set_stop_video_call_request (uint8_t on)
 		stop_video_call_request = 0;
 	}
 
+}
+
+// Request command from Phone (BLE)
+uint8_t get_stop_video_ai_request (void)
+{
+	return stop_video_ai_request;
+
+}
+
+void set_stop_video_ai_request (uint8_t on)
+{
+	if (on) {
+		stop_video_ai_request = 1;
+	} else {
+		stop_video_ai_request = 0;
+	}
+
+}
+
+// Request command from Phone (BLE)
+uint8_t get_stop_translation_request (void)
+{
+	return stop_translation_request;
+
+}
+
+void set_stop_translation_request (uint8_t on)
+{
+	if (on) {
+		stop_translation_request = 1;
+	} else {
+		stop_translation_request = 0;
+	}
+
+}
+
+// Request command from Phone (BLE)
+uint8_t get_enter_video_call_request (void)
+{
+	return enter_video_call_request;
+
+}
+
+void set_enter_video_call_request (uint8_t on)
+{
+	if (on) {
+		enter_video_call_request = 1;
+	} else {
+		enter_video_call_request = 0;
+	}
+}
+
+// Request command from Phone (BLE)
+uint8_t get_leave_video_call_request (void)
+{
+	return leave_video_call_request;
+
+}
+
+void set_leave_video_call_request (uint8_t on)
+{
+	if (on) {
+		leave_video_call_request = 1;
+	} else {
+		leave_video_call_request = 0;
+	}
+}
+
+// Request command from Phone (BLE)
+uint8_t get_enter_video_ai_request (void)
+{
+	return enter_video_ai_request;
+
+}
+
+void set_enter_video_ai_request (uint8_t on)
+{
+	if (on) {
+		enter_video_ai_request = 1;
+	} else {
+		enter_video_ai_request = 0;
+	}
+}
+
+// Request command from Phone (BLE)
+uint8_t get_leave_video_ai_request (void)
+{
+	return leave_video_ai_request;
+
+}
+
+void set_leave_video_ai_request (uint8_t on)
+{
+	if (on) {
+		leave_video_ai_request = 1;
+	} else {
+		leave_video_ai_request = 0;
+	}
+}
+
+// Request command from Phone (BLE)
+uint8_t get_enter_translation_request (void)
+{
+	return enter_translation_request;
+
+}
+
+void set_enter_translation_request (uint8_t on)
+{
+	if (on) {
+		enter_translation_request = 1;
+	} else {
+		enter_translation_request = 0;
+	}
+}
+
+// Request command from Phone (BLE)
+uint8_t get_leave_translation_request (void)
+{
+	return leave_translation_request;
+
+}
+
+void set_leave_translation_request (uint8_t on)
+{
+	if (on) {
+		leave_translation_request = 1;
+	} else {
+		leave_translation_request = 0;
+	}
 }
