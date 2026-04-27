@@ -362,7 +362,7 @@ static void scenario_media_player_handler (void)
 	} else if (media_player_handler_start_state == 5) {
 
 		RequestToGetIntoMediaPlayer = 1;
-		is_media_playing = 1;
+		is_media_playing = MUSIC_PLAYING;
 
 		media_player_handler_start_state++;
 

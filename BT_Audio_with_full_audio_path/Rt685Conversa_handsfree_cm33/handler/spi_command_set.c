@@ -342,12 +342,14 @@ void spi_command_atomic_event_parser (uint8_t event_id, const uint8_t *args)
 
 		case CMD_ATOMIC_EVENT_VIDEO_PLAY_STARTED:
 			PRINTF("[SPI][Event] VIDEO_PLAY_STARTED \r\n ");
-			break;
-		case CMD_ATOMIC_EVENT_VIDEO_PLAY_PAUSED:
-			PRINTF("[SPI][Event] VIDEO_PLAY_PAUSED \r\n ");
 			if (get_media_status() == MUSIC_PAUSE) {
 				set_media_status(MUSIC_PLAYING);
-			} else if (get_media_status() == MUSIC_PLAYING) {
+			}
+			break;
+
+		case CMD_ATOMIC_EVENT_VIDEO_PLAY_PAUSED:
+			PRINTF("[SPI][Event] VIDEO_PLAY_PAUSED \r\n ");
+			if (get_media_status() == MUSIC_PLAYING) {
 				set_media_status(MUSIC_PAUSE);
 			}
 			break;
