@@ -92,7 +92,5 @@ void spi_command_atomic_event_parser (uint8_t event_id, const uint8_t *args);
 
 uint8_t spi_command_get_args_and_len (uint8_t msg_type, uint8_t cmd_id, char *pArgs);
 
-uint8_t get_start_wifi_ap_request (void);
-void set_start_wifi_ap_request (uint8_t on);
 
 #endif /* SPI_COMMAND_SET_H_ */

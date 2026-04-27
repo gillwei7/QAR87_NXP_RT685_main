@@ -16,6 +16,8 @@
 #include "hal_pmic.h"
 #include "i2c_component_handler.h"
 #include "ringtone_handler.h"
+#include <ble_event_handler.h>
+#include <ble_packet_handler.h>
 
 extern uint8_t Novatek_boot_completed;
 
@@ -55,6 +57,15 @@ static uint8_t video_ai_handler_stop_state = 0;
 
 static uint8_t translation_handler_start_state = 0;
 static uint8_t translation_handler_stop_state = 0;
+
+static uint8_t start_wifi_ap_request = 0;
+static uint8_t stop_wifi_ap_request = 0;
+static uint8_t soc_wifi_ap_opened_status = 0;
+static uint8_t start_wifi_ip_request = 0;
+static uint8_t phone_wifi_connected_status = 0;
+static uint8_t soc_wifi_connected_status = 0;
+static uint8_t start_video_call_request = 0;
+static uint8_t stop_video_call_request = 0;
 
 uint8_t get_scenario_state(void)
 {
@@ -600,21 +611,40 @@ static void scenario_video_call_handler (void)
 	if (video_call_handler_start_state == 0 && video_call_handler_stop_state == 0) {
 			return;
 	}
-	//Start: 1. Audio path 2. SPI 3. BLE 4. LED and AMP
+	//Start: 1. Audio path 2. LED and AMP
 	if (video_call_handler_start_state == 1) {
 		PRINTF("[VideoCall] Start video call...\r\n");
 		RequestToGetIntoVideoAI = 1; //Audio path
 		video_call_handler_start_state++;
 
 	} else if (video_call_handler_start_state == 2) {
-		// TODO send SPI command (Start video call) to Novatek
-		video_call_handler_start_state++;
+		if (start_video_call_request) {
+			if (spi_protocol_get_status() == S_IDLE) {
+				if (phone_wifi_connected_status && soc_wifi_connected_status) {
+					PRINTF("[VideoCall] Both phone and Novatek are connected\r\n");
+					phone_wifi_connected_status = 0;
+					soc_wifi_connected_status = 0;
+
+				} else if (phone_wifi_connected_status) {
+					PRINTF("[VideoCall] Only phone connected\r\n");
+					phone_wifi_connected_status = 0;
+
+				} else if (soc_wifi_connected_status) {
+					PRINTF("[VideoCall] Only Novatek connected\r\n");
+					soc_wifi_connected_status = 0;
+
+				} else {
+					PRINTF("[VideoCall] Both phone and Novatek are disconnected\r\n");
+				}
+				vTaskDelay(pdMS_TO_TICKS(5));
+				PRINTF("[VideoCall] video_call_url: %s\r\n", get_video_call_url());
+				spi_command_atomic_exec_start_video_call(get_video_call_url());
+				start_video_call_request = 0;
+				video_call_handler_start_state++;
+			}
+		}
 
 	} else if (video_call_handler_start_state == 3) {
-		// TODO Send a BLE event (Wi-Fi IP) to the phone when the Novatek Wi-Fi IP is ready
-		video_call_handler_start_state++;
-
-	} else if (video_call_handler_start_state == 4) {
 		// TODO Set LED and AMP when the Novatek RTSP is ready
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
@@ -627,32 +657,34 @@ static void scenario_video_call_handler (void)
 		video_call_handler_start_state++;
 	}
 
-	//Stop: 1. AMP and SPI 2. Audio path 3. UI 4. LED
+	//Stop: 1. AMP 2. Audio path 3. UI 4. LED
 	if (video_call_handler_stop_state == 1) {
 		PRINTF("[VideoCall] Stop video call...\r\n");
 		amp_post_event(AMP_EVT_STOP);
-		// TODO send SPI command (Stop video call) to Novatek
-
 		video_call_handler_stop_state++;
 
 	} else if (video_call_handler_stop_state == 2) {
 		RequestToGetOutofVideoAI = 1; //Audio path
-
 		video_call_handler_stop_state++;
 
 	} else if (video_call_handler_stop_state == 3) {
-		if (spi_protocol_get_status() == S_IDLE) {
-
-			set_ui_view(UI_VIEW_HOME); // UI: home
-
-			video_call_handler_stop_state++;
+		if (stop_video_call_request) {
+			if (spi_protocol_get_status() == S_IDLE) {
+				spi_command_atomic_exec_stop_video_call();
+				stop_video_call_request = 0;
+				video_call_handler_stop_state++;
+			}
 		}
 	} else if (video_call_handler_stop_state == 4) {
-
+		if (spi_protocol_get_status() == S_IDLE) {
+			set_ui_view(UI_VIEW_HOME); // UI: home
+			video_call_handler_stop_state++;
+		}
+	} else if (video_call_handler_stop_state == 5) {
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
 		current_scenario_state = SCENARIO_STATE_HOME;
-
+		//TODO Add a 60-second timer to close the Wi-Fi AP.
 		video_call_handler_stop_state = 0;
 
 	} else if (video_call_handler_stop_state > 0) {
@@ -803,6 +835,84 @@ static void scenario_translation_handler (void)
 	}
 }
 
+static void wifi_request_handler (void)
+{
+	// Send SPI command (Start Wi-Fi AP) to Novatek
+	if (start_wifi_ap_request) {
+		if (spi_protocol_get_status() == S_IDLE) {
+			spi_command_atomic_exec_start_wifi_ap();
+			start_wifi_ap_request = 0;
+		}
+	}
+
+	// Send a BLE ACK (HOTSPOT_ON) to the phone when the Novatek Wi-Fi AP is opened
+	if (soc_wifi_ap_opened_status) {
+		ble_send_event_hotspot_on();
+		soc_wifi_ap_opened_status = 0;
+	}
+
+	// Send a BLE ACK (IP and SSID) to the phone
+	if (start_wifi_ip_request) {
+		ble_send_event_ip_ssid();
+		start_wifi_ip_request = 0;
+	}
+
+	if (stop_wifi_ap_request) {
+		if (spi_protocol_get_status() == S_IDLE) {
+			spi_command_atomic_exec_stop_wifi_ap();
+			stop_wifi_ap_request = 0;
+		}
+	}
+}
+
+// For Backup
+#if 0
+static void video_call_request_handler (void)
+{
+	// Check if both phone and Novatek are connected
+	if (start_video_call_request) {
+		if (spi_protocol_get_status() == S_IDLE) {
+
+			if (phone_wifi_connected_status && soc_wifi_connected_status) {
+				PRINTF("[VideoCall] Both phone and Novatek are connected\r\n");
+				phone_wifi_connected_status = 0;
+				soc_wifi_connected_status = 0;
+
+			} else if (phone_wifi_connected_status) {
+				PRINTF("[VideoCall] Only phone connected\r\n");
+				phone_wifi_connected_status = 0;
+
+			} else if (soc_wifi_connected_status) {
+				PRINTF("[VideoCall] Only Novatek connected\r\n");
+				soc_wifi_connected_status = 0;
+
+			} else {
+				PRINTF("[VideoCall] Both phone and Novatek are disconnected\r\n");
+			}
+			vTaskDelay(pdMS_TO_TICKS(5));
+			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
+			led_post_event(HAL_LED_EVENT_REFRESH);
+			amp_post_event(AMP_EVT_MUSIC);
+			PRINTF("[VideoCall] video_call_url: %s\r\n", get_video_call_url());
+
+			spi_command_atomic_exec_start_video_call(get_video_call_url());
+			start_video_call_request = 0;
+		}
+	}
+
+	if (stop_video_call_request) {
+		if (spi_protocol_get_status() == S_IDLE) {
+			amp_post_event(AMP_EVT_STOP);
+			hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
+			led_post_event(HAL_LED_EVENT_REFRESH);
+
+			spi_command_atomic_exec_stop_video_call();
+			stop_video_call_request = 0;
+		}
+	}
+}
+#endif
+
 void scenario_state_handler (void)
 {
 	scenario_menu_handler();
@@ -816,6 +926,10 @@ void scenario_state_handler (void)
 	scenario_video_ai_handler();
 	scenario_translation_handler();
 	scenario_power_off_handler();
+	wifi_request_handler();
+#if 0
+	video_call_request_handler();
+#endif
 }
 
 void set_power_off_handler_state (void)
@@ -870,4 +984,136 @@ void set_media_status(uint8_t status)
 	} else {
 		amp_post_event(AMP_EVT_STOP);
 	}
+}
+
+// Request command from Phone (BLE)
+uint8_t get_start_wifi_ap_request (void)
+{
+	return start_wifi_ap_request;
+}
+
+void set_start_wifi_ap_request (uint8_t on)
+{
+	if (on) {
+		start_wifi_ap_request = 1;
+	} else {
+		start_wifi_ap_request = 0;
+	}
+}
+
+// Request command from Phone (BLE) or from System Controller
+uint8_t get_stop_wifi_ap_request (void)
+{
+	return stop_wifi_ap_request;
+}
+
+void set_stop_wifi_ap_request (uint8_t on)
+{
+	if (on) {
+		stop_wifi_ap_request = 1;
+	} else {
+		stop_wifi_ap_request = 0;
+	}
+}
+
+// Status event from Novatek (SPI)
+uint8_t get_soc_wifi_ap_opened_status (void)
+{
+	return soc_wifi_ap_opened_status;
+
+}
+
+void set_soc_wifi_ap_opened_status (uint8_t on)
+{
+	if (on) {
+		soc_wifi_ap_opened_status = 1;
+	} else {
+		soc_wifi_ap_opened_status = 0;
+	}
+
+}
+
+// Request command from Phone (BLE)
+uint8_t get_start_wifi_ip_request (void)
+{
+	return start_wifi_ip_request;
+
+}
+
+void set_start_wifi_ip_request (uint8_t on)
+{
+	if (on) {
+		start_wifi_ip_request = 1;
+	} else {
+		start_wifi_ip_request = 0;
+	}
+
+}
+
+// Status event from Phone (BLE)
+uint8_t get_phone_wifi_connected_status (void)
+{
+	return phone_wifi_connected_status;
+
+}
+
+void set_phone_wifi_connected_status (uint8_t on)
+{
+	if (on) {
+		phone_wifi_connected_status = 1;
+	} else {
+		phone_wifi_connected_status = 0;
+	}
+
+}
+
+// Status event from Novatek (SPI)
+uint8_t get_soc_wifi_connected_status (void)
+{
+	return soc_wifi_connected_status;
+
+}
+
+void set_soc_wifi_connected_status (uint8_t on)
+{
+	if (on) {
+		soc_wifi_connected_status = 1;
+	} else {
+		soc_wifi_connected_status = 0;
+	}
+
+}
+
+// Request command from Phone (BLE)
+uint8_t get_start_video_call_request (void)
+{
+	return start_video_call_request;
+
+}
+
+void set_start_video_call_request (uint8_t on)
+{
+	if (on) {
+		start_video_call_request = 1;
+	} else {
+		start_video_call_request = 0;
+	}
+
+}
+
+// Request command from Phone (BLE)
+uint8_t get_stop_video_call_request (void)
+{
+	return stop_video_call_request;
+
+}
+
+void set_stop_video_call_request (uint8_t on)
+{
+	if (on) {
+		stop_video_call_request = 1;
+	} else {
+		stop_video_call_request = 0;
+	}
+
 }

@@ -26,7 +26,6 @@ static url_info_t g_url_info = {0};
 static uint8_t args_buff[BUFFER_SIZE];
 uint8_t Novatek_boot_completed = 0;
 
-static uint8_t start_ap_request = 0;
 
 /* 宣告全域變數來儲存時間資訊 (可給予預設值) */
 static spi_command_time_info_t s_system_time = {
@@ -355,12 +354,13 @@ void spi_command_atomic_event_parser (uint8_t event_id, const uint8_t *args)
 
 		case CMD_ATOMIC_EVENT_WIFI_CONNECTED:
 			PRINTF("[SPI][Event] WIFI_CONNECTED \r\n ");
+			set_soc_wifi_connected_status(1);
+			set_wifi_ap_status(WIFI_AP_CONNECTED);
 			break;
 
 		case CMD_ATOMIC_EVENT_WIFI_DISCONNECTED:
 			PRINTF("[SPI][Event] WIFI_DISCONNECTED \r\n ");
-//			set_ringtone_state(Ringtone_WiFi_Disconnected);
-
+			set_wifi_ap_status(WIFI_AP_ON);
 			break;
 		case CMD_ATOMIC_EVENT_MSG_NOTIFIED:
 			PRINTF("[SPI][Event] MSG_NOTIFIED \r\n ");
@@ -391,10 +391,13 @@ void spi_command_atomic_event_parser (uint8_t event_id, const uint8_t *args)
 
 		case CMD_ATOMIC_EVENT_WIFI_AP_OPEN:
 			PRINTF("[SPI][Event] WIFI_AP_OPEN \r\n ");
+			set_soc_wifi_ap_opened_status(1);
+			set_wifi_ap_status(WIFI_AP_ON);
 			break;
 
 		case CMD_ATOMIC_EVENT_WIFI_AP_CLOSE:
 			PRINTF("[SPI][Event] WIFI_AP_CLOSE \r\n ");
+			set_wifi_ap_status(WIFI_AP_OFF);
 			break;
 
 		case CMD_ATOMIC_EVENT_UNKNOWN_CMD_ERROR:
@@ -621,16 +624,4 @@ void application_examples_atomic_exec(void)
 
 }
 
-uint8_t get_start_wifi_ap_request (void)
-{
-	return start_ap_request;
-}
 
-void set_start_wifi_ap_request (uint8_t on)
-{
-	if (on) {
-		start_ap_request = 1;
-	} else {
-		start_ap_request = 0;
-	}
-}

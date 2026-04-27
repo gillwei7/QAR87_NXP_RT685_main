@@ -30,6 +30,12 @@ typedef enum {
 	AMP_STATUS_RECEIVER,           // fs = 16000 (ringtone and hfp)
 } amp_status_t;
 
+typedef enum {
+	WIFI_AP_OFF = 0,     // Off
+	WIFI_AP_ON,          // On (Disconnected)
+	WIFI_AP_CONNECTED,   // Connected
+} wifi_ap_status_t;
+
 
 typedef struct __attribute__((packed)) {
     uint8_t flags;   // byte0: [RSVD3:3][RSVD1:1][MIC:1][BT:1][HA:1][BLE:1]
@@ -67,6 +73,8 @@ size_t ss_get_device_name_size (void);
 uint8_t * ss_get_wifi_ssid (void);
 void ss_print_bt_addr (void);
 uint8_t * ss_get_wifi_ip (void);
+uint8_t get_wifi_ap_status (void);
+void set_wifi_ap_status (uint8_t status);
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
 void ss_ble_on();

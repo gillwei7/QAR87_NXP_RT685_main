@@ -83,5 +83,6 @@ typedef enum {
 int ble_packet_parser (const uint8_t *buf, uint16_t len);
 void ble_message_parser (ble_msg_type_t type, const uint8_t *data, size_t len);
 
+uint8_t * get_video_call_url (void);
 
 #endif /* BLE_PACKET_HANDLER_H_ */

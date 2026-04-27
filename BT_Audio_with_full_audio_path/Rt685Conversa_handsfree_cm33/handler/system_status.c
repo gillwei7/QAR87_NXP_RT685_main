@@ -38,6 +38,9 @@ static volatile uint8_t is_turning_on_camera = 0;
 static volatile uint8_t need_send_state = 0;
 static volatile uint8_t need_send_music_status = 0;
 
+static volatile uint8_t wifi_ap_status = WIFI_AP_OFF;
+
+
 static uint8_t bt_addr_0 = 0;
 static uint8_t bt_addr_1 = 0;
 static uint8_t bt_addr_2 = 0;
@@ -209,6 +212,23 @@ void ss_print_bt_addr (void)
 uint8_t * ss_get_wifi_ip (void)
 {
 	return wifi_ip;
+}
+
+uint8_t get_wifi_ap_status (void)
+{
+	return wifi_ap_status;
+}
+
+void set_wifi_ap_status (uint8_t status)
+{
+#if 0 // TODO ringtone
+	if (wifi_ap_status == WIFI_AP_CONNECTED && status == WIFI_AP_ON) {
+//		set_ringtone_state(Ringtone_WiFi_Disconnected);
+	} else if (wifi_ap_status == WIFI_AP_ON && status == WIFI_AP_CONNECTED) {
+
+	}
+#endif
+	wifi_ap_status = status;
 }
 
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */

@@ -1,5 +1,3 @@
-#include <ble_event_handler.h>
-#include <ble_packet_handler.h>
 /*
  * ble_gatt_parse.c
  *
@@ -16,9 +14,9 @@
 #include "fsl_debug_console.h"
 #include "fsl_crc.h"
 #include <string.h>
-#include "spi_command_set.h"
-#include "system_status.h"
-
+#include "scenario_state.h"
+#include <ble_event_handler.h>
+#include <ble_packet_handler.h>
 
 static uint8_t video_call_url[128] = {0};
 
@@ -345,12 +343,12 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 
 		case BLE_CMD_ID_START_AP :
 			PRINTF("[BLE Parser] Start_AP\n");
-			spi_command_atomic_exec_start_wifi_ap();
+			set_start_wifi_ap_request(1);
 			break;
 
 		case BLE_CMD_ID_START_AP_IP :
 			PRINTF("[BLE Parser] Start_AP_IP\n");
-			ble_send_event_ip_ssid();
+			set_start_wifi_ip_request(1);
 			break;
 
 		case BLE_CMD_ID_WIFI_CONNECTED :
@@ -365,19 +363,19 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 			size_t url_len = strlen("Start_Video_Call_URL:");
 			snprintf((char *)video_call_url, sizeof(video_call_url), "%s", &ble_data[url_len]);
 			PRINTF("[BLE] URL: %s\n", video_call_url);
-
-			spi_command_atomic_exec_start_video_call(video_call_url);
+			set_start_video_call_request(1);
+			set_scenario_state(SCENARIO_STATE_VIDEO_CALL);
 			break;
 
 		case BLE_CMD_ID_STOP_VIDEO_CALL :
 			PRINTF("[BLE Parser] STOP_VIDEO_CALL\n");
-			spi_command_atomic_exec_stop_video_call();
+			set_stop_video_call_request(1);
+			set_scenario_state(SCENARIO_STATE_HOME);
 			break;
 
 		case BLE_CMD_ID_LEAVE_VIDEO_CALL :
 			PRINTF("[BLE Parser] LEAVE_VIDEO_CALL\n");
 			/*NXP 恢復 Audio Path 設定 */
-			spi_command_atomic_exec_stop_wifi_ap();
 			break;
 
 		case BLE_CMD_ID_STOP_VIDEOCHAT :
@@ -428,3 +426,7 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 	}
 }
 
+uint8_t * get_video_call_url (void)
+{
+	return video_call_url;
+}

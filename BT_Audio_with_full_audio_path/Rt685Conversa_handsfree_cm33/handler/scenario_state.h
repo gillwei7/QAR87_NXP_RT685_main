@@ -42,4 +42,37 @@ void set_audio_call_handler_stop_state (void);
 
 uint8_t get_media_status(void);
 void set_media_status(uint8_t status);
+
+// Request command from Phone (BLE)
+uint8_t get_start_wifi_ap_request (void);
+void set_start_wifi_ap_request (uint8_t on);
+
+// Request command from Phone (BLE) or from System Controller
+uint8_t get_stop_wifi_ap_request (void);
+void set_stop_wifi_ap_request (uint8_t on);
+
+// Status event from Novatek (SPI)
+uint8_t get_soc_wifi_ap_opened_status (void);
+void set_soc_wifi_ap_opened_status (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_start_wifi_ip_request (void);
+void set_start_wifi_ip_request (uint8_t on);
+
+// Status event from Phone (BLE)
+uint8_t get_phone_wifi_connected_status (void);
+void set_phone_wifi_connected_status (uint8_t on);
+
+// Status event from Novatek (SPI)
+uint8_t get_soc_wifi_connected_status (void);
+void set_soc_wifi_connected_status (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_start_video_call_request (void);
+void set_start_video_call_request (uint8_t on);
+
+// Request command from Phone (BLE)
+uint8_t get_stop_video_call_request (void);
+void set_stop_video_call_request (uint8_t on);
+
 #endif /* SCENARIO_STATE_H_ */
