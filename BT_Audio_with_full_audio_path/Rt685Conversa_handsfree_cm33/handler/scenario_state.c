@@ -100,8 +100,11 @@ void set_scenario_state(uint8_t state)
 		} else if (current_scenario_state == SCENARIO_STATE_VIDEO_RECORDING) {
 			video_recording_handler_stop_state = 1;
 
+
 		} else if (current_scenario_state == SCENARIO_STATE_VIDEO_CALL) {
-			video_call_handler_stop_state = 1;
+			if (video_call_handler_stop_state == 0) {
+				video_call_handler_stop_state = 1;
+			}
 
 		} else if (current_scenario_state == SCENARIO_STATE_VIDEO_AI) {
 			video_ai_handler_stop_state = 1;
@@ -700,6 +703,7 @@ static void scenario_video_call_handler (void)
 		current_scenario_state = SCENARIO_STATE_HOME;
 		//TODO Add a 60-second timer to close the Wi-Fi AP.
 		video_call_handler_stop_state = 0;
+		stop_video_call_request = 0;
 
 	} else if (video_call_handler_stop_state > 0) {
 		video_call_handler_stop_state++;
@@ -712,32 +716,44 @@ static void scenario_video_ai_handler (void)
 	if (video_ai_handler_start_state == 0 && video_ai_handler_stop_state == 0) {
 			return;
 	}
-	//Start: 1. Ringtone 2. Audio path 3. SPI 4. BLE 5. LED and AMP
+	//Start: 1. Audio path 2. LED and AMP
 	if (video_ai_handler_start_state == 1) {
 		PRINTF("[VideoAI] Start video ai...\r\n");
-		set_ringtone_state(Ringtone_StartVideoAI);
+		RequestToGetIntoVideoAI = 1; //Audio path
 		video_ai_handler_start_state++;
 
 	} else if (video_ai_handler_start_state == 2) {
-		if (!is_playing_ringtone()) { // Wait for the ringtone to finish
-			RequestToGetIntoVideoAI = 1; //Audio path
-			video_ai_handler_start_state++;
+		if (start_video_ai_request) {
+			if (spi_protocol_get_status() == S_IDLE) {
+				if (phone_wifi_connected_status && soc_wifi_connected_status) {
+					PRINTF("[VideoAI] Both phone and Novatek are connected\r\n");
+					phone_wifi_connected_status = 0;
+					soc_wifi_connected_status = 0;
+
+				} else if (phone_wifi_connected_status) {
+					PRINTF("[VideoAI] Only phone connected\r\n");
+					phone_wifi_connected_status = 0;
+
+				} else if (soc_wifi_connected_status) {
+					PRINTF("[VideoAI] Only Novatek connected\r\n");
+					soc_wifi_connected_status = 0;
+
+				} else {
+					PRINTF("[VideoAI] Both phone and Novatek are disconnected\r\n");
+				}
+				vTaskDelay(pdMS_TO_TICKS(5));
+				// TODO SPI: start video ai
+				start_video_ai_request = 0;
+				video_ai_handler_start_state++;
+			}
 		}
 
 	} else if (video_ai_handler_start_state == 3) {
-		// TODO send SPI command (Start video ai) to Novatek
-		video_ai_handler_start_state++;
-
-	} else if (video_ai_handler_start_state == 4) {
-		// TODO Send a BLE event (Wi-Fi IP) to the phone when the Novatek Wi-Fi IP is ready
-		video_ai_handler_start_state++;
-
-	} else if (video_ai_handler_start_state == 5) {
 		// TODO Set LED and AMP when the Novatek RTSP is ready
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
 		amp_post_event(AMP_EVT_MUSIC);
-		current_scenario_state = SCENARIO_STATE_VIDEO_AI;
+		current_scenario_state = SCENARIO_STATE_VIDEO_AI;;
 
 		video_ai_handler_start_state = 0;
 
@@ -745,36 +761,38 @@ static void scenario_video_ai_handler (void)
 		video_ai_handler_start_state++;
 	}
 
-	//Stop: 1. AMP and SPI 2. Audio path 3. UI 4. LED and Ringtone
+	//Stop: 1. AMP 2. Audio path 3. UI 4. LED
 	if (video_ai_handler_stop_state == 1) {
 		PRINTF("[VideoAI] Stop video ai...\r\n");
 		amp_post_event(AMP_EVT_STOP);
-		// TODO send SPI command (Stop video ai) to Novatek
 		video_ai_handler_stop_state++;
 
 	} else if (video_ai_handler_stop_state == 2) {
 		RequestToGetOutofVideoAI = 1; //Audio path
-
 		video_ai_handler_stop_state++;
 
 	} else if (video_ai_handler_stop_state == 3) {
-		if (spi_protocol_get_status() == S_IDLE) {
-
-			set_ui_view(UI_VIEW_HOME); // UI: home
-
-			video_ai_handler_stop_state++;
+		if (stop_video_ai_request) {
+			if (spi_protocol_get_status() == S_IDLE) {
+				// TODO SPI: stop video ai
+				stop_video_ai_request = 0;
+				video_ai_handler_stop_state++;
+			}
 		}
 	} else if (video_ai_handler_stop_state == 4) {
+		if (spi_protocol_get_status() == S_IDLE) {
+			set_ui_view(UI_VIEW_HOME); // UI: home
+			video_ai_handler_stop_state++;
+		}
+	} else if (video_ai_handler_stop_state == 5) {
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
-		set_ringtone_state(Ringtone_StopVideoAI);
 		current_scenario_state = SCENARIO_STATE_HOME;
-
 		video_ai_handler_stop_state = 0;
+		stop_video_ai_request = 0;
 
 	} else if (video_ai_handler_stop_state > 0) {
 		video_ai_handler_stop_state++;
-
 	}
 }
 
@@ -877,6 +895,7 @@ static void wifi_request_handler (void)
 			stop_wifi_ap_request = 0;
 		}
 	}
+
 	//TODO Add a 60-second timer to close the Wi-Fi AP.
 
 }

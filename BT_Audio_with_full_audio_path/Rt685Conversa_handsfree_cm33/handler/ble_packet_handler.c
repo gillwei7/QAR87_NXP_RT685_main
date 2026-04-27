@@ -357,6 +357,10 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 
 		case BLE_CMD_ID_RTSP_AV :
 			PRINTF("[BLE Parser] RTSP_AV\n");
+			if (get_phone_page_status() == PHONE_PAGE_STATUS_VIDEO_AI) {
+				set_start_video_ai_request(1);
+				set_scenario_state(SCENARIO_STATE_VIDEO_AI);
+			}
 			break;
 
 		case BLE_CMD_ID_START_VIDEO_CALL_URL :
@@ -369,8 +373,10 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 
 		case BLE_CMD_ID_STOP_VIDEO_CALL :
 			PRINTF("[BLE Parser] STOP_VIDEO_CALL\n");
-			set_stop_video_call_request(1);
-			set_scenario_state(SCENARIO_STATE_HOME);
+			if (get_scenario_state() == SCENARIO_STATE_VIDEO_CALL) {
+				set_stop_video_call_request(1);
+				set_scenario_state(SCENARIO_STATE_HOME);
+			}
 			break;
 
 		case BLE_CMD_ID_LEAVE_VIDEO_CALL :
@@ -415,6 +421,10 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 
 		case BLE_CMD_ID_RTSP_AUDIO_ONLY_ON :
 			PRINTF("[BLE Parser] RTSP_AUDIO_ONLY_ON\n");
+			if (get_phone_page_status() == PHONE_PAGE_STATUS_TRANSLATION) {
+				set_start_translation_request(1);
+				set_scenario_state(SCENARIO_STATE_TRANSLATION);
+			}
 
 			break;
 
