@@ -254,7 +254,9 @@ void set_scenario_state(uint8_t state)
 			 || current_scenario_state == SCENARIO_STATE_ABOUT
 #endif
 			)) {
-		translation_handler_start_state = 1;
+		if (music_player_handler_start_state == 0) {
+			music_player_handler_start_state = 1;
+		}
 	} else if (state == SCENARIO_STATE_AUDIO_CALL && (current_scenario_state == SCENARIO_STATE_HOME
 #if MENU_STATE_ENABLE
 			 || current_scenario_state == SCENARIO_STATE_MENU
@@ -263,9 +265,12 @@ void set_scenario_state(uint8_t state)
 			 || current_scenario_state == SCENARIO_STATE_ABOUT
 #endif
 			)) {
-		translation_handler_start_state = 1;
+		if (audio_call_handler_start_state == 0) {
+			audio_call_handler_start_state = 1;
+		}
 	}
 }
+
 
 static TickType_t power_off_tick = 0;
 static void scenario_power_off_handler (void)
@@ -1029,14 +1034,28 @@ static void phone_page_request_handler (void)
 	}
 	if (enter_video_call_request) {
 		phone_page_status = PHONE_PAGE_STATUS_VIDEO_CALL;
+		if (get_music_status() == STATUS_ON) {
+			avrcp_pause_button(0);
+			PRINTF("[Music] pause the music before starting video call\r\n");
+		}
 		enter_video_call_request = 0;
 	}
 	if (enter_video_ai_request) {
 		phone_page_status = PHONE_PAGE_STATUS_VIDEO_AI;
+		if (get_music_status() == STATUS_ON) {
+			avrcp_pause_button(0);
+			PRINTF("[Music] pause the music before starting video ai\r\n");
+		}
+
 		enter_video_ai_request = 0;
 	}
 	if (enter_translation_request) {
 		phone_page_status = PHONE_PAGE_STATUS_TRANSLATION;
+		if (get_music_status() == STATUS_ON) {
+			avrcp_pause_button(0);
+			PRINTF("[Music] pause the music before starting translation\r\n");
+		}
+
 		enter_translation_request = 0;
 	}
 }
