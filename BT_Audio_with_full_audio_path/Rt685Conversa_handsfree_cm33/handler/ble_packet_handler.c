@@ -290,10 +290,25 @@ static uint8_t peripheral_ble_get_cmd_id(uint8_t * ble_data)
 	{
 		return BLE_CMD_ID_START_VIDEO_CALL_URL ;
 	}
+    else if (strcmp(ble_data, "RTSP_AUDIO_ONLY_ON") == 0) {
+		return BLE_CMD_ID_RTSP_AUDIO_ONLY_ON;
+    }
 	else if(strcmp(ble_data, "Stop_Video_Call") == 0)
 	{
 		return BLE_CMD_ID_STOP_VIDEO_CALL;
 	}
+    else if (strcmp(ble_data, "Stop_Video_AI") == 0) {
+		return BLE_CMD_ID_STOP_VIDEO_AI;
+    }
+    else if (strcmp(ble_data, "Stop_Translation") == 0) {
+		return BLE_CMD_ID_STOP_TRANSLATION;
+    }
+    else if (strcmp(ble_data, "stopTranslation") == 0) {
+		return BLE_CMD_ID_STOP_TRANSLATION;
+    }
+    else if (strcmp(ble_data, "STOP_VIDEOCHAT") == 0) {
+		return BLE_CMD_ID_STOP_VIDEOCHAT;
+    }
 	else if (strcmp(ble_data, "Enter_Video_Call") == 0)
 	{
 		return BLE_CMD_ID_ENTER_VIDEO_CALL;
@@ -302,12 +317,22 @@ static uint8_t peripheral_ble_get_cmd_id(uint8_t * ble_data)
 	{
 		return BLE_CMD_ID_LEAVE_VIDEO_CALL;
 	}
-    else if (strcmp(ble_data, "STOP_VIDEOCHAT") == 0) {
-		return BLE_CMD_ID_LEAVE_VIDEO_CALL;
-    }
-    else if (strcmp(ble_data, "stopTranslation") == 0) {
-		return BLE_CMD_ID_STOP_TRANSLATION;
-    }
+	else if (strcmp(ble_data, "Enter_Video_AI") == 0)
+	{
+		return BLE_CMD_ID_ENTER_VIDEO_AI;
+	}
+	else if (strcmp(ble_data, "Leave_Video_AI") == 0)
+	{
+		return BLE_CMD_ID_LEAVE_VIDEO_AI;
+	}
+	else if (strcmp(ble_data, "Enter_Translation") == 0)
+	{
+		return BLE_CMD_ID_ENTER_TRANSLATION;
+	}
+	else if (strcmp(ble_data, "Leave_Translation") == 0)
+	{
+		return BLE_CMD_ID_LEAVE_TRANSLATION;
+	}
     else if (strcmp(ble_data, "TAKE_PHOTO") == 0) {
 		return BLE_CMD_ID_TAKE_PHOTO;
     }
@@ -323,9 +348,6 @@ static uint8_t peripheral_ble_get_cmd_id(uint8_t * ble_data)
     else if (strcmp(ble_data, "STOP_RECORDING") == 0) {
 		return BLE_CMD_ID_STOP_RECORDING;
     }
-    else if (strcmp(ble_data, "RTSP_AUDIO_ONLY_ON") == 0) {
-		return BLE_CMD_ID_RTSP_AUDIO_ONLY_ON;
-    }
 
 	return BLE_CMD_ID_UNKNOWN ;
 }
@@ -336,12 +358,6 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 
 	switch(cmd_id)
 	{
-		case BLE_CMD_ID_ENTER_VIDEO_CALL :
-			PRINTF("[BLE Parser] ENTER_VIDEO_CALL_URL\n");
-			/*NXP 更改 Audio Path 設定 */
-			set_enter_video_call_request(1);
-			break;
-
 		case BLE_CMD_ID_START_AP :
 			PRINTF("[BLE Parser] Start_AP\n");
 			set_start_wifi_ap_request(1);
@@ -372,6 +388,15 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 			set_scenario_state(SCENARIO_STATE_VIDEO_CALL);
 			break;
 
+		case BLE_CMD_ID_RTSP_AUDIO_ONLY_ON :
+			PRINTF("[BLE Parser] RTSP_AUDIO_ONLY_ON\n");
+			if (get_phone_page_status() == PHONE_PAGE_STATUS_TRANSLATION) {
+				set_start_translation_request(1);
+				set_scenario_state(SCENARIO_STATE_TRANSLATION);
+			}
+
+			break;
+
 		case BLE_CMD_ID_STOP_VIDEO_CALL :
 			PRINTF("[BLE Parser] STOP_VIDEO_CALL\n");
 			if (get_scenario_state() == SCENARIO_STATE_VIDEO_CALL) {
@@ -380,10 +405,17 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 			}
 			break;
 
-		case BLE_CMD_ID_LEAVE_VIDEO_CALL :
-			PRINTF("[BLE Parser] LEAVE_VIDEO_CALL\n");
-			/*NXP 恢復 Audio Path 設定 */
-			set_leave_video_call_request(1);
+		case BLE_CMD_ID_STOP_VIDEO_AI :
+			PRINTF("[BLE Parser] STOP_VIDEO_AI\n");
+			if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI) {
+				set_stop_video_ai_request(1);
+				set_scenario_state(SCENARIO_STATE_HOME);
+			}
+			break;
+
+		case BLE_CMD_ID_STOP_TRANSLATION :
+			PRINTF("[BLE Parser] STOP_TRANSLATION\n");
+
 			break;
 
 		case BLE_CMD_ID_STOP_VIDEOCHAT :
@@ -391,9 +423,34 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 
 			break;
 
-		case BLE_CMD_ID_STOP_TRANSLATION :
-			PRINTF("[BLE Parser] STOP_TRANSLATION\n");
+		case BLE_CMD_ID_ENTER_VIDEO_CALL :
+			PRINTF("[BLE Parser] ENTER_VIDEO_CALL\n");
+			set_enter_video_call_request(1);
+			break;
 
+		case BLE_CMD_ID_LEAVE_VIDEO_CALL :
+			PRINTF("[BLE Parser] LEAVE_VIDEO_CALL\n");
+			set_leave_video_call_request(1);
+			break;
+
+		case BLE_CMD_ID_ENTER_VIDEO_AI :
+			PRINTF("[BLE Parser] ENTER_VIDEO_AI\n");
+			set_enter_video_ai_request(1);
+			break;
+
+		case BLE_CMD_ID_LEAVE_VIDEO_AI :
+			PRINTF("[BLE Parser] LEAVE_VIDEO_AI\n");
+			set_leave_video_ai_request(1);
+			break;
+
+		case BLE_CMD_ID_ENTER_TRANSLATION :
+			PRINTF("[BLE Parser] ENTER_TRANSLATION\n");
+			set_enter_translation_request(1);
+			break;
+
+		case BLE_CMD_ID_LEAVE_TRANSLATION :
+			PRINTF("[BLE Parser] LEAVE_TRANSLATION\n");
+			set_leave_translation_request(1);
 			break;
 
 		case BLE_CMD_ID_TAKE_PHOTO :
@@ -421,14 +478,6 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 
 			break;
 
-		case BLE_CMD_ID_RTSP_AUDIO_ONLY_ON :
-			PRINTF("[BLE Parser] RTSP_AUDIO_ONLY_ON\n");
-			if (get_phone_page_status() == PHONE_PAGE_STATUS_TRANSLATION) {
-				set_start_translation_request(1);
-				set_scenario_state(SCENARIO_STATE_TRANSLATION);
-			}
-
-			break;
 
 		case BLE_CMD_ID_UNKNOWN :
 			PRINTF("[BLE Parser] Unknown BLE Command\n");
