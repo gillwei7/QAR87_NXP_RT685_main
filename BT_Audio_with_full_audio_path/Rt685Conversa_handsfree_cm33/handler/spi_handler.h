@@ -114,6 +114,11 @@ extern volatile slave_fsm_state_t g_slave_state;
 
 #define CMD_ATOMIC_EXEC_SWITCH_UI_PAGE          0x30  // 要求切換至指定 UI 頁面
 
+#define CMD_ATOMIC_EXEC_START_VIDEO_AI          0x31
+#define CMD_ATOMIC_EXEC_STOP_VIDEO_AI           0x32
+#define CMD_ATOMIC_EXEC_START_TRANSLATION       0x33
+#define CMD_ATOMIC_EXEC_STOP_TRANSLATION        0x34
+
 /* ------------------------------------------------------------------------- *
  * [0x21] CMD_ATOMIC_STATUS (資訊同步：NXP -> Novatek)
  * 適用場景: NXP 將自身的狀態數據推送給 Novatek

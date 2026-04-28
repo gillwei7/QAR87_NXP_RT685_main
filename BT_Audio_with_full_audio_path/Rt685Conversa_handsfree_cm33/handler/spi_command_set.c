@@ -176,6 +176,22 @@ void spi_command_atomic_exec_stop_video_call(void)
 {
 	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_VIDEO_CALL);
 }
+void spi_command_atomic_exec_start_video_ai(void)
+{
+	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_VIDEO_AI);
+}
+void spi_command_atomic_exec_stop_video_ai(void)
+{
+	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_VIDEO_AI);
+}
+void spi_command_atomic_exec_start_translation(void)
+{
+	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_START_TRANSLATION);
+}
+void spi_command_atomic_exec_stop_translation(void)
+{
+	send_spi_request(CMD_ATOMIC_EXEC, CMD_ATOMIC_EXEC_STOP_TRANSLATION);
+}
 void spi_command_atomic_exec_start_wifi_ap(void)
 {
 	ip_ssid_processing(ss_get_wifi_ip(), ss_get_wifi_ssid());
