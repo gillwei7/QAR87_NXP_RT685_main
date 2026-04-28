@@ -194,7 +194,7 @@ uint8_t * ss_get_device_name (void)
 
 size_t ss_get_device_name_size (void)
 {
-	return strlen(device_name);
+	return sizeof(device_name);
 }
 
 uint8_t * ss_get_wifi_ssid (void)
