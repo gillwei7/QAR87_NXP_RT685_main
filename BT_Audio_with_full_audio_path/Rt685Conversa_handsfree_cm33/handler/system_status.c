@@ -38,7 +38,7 @@ static volatile uint8_t is_turning_on_camera = 0;
 static volatile uint8_t need_send_state = 0;
 static volatile uint8_t need_send_music_status = 0;
 
-static volatile uint8_t wifi_ap_status = WIFI_AP_OFF;
+static volatile wifi_ap_status_t wifi_ap_status = WIFI_AP_OFF;
 
 
 static uint8_t bt_addr_0 = 0;
@@ -214,12 +214,12 @@ uint8_t * ss_get_wifi_ip (void)
 	return wifi_ip;
 }
 
-uint8_t get_wifi_ap_status (void)
+wifi_ap_status_t get_wifi_ap_status (void)
 {
 	return wifi_ap_status;
 }
 
-void set_wifi_ap_status (uint8_t status)
+void set_wifi_ap_status (wifi_ap_status_t status)
 {
 #if 0 // TODO ringtone
 	if (wifi_ap_status == WIFI_AP_CONNECTED && status == WIFI_AP_ON) {

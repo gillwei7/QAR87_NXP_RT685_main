@@ -80,6 +80,29 @@ static uint8_t leave_video_ai_request = 0;
 static uint8_t enter_translation_request = 0;
 static uint8_t leave_translation_request = 0;
 
+static TimerHandle_t s_wifi_ap_off_timer = NULL;
+
+static void wifi_ap_off_timer_callback(TimerHandle_t xTimer)
+{
+	set_stop_wifi_ap_request(1);
+	PRINTF("[Wi-Fi] wifi_ap_off\r\n");
+}
+
+void wifi_ap_off_timer_init (void)
+{
+	s_wifi_ap_off_timer = xTimerCreate("WifiApOffTimer",
+	                               pdMS_TO_TICKS(60000),
+	                               pdFALSE,     // auto-reload
+	                               NULL,
+	                               wifi_ap_off_timer_callback);
+}
+
+void wifi_ap_off_timer_start(void)
+{
+	if (s_wifi_ap_off_timer != NULL) {
+	    xTimerStart(s_wifi_ap_off_timer, 0);
+	}
+}
 
 uint8_t get_scenario_state(void)
 {
@@ -978,15 +1001,13 @@ static void wifi_request_handler (void)
 		start_wifi_ip_request = 0;
 	}
 
-	if (stop_wifi_ap_request) {
+	//Add a 60-second timer to close the Wi-Fi AP.
+	if (stop_wifi_ap_request && phone_page_status == PHONE_PAGE_STATUS_HOME && get_wifi_ap_status() != WIFI_AP_OFF) {
 		if (spi_protocol_get_status() == S_IDLE) {
 			spi_command_atomic_exec_stop_wifi_ap();
 			stop_wifi_ap_request = 0;
 		}
 	}
-
-	//TODO Add a 60-second timer to close the Wi-Fi AP.
-
 }
 
 static void phone_page_request_handler (void)
@@ -994,14 +1015,17 @@ static void phone_page_request_handler (void)
 	if (leave_video_call_request) {
 		phone_page_status = PHONE_PAGE_STATUS_HOME;
 		leave_video_call_request = 0;
+		wifi_ap_off_timer_start();
 	}
 	if (leave_video_ai_request) {
 		phone_page_status = PHONE_PAGE_STATUS_HOME;
 		leave_video_ai_request = 0;
+		wifi_ap_off_timer_start();
 	}
 	if (leave_translation_request) {
 		phone_page_status = PHONE_PAGE_STATUS_HOME;
 		leave_translation_request = 0;
+		wifi_ap_off_timer_start();
 	}
 	if (enter_video_call_request) {
 		phone_page_status = PHONE_PAGE_STATUS_VIDEO_CALL;

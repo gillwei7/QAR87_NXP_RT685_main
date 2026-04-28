@@ -35,6 +35,7 @@ typedef enum {
 	PHONE_PAGE_STATUS_VIDEO_CALL,
 } phone_page_status_t;
 
+void wifi_ap_off_timer_init (void);
 uint8_t get_scenario_state(void);
 void set_scenario_state(uint8_t state);
 phone_page_status_t get_phone_page_status (void);

@@ -15,6 +15,7 @@
 #include "fsl_adapter_gpio.h"
 #include "GlobalDef.h"
 #include "spi_handler.h"
+#include "scenario_state.h"
 
 /*******************************************************************************
  * Definitions
@@ -349,6 +350,7 @@ void hal_board_init(void)
 	hal_i3c_init();
 	hal_spi_init();
 	Init_I2C_Component();
+	wifi_ap_off_timer_init();
 //	hal_scan_i2c_devices(BOARD_PMIC_I3C_BASEADDR);
 }
 
