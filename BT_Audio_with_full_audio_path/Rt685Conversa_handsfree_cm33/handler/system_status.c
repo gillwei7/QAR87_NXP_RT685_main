@@ -15,6 +15,7 @@
 #include "ringtone_handler.h"
 #include "scenario_state.h"
 #include "porting.h"
+#include "spi_command_set.h"
 
 
 
@@ -39,6 +40,10 @@ static volatile uint8_t need_send_state = 0;
 static volatile uint8_t need_send_music_status = 0;
 
 static volatile wifi_ap_status_t wifi_ap_status = WIFI_AP_OFF;
+static volatile uint8_t oe_status = STATUS_ON;
+
+static uint8_t oe_on_request = 0;
+static uint8_t oe_off_request = 0;
 
 
 static uint8_t bt_addr_0 = 0;
@@ -231,6 +236,16 @@ void set_wifi_ap_status (wifi_ap_status_t status)
 	wifi_ap_status = status;
 }
 
+uint8_t get_oe_status (void)
+{
+	return oe_status;
+}
+
+void set_oe_status (uint8_t status)
+{
+	oe_status = status;
+}
+
 /* ====== BLE/HA/BT/MIC：開關與讀取 ====== */
 void ss_ble_on() {
 	ss.flags |=  SS_BLE_BIT;
@@ -348,4 +363,59 @@ uint8_t ss_get_battery() {
     return (uint8_t)((ss.batt & SS_LEVEL_MASK) >> SS_LEVEL_SHIFT);
 }
 
+uint8_t get_oe_on_request (void)
+{
+	return oe_on_request;
 
+}
+
+void set_oe_on_request (uint8_t on)
+{
+	if (on) {
+		oe_on_request = 1;
+	} else {
+		oe_on_request = 0;
+	}
+}
+
+uint8_t get_oe_off_request (void)
+{
+	return oe_off_request;
+
+}
+
+void set_oe_off_request (uint8_t on)
+{
+	if (on) {
+		oe_off_request = 1;
+	} else {
+		oe_off_request = 0;
+	}
+}
+
+static void oe_request_handler (void)
+{
+	if (oe_on_request && oe_status == STATUS_OFF) {
+		if (spi_protocol_get_status() == S_IDLE) {
+			spi_command_atomic_exec_open_oe(); // turn OE on
+			oe_status = STATUS_ON;
+			PRINTF("[OE] oe_status on\r\n");
+			oe_on_request = 0;
+		}
+	}
+
+	if (oe_off_request && oe_status == STATUS_ON) {
+		if (spi_protocol_get_status() == S_IDLE) {
+			spi_command_atomic_exec_close_oe(); // turn OE off
+			oe_status = STATUS_OFF;
+			PRINTF("[OE] oe_status off\r\n");
+			oe_off_request = 0;
+		}
+	}
+}
+
+void system_status_handler (void)
+{
+	oe_request_handler();
+
+}

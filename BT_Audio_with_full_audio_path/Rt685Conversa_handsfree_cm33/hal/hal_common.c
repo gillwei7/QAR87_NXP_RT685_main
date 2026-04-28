@@ -363,7 +363,7 @@ void hal_main_handler (void)
 	ringtone_handler();
 	button_handler();
 	scenario_state_handler();
-
+	system_status_handler();
 }
 
 #endif

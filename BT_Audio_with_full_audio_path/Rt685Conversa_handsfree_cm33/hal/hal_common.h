@@ -115,6 +115,7 @@ void hal_main_handler (void);
 
 void i2c_device_boot (void);
 
+void system_status_handler (void);
 void scenario_state_handler (void);
 void bluetooth_reconnect_handler (void);
 void touch_gesture_handler (void);

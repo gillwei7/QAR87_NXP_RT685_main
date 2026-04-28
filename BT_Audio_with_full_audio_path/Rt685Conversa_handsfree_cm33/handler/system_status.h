@@ -120,6 +120,13 @@ void ss_set_music_status(uint8_t status);
 #endif
 void send_music_status_to_soc(void);
 
+uint8_t get_oe_status (void);
+void set_oe_status (uint8_t status);
+uint8_t get_oe_on_request (void);
+void set_oe_on_request (uint8_t on);
+uint8_t get_oe_off_request (void);
+void set_oe_off_request (uint8_t on);
+
 /*
 
 SystemStatus ss = {0};

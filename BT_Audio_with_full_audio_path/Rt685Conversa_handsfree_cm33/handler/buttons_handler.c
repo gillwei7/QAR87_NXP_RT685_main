@@ -58,7 +58,6 @@ static TimerHandle_t s_function_button_timer = NULL;
 
 static uint8_t video_recording_press = 0;
 
-static uint8_t oe_status = 1;
 
 
 /* 簡單阻塞式 delay：使用 NXP SDK，依核心時脈做最少延遲 */
@@ -195,12 +194,11 @@ void button_press_handler (void)
 #if SOC_SPI_ENABLE
 #if 1
 			if (Novatek_boot_completed) {
-				if (oe_status == 0) {
-					spi_command_atomic_exec_open_oe(); // turn OE on
-					oe_status = 1;
-				} else {
-					spi_command_atomic_exec_close_oe(); // turn OE off
-					oe_status = 0;
+				if (get_oe_status() == STATUS_OFF) {
+					set_oe_on_request(1);
+
+				} else if (get_oe_status() == STATUS_ON){
+					set_oe_off_request(1);
 				}
 			}
 //			ss_get_device_name(); // for test only
