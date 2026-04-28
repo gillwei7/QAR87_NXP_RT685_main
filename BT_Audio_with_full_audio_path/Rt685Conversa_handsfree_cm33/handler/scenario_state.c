@@ -742,7 +742,7 @@ static void scenario_video_ai_handler (void)
 					PRINTF("[VideoAI] Both phone and Novatek are disconnected\r\n");
 				}
 				vTaskDelay(pdMS_TO_TICKS(5));
-				// TODO SPI: start video ai
+				spi_command_atomic_exec_start_video_ai();
 				start_video_ai_request = 0;
 				video_ai_handler_start_state++;
 			}
@@ -774,7 +774,7 @@ static void scenario_video_ai_handler (void)
 	} else if (video_ai_handler_stop_state == 3) {
 		if (stop_video_ai_request) {
 			if (spi_protocol_get_status() == S_IDLE) {
-				// TODO SPI: stop video ai
+				spi_command_atomic_exec_stop_video_ai();
 				stop_video_ai_request = 0;
 				video_ai_handler_stop_state++;
 			}
@@ -801,32 +801,44 @@ static void scenario_translation_handler (void)
 	if (translation_handler_start_state == 0 && translation_handler_stop_state == 0) {
 			return;
 	}
-	//Start: 1. Ringtone 2. Audio path 3. SPI 4. BLE 5. LED and AMP
+	//Start: 1. Audio path 2. LED and AMP
 	if (translation_handler_start_state == 1) {
-		PRINTF("[Translation] Start Translation...\r\n");
-		set_ringtone_state(Ringtone_StartTranslation);
+		PRINTF("[Translation] Start video ai...\r\n");
+		RequestToGetIntoVideoAI = 1; //Audio path
 		translation_handler_start_state++;
 
 	} else if (translation_handler_start_state == 2) {
-		if (!is_playing_ringtone()) { // Wait for the ringtone to finish
-			RequestToGetIntoVideoAI = 1; //Audio path
-			translation_handler_start_state++;
+		if (start_translation_request) {
+			if (spi_protocol_get_status() == S_IDLE) {
+				if (phone_wifi_connected_status && soc_wifi_connected_status) {
+					PRINTF("[Translation] Both phone and Novatek are connected\r\n");
+					phone_wifi_connected_status = 0;
+					soc_wifi_connected_status = 0;
+
+				} else if (phone_wifi_connected_status) {
+					PRINTF("[Translation] Only phone connected\r\n");
+					phone_wifi_connected_status = 0;
+
+				} else if (soc_wifi_connected_status) {
+					PRINTF("[Translation] Only Novatek connected\r\n");
+					soc_wifi_connected_status = 0;
+
+				} else {
+					PRINTF("[Translation] Both phone and Novatek are disconnected\r\n");
+				}
+				vTaskDelay(pdMS_TO_TICKS(5));
+				spi_command_atomic_exec_start_translation();
+				start_translation_request = 0;
+				translation_handler_start_state++;
+			}
 		}
 
 	} else if (translation_handler_start_state == 3) {
-		// TODO send SPI command (Start Translation) to Novatek
-		translation_handler_start_state++;
-
-	} else if (translation_handler_start_state == 4) {
-		// TODO Send a BLE event (Wi-Fi IP) to the phone when the Novatek Wi-Fi IP is ready
-		translation_handler_start_state++;
-
-	} else if (translation_handler_start_state == 5) {
 		// TODO Set LED and AMP when the Novatek RTSP is ready
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
 		amp_post_event(AMP_EVT_MUSIC);
-		current_scenario_state = SCENARIO_STATE_TRANSLATION;
+		current_scenario_state = SCENARIO_STATE_VIDEO_AI;;
 
 		translation_handler_start_state = 0;
 
@@ -834,36 +846,38 @@ static void scenario_translation_handler (void)
 		translation_handler_start_state++;
 	}
 
-	//Stop: 1. AMP and SPI 2. Audio path 3. UI 4. LED and Ringtone
+	//Stop: 1. AMP 2. Audio path 3. UI 4. LED
 	if (translation_handler_stop_state == 1) {
-		PRINTF("[Translation] Stop Translation...\r\n");
+		PRINTF("[Translation] Stop video ai...\r\n");
 		amp_post_event(AMP_EVT_STOP);
-		// TODO send SPI command (Stop Translation) to Novatek
 		translation_handler_stop_state++;
 
 	} else if (translation_handler_stop_state == 2) {
 		RequestToGetOutofVideoAI = 1; //Audio path
-
 		translation_handler_stop_state++;
 
 	} else if (translation_handler_stop_state == 3) {
-		if (spi_protocol_get_status() == S_IDLE) {
-
-			set_ui_view(UI_VIEW_HOME); // UI: home
-
-			translation_handler_stop_state++;
+		if (stop_translation_request) {
+			if (spi_protocol_get_status() == S_IDLE) {
+				spi_command_atomic_exec_stop_translation();
+				stop_translation_request = 0;
+				translation_handler_stop_state++;
+			}
 		}
 	} else if (translation_handler_stop_state == 4) {
+		if (spi_protocol_get_status() == S_IDLE) {
+			set_ui_view(UI_VIEW_HOME); // UI: home
+			translation_handler_stop_state++;
+		}
+	} else if (translation_handler_stop_state == 5) {
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
-		set_ringtone_state(Ringtone_StopTranslation);
 		current_scenario_state = SCENARIO_STATE_HOME;
-
 		translation_handler_stop_state = 0;
+		stop_translation_request = 0;
 
 	} else if (translation_handler_stop_state > 0) {
 		translation_handler_stop_state++;
-
 	}
 }
 

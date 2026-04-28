@@ -415,6 +415,10 @@ void peripheral_ble_cmd_parser(uint8_t * ble_data, uint16_t data_len)
 
 		case BLE_CMD_ID_STOP_TRANSLATION :
 			PRINTF("[BLE Parser] STOP_TRANSLATION\n");
+			if (get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
+				set_stop_translation_request(1);
+				set_scenario_state(SCENARIO_STATE_HOME);
+			}
 
 			break;
 
