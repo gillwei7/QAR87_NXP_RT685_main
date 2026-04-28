@@ -10,6 +10,84 @@
 
 #include "spi_handler.h"
 
+
+/* ------------------------------------------------------------------------- *
+ * [0x20] CMD_ATOMIC_EXEC (執行指令：NXP -> Novatek)
+ * 適用場景: NXP 請求 Novatek 執行特定動作 (Action)
+ * ------------------------------------------------------------------------- */
+#define CMD_ATOMIC_EXEC_OPEN_OE                 0x01  // 開啟光機/螢幕
+#define CMD_ATOMIC_EXEC_CLOSE_OE                0x02  // 關閉光機/螢幕
+#define CMD_ATOMIC_EXEC_SOFT_POWER_OFF          0x03  // 通知軟關機
+#define CMD_ATOMIC_EXEC_UNLOAD_WIFI_DRIVER      0x04  // 解除/卸載 Wi-Fi 驅動
+
+#define CMD_ATOMIC_EXEC_ENTER                   0x11  // UI：確認/進入
+#define CMD_ATOMIC_EXEC_EXIT                    0x15  // UI：退出/返回
+#define CMD_ATOMIC_EXEC_MENU_LEFT               0x17  // UI：選單左移
+#define CMD_ATOMIC_EXEC_MENU_RIGHT              0x19  // UI：選單右移
+
+#define CMD_ATOMIC_EXEC_MEDIA_START             0x12  // 啟動播放器
+#define CMD_ATOMIC_EXEC_MEDIA_STOP              0x13  // 停止播放
+#define CMD_ATOMIC_EXEC_NEXT_MEDIA              0x14  // 下一首/下一部
+#define CMD_ATOMIC_EXEC_PREVIOUS_MEDIA          0x1C  // 上一首
+#define CMD_ATOMIC_EXEC_MEDIA_PLAY_PAUSE        0x1D  // 播放/暫停(含強制設定)
+
+#define CMD_ATOMIC_EXEC_TAKE_PICTURE            0x21  // 拍照
+#define CMD_ATOMIC_EXEC_STOP_RECORDING          0x22  // 停止錄影
+#define CMD_ATOMIC_EXEC_START_RECORDING         0x23  // 開始錄影
+
+#define CMD_ATOMIC_EXEC_START_VIDEO_CALL        0x28  // 視訊會議開始 (包含傳送URL)
+#define CMD_ATOMIC_EXEC_STOP_VIDEO_CALL         0x29  // 視訊會議停止
+#define CMD_ATOMIC_EXEC_START_WIFI_AP           0x2A  // 開啟WIFI AP (包含傳送IP、SSID)
+#define CMD_ATOMIC_EXEC_STOP_WIFI_AP            0x2B  // 關閉WIFI AP
+
+#define CMD_ATOMIC_EXEC_SWITCH_UI_PAGE          0x30  // 要求切換至指定 UI 頁面
+
+#define CMD_ATOMIC_EXEC_START_VIDEO_AI          0x31
+#define CMD_ATOMIC_EXEC_STOP_VIDEO_AI           0x32
+#define CMD_ATOMIC_EXEC_START_TRANSLATION       0x33
+#define CMD_ATOMIC_EXEC_STOP_TRANSLATION        0x34
+
+/* ------------------------------------------------------------------------- *
+ * [0x21] CMD_ATOMIC_STATUS (資訊同步：NXP -> Novatek)
+ * 適用場景: NXP 將自身的狀態數據推送給 Novatek
+ * ------------------------------------------------------------------------- */
+#define CMD_ATOMIC_STATUS_TIME_SYNC             0x91  // 同步系統時間
+#define CMD_ATOMIC_STATUS_MSG_NOTIFICATION      0x92  // 推送手機通知訊息
+#define CMD_ATOMIC_STATUS_SYS_STATUS            0x93  // 同步電量/充電/藍牙連線狀態
+#define CMD_ATOMIC_STATUS_VERSION_INFO_SYNC     0x94  // 同步 NXP 版本號
+#define CMD_ATOMIC_STATUS_VOLUME_INFO_SYNC      0x95  // 同步當前音量值與狀態
+#define CMD_ATOMIC_STATUS_NXP_OTA_STATUS_SYNC   0x96  // 同步 NXP OTA 更新狀態
+
+/* ------------------------------------------------------------------------- *
+ * [0x22] CMD_ATOMIC_EVENT (事件回報：Novatek -> NXP)
+ * 適用場景: Novatek 主動回報硬體、UI 或系統發生的事件
+ * ------------------------------------------------------------------------- */
+#define CMD_ATOMIC_EVENT_SYSTEM_BOOT_DONE       0x11  // 回報：已開機完成
+
+#define CMD_ATOMIC_EVENT_CAMERA_ACTIVATED       0x01  // 回報：相機已經啟動
+#define CMD_ATOMIC_EVENT_PHOTO_CAPTURED         0x02  // 回報：拍照完成
+#define CMD_ATOMIC_EVENT_CAMERA_CLOSED          0x03  // 回報：相機已關閉
+#define CMD_ATOMIC_EVENT_RECORDING_STARTED      0x04  // 回報：錄影開始
+#define CMD_ATOMIC_EVENT_RECORDING_STOPPED      0x05  // 回報：錄影停止
+
+#define CMD_ATOMIC_EVENT_VIDEO_PLAY_STARTED     0x06  // 回報：影片開始播放
+#define CMD_ATOMIC_EVENT_VIDEO_PLAY_PAUSED      0x07  // 回報：影片已暫停
+
+#define CMD_ATOMIC_EVENT_WIFI_CONNECTED         0x08  // 回報：Wi-Fi 連線成功
+#define CMD_ATOMIC_EVENT_WIFI_DISCONNECTED      0x09  // 回報：Wi-Fi 連線中斷
+#define CMD_ATOMIC_EVENT_MSG_NOTIFIED           0x0A  // 回報：訊息已顯示/提示
+
+#define CMD_ATOMIC_EVENT_UI_PAGE_CHANGED        0x30  // 回報：UI 頁面已切換
+#define CMD_ATOMIC_EVENT_OTA_STARTED            0x38  // 回報：韌體更新開始
+#define CMD_ATOMIC_EVENT_OTA_FINISHED           0x39  // 回報：韌體更新結果
+
+#define CMD_ATOMIC_EVENT_WIFI_AP_OPEN           0x40  // 回報: WIFI AP開啟
+#define CMD_ATOMIC_EVENT_WIFI_AP_CLOSE          0x41  // 回報: WIFI AP關閉
+
+#define CMD_ATOMIC_EVENT_UNKNOWN_CMD_ERROR      0xFF  // 錯誤回報：未知的指令
+
+
+
 typedef enum {
 	SPI_COMMAND_UI_PAGE_HOME = 0,
 	SPI_COMMAND_UI_PAGE_LAUNCHER,
