@@ -37,6 +37,7 @@
 #include "app_handsfree.h"
 #if UsingQAR87Board == 1
 #include "ringtone_handler.h"
+#include "scenario_state.h"
 #endif
 
 static int app_auto_connect_del_addr(bt_addr_t const *addr);
@@ -230,7 +231,12 @@ static void disconnected(struct bt_conn *conn, uint8_t reason)
 	{
 
     	PRINTF("LE ACL Disconnection (reason %d)\n", reason);
-      
+
+    	if (get_scenario_state() == SCENARIO_STATE_VIDEO_AI || get_scenario_state() == SCENARIO_STATE_VIDEO_CALL
+    			|| get_scenario_state() == SCENARIO_STATE_TRANSLATION) {
+        	set_scenario_state(SCENARIO_STATE_HOME);
+    	}
+
         phone_le_conn = NULL;
 		return;
 	}

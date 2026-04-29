@@ -855,7 +855,7 @@ static void scenario_video_ai_handler (void)
 		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
 		led_post_event(HAL_LED_EVENT_REFRESH);
 		amp_post_event(AMP_EVT_MUSIC);
-		current_scenario_state = SCENARIO_STATE_VIDEO_AI;;
+		current_scenario_state = SCENARIO_STATE_VIDEO_AI;
 
 		video_ai_handler_start_state = 0;
 		return;
