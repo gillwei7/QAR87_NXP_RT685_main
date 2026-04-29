@@ -899,9 +899,9 @@ static void scenario_translation_handler (void)
 	if (translation_handler_start_state == 0 && translation_handler_stop_state == 0) {
 		return;
 	}
-	//Start: 1. Audio path 2. LED and AMP
+	//Start: 1. Audio path 2. AMP
 	if (translation_handler_start_state == 1) {
-		PRINTF("[Translation] Start video ai...\r\n");
+		PRINTF("[Translation] Start translation...\r\n");
 		RequestToGetIntoVideoAI = 1; //Audio path
 		translation_handler_start_state++;
 		return;
@@ -934,11 +934,9 @@ static void scenario_translation_handler (void)
 		return;
 
 	} else if (translation_handler_start_state == 3) {
-		// Set LED and AMP when the Novatek RTSP is ready
-		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_ENABLE);
-		led_post_event(HAL_LED_EVENT_REFRESH);
+		// Set and AMP when the Novatek RTSP is ready
 		amp_post_event(AMP_EVT_MUSIC);
-		current_scenario_state = SCENARIO_STATE_VIDEO_AI;;
+		current_scenario_state = SCENARIO_STATE_TRANSLATION;
 
 		translation_handler_start_state = 0;
 		return;
@@ -949,9 +947,9 @@ static void scenario_translation_handler (void)
 
 	}
 
-	//Stop: 1. AMP 2. Audio path 3. UI 4. LED
+	//Stop: 1. AMP 2. Audio path 3. UI
 	if (translation_handler_stop_state == 1) {
-		PRINTF("[Translation] Stop video ai...\r\n");
+		PRINTF("[Translation] Stop translation...\r\n");
 		amp_post_event(AMP_EVT_STOP);
 		translation_handler_stop_state++;
 
@@ -973,8 +971,6 @@ static void scenario_translation_handler (void)
 			translation_handler_stop_state++;
 		}
 	} else if (translation_handler_stop_state == 5) {
-		hal_led_set_situation(HAL_LED_STATUS_RECORDING, SITUATION_DISABLE);
-		led_post_event(HAL_LED_EVENT_REFRESH);
 		current_scenario_state = SCENARIO_STATE_HOME;
 		translation_handler_stop_state = 0;
 		stop_translation_request = 0;
