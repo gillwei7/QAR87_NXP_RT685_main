@@ -35,7 +35,7 @@ static void update_ui_view (void) {
 			break;
 
 		case UI_VIEW_MUSIC_PLAYER:
-			spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_MUSIC_PLAYER);
+//			spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_MUSIC_PLAYER);
 			break;
 
 		case UI_VIEW_AUDIO_CALL:
@@ -46,7 +46,7 @@ static void update_ui_view (void) {
 			break;
 
 		case UI_VIEW_VIDEO_RECORDING:
-			spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_RECORDING);
+//			spi_command_atomic_exec_switch_ui_page(SPI_COMMAND_UI_PAGE_RECORDING);
 			break;
 
 		case UI_VIEW_TAKE_PHOTO:
