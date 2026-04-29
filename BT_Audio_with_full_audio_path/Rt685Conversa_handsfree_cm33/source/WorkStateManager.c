@@ -743,7 +743,7 @@ void Manager_Task(void *pvParameters)
 	{
 		//vTaskDelay(40);
 		//vTaskDelay(10);
-		vTaskDelay(pdMS_TO_TICKS(10));
+		vTaskDelay(pdMS_TO_TICKS(3));
 
 		//-------------------------------step 0, get APP event: button, SPI, sensors, touch, etc---------------------------------------
 		//---beg---

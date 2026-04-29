@@ -1280,7 +1280,7 @@ void spi_command_handler(void)
         SPI_CS_RISE_EVENT_BIT,              // 4. CS 拉高事件 (用於偵測結束)
         pdFALSE,                             // 執行完後不自動清除
         pdFALSE,                            // 只要其中一個 Bit 成立就喚醒
-        pdMS_TO_TICKS(20)                   // 週期醒來檢查 queue 命令
+        pdMS_TO_TICKS(2)                   // 週期醒來檢查 queue 命令
     );
 
     /* 分流邏輯 */
