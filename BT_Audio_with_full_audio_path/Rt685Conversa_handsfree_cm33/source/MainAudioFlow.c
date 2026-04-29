@@ -2043,7 +2043,7 @@ void InitAudioInterface_VideoAi(int Opt)
     VarBlockSharedByDspAndMcu.PdmFrmSizeInSamples=AudioFrameSizeInSamplePerCh_16KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Amp=AudioFrameSizeInSamplePerCh_48KHz;
     VarBlockSharedByDspAndMcu.I2SFrmSizeInSamples_Nvt=AudioFrameSizeInSamplePerCh_48KHz;
-    VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_HfpVoiceCall;
+    VarBlockSharedByDspAndMcu.NeedToSwitchConversaTuningCfg=ConversaTuningCfg_AdaptiveMode;//ConversaTuningCfg_HfpVoiceCall;
 
     // Add for SBC
     VarBlockSharedByDspAndMcu.NeedToStartPlaySbc=1;
