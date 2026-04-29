@@ -303,12 +303,14 @@ static uint8_t peripheral_ble_get_cmd_id(uint8_t * ble_data)
     else if (strcmp(ble_data, "Stop_Translation") == 0) {
 		return BLE_CMD_ID_STOP_TRANSLATION;
     }
+#if 0
     else if (strcmp(ble_data, "stopTranslation") == 0) {
 		return BLE_CMD_ID_STOP_TRANSLATION;
     }
     else if (strcmp(ble_data, "STOP_VIDEOCHAT") == 0) {
 		return BLE_CMD_ID_STOP_VIDEOCHAT;
     }
+#endif
 	else if (strcmp(ble_data, "Enter_Video_Call") == 0)
 	{
 		return BLE_CMD_ID_ENTER_VIDEO_CALL;
