@@ -97,6 +97,13 @@ void wifi_ap_off_timer_init (void)
 	                               wifi_ap_off_timer_callback);
 }
 
+void wifi_ap_off_timer_stop(void)
+{
+	if (s_wifi_ap_off_timer != NULL) {
+	    xTimerStop(s_wifi_ap_off_timer, 0);
+	}
+}
+
 void wifi_ap_off_timer_start(void)
 {
 	if (s_wifi_ap_off_timer != NULL) {
@@ -1016,16 +1023,22 @@ static void phone_page_request_handler (void)
 	if (leave_video_call_request) {
 		phone_page_status = PHONE_PAGE_STATUS_HOME;
 		leave_video_call_request = 0;
+		wifi_ap_off_timer_stop();
+		vTaskDelay(pdMS_TO_TICKS(2));
 		wifi_ap_off_timer_start();
 	}
 	if (leave_video_ai_request) {
 		phone_page_status = PHONE_PAGE_STATUS_HOME;
 		leave_video_ai_request = 0;
+		wifi_ap_off_timer_stop();
+		vTaskDelay(pdMS_TO_TICKS(2));
 		wifi_ap_off_timer_start();
 	}
 	if (leave_translation_request) {
 		phone_page_status = PHONE_PAGE_STATUS_HOME;
 		leave_translation_request = 0;
+		wifi_ap_off_timer_stop();
+		vTaskDelay(pdMS_TO_TICKS(2));
 		wifi_ap_off_timer_start();
 	}
 	if (enter_video_call_request) {
