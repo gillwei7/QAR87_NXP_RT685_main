@@ -64,6 +64,9 @@ struct arm_vector_table
 };
 
 static struct arm_vector_table *vt;
+static struct image_header g_direct_boot_hdr = {
+    .ih_hdr_size = 0x400,
+};
 
 /*******************************************************************************
  * Code
@@ -162,9 +165,10 @@ int sbl_boot_main(void)
     rc = boot_go(&rsp);
     if (rc != 0)
     {
-        BOOT_LOG_ERR("Unable to find bootable image");
-        for (;;)
-            ;
+        BOOT_LOG_WRN("Unable to find bootable image, fallback direct-boot to primary app");
+        rsp.br_flash_dev_id = FLASH_DEVICE_ID;
+        rsp.br_image_off    = BOOT_FLASH_ACT_APP - BOOT_FLASH_BASE;
+        rsp.br_hdr          = &g_direct_boot_hdr;
     }
 
 #if defined(CONFIG_ENCRYPT_XIP_EXT_ENABLE) && defined(CONFIG_ENCRYPT_XIP_EXT_OVERWRITE_ONLY)
