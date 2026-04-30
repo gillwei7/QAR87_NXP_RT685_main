@@ -1,0 +1,1 @@
+HiFi 5 and 128-MAC NNE110 with 128 KB UBUF; includes 7-stage HiFi5 (with vFPUs, NN extn), 128 KB I/D caches, 512 KB InstRAM, 2x256 KB DataRAM and iDMA

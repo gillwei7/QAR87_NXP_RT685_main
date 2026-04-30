@@ -1,0 +1,7 @@
+Vision Q7 fixed-point and half-precision 
+floating-point AI reference configuration. 
+Provides 512 8x8 MACs and 128 16x16 MACs and 
+64 half-precision floating-point MACs. 
+
+Fixed-point and floating-point NN applications in 
+addition to general imaging and vision applications.

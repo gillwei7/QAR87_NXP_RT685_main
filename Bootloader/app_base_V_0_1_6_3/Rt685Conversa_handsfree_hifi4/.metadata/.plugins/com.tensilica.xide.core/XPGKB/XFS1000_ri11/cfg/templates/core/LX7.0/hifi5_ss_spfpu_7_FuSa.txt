@@ -1,0 +1,2 @@
+7 stage HiFi 5 with SP-vFPU template 
+for FuSa certification

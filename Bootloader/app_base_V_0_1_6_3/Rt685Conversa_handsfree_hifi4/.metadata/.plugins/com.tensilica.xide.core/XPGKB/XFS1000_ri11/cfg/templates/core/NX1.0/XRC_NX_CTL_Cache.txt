@@ -1,0 +1,4 @@
+This is an example little-endian NX CPU.
+It provides a typical configuration with a single load-store unit, zero-overhead loops, boolean registers, and integer divider. 
+The core is configured to use 32KB instruction cache and 32KB data cache, along with an MPU and AXI interfaces to the system. 
+From this configuration, users can do multiple experiments on the impact of various configuration operations on their code.

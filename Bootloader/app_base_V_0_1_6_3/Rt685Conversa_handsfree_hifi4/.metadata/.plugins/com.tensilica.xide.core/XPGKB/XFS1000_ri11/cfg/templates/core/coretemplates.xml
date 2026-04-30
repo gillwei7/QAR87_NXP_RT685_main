@@ -1,0 +1,606 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- feature="a,b" means needs feature a and feature b <br/> feature="a,b:c" means needs feature a and at least oneof feature b,c -->
+<templateSettings>  
+
+    <ISA version="NX1.0">   
+		<templateCategory  name="Functional Safety Templates">
+			<template name="XRC_Vision_Q7_FuSa" feature="nx_visionq7,nx_fusa_iso26262" template_op="visionq7`1" />
+			<template name="XRC_B10_BASE_FuSa" feature="nx_b10,nx_fusa_iso26262" template_op="bbn_b10`1" />
+			<template name="XRC_B20_BASE_FuSa" feature="nx_b20,nx_fusa_iso26262" template_op="bbn_b20`1" />
+    	</templateCategory>
+        <templateCategory  name="NX MP Processors">
+            <template name="XRC_Vision_Q7_2P" feature="nx_visionq7,nx_mp" template_op="visionq7`1" />
+            <template name="XRC_Vision_Q7_4P" feature="nx_visionq7,nx_mp" template_op="visionq7`1" />
+    	</templateCategory>    
+        <templateCategory  name="NX Vector Processors">
+            <template name="XRC_KQ7_BASE" feature="nx_fpm220" template_op="fpmnx_220`1" />
+            <template name="XRC_KQ7_SPXDP" feature="nx_fpm220" template_op="fpmnx_220`1" />
+            <template name="XRC_KQ7_AO" feature="nx_fpm220" template_op="fpmnx_220`1" />
+            <template name="XRC_KQ8_BASE" feature="nx_fpm240" template_op="fpmnx_240`1" />
+            <template name="XRC_KQ8_SPXDP" feature="nx_fpm240" template_op="fpmnx_240`1" />
+            <template name="XRC_KQ8_AO" feature="nx_fpm240" template_op="fpmnx_240`1" />            
+        
+            <template name="XRC_Vision_Q6" feature="nx_visionq6" template_op="visionq6`1" />
+            <template name="XRC_Vision_Q6_AO" feature="nx_visionq6" template_op="visionq6`1"  />
+            <template name="XRC_Vision_Q7" feature="nx_visionq7" template_op="visionq7`1" />
+            <template name="XRC_Vision_Q7_AI1" feature="nx_visionq7" template_op="visionq7`1" />
+            <template name="XRC_Vision_Q7_AI2" feature="nx_visionq7" template_op="visionq7`1" />
+            <template name="XRC_Vision_Q7_SLAM" feature="nx_visionq7" template_op="visionq7`1" />
+            <template name="XRC_Vision_Q7_AO" feature="nx_visionq7" template_op="visionq7`1" />
+            <template name="XRC_Vision_Q7_AO2" feature="nx_visionq7" template_op="visionq7`1" />
+            <template name="XRC_Vision_Q7_AO3" feature="nx_visionq7" template_op="visionq7`1" />
+            
+			<template name="XRC_Vision_Q8" feature="nx_visionq8" template_op="visionq8`1" />
+			<template name="XRC_Vision_Q8_AI1" feature="nx_visionq8" template_op="visionq8`1" />
+			<template name="XRC_Vision_Q8_SLAM" feature="nx_visionq8" template_op="visionq8`1" />
+			<template name="XRC_Vision_Q8_AO" feature="nx_visionq8" template_op="visionq8`1" />        
+			<template name="XRC_Vision_Q8_AODP" feature="nx_visionq8" template_op="visionq8`1" /> 
+			<template name="XRC_Vision_Q8_AODP2" feature="nx_visionq8" template_op="visionq8`1" /> 
+			<template name="XRC_Vision_Q8_O" feature="nx_visionq8" template_op="visionq8`1" />  
+			<template name="XRC_Vision_Q8_O2" feature="nx_visionq8" template_op="visionq8`1" />                         
+            
+            <template name="PDXNX8" feature="nx_pdxnx8" template_op="pdxnx8`1" />
+            <template name="Fusion_J6_MIN" feature="nx_fuj6" template_op="fuj6`1" />
+            <template name="Fusion_J6_MIN_altbgmap" feature="nx_fuj6,nx_altbgmap" template_op="fuj6`1" />
+            <template name="Fusion_J6_MIN_mp" feature="nx_fuj6,nx_altbgmap,nx_mp" template_op="fuj6`1" />
+            <template name="Ball" feature="nx_ball,nx_perfcount16" template_op="ball`1" />
+            
+            <template name="XRC_B10_BASE" feature="nx_b10" template_op="bbn_b10`1" />
+            <template name="XRC_B10_V32BSPX" feature="nx_b10" template_op="bbn_b10`1" />
+            <template name="XRC_B10_AO" feature="nx_b10" template_op="bbn_b10`1" />
+            
+            <template name="XRC_B20_BASE" feature="nx_b20" template_op="bbn_b20`1" />
+            <template name="XRC_B20_V32BSPX" feature="nx_b20" template_op="bbn_b20`1" />
+            <template name="XRC_B20_AO" feature="nx_b20" template_op="bbn_b20`1" />            
+        </templateCategory>
+
+        <templateCategory  name="NX Base Vector Processors">
+            <template name="DSP_3cycle_512" feature="nx_bare_vector" template_op="" />
+            <template name="DSP_L1S_L1V_256" feature="nx_bare_vector" template_op="" />
+        </templateCategory>
+
+        <templateCategory  name="NX Controllers">
+            <template name="NX_Controller_small" feature="" template_op="data_latency`2" />
+            <template name="NX_Controller_big" feature="" template_op="data_latency`2" />
+            <template name="nx_5c6_flix3_cache" feature="" template_op="data_latency`2" />
+            <template name="nx_5c6_flix3_tcm" feature="" template_op="data_latency`2" />
+            <template name="XRC_NX_CTL_Cache" feature="" template_op="data_latency`2" />
+            <template name="XRC_NX_FLIX3_Cache" feature="" template_op="data_latency`2" />
+        </templateCategory>
+    </ISA>
+
+    <ISA version="LX8.0">
+		<templateCategory  name="General">
+			<template name="sample_controller" feature="" />
+			<template name="sample_config" feature="" />
+			<template name="nopif" feature="" />
+			<template name="tie_dev1" feature="" />
+			<template name="tie_dev2" feature="instwidth_16byte,datawidth_256" />
+            <template name="G3KP1" feature="lx_g3_fp105,instwidth_16byte,udma_rg4" />
+            <template name="hifi1_ao_5" feature="lx_hifile" />
+            <template name="hifi3z_ao_5" feature="hifi3z,hifi_vector_fp_rf2" />
+            <template name="XRC_ConnX_110_MAX" feature="lx_bp1,instwidth_16byte,udma_rg4" />
+		</templateCategory>			
+			
+        <templateCategory  name="Reference Cores">
+            <template name="XRC_Vision_110" feature="lx_visionp_128,udma_rg4" template_op="visionp_128`1" />
+            <template name="XRC_Vision_110_min" feature="lx_visionp_128,udma_rg4" template_op="visionp_128`1" />
+            <template name="XRC_Vision_110_AO" feature="lx_visionp_128,udma_rg4" template_op="visionp_128`1" />
+       		<template name="XRC_Vision_130" feature="lx_visionp_512,udma_rg4" template_op="visionp_512`1" />
+       		<template name="XRC_Vision_130_AO" feature="lx_visionp_512,udma_rg4" template_op="visionp_512`1" />
+        </templateCategory>   			
+
+        <templateCategory  name="Y">
+            <template name="g3kp1_lx8" feature="yos,lx_g3_fp105,instwidth_16byte,udma_rg4" />
+            <template name="hifi4_lx8" feature="yos,hifi4,hifi_vector_fp_rf2" />
+            <template name="vp110_lx8" feature="yos,lx_visionp_128,instwidth_16byte,datawidth_256,udma_rg4,visionp1_vecreggroup_spl" />
+            <template name="vp130_lx8" feature="yos,lx_visionp_512,instwidth_16byte,datawidth_256,udma_rg4,ivp26_no_sg_ea,ivp26_quadmac_rg4" />
+        </templateCategory>      
+        
+        <templateCategory  name="X">
+            <template name="hifi5_btb_apb_l2" feature="hifi5,mayfools" />
+        </templateCategory>          
+
+    </ISA>        
+
+	<ISA version="LX7.0">
+		 <templateCategory  name="RI.8 BOGUS TEMPLATES">
+		 	<template name="FusionG3_next_BOGUS" feature="lx_g3_fp105,aprilfools" template_op="pdx4b_fpm128`1" />
+    	</templateCategory>	
+    	
+		 <templateCategory  name="Functional Safety Templates">
+		 	<template name="XRC_KP1_MIN_FuSa" feature="lx_fpm105,fusa_iso26262" template_op="fpmlx_128`1" />
+    		<template name="XRC_FUSIONG3_MAX_FuSa" feature="pdx5_rg4,udma_rg4,instwidth_16byte,fusa_iso26262" template_op="pdx4b`1" />   
+    		<template name="XRC_FUSIONG6_MAX_FuSa" feature="pdx8,instwidth_16byte,fusa_iso26262" template_op="pdx8`1" /> 	
+    		<template name="XRC_B16EP_MIN_FuSa" feature="connx_bbep16,instwidth_16byte,datawidth_256,fusa_iso26262" template_op="cx_bbep16`1" />
+    		<template name="XRC_B32EP_MIN_FuSa" feature="connx_bbep32,instwidth_16byte,datawidth_256,fusa_iso26262" template_op="cx_bbep32`1" />
+    		<template name="XRC_B64EP_MIN_FuSa" feature="connx_bbep64,instwidth_16byte,datawidth_256,fusa_iso26262" template_op="cx_bbep64`1" />
+    		<template name="XRC_FusionF1_All_cac_FuSa" feature="fusion,fusa_iso26262" template_op="fsn`1" />
+    		<template name="Vision_P6_FuSa" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,fusa_iso26262" template_op="ivp26_32`1" />
+    		<template name="Vision_P5_FuSa" feature="ivp2_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,fusa_iso26262" template_op="ivp2_32`1" />  	
+    		<template name="hifi5_ss_spfpu_7_FuSa" feature="hifi5,fusa_iso26262" template_op="hifi5`1" />
+    		<template name="hifi4_ss_spfpu_7_FuSa" feature="hifi4,fusa_iso26262" template_op="hifi4`1" />
+    		<template name="hifi3z_ss_spfpu_7_FuSa" feature="hifi3z,fusa_iso26262" template_op="hifi3z`1" />
+            <template name="XRC_DNA150_256MAC_FuSa"
+                feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,dna150,fusa_iso26262,dna150_fusa_1mblk" template_op="ivp26_32`1" />
+            <template name="XRC_DNA150_1KMAC_FuSa" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,dna150,fusa_iso26262,nosuchfeature"
+                template_op="ivp26_32`1" />
+            <template name="XRC_DNA150_2KMAC_FuSa" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,dna150,fusa_iso26262,nosuchfeature"
+                template_op="ivp26_32`1" />
+    		<template name="sample_config_FuSa" feature="fusa_iso26262" />
+    		<template name="sample_config_DCLS_FuSa" feature="fusa_iso26262" />
+    	</templateCategory>
+		<templateCategory  name="Tensilica® Fusion Reference Cores"> 
+			<template name="XRC_FUSIONG3_MIN" feature="pdx5_rg4,instwidth_16byte" />
+			<template name="XRC_FUSIONG3_TYP_SPVFPU" feature="pdx5_rg4,udma_rg4,instwidth_16byte" />
+			<template name="XRC_FUSIONG3_MAX" feature="pdx5_rg4,udma_rg4,instwidth_16byte" />
+			<template name="XRC_FUSIONG3_MAX_BM" feature="pdx5_rg4,udma_rg4,biglmem8,instwidth_16byte" />
+
+			<template name="XRC_FUSIONG6_MIN" feature="pdx8,instwidth_16byte,datawidth_256" />
+			<template name="XRC_FUSIONG6_TYP_SPVFPU" feature="pdx8,udma_rg4,instwidth_16byte,datawidth_256" />
+			<template name="XRC_FUSIONG6_MAX" feature="pdx8,udma_rg4,instwidth_16byte,datawidth_256" />
+			<template name="XRC_FUSIONG6_MAX_BM" feature="pdx8,udma_rg4,biglmem8,instwidth_16byte,datawidth_256" />
+			
+			<template name="XRC_FusionF1_802ah" feature="fusion" />
+			<template name="XRC_FusionF1_All_cache" feature="fusion" />
+			<template name="XRC_FusionF1_All_LM" feature="fusion" />
+		</templateCategory>
+		<templateCategory  name="Reference Cores">
+		
+		 	<template name="XRC_ConnX_110_MIN" feature="lx_bp1,instwidth_16byte" template_op="bbnlx_128`1" />
+		 	<template name="XRC_ConnX_110_MAX" feature="lx_bp1,instwidth_16byte,udma_rg4" template_op="bbnlx_128`1" />
+		 	<template name="XRC_ConnX_110_TYP" feature="lx_bp1,instwidth_16byte" template_op="bbnlx_128`1" />
+		 	<template name="XRC_ConnX_120_MIN" feature="lx_bp3,instwidth_16byte,datawidth_256" template_op="bbnlx_256`1" />
+		 	<template name="XRC_ConnX_120_MAX" feature="lx_bp3,instwidth_16byte,datawidth_256,udma_rg4" template_op="bbnlx_256`1" />
+		 	<template name="XRC_ConnX_120_TYP" feature="lx_bp3,instwidth_16byte,datawidth_256" template_op="bbnlx_256`1" />
+		 			
+			<template name="XRC_KP1_MIN" feature="lx_fpm105,instwidth_16byte" template_op="fpmlx_128`1" /> 
+			<template name="XRC_KP1_MAX" feature="lx_fpm105,instwidth_16byte,udma_rg4" template_op="fpmlx_128`1" /> 
+			<template name="XRC_KP1_TYP" feature="lx_fpm105,instwidth_16byte,udma_rg4" template_op="fpmlx_128`1" />
+			<template name="XRC_KP6_MIN" feature="lx_fpm120,instwidth_16byte,datawidth_256,udma_rg4" template_op="fpmlx_512`1" /> 
+			<template name="XRC_KP6_MAX" feature="lx_fpm120,instwidth_16byte,datawidth_256,udma_rg4" template_op="fpmlx_512`1" /> 
+			<template name="XRC_KP6_TYP" feature="lx_fpm120,instwidth_16byte,datawidth_256,udma_rg4" template_op="fpmlx_512`1" />			
+		
+			<template name="XRC-B16LP" feature="connx_bbe16" />
+			<template name="XRC-B16PM" feature="connx_bbe16" />
+
+			<template name="XRC_B16EP_MIN" feature="connx_bbep16,instwidth_16byte" />
+			<template name="XRC_B16EP_AO" feature="connx_bbep16,instwidth_16byte" />
+			<template name="XRC_B32EP_MIN" feature="connx_bbep32,instwidth_16byte,datawidth_256" />
+			<template name="XRC_B32EP_AO" feature="connx_bbep32,instwidth_16byte,datawidth_256" />
+			<template name="XRC_B64EP_MIN" feature="connx_bbep64,instwidth_16byte,datawidth_256" />
+			<template name="XRC_B64EP_AO" feature="connx_bbep64,instwidth_16byte,datawidth_256" />
+			
+			<template name="Vision_C5" feature="ivp2c_32,udma_rg4,instwidth_16byte,datawidth_256" />
+			<template name="Vision_C5E" feature="ivp2ce_32,udma_rg4,instwidth_16byte,datawidth_256" />
+			<template name="Vision_P6" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256" />
+			<template name="Vision_P6_AO" feature="ivp26_32_rg4,udma_rg4,ivp26_vfp_rg4,instwidth_16byte,datawidth_256" />
+            <template name="Vision_P6_AO_alt" feature="aprilfools,ivp26_32_rg4,udma_rg4,ivp26_vfp_rg4,instwidth_16byte,datawidth_256" />
+			<template name="Vision_P6_AO2" feature="ivp26_32_rg4,udma_rg4,ivp26_vfp_rg4,instwidth_16byte,datawidth_256" />
+			<template name="Vision_P5" feature="ivp2_32_rg4,udma_rg4,instwidth_16byte,datawidth_256" /> 
+			
+			<template name="XRC_Vision_P1" feature="lx_visionp1,udma_rg4,instwidth_16byte" template_op="visionp1`1" />
+			<template name="XRC_Vision_P1_min" feature="lx_visionp1,udma_rg4,instwidth_16byte" template_op="visionp1`1" />
+			<template name="XRC_Vision_P1_AO" feature="lx_visionp1,udma_rg4,instwidth_16byte" template_op="visionp1`1" />
+			<template name="XRC_Vision_P1_AO2" feature="lx_visionp1,udma_rg4,instwidth_16byte" template_op="visionp1`1" />
+
+			<template name="XRC_DNA100_256MAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,xnne" />
+			<template name="XRC_DNA100_1KMAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,xnne" />
+			<template name="XRC_DNA100_2KMAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,xnne" />
+			<template name="XRC_7C0" feature="xnne_vpu" />
+
+			<template name="XRC_DNA150_256MAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,dna150" template_op="ivp26_32`1" />
+			<template name="XRC_DNA150_512MAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,dna150" template_op="ivp26_32`1" />
+			<template name="XRC_DNA150_1KMAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,dna150" template_op="ivp26_32`1" />
+			<template name="XRC_DNA150_2KMAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,dna150" template_op="ivp26_32`1" />			
+			
+			<template name="XRC_7C0_v2" feature="xnne_vpu" />
+			<template name="XRC_7C0_v2_ECC" feature="xnne_vpu" />
+
+			<template name="XRC_D2PM" feature="x_connx_rg" />
+			<template name="XRC_D2SA" feature="x_connx_rg" />
+			
+            <template name="lx_5c6_flix3_cache" feature="" />
+            <template name="lx_5c6_flix3_tcm" feature="" />
+			
+		</templateCategory>
+
+		<templateCategory  name="AI Max">
+			<template name="XRC_NNA110_VP6_256MAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,nna110" template_op="ivp26_32`1" />
+			<template name="XRC_NNA110_VP6_512MAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,nna110" template_op="ivp26_32`1" />
+			<template name="XRC_NNA110_VP6_1KMAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,nna110" template_op="ivp26_32`1" />
+			<template name="XRC_NNA110_VP6_2KMAC" feature="ivp26_32_rg4,udma_rg4,instwidth_16byte,datawidth_256,nna110" template_op="ivp26_32`1" />			
+
+			<template name="XRC_NNA110_VP1_256MAC" feature="lx_visionp1,udma_rg4,instwidth_16byte,nna110" template_op="visionp1`1" />
+			<template name="XRC_NNA110_VP1_512MAC" feature="lx_visionp1,udma_rg4,instwidth_16byte,nna110" template_op="visionp1`1" />
+			<template name="XRC_NNA110_VP1_1KMAC" feature="lx_visionp1,udma_rg4,instwidth_16byte,nna110" template_op="visionp1`1" />
+			<template name="XRC_NNA110_VP1_2KMAC" feature="lx_visionp1,udma_rg4,instwidth_16byte,nna110" template_op="visionp1`1" />					
+		</templateCategory>			
+		
+		<templateCategory  name="AI Boost">
+			<template name="NNE110_HiFi5_MIN" feature="hifi5,udma_rg4,instwidth_16byte,nne110" template_op="hifi5`1" />	
+			<template name="NNE110_HiFi5_TYP" feature="hifi5,udma_rg4,instwidth_16byte,nne110" template_op="hifi5`1" />	
+			<template name="NNE110_HiFi5_MAX" feature="hifi5,udma_rg4,instwidth_16byte,nne110" template_op="hifi5`1" />	
+			
+			<template name="NNE110_HiFi4_MIN" feature="hifi4,nne110" template_op="hifi4`1" />	
+			<template name="NNE110_HiFi4_TYP" feature="hifi4,nne110" template_op="hifi4`1" />	
+			<template name="NNE110_HiFi4_MAX" feature="hifi4,hifi_vector_fp_rf2,nne110" template_op="hifi4`1" />	
+									
+            <template name="NNE110_HiFi3Z_MIN" feature="hifi3z,nne110" template_op="hifi3z`1" />
+            <template name="NNE110_HiFi3Z_TYP" feature="hifi3z,hifi_vector_fp_rf2,nne110" template_op="hifi3z`1" />
+            <template name="NNE110_HiFi3Z_MAX" feature="hifi3z,hifi_vector_fp_rf2,nne110" template_op="hifi3z`1" />   
+            
+            <template name="NNE110_HiFi1_MIN" feature="lx_hifile,nne110" template_op="hifi_le`1" />
+            <template name="NNE110_HiFi1_TYP" feature="lx_hifile,nne110" template_op="hifi_le`1" />
+            <template name="NNE110_HiFi1_MAX" feature="lx_hifile,nne110" template_op="hifi_le`1" />   									
+		</templateCategory>				
+		
+		<templateCategory  name="HiFi">
+			<template name="hifi5_ao_7" feature="hifi5,udma_rg4,instwidth_16byte" />
+			<template name="hifi5_ss_spfpu_7" feature="hifi5,instwidth_16byte" />
+			<template name="hifi5_ss_sphpfpu_nn_dm128" feature="hifi5,udma_rg4,instwidth_16byte" />
+			<template name="hifi5_tv_car_5" feature="hifi5,instwidth_16byte" />
+
+			<template name="hifi4_ao_7" feature="hifi4,hifi_vector_fp_rf2" />
+			<template name="hifi4_ss_spfpu_7" feature="hifi4,hifi_vector_fp_rf2" />
+			<template name="hifi4_tv_car_5" feature="hifi4" />
+
+			<template name="hifi3z_ao_5" feature="hifi3z,hifi_vector_fp_rf2" />
+			<template name="hifi3z_bt_iot" feature="hifi3z" />
+			<template name="hifi3z_ss_spfpu_7" feature="hifi3z,hifi_vector_fp_rf2" />
+			<template name="hifi3z_tv_car_5" feature="hifi3z" />
+
+			<template name="hifi3_ao_5" feature="x_hifi3_rd4,hifi_vector_fp_rf2" />
+			<template name="hifi3_bt_iot" feature="x_hifi3_rd4" />
+			<template name="hifi3_ss_spfpu_7" feature="x_hifi3_rd4,hifi_vector_fp_rf2" />
+			<template name="hifi3_tv_car_5" feature="x_hifi3_rd4" />
+			
+			<template name="hifi1_bt_iot_call0" feature="lx_hifile" template_op="hifi_le`1" />
+			<template name="hifi1_bt_iot_spfpu_call0" feature="lx_hifile" template_op="hifi_le`1" />
+			<template name="hifi1_ao_5" feature="lx_hifile" template_op="hifi_le`1" />
+
+			<template name="hifi_mini_ao_5" feature="x_hifi2_40_rd5a,x_hifi2hd" />
+			<template name="hifi_mini_bt_iot" feature="x_hifi2_40_rd5a" />
+		</templateCategory>
+		
+		<templateCategory  name="Full MMU Templates">
+			<template name="sample_full_mmu" feature="" />
+			<template name="sample_full_mmu_dual_ls" feature="" />
+			<template name="sample_full_mmu_lmem" feature="" />
+			<template name="sample_mmu" feature="" />
+		</templateCategory>		
+		
+        <templateCategory name="LX Controllers">
+            <template name="XRC_LX7_5S_Tiny" feature="" />
+            <template name="XRC_LX7_5S_Typ" feature="" />
+            <template name="XRC_LX7_5S_FLIX3_Cache" feature="" />
+            <template name="XRC_LX7_7S_FLIX3_Cache" feature="" />
+        </templateCategory>
+
+		<templateCategory  name="General">
+			<template name="default" feature="" />
+
+			<template name="sample_controller" feature="" />
+			<template name="secure_controller" feature="secureLX" />	
+			<template name="sample_config" feature="" />
+			<template name="sample_mmu" feature="" />
+			<template name="sample_flix" feature="" />
+
+			<template name="dfp" feature="debug" />
+			<template name="nopif_4kiram" feature="" />
+			<template name="nopif" feature="" />
+			<template name="prefetch32_128_64" feature="debug" />
+			<template name="prefetch32x" feature="debug" />
+			<template name="tie_dev1" feature="" />
+			<template name="tie_dev2" feature="instwidth_16byte,datawidth_256" />
+			
+			<template name="mpu_base" feature="udma_rg4" />
+			<template name="mpu_base_alt" feature="lx7_altbgmap,udma_rg4" />
+			<template name="mpu_base_bm" feature="udma_rg4" />
+		</templateCategory>
+		
+		<templateCategory  name="Legacy">
+			<template name="D_106micro" feature="diam_legacy" />
+			<template name="D_108mini" feature="diam_legacy" />
+			<template name="D_212GP" feature="diam_legacy" />
+			<template name="D_233L" feature="diam_legacy" />
+			<template name="D_570T" feature="diam_legacy" />
+		</templateCategory>
+	</ISA>
+	
+	<ISA version="LX6.0">
+		<templateCategory  name="Reference Core">
+			<template name="XRC-B16LP" feature="connx_bbe16" />
+			<template name="XRC-B16PM" feature="connx_bbe16" />
+
+			<template name="XRC_B16EP_MIN" feature="connx_bbep16,instwidth_16byte" />
+			<template name="XRC_B16EP_AO" feature="connx_bbep16,instwidth_16byte" />
+			<template name="XRC_B32EP_MIN" feature="connx_bbep32,instwidth_16byte,datawidth_256" />
+			<template name="XRC_B32EP_AO" feature="connx_bbep32,instwidth_16byte,datawidth_256" />
+			<template name="XRC_B64EP_MIN" feature="connx_bbep64,instwidth_16byte,datawidth_256" />
+			<template name="XRC_B64EP_AO" feature="connx_bbep64,instwidth_16byte,datawidth_256" />
+
+			<template name="XRC_IVP32_SAC" feature="connx_bben_ivp_re5,instwidth_16byte,datawidth_256" />
+			<template name="XRC_IVPEP" feature="ivpep,instwidth_16byte,datawidth_256" />
+			<template name="IVPEP_Core_Ref" feature="debug,connx_mdma_rerwer,instwidth_16byte,datawidth_256" />
+
+			<template name="XRC-BSP3" feature="connx_bsp3_rd2" />
+			<template name="XRC_D2PM" feature="x_connx" />
+			<template name="XRC_D2SA" feature="x_connx" />
+			<template name="XRC-SSP16_PM" feature="connx_ssp16_rd2" />
+			<template name="XRC-SSP16_SA" feature="connx_ssp16_rd2" />
+		</templateCategory>
+		
+		<templateCategory  name="HiFi">
+			<template name="hifi4_bd5" feature="hifi4" />
+			<template name="hifi4_bd7" feature="hifi4" />
+			<template name="hifi4_cache" feature="hifi4" />
+			<template name="hifi4_localmem" feature="hifi4" />
+
+			<template name="hifi3_bd5" feature="x_hifi3_rd4" />
+			<template name="hifi3_bd7" feature="x_hifi3_rd4" />
+			<template name="hifi3_cache" feature="x_hifi3_rd4" />
+			<template name="hifi3_localmem" feature="x_hifi3_rd4" />
+
+			<template name="hifi_mini" feature="x_hifi2_40_rd5a" />
+
+			<template name="hifi2_std" feature="x_hifi2" />
+			<template name="hifi2_area" feature="x_hifi2" />
+			<template name="hifi2_nopif" feature="x_hifi2" />
+			<template name="hifiep_5_pfs" feature="x_hifi2,x_hifi2hd" />
+			<template name="hifiep_bd_5" feature="x_hifi2,x_hifi2hd" />
+			<template name="hifiep_bd_7" feature="x_hifi2,x_hifi2hd" />
+		</templateCategory>
+		<templateCategory  name="General">
+			<template name="default" feature="" />
+			
+			<template name="sample_controller" feature="" />
+			<template name="sample_config" feature="" />
+			<template name="sample_flix" feature="" />
+
+			<template name="VectraVMB" feature="x_Vectra" />
+			<template name="dfp" feature="debug" />
+			<template name="nopif_4kiram" feature="" />
+			<template name="nopif" feature="" />
+			<template name="prefetch32_128_64" feature="debug" />
+			<template name="prefetch32x" feature="debug" />
+			<template name="Xilinx KC705" feature="" />
+			<template name="tie_dev1" feature="" />
+			<template name="tie_dev2" feature="instwidth_16byte,datawidth_256" />
+		</templateCategory>
+		<templateCategory  name="Example Core">
+			<template name="D_106micro" feature="" />
+			<template name="D_108mini" feature="" />
+			<template name="D_212GP" feature="" />
+			<template name="D_233L" feature="" />
+			<template name="D_570T" feature="" />
+		</templateCategory>
+		<templateCategory  name="Tensilica® Fusion F1 DSP">
+			<template name="XRC_FUSION_AON" feature="fusion" />
+			<template name="XRC_FUSION_AON_ALL" feature="fusion" />
+			<template name="XRC_FUSION_AON_ALL_CACHE" feature="fusion" />
+			<template name="XRC_FUSION_AON_ALL_LM" feature="fusion" />
+			<template name="XRC_FUSION_AON_ALL_LOW" feature="fusion" />
+			<template name="XRC_FUSION_AON_SF" feature="fusion" />
+			<template name="XRC_FUSION_BASE" feature="fusion" />
+			<template name="XRC_FUSION_WIRELESS_HOME" feature="fusion" />
+			<template name="XRC_FUSION_WIRELESS_MOBILE" feature="fusion" />
+			<template name="XRC_FUSION_COMM_ALL" feature="fusion" />
+		</templateCategory>
+	</ISA>
+
+	<ISA version="LX5.0">
+		<templateCategory  name="Reference Core">
+			<template name="XRC-B16LP" feature="connx_bbe16" />
+			<template name="XRC-B16PM" feature="connx_bbe16" />
+
+			<template name="XRC_B32EP_MIN" feature="connx_bbep32" />
+			<template name="XRC_B32EP_eNB_RX" feature="connx_bbep32" />
+			<template name="XRC_B32EP_eNB_TX" feature="connx_bbep32" />
+			<template name="XRC_B32EP_UE_2x2" feature="connx_bbep32" />
+			<template name="XRC_B32EP_UE_4x4" feature="connx_bbep32" />
+			
+			<template name="XRC_B64EP_MIN" feature="connx_bbep64" />
+			<template name="XRC_B64EP_Base_DSP" feature="connx_bbep64" />
+			<template name="XRC_B64EP_eNB_RX" feature="connx_bbep64" />
+			<template name="XRC_B64EP_eNB_TX" feature="connx_bbep64" />
+			<template name="XRC_B64EP_WiFi_4x4" feature="connx_bbep64" />
+			<template name="XRC_IVP32_SAC" feature="connx_bben_ivp_re5" />
+
+			<template name="XRC-BSP3" feature="connx_bsp3_rd2" />
+			<template name="XRC-D2MR" feature="x_connx" />
+			<template name="XRC-D2SA" feature="x_connx" />
+			<template name="XRC-SSP16_PM" feature="connx_ssp16_rd2" />
+			<template name="XRC-SSP16_SA" feature="connx_ssp16_rd2" />
+		</templateCategory>
+		<templateCategory  name="HiFi">
+			<template name="hifi2_std" feature="x_hifi2" />
+			<template name="hifi2_area" feature="x_hifi2" />
+			<template name="hifi2_nopif" feature="x_hifi2" />
+			<template name="hifi_mini" feature="x_hifi2_40_rd5a" />
+			<template name="hifiep_5_pfs" feature="x_hifi2,x_hifi2hd,prefetch" />
+			<template name="hifiep_bd_5" feature="x_hifi2,x_hifi2hd,prefetch" />
+			<template name="hifiep_bd_7" feature="x_hifi2,x_hifi2hd,prefetch" />
+			<template name="hifi3_bd5" feature="x_hifi3_rd4,prefetch" />
+			<template name="hifi3_bd7" feature="x_hifi3_rd4,prefetch" />
+			<template name="hifi3_cache" feature="x_hifi3_rd4,prefetch" />
+			<template name="hifi3_localmem" feature="x_hifi3_rd4" />
+		</templateCategory>
+		<templateCategory  name="General">
+			<template name="default" feature="" />
+			<template name="VectraVMB" feature="x_Vectra" />
+			<template name="dfp" feature="debug" />
+			<template name="nopif_4kiram" feature="" />
+			<template name="nopif" feature="" />
+			<template name="prefetch32_128_64" feature="debug" />
+			<template name="prefetch32x" feature="debug" />
+			<template name="Xilinx KC705" feature="" />
+			<template name="tie_dev1" feature="" />
+			<template name="tie_dev2" feature="instwidth_16byte,datawidth_256" />
+		</templateCategory>
+		<templateCategory  name="Example Core">
+			<template name="DE_106micro" feature="" />
+			<template name="DE_108mini" feature="" />
+			<template name="DE_212GP" feature="" />
+			<template name="DE_233L" feature="" />
+			<template name="DE_570T" feature="" />
+		</templateCategory>
+	</ISA>
+	
+	<ISA version="LX4.0">
+		<templateCategory  name="Reference Core">
+			<template name="XRC-B16LP" feature="connx_bbe16" />
+			<template name="XRC-B16PM" feature="connx_bbe16" />
+			
+			<template name="XRC-BSP3" feature="connx_bsp3_rd2" />
+			<template name="XRC-D2MR" feature="x_connx" />
+			<template name="XRC-D2SA" feature="x_connx" />
+			<template name="XRC-SSP16_PM" feature="connx_ssp16_rd2" />
+			<template name="XRC-SSP16_SA" feature="connx_ssp16_rd2" />
+		</templateCategory>
+		<templateCategory  name="HiFi">
+			<template name="hifi2_area" feature="x_hifi2" />
+			<template name="hifi2_nopif" feature="x_hifi2" />
+			<template name="hifi_mini" feature="x_hifi2_40_rd5a" />
+			<template name="hifiep_5_pfs" feature="x_hifi2,x_hifi2hd,prefetch" />
+			<template name="hifiep_bd_5" feature="x_hifi2,x_hifi2hd,prefetch" />
+			<template name="hifiep_bd_7" feature="x_hifi2,x_hifi2hd,prefetch" />
+			<template name="hifi3_bd5" feature="x_hifi3_rd4,prefetch" />
+			<template name="hifi3_bd7" feature="x_hifi3_rd4,prefetch" />
+			<template name="hifi3_cache" feature="x_hifi3_rd4,prefetch" />
+			<template name="hifi3_localmem" feature="x_hifi3_rd4" />
+		</templateCategory>
+		<templateCategory  name="General">
+			<template name="default" feature="" />
+			<template name="dfp" feature="debug" />
+			<template name="lx4_96_256" feature="debug" />
+			<template name="nopif_4kiram" feature="" />
+			<template name="nopif_lmem_exl" feature="debug" />
+			<template name="nopif" feature="" />
+			<template name="prefetch32_128_64" feature="debug" />
+			<template name="prefetch32x" feature="debug" />
+			<template name="prefetch64x" feature="debug" />
+			<template name="vectralx" feature="x_Vectra" />
+			<template name="xpres_128_256" feature="debug" />
+			<template name="xpres_128_512" feature="debug" />
+			<template name="xpres_128_lmems" feature="debug" />
+			<template name="xpres_128" feature="" />
+			<template name="xpres" feature="" />
+		</templateCategory>
+		<templateCategory  name="Diamond">
+			<template name="DC_D_106micro" feature="" />
+			<template name="DC_D_108mini" feature="" />
+			<template name="DC_D_212GP" feature="" />
+			<template name="DC_D_233L" feature="" />
+			<template name="DC_D_330HiFi" feature="x_hifi2" />
+			<template name="DC_D_545CK" feature="x_Vectra" />
+			<template name="DC_D_570T" feature="" />
+		</templateCategory>
+	</ISA>
+	
+	<ISA version="LX3.0">
+		<templateCategory  name="General">
+			<template name="default" feature="" />
+			<template name="nopif_4kiram" feature="" />
+			<template name="nopif" feature="" />
+			<template name="prefetch32" feature="debug" />
+			<template name="prefetch64" feature="debug" />
+			<template name="vectralx" feature="x_Vectra" />
+			<template name="xpres" feature="" />
+			<template name="XRC-B16LP" feature="connx_bbe16" />
+			<template name="XRC-B16PM" feature="connx_bbe16" />
+			<template name="XRC-D2MR" feature="x_connx" />
+			<template name="XRC-D2SA" feature="x_connx" />
+		</templateCategory>
+		<templateCategory  name="Diamond">
+		<template name="DC_C_106micro" feature="" />
+			<template name="DC_C_108mini" feature="" />
+			<template name="DC_C_212GP" feature="" />
+			<template name="DC_C_233L" feature="" />
+			<template name="DC_C_330HiFi" feature="x_hifi2" />
+			<template name="DC_C_545CK" feature="x_Vectra" />
+			<template name="DC_C_570T" feature="" />
+		</templateCategory>
+		<templateCategory  name="HiFi">
+			<template name="HiFi2BasicController" feature="x_hifi2" />
+			<template name="HiFi2Controller" feature="x_hifi2" />
+			<template name="HiFi2LowArea" feature="x_hifi2" />
+			<template name="HiFiEP" feature="debug,x_hifi2,x_hifi2hd" />
+		</templateCategory>
+	</ISA>
+	
+	<ISA version="MX1.1">
+		<templateCategory  name="General">
+			<template name="xpres_mx_ints_nomul" feature=""  />
+			<template name="xpres_mx" feature="" />
+			<template name="xpres_mx_ints" feature="" />
+		</templateCategory>
+	</ISA>
+	
+	<ISA version="MX1.0">
+		<templateCategory  name="General">
+			<template name="xpres_mx_ints_nomul" feature=""  />
+			<template name="xpres_mx" feature="" />
+			<template name="xpres_mx_ints" feature="" />
+		</templateCategory>
+	</ISA>
+	
+	<ISA version="TX1.0">
+		<templateCategory  name="General">
+			<template name="tx_uram" feature="debug"  />
+			<template name="tx_uwide" feature="debug" />
+			<template name="tx128_128" feature="debug" />
+			<template name="txdefaults" feature="" />
+			<template name="txmini" feature="" />
+		</templateCategory>
+	</ISA>
+	
+	<ISA version="X11.0">
+		<templateCategory  name="General">
+			<template name="default" feature="" />
+			<template name="nopif" feature="" />
+			<template name="Xilinx KC705" feature="" />
+		</templateCategory>
+		<templateCategory  name="Example Core">
+			<template name="D_106micro" feature="" />
+			<template name="D_108mini" feature="" />
+			<template name="D_212GP" feature="" />
+			<template name="D_233L" feature="" />
+		</templateCategory>
+	</ISA>
+	
+	<ISA version="X10.0">
+		<templateCategory  name="General">
+			<template name="default" feature="" />
+			<template name="nopif" feature="" />
+			<template name="Xilinx KC705" feature="" />
+		</templateCategory>
+		<templateCategory  name="Example Core">
+			<template name="DE_106micro" feature="" />
+			<template name="DE_108mini" feature="" />
+			<template name="DE_212GP" feature="" />
+			<template name="DE_233L" feature="" />
+		</templateCategory>
+	</ISA>
+	
+	<ISA version="X9.0">
+		<templateCategory  name="General">
+			<template name="default" feature="" />
+			<template name="nopif" feature="" />
+		</templateCategory>
+		<templateCategory  name="Diamond">
+			<template name="DC_D_106micro" feature="" />
+			<template name="DC_D_108mini" feature="" />
+			<template name="DC_D_212GP" feature="" />
+			<template name="DC_D_233L" feature="" />
+		</templateCategory>
+	</ISA>
+	
+	<ISA version="X8.0">
+		<templateCategory  name="General">
+			<template name="default" feature="" />
+			<template name="nopif" feature="" />
+		</templateCategory>
+	</ISA>
+
+</templateSettings>

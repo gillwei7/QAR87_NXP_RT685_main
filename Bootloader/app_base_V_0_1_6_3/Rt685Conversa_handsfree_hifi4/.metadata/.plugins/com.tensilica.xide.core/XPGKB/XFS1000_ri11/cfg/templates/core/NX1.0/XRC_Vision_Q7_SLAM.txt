@@ -1,0 +1,7 @@
+Vision Q7 SLAM reference configuration. 
+Provides 32 single-precision floating-point 
+MACs, fast single-precision reciprocal 
+approximation and FAST9 acceleration. 
+
+SLAM applications in addition to general 
+imaging and computer vision applications.

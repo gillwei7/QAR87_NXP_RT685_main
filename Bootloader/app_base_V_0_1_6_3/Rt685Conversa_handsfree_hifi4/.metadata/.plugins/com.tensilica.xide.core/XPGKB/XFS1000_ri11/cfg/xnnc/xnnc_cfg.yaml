@@ -1,0 +1,2204 @@
+# XNNC cfg config model definition as per 1.x cfg description, not sure what 2.0 adds/removes
+
+# Various xnnc stages, the sequence in which they need to be run and their UI name.
+#DO NOT CHANGE STAGE SEQUENCES MENTIONED BELOW.
+#A stage which has an enable switch should define metaN , shortN , version and result
+stages:
+  - { n: general, seq: -1, u_name: 'General Properties' , groups: ['Stage_Args'], version: { hi: '99999', lo: '2.0.0'}}
+  - { n: convt, seq: 100, u_name: 'TensorFlow2ONNX', switch: { en: conv_tf , disExpr : 'false' , disDef : false} , result: {directory : 'temp' , start : '' , end : '.onnx'} , metaN: 'Conv TF->ONNX' , shortN: 'CONV', version: { hi: '99999', lo: '2.0.0'}}
+  - { n: convtorch, seq: 150, u_name: 'Convert Pytorch', switch: { en: conv_torch , disExpr : '"${network-type}" != "Pytorch" && "${network-type}" != "pytorch"' , disDef : true} , result: {directory : 'temp' , start : '' , end : '.onnx'} , metaN: 'Conv Torch' , shortN: 'CONV_TORCH', version: { hi: '99999', lo: '2.5.0'}}
+  - { n: compression, seq: 200, u_name: 'Compression Arguments', groups: ['pruning' , 'clustering'] , switch: { en: compression, disExpr : '"${network-model_type}" == "quantized" || "${network-model_type}" == "Quantized"' , disDef : false} , metaN : 'Compression',result: {directory : 'temp/clustering|temp/pruning' , start : ' | ' , end : '.onnx|.onnx'} , metaN : 'Compression' , shortN : 'CPR',  version: { hi: '99999', lo: '2.1.0'}}
+  - { n: gen_quant, seq: 300 , u_name: 'Quantization Profiles',groups : ['Quantization_Args'], switch: { en: gen_quant_profile, disExpr : '"${network-model_type}" == "quantized" || "${network-model_type}" == "Quantized"' , disDef : false} , result: {directory : 'temp' , start : 'ProfileList' , end : '.txt'} , metaN : 'Gen Quant' , shortN : 'GQ', version: { hi: '99999', lo: '2.0.0'}}
+  - { n: use_quant, seq: 500 , u_name: 'Use Quantization Profiles', switch: { en: use_quant_profile , disExpr : '"${network-model_type}" == "quantized" || "${network-model_type}" == "Quantized"' , disDef : false}, needs_seq: ['300'] , result: {directory : 'output' , start : 'FixedPoint_Results' , end : '.txt'} , metaN : 'Use Quant' , shortN : 'UQ', version: { hi: '99999', lo: '2.0.0'}}
+  - { n: test_best_profile, seq: 525 , u_name: 'Test Best Profile', switch: { en: test_best_profile, disExpr : '"${network-model_type}" != "quantized" && "${network-model_type}" != "Quantized"' , disDef : true} , result: {directory : 'output' , start : 'FixedPointTest_Results' , end : '.txt'} , metaN : 'Test Best Profile' , shortN : 'TBF', version: { hi: '99999', lo: '2.3.0'}}
+  - { n: gen_code, seq: 600, u_name: 'Code Generation Properties', groups : ['Compression_Args' , 'Graph_Args' ] ,switch: { en: gen_code}, needs_seq: ['500|525']  , result: {directory : 'output' , start : '' , end : '.xws'} , metaN : 'Gen Code' , shortN : 'GC', version: { hi: '99999', lo: '2.0.0'}}
+  - { n: flt_inference, seq: 400, u_name: 'Floating Point Inference', independent : true ,switch: { en: flt_inference, disExpr : '"${network-model_type}" == "quantized" || "${network-model_type}" == "Quantized"' , disDef : false} , result: {directory : 'output' , start : 'Float_Results' , end : '.txt'} , metaN : 'FLT Inference' , shortN : 'FLT', version: { hi: '99999', lo: '2.0.0'}}
+  - { n: xtensa_args, seq: -1, u_name: 'Xtensa Arguments' , groups : ['MultiCore'], version: { hi: '99999', lo: '2.0.0'}}
+  - { n: stage_args, seq: -1, u_name: 'Stage Specific Arguments', version: { hi: '99999', lo: '2.0.0'}}
+  - { n: network_args, seq: -1, u_name: 'Network Specific Arguments', groups : ['custom_args','Yolo_Args','torch_quant'], version: { hi: '99999', lo: '2.1.0'}}
+
+allstages:
+  - { seq: '300;400;500;600' , version: { hi: '99999', lo: '2.0.0'} , expr : '"${network-model_type}" != "quantized" && "${network-model_type}" != "Quantized"' , def : true}
+  - { seq: '525;600' , version: { hi: '99999', lo: '2.3.0'} , expr : '"${network-model_type}" == "quantized" || "${network-model_type}" == "Quantized"' , def : false}
+
+pages : 
+  - { n : pg1 , u_name : 'General Properties' , sections: [general , convt]}
+  - { n : pg2 , u_name : 'Quantization' , sections: [gen_quant , use_quant]}
+  - { n : pg3 , u_name : 'Xtensa Arguments' , sections: [xtensa_args]}
+  - { n : pg4 , u_name : 'Code Generation ' , sections: [gen_code]}
+  - { n : pg5 , u_name : 'Pruning/Clustering' , sections: [compression]}
+  - { n : pg6 , u_name : 'Network Specific Arguments' , sections: [network_args]}
+   
+# these are the co-procs which are allowed with xnnc.  
+xnnc_coprocs: [ 'ivp26_32', 'ivp2c_32', 'visionq6,l2_numcores~1', 'visionq7', 'visionq8', 'visionp1' ]
+#sample of full supported syntax for above, allows operators like ! , ~ : (not comma tilde colon)
+#xnnc_coprocs: [ 'ivp26_32', 'ivp2c_32', 'visionq6,l2_numcores~1', '!visionq7,l2_numcores~2:4', '!visionq6' ]
+
+
+# these are the internal XX names of xnnc dsps and their names in XNNC land.
+#the old style, to keep customers without patch happy
+xnnc_dsp: { xnne_num_sblks : dna100 , xnne2_num_sblks : dna150 , visionq8 : dsp_vq8 , visionp1 : dsp_vp1}  
+# the new style (with expression handling), this was patched and hence the above  xnnc_dsp needs to exist
+xnnc_dsp2: { '${xnne_num_sblks}>0' : dna100 ,
+             '${nna_engine} == 20 && ${visionp1} > 0' : nna1_vp1,
+             '${nna_engine} == 20' : nna1,
+             '${visionq8}>0' : dsp_vq8,
+             '${visionp1}>0': dsp_vp1,
+             '${xnne2_num_sblks}>0' : dna150,
+             '${nna_engine} == 10' : dna150 }  
+
+#To draft message from error log , add just pattern and keep msg as empty
+xnnc_error_pattern : 
+  - { pattern : 'nnc: error:', msg : ''}
+  - { pattern : "Path doesn't exist", msg : ''}
+  - { pattern : 'Config file error' , msg : 'Run Failed due to error in config file'}
+  - { pattern : 'xnnc.py: error:' , msg: ''}
+  - { pattern : 'ImportError: No module named' , msg: 'Run Failed as some python module was not found'}
+  - { pattern : 'ValueError:' , msg: ''}
+  - { pattern : 'ImportError: DLL load failed' , msg: 'Run Failed as dll load failed'}
+  - { pattern : 'incorrect usage. Job not submitted' , msg: 'Could not process python incantation' }
+  - { pattern : 'ERROR:' , msg : ''}
+  - { pattern : 'SyntaxError: invalid syntax', msg: 'Wrong python used or arguments to xnnc.py does not satisfy the requirements'}
+  - { pattern : 'INFO: BestProfile cannot be selected automatically' , msg : 'Please select best profile manually'}
+  - { pattern : 'The filename, directory name, or volume label syntax is incorrect.' , msg : 'The filename, directory name, or volume label syntax is incorrect. Try removing quotes when file name or directory name is specified  as part of argument.'}
+  - { pattern : 'XNNC compilation completed with errors' , msg : ''}
+
+groups:
+  - { n: Stage_Args , u_name : 'Stage Arguments' , type : check , checkName: 'Set Stage Arguments'}
+  - { n: Compression_Args , u_name : 'Compression Arguments' , type : check , checkName : 'Set Compression Arguments'}
+  - { n: Graph_Args , u_name : 'Graph Arguments' , type : check , checkName : 'Set Graph Arguments'}
+  - { n: MultiCore  , u_name : 'Multicore Arguments' , type : check , checkName : 'Use MultiCore'}
+  - { n: pruning , u_name : 'Pruning' , type : check , checkName : 'Enable Pruning'} 
+  - { n: clustering , u_name : 'Clustering' , type : check , checkName : 'Enable Clustering'}
+  - { n: Quantization_Args, u_name: 'Accuracy Tuning', type: check, checkName: 'Set Accuracy Tuning Arguments'}
+  - { n: custom_args, u_name: 'Custom Arguments', type: check, checkName: 'Set Custom Layer Arguments'}
+  - { n: Yolo_Args, u_name: 'Yolo Arguments', type: check, checkName: 'Set Yolo Specific Arguments'} 
+  - { n: torch_quant, u_name: 'Pytorch Quant', type: check, checkName: 'Set Pytorch Quantization Arguments'} 
+
+  
+tables: 
+  - { n: input_args , uName : 'Input Node Arguments' , uiSection : general , helpId : U_Xnnc_Editor_table_1}
+  - { n: test_infer_args , uName : 'Test Inference Args' , uiSection : network_args , helpId : U_Xnnc_Editor_table_2}
+
+#Config restrictions - These are restrictions on the config used for code generation
+#Make sure that the restrictions are added in the same way. 
+#The condition 'cond' can have multiple conditions seperated by || or && or a combination of both.
+#The err_msg can be of type Error/Warning/Info. Use prefix err: / warn: / info: before msg for type.
+   
+
+config_restrictions: 
+    LX : 
+      - {
+          xnnc_ver: '0-2.2',
+          cond: '${visionp1} == 1',
+          msg: 'err: This version of XNNC does not support Vision P1, please use XNNC 2.3.0+'
+        }   
+      - {
+          xnnc_ver: '0-2.3',
+          cond: '${nna_engine} == 20',
+          msg: 'err: This version of XNNC does not support NNA110, please use XNNC 2.3.1+'
+        }
+      - {
+          xnnc_ver: '2.4-2.4',
+          cond: '${visionp1} == 1 && "${hw_version}"=="LX7.1.8"',
+          msg: 'err: VisionP1 configuration builds from the RI-2021.8 release requires that XNNC v2.4.1 or later is used.'
+        }
+      - {
+          xnnc_ver: '2.4-2.4',
+          cond: '${ivp26_32} == 1 && "${hw_version}"=="LX7.1.8"',
+          msg: 'err: VisionP6 configuration builds from the RI-2021.8 release requires that XNNC v2.4.1 or later is used.'
+        }                   
+    NX :         
+      - {
+          xnnc_ver: '0-2.1',
+          cond: '${idma_channels} != 2',
+          msg: 'err:NX configs with <iDMA channels> = 1 or 4 is not supported by XNNC version 2.1 and below, please use XNNC 2.2+'
+        }
+      - {
+          xnnc_ver: '0-2.2',
+          cond: '${visionq8} == 1',
+          msg: 'err: This version of XNNC does not support Vision Q8, please use XNNC 2.3+'
+        }
+      - {
+          xnnc_ver: '0-2.2',
+          cond: '${l2_numcores} > 1',
+          msg: 'err: This version of XNNC does not support multi-core configurations, please use XNNC 2.3+'
+        }
+      
+image_list_wizards:
+  wiz1:
+    - image_list_type:
+        n: Image Lists
+        t: list
+        tooltip: Select the type of imagelists
+        version:
+        - { hi: '99999', lo: '2.0.0' , choice : ['Calibration List' , 'Validation List' , 'Test Inference List' , 'Test Classification List' ], e: '"${network_class}" == "Classification"'}
+        - { hi: '99999', lo: '2.0.0' , choice : ['Calibration List' , 'Validation List' , 'Test Inference List']} 
+    - props:
+        title : Image list types
+        desc : Select the type of image list
+        can_proceed : [ "\"${network_class}\" == \"Segmentation\">wiz7" , "\"${network_class}\" == \"Detection\">wiz3" , "\"${network_class}\" == \"Classification\">wiz2"]
+        can_finish : [ "false" ]
+        validation: 
+        - {
+            cond : "\"${image_list_type}\" == \"\" ",
+            msg : "err:Image list type cannot be empty"
+          }
+  wiz2:
+    - data_category:
+        n: Image Data Set is categorized
+        t: check
+        tooltip : Is Image data categorized
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - image_set_dir:
+        n: Image data set directory
+        t: dir
+        enable : '${data_category} == true'
+        tooltip: Directory to categorized image data
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - props:
+        title : Image dataset information
+        can_proceed : ["'${data_category} == false && \"${image_list_type}\" != \"Test Inference List\"'>wiz3", "'${data_category} == false' && \"${image_list_type}\" == \"Test Inference List\" >wiz6" , "'${data_category} == true && \"${image_set_dir}\" != \"\" && \"${image_list_type}\" != \"Test Inference List\"'>wiz4" , "'${data_category} == true && \"${image_set_dir}\" != \"\" && \"${image_list_type}\" == \"Test Inference List\"'>wiz5"] 
+        can_finish : ["false"]
+        validation: 
+        - {
+            cond : "\"${data_category}\" == true && \"${image_set_dir}\" == \"\"",
+            msg : "err:Please specify image dataset directory"
+          }        
+  wiz3:
+    - image_list_name:
+        n: Image List Name
+        t: str
+        tooltip : Name of the imagelist
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - image_dir:
+        n: Image Directory
+        t: dir
+        tooltip: Specify image directory
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - image_format:
+        n: Input Image Format
+        t: choice
+        enable : 'true'
+        uc: true  #update choices before navigating to this page 
+        tooltip: Specify image extension
+        version:
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.png], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.ppm], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.png, .ppm, .npy], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.ppm, .npy], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '99999', lo: '2.4.0' , choice : [.png, .ppm, .npy, .np], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '99999', lo: '2.4.0' , choice : [.ppm, .npy, .np], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '99999', lo: '2.0.0' , choice : [.png , .ppm , .npy, .np]}
+    - selection_scheme:
+        n: Selection Scheme
+        t: choice
+        tooltip : Select the selection scheme
+        version:
+        - { hi: '99999', lo: '2.0.0' , choice : [Select First , Select Last , Select even ones , Select odd ones , Select All] } 
+    - num_images:
+        n: No. of Images
+        t: int
+        tooltip : Select the number of images
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - props:
+        title : Create Image list
+        can_proceed : ["'\"${image_list_name}\" != \"\" && \"${image_dir}\" != \"\" && \"${image_format}\" != \"\" && \"${selection_scheme}\" != \"\" && \"${num_images}\" != \"\" && ${num_images} > 0'>wiz8"] 
+        can_finish : ["'\"${image_list_name}\" != \"\" && \"${image_dir}\" != \"\" && \"${image_format}\" != \"\" && \"${selection_scheme}\" != \"\" && \"${num_images}\" != \"\" && ${num_images} > 0'"]
+        validation: 
+        - {
+            cond : "\"${image_list_name}\" == \"\"",
+            msg : "err:Image list name cannot be empty"
+          }
+        - {
+            cond : "\"${image_dir}\" == \"\"",
+            msg : "err:Image directory cannot be empty"
+          }
+        - {
+            cond : "\"${image_format}\" == \"\"",
+            msg : "err:Input image format cannot be empty"
+          }
+        - {
+            cond : "\"${selection_scheme}\" == \"\"",
+            msg : "err:Selection Scheme cannot be empty"
+          }
+        - {
+            cond : "${num_images} <= 0",
+            msg : "err:No. of Images should be greater than 0"
+          }
+  wiz4:
+    - image_list_name:
+        n: Image List Name
+        t: str
+        tooltip : Name of the imagelist
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - img_label:
+        n: Label
+        t: str
+        group : add_images
+        tooltip: Specify image label
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - image_format_group:
+        n: Input Image Format
+        t: choice
+        enable : 'true'
+        uc: true
+        group : add_images
+        tooltip: Specify image extension
+        version:
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.png], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.ppm], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.png, .ppm, .npy], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.ppm, .npy], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '99999', lo: '2.4.0' , choice : [.png, .ppm, .npy, .np], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '99999', lo: '2.4.0' , choice : [.ppm, .npy, .np], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '99999', lo: '2.0.0' , choice : [.png , .ppm , .npy, .np]}
+    - selection_scheme_group:
+        n: Selection Scheme
+        t: choice
+        group : add_images        
+        tooltip : Select the selection scheme
+        version:
+        - { hi: '99999', lo: '2.0.0' , choice : [Select First , Select Last , Select even ones , Select odd ones , Select All] } 
+    - img_count_group:
+        n: No. of Images
+        t: int
+        group : add_images
+        tooltip : Select the number of images
+        version:
+        - { hi: '99999', lo: '2.0.0'}
+    - img_selections : 
+        n: Selections
+        t : table   #Table will be with add button at start and reset at end , purpose of the table is just for viewing
+        cols : ['i:img_label' , 'selection_scheme_group' , 'img_count_group' , 'image_format_group'] # if i: is specified , then entry is to be indexed on that value.
+        group : add_images
+        version:
+        - { hi: '99999', lo: '2.0.0'}
+    - props:
+        title : Create Image list
+        can_proceed : ["'\"${image_list_name}\" != \"\" && \"${img_selections}\" != \"[]\">wiz8"] 
+        can_finish : ["'\"${image_list_name}\" != \"\" && \"${img_selections}\" != \"[]\""]
+        group_controls:
+        - {n : add_images , u_name: Add Images }
+        validation: 
+        - {
+            cond : "\"${image_list_name}\" == \"\"",
+            msg : "err:Image list name cannot be empty"
+          }
+        - {
+            cond : "\"${img_selections}\" == \"[]\"",
+            msg : "err:Please add some images to the list"
+          }
+  wiz5:
+    - image_list_name:
+        n: Image List Name
+        t: str
+        tooltip : Name of the imagelist
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - img_label:
+        n: Label
+        t: str
+        group : add_images
+        tooltip: Specify image label
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - image_format_group:
+        n: Input Image Format
+        t: choice
+        enable : 'true'
+        uc: true
+        group : add_images
+        tooltip: Specify image extension
+        version:
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.png], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.ppm], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.png, .ppm, .npy], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.ppm, .npy], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '99999', lo: '2.4.0' , choice : [.png, .ppm, .npy, .np], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '99999', lo: '2.4.0' , choice : [.ppm, .npy, .np], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '99999', lo: '2.0.0' , choice : [.png , .ppm , .npy, .np]} 
+    - selection_scheme_group:
+        n: Selection Scheme
+        t: choice
+        group : add_images        
+        tooltip : Select the selection scheme
+        version:
+        - { hi: '99999', lo: '2.0.0' , choice : [Select First , Select Last , Select even ones , Select odd ones , Select All] } 
+    - img_count_group:
+        n: No. of Images
+        t: int
+        group : add_images
+        tooltip : Select the number of images
+        version:
+        - { hi: '99999', lo: '2.0.0'}
+    - img_selections : 
+        n: Selections
+        t : table   #Table will be with add button at start and reset at end , purpose of the table is just for viewing
+        cols : ['i:img_label' , 'selection_scheme_group' , 'img_count_group' , 'image_format_group'] # if i: is specified , then entry is to be indexed on that value.
+        group : add_images
+        version:
+        - { hi: '99999', lo: '2.0.0'}
+    - output_identifier:
+        n: Unique output identifiers
+        t: str
+        tooltip : Unique output identifier(s)
+        group : unique_output
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - props:
+        title : Create Image list
+        can_proceed : ["'\"${image_list_name}\" != \"\" && \"${img_selections}\" != \"[]\">wiz8"] 
+        can_finish : ["'\"${image_list_name}\" != \"\" && \"${img_selections}\" != \"[]\""]
+        group_controls:
+        - {n : add_images , u_name: Add Images }
+        - {n : unique_output , u_name: Add Output Identifier , type: check}
+        validation: 
+        - {
+            cond : "\"${image_list_name}\" == \"\"",
+            msg : "err:Image list name cannot be empty"
+          }
+        - {
+            cond : "\"${img_selections}\" == \"[]\"",
+            msg : "err:Please add some images to the list"
+          }                    
+  wiz6:
+    - image_list_name:
+        n: Image List Name
+        t: str
+        tooltip : Name of the imagelist
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - image_dir:
+        n: Image Directory
+        t: dir
+        tooltip: Specify image directory
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - image_format:
+        n: Input Image Format
+        t: choice
+        enable : 'true'
+        uc: true
+        tooltip: Specify image extension
+        version:
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.png], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.ppm], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.png, .ppm, .npy], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.ppm, .npy], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '99999', lo: '2.4.0' , choice : [.png, .ppm, .npy, .np], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '99999', lo: '2.4.0' , choice : [.ppm, .npy, .np], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '99999', lo: '2.0.0' , choice : [.png , .ppm , .npy, .np]}
+    - selection_scheme:
+        n: Selection Scheme
+        t: choice
+        tooltip : Select the selection scheme
+        version:
+        - { hi: '99999', lo: '2.0.0' , choice : [Select First , Select Last , Select even ones , Select odd ones , Select All] } 
+    - num_images:
+        n: No. of Images
+        t: int
+        tooltip : Select the number of images
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - output_identifier:
+        n: Unique output identifiers
+        t: str
+        tooltip : Unique output identifier(s)
+        group : unique_output
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - props:
+        title : Create Image list
+        can_proceed : ["'\"${image_list_name}\" != \"\" && \"${image_dir}\" != \"\" && \"${image_format}\" != \"\" && \"${selection_scheme}\" != \"\" && \"${num_images}\" != \"\" && ${num_images} > 0' >wiz8"] 
+        can_finish : ["'\"${image_list_name}\" != \"\" && \"${image_dir}\" != \"\" && \"${image_format}\" != \"\" && \"${selection_scheme}\" != \"\" && \"${num_images}\" != \"\" && ${num_images} > 0'"]
+        group_controls:
+        - {n : unique_output , u_name: Add Output Identifier , type: check}
+        validation: 
+        - {
+            cond : "\"${image_list_name}\" == \"\"",
+            msg : "err:Image list name cannot be empty"
+          }
+        - {
+            cond : "\"${image_dir}\" == \"\"",
+            msg : "err:Image directory cannot be empty"
+          }
+        - {
+            cond : "\"${image_format}\" == \"\"",
+            msg : "err:Input image format cannot be empty"
+          }
+        - {
+            cond : "\"${selection_scheme}\" == \"\"",
+            msg : "err:Selection Scheme cannot be empty"
+          }
+        - {
+            cond : "${num_images} <= 0",
+            msg : "err:No. of Images should be greater than 0"
+          }
+  wiz7:
+    - image_list_name:
+        n: Image List Name
+        t: str
+        tooltip : Name of the imagelist
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - image_dir:
+        n: Image Directory
+        t: dir
+        tooltip: Specify image directory
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - image_format:
+        n: Input Image Format
+        t: choice
+        enable : 'true'
+        uc: true
+        tooltip: Specify image extension
+        version:
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.png], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.ppm], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.png, .ppm, .npy], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.ppm, .npy], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '99999', lo: '2.4.0' , choice : [.png, .ppm, .npy, .np], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '99999', lo: '2.4.0' , choice : [.ppm, .npy, .np], e : '"${image_list_type}" == "Test Inference List" || "${image_list_type}" == "Test Classification List"'}
+        - { hi: '99999', lo: '2.0.0' , choice : [.png , .ppm , .npy, .np]}
+    - gt_image_dir:
+        n: Ground Truth Image Directory
+        t: dir
+        tooltip: Specify image directory
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - gt_image_format:
+        n: Ground Truth Image Format
+        t: choice
+        enable : 'true'
+        uc: true
+        tooltip: Specify image extension
+        version:
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.png], e : '"${image_list_type}" == "Calibration List" || "${image_list_type}" == "Validation List"'}
+        - { hi: '2.0.0', lo: '2.0.0' , choice : [.pgm], e : '"${image_list_type}" == "Test Inference List"'}
+        - { hi: '2.3.1', lo: '2.1.0' , choice : [.pgm,.ppm,.png,.npy]}
+        - { hi: '99999', lo: '2.4.0' , choice : [.pgm,.ppm,.png,.npy,.np,.blob]}
+        - { hi: '99999', lo: '2.0.0' , choice : [.ppm , .pgm, .npy, .np]} 
+    - selection_scheme:
+        n: Selection Scheme
+        t: choice
+        tooltip : Select the selection scheme
+        version:
+        - { hi: '99999', lo: '2.0.0' , choice : [Select First , Select Last , Select even ones , Select odd ones , Select All] } 
+    - num_images:
+        n: No. of Images
+        t: int
+        tooltip : Select the number of images
+        version:
+        - { hi: '99999', lo: '2.0.0'} 
+    - props:
+        title : Create Image list
+        can_proceed : ["'\"${image_list_name}\" != \"\" && \"${image_dir}\" != \"\" && \"${image_format}\" != \"\" && \"${gt_image_dir}\" != \"\" && \"${gt_image_format}\" != \"\" && \"${selection_scheme}\" != \"\" && \"${num_images}\" != \"\" && ${num_images} > 0'>wiz8"] 
+        can_finish : ["'\"${image_list_name}\" != \"\" && \"${image_dir}\" != \"\" && \"${image_format}\" != \"\" && \"${gt_image_dir}\" != \"\" && \"${gt_image_format}\" != \"\" && \"${selection_scheme}\" != \"\" && \"${num_images}\" != \"\" && ${num_images} > 0'"]
+        validation: 
+        - {
+            cond : "\"${image_list_name}\" == \"\"",
+            msg : "err:Image list name cannot be empty"
+          }
+        - {
+            cond : "\"${image_dir}\" == \"\"",
+            msg : "err:Image directory cannot be empty"
+          }
+        - {
+            cond : "\"${image_format}\" == \"\"",
+            msg : "err:Input image format cannot be empty"
+          }
+        - {
+            cond : "\"${gt_image_dir}\" == \"\"",
+            msg : "err:Ground truth image directory cannot be empty"
+          }
+        - {
+            cond : "\"${gt_image_format}\" == \"\"",
+            msg : "err:Ground truth image format cannot be empty"
+          }
+        - {
+            cond : "\"${selection_scheme}\" == \"\"",
+            msg : "err:Selection Scheme cannot be empty"
+          }
+        - {
+            cond : "${num_images} <= 0",
+            msg : "err:No. of Images should be greater than 0"
+          }
+  wiz8:
+    - image_list_patterns:
+        n: Image List Patterns
+        t: image_pattern
+        tooltip : 
+        version:
+        - { hi: '99999', lo: '2.3.0'}
+    - props:
+        title : Create Image list file name patterns 
+        can_proceed : ["false"] 
+        can_finish : ["\"${image_list_patterns}\" != \"[]\""]
+        validation: 
+        - {
+            cond : "\"${image_list_patterns}\" == \"[]\"",
+            msg : "err:Please add some image file name patterns"
+          }                
+       
+#xnnc output control attributes. This is for UI elements.
+#For file and browse controls, there are two attributes which should be compulsorily provided.
+#1.1 u_nettype refers to the network types(Classification,Segmentation,Detection etc) for which the attribute should be disabled. 
+#1.2 If the attribute is supported for all types of networks, then this field should be  none
+#2.1 u_netmodel refers to the network model (e.g ONNX,Tensorflow,Caffe etc) for which the attribute should be enabled.
+#2.2 If the attribtue is to be enable for all, this field should be all.
+outputattributes:
+  - saveOption:
+      u_name: Save actions                                  #UI name to be displayed
+      u_type: choice                                        #type, the different types will be chkButton,str,chkBoxTableViewer, browse
+      u_seq: 1                                              #Sequence in which the attribute will appear.
+      u_nettype: none                                       #Network type for which the option should be disabled   
+      u_row: 1
+      u_tooltip: Save action that will be used to generate metrics.
+      version: 
+      - { hi: '99999', lo: '2.0.0', 
+      choice: ['save top1_5:classification:all',
+      'save SegStats:segmentation:all', 'save psnr:segmentation:all', 'save l1:segmentation:all', 'save l2:segmentation:all',
+      'save voc_det_AP:detection:all', 'save coco_det_AP:detection:all', 'save coco_mask_AP:detection:all', 
+      'save TextMetric:all:all','TextMetric:all:all','save xinferPP:all:tensorflow', 'save:all:all', 'save squad1_qa:all:all', 'save squad2_qa:all:all' , 'save xoutputPP:all:all']}    
+  - num_classes:
+      u_name: Number of Classes
+      u_type: choice
+      u_seq: 4
+      u_nettype: Classification,Segmentation
+      u_row: 2
+      u_tooltip: You must select one of the values when COCO datasets is chosen.
+      version:
+      - { hi: '99999', lo: '2.0.0', choice: ['91','80'] } 
+  - output_tensors:
+      u_name: Output nodes
+      u_type: list
+      u_seq: 13
+      u_row: 3
+      u_tooltip: Output nodes name.
+      version: 
+      - { hi: '99999', lo: '2.0.0' }
+  - labels_file:
+      u_name: Labels/Annotation/dataset file
+      u_type: file
+      u_seq: 11
+      u_nettype: none
+      u_netmodel: all
+      u_row: 4
+      u_tooltip: Labels file for classification, segmentation or object detection classes. Provide the relevant dataset json file in case of SQuAD datasets.
+      dialogattribs : {dialogkey: labels_file, filterextensions: ['*.txt', '*.pb', '*.json', '*.yaml'], pathVariableName: LABEL_FILE_LOC}
+      version: 
+      - { hi: '99999', lo: '2.0.0' }
+  - annotation_dir:
+      u_name: Annotations directory
+      u_type: browse
+      u_seq: 21
+      u_nettype: Classification,Segmentation
+      u_netmodel: all
+      u_row: 5
+      u_tooltip: Directory where .xml files are located for corresponding image with the same name
+      dialogattribs : {dialogkey: anno_dir, pathVariableName: ANNOTATION_DIR_LOC}
+      version: 
+      - { hi: '99999', lo: '2.0.0' }
+  - model_file:
+      u_name: Model File
+      u_type: file
+      u_seq: 21
+      u_netmodel: tensorflow
+      u_nettype: none
+      u_row: 6
+      u_tooltip: Model file which will be used with xinferPP. If not provided, the model provided in the config file is used.
+      dialogattribs : {dialogkey: tensorflow_model, filterextensions: ['*.pb'], pathVariableName: MODEL_FILE_LOC}
+      version: 
+      - { hi: '99999', lo: '2.2.0' }
+  - vocab_file:
+      u_name: Vocabulary File
+      u_type: file
+      u_seq: 11
+      u_nettype: none
+      u_netmodel: all
+      u_row: 7
+      u_tooltip: Vocabulary file to be used with squad save actions.
+      dialogattribs : {key: vocab_file, filterextensions: ['*.txt'], pathVariableName: LABEL_FILE_LOC} 
+      version: 
+      - { hi: '99999', lo: '2.3.0' }
+  - extra_args:
+      u_name: Extra Args
+      u_type: str
+      u_seq: 21
+      u_row: 8
+      u_tooltip: Provide additional parameters required by some detection networks here.
+      version: 
+      - { hi: '99999', lo: '2.0.0' }   
+
+# xnnc cfg attributes that are defined in the cfg file.
+attributes:
+  path:                  # section
+  - input_dir:           # attribute internal name
+      n: Input Directory # attribute UI name
+      t: dir             # type, different types are: dir, file, choice, int, str, mlt (multi line text)
+      uistage: general     # the stage from above to which this attribute belongs to
+      order: 10          # the order in which this attribute will appear in UI
+      xcfg : false
+      scope: f           # default is f, allowed values are f, s, o (f = full i.e. mandatory, s = mandatory for stage, o = optional) 
+      version:           # the version on xnnc in which this arrtibute existed , hi: 99999 means till end of time
+      - { hi: '99999', lo: '2.0.0' }
+  - output_dir:
+      n: Output Directory
+      t: dir
+      uistage: general
+      order: 20
+      xcfg : false
+      version:
+      - { hi: '99999', lo: '2.0.0' }   
+  - tmp_dir:
+      n: Temp Directory
+      t: dir
+      uistage: general
+      order: 30
+      xcfg : false
+      version:
+      - { hi: '99999', lo: '2.0.0' }  
+  - image_dir:
+      n: Image list dir
+      t: dir
+      uistage: general
+      wiz: false
+      order: 31
+      xcfg : false
+      version:
+      - { hi: '99999', lo: '2.0.0' }     
+  - custom_op_lib_path:
+      n: Custom Library Path
+      t: dir
+      uistage: general
+      order: 32
+      xcfg : false
+      scope : o
+      version:
+      - { hi: '99999', lo: '2.0.0' }         
+  network:               # section
+  - class:
+      n: Network type
+      t: choice
+      uistage: general
+      wiz: true
+      order: 40
+      xcfg : false
+      dv: Classification
+      version:
+      - { hi: '99999', lo: '2.0.0', choice: [ 'Classification', 'Segmentation', 'Detection' ] }
+  - name:
+      n: Name
+      t: str
+      uistage: general
+      wiz: false
+      order: 40
+      xcfg: false
+      scope: o
+      tooltip : The name to be used for xws generation
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - type:
+      n: Input model type
+      t: choice
+      uistage: gen_quant
+      dv: ONNX
+      deps2: { Caffe2: [ network-input_graph, network-input_model ], Tensorflow: [ network-input_model ] }
+      cons2: { ONNX: [ network-input_graph ], Tensorflow: [ network-input_graph ] , Pytorch : [network-input_graph]}         
+      bsdeps2: {  ONNX: { network-input_data_layout: NHWC }, Caffe2: { network-input_data_layout: NCHW } }
+      order: 41
+      xcfg : false
+      version:
+      - { hi: '2.3.1', lo: '2.0.0', choice: [ 'ONNX', 'Caffe2', 'Tensorflow' ] }
+      - { hi: '99999', lo: '2.4.0', choice: [ 'ONNX', 'Caffe2', 'Tensorflow' , 'Pytorch'] }
+  - input_graph:
+      n: Input Graph
+      t: str
+      read_only : true
+      uistage: general
+      scope: o
+      order: 50
+      helpId : U_Xnnc_Editor_input_graph
+      disable: { network-type: [ONNX , Tensorflow , Pytorch]}
+      tooltip : init_net.pb for Caffe2 networks. No files other than .pbtxt and .pb to be present for Caffe2 in graph and model directories
+      version:
+      - { hi: '99999', lo: '2.0.0' }   
+  - input_model:
+      n: Input Model
+      t: str
+      read_only : true
+      uistage: general
+      helpId : U_Xnnc_Editor_input_model
+      wiz: true
+      order: 60
+      tooltip : For ONNX network a .onnx file , for Caffe2 predict_net.pb, for Tensorflow a .pb file , for PyTorch a .pth file and for TFlite a .tflite file.
+      version:
+      - { hi: '99999', lo: '2.0.0' }  
+  - input_node_name:
+      n: Input Node Name
+      t: multi
+      uistage: general
+      order: 61
+      table : input_args
+      helpId : U_Xnnc_Editor_input_node_name
+      tooltip : Input Node Name
+      multi_attrs :
+      - { cntrl : text , widget_count : 1  , secondary_sep: "," , loVersion : '2.3.0' , hiVersion : '99999' , type: str}
+      version:
+      - { hi: '99999', lo: '2.0.0' }  
+  - input_data_layout:
+      n: Input Data Layout
+      t: multi
+      uistage: general
+      dv: NHWC
+      table : input_args
+      order: 62
+      helpId : U_Xnnc_Editor_input_data_layout #temporary
+      tooltip : Default for ONNX->NHWC , Caffe2->NCHW
+      multi_attrs :
+      - { cntrl : combo , widget_count : 1  , secondary_sep: "," , loVersion : '2.3.0' , hiVersion : '99999' , type : str}
+      bsdeps2: {  NHWC: { network-type: ONNX }, NCHW: { network-type: Caffe2 } }
+      version:
+      - { hi: '2.2.0', lo: '2.0.0', choice: [ 'NHWC', 'NCHW', 'RGB', 'BGR' ] }
+      - { hi: '99999', lo: '2.3.0', choice: [ 'NHWC', 'NCHW', 'RGB', 'BGR' , 'NonImage'] }                     
+  - output_data_layout:
+      n: Output Data Layout
+      t: choice
+      uistage: general
+      dv: NCHW
+      scope : o
+      order: 62
+      helpId : U_Xnnc_Editor_output_data_layout
+      tooltip : The default value is NCHW which is the blob dump format in XNNC .|Networks like tf_SRCNN NHWC is recommended.
+      version:
+      - { hi: '99999', lo: '2.0.0', choice: [ 'NHWC', 'NCHW', 'RGB', 'BGR' ] }                    
+  - input_files_layout:
+      n: Input Files Layout
+      t: str
+      uistage: general
+      dv: NHWC
+      order: 63
+      scope : o
+      helpId : U_Xnnc_Editor_input_data_layout #temporary
+      tooltip : For XNNC VERSION 2.1 Onwards|Input Files Layout is an optional parameter.|The setting specifies inputs (by their position in input_node_name list) to which newlayouts apply.|If the setting for an input differs from input_data_layout, the input tensor is transposed.|Default value is the value of input_data_layout.
+      version:
+      - { hi: '99999', lo: '2.1.0' }                    
+  - model_type:
+      n: Model Type
+      t: choice
+      uistage: general
+      dv: float
+      scope : o
+      order: 62
+      helpId : U_Xnnc_Editor_input_model_type
+      tooltip : For XNNC VERSION 2.3 Onwards|The default value is float|.Model type should be set to quantized for TFLite Fully Quantized Models. 
+      version:
+      - { hi: '99999', lo: '2.3.0', choice: [ 'quantized', 'float' ] }                    
+  - mean:
+      n: Mean
+      t: multi
+      uistage: general
+      table : input_args
+      scope : f
+      order: 70
+      helpId : U_Xnnc_Editor_mean_1
+      dv : 127.5
+      tooltip: Mean
+      multi_attrs :
+      - { cntrl : text , group : Mean and Standard Deviation ,widget_count : 1 , secondary_sep: ":" , loVersion : '2.3.0' , hiVersion : '99999' , type : str }
+      version:
+      - { hi: '99999', lo: '2.0.0' }  
+  - stddev:
+      n: Std dev
+      t: multi
+      uistage: general
+      table : input_args
+      order: 71
+      dv : 127.5
+      helpId : U_Xnnc_Editor_stddev_1
+      tooltip: Standard deviation for channel 1
+      multi_attrs :
+      - { cntrl : text , group : Mean and Standard Deviation ,widget_count : 1  , secondary_sep: ":" , loVersion : '2.3.0' , hiVersion : '99999' , type : str}
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - channel_order:
+      n: Channel Order
+      t: choice
+      uistage: general
+      order: 71
+      xcfg : true
+      helpId: U_Xnnc_Editor_channel_order
+      scope : o      
+      version:
+      - { hi: '99999', lo: '2.0.0' , choice : ['RGB' , 'BGR']}
+  - network_optimization:
+      n: Network Optimization
+      t: str
+      uistage: general
+      order: 71
+      tooltip: XNNC 2.5 Onwards|Specify optional external optimizations. Sometimes running some external|optimizations on the network before passing it through xnnc results in better performance. In|such cases network_optimization can be used to pass a list of comma-separated supported|optimizations. 
+      scope : o
+      helpId : U_Xnnc_Editor_uq_gc_args
+      dv : map_standalone_bn_to_conv
+      version:
+      - { hi: '99999', lo: '2.5.0' }
+  - profile_args:
+      n: Gen_Quant args
+      t: str
+      uistage: general
+      order: 71
+      tooltip: gen_quant_profile Arguments 
+      scope : o
+      helpId : U_Xnnc_Editor_gq_args
+      group : Stage_Args
+      version:
+      - { hi: '99999', lo: '2.0.0' }                
+  - float_args:
+      n: Float inference args
+      t: str
+      uistage: general
+      order: 71
+      helpId : U_Xnnc_Editor_flt_args
+      tooltip: flt_inference Arguments
+      scope : o
+      group: Stage_Args
+      version:
+      - { hi: '99999', lo: '2.0.0' }                
+  - fixed_args:
+      n: Use_Quant/Gen_Code args
+      t: str
+      uistage: general
+      order: 71
+      tooltip: use_quant_profile/gen_code Arguments
+      scope : o
+      helpId : U_Xnnc_Editor_uq_gc_args
+      group : Stage_Args
+      version:
+      - { hi: '99999', lo: '2.0.0' }                                
+  out_cntrl:
+  - description:
+      n: Output control
+      t: mlt #multi line text
+      delimiter: '"'
+      row: 4
+      uistage: general
+      order: 80
+      scope: o
+      row: 3
+      helpId : U_Xnnc_Editor_octrl
+      visible: false
+      version:
+      - { hi: '99999', lo: '2.0.0' }     
+  dataset:    
+  - calibration_set:
+      n: Calibration Set
+      t: image_file
+      uistage: gen_quant
+      order: 100
+      helpId : U_Xnnc_Editor_calib_set
+      version:
+      - { hi: '99999', lo: '2.0.0' }   
+  - calibration_count:
+      n: Calibration Count
+      t: int
+      uistage: gen_quant
+      order: 110
+      helpId : U_Xnnc_Editor_calib_count
+      tooltip : Number of images you want to use for calibration
+      version:
+      - { hi: '99999', lo: '2.0.0' }   
+  - validation_set:
+      n:  Validation Set
+      t: image_file
+      uistage: gen_quant
+      order: 120
+      helpId : U_Xnnc_Editor_valid_set
+      version:
+      - { hi: '99999', lo: '2.0.0' }   
+  - validation_count:
+      n: Validation Count
+      t: int
+      uistage: gen_quant
+      order: 130
+      helpId : U_Xnnc_Editor_valid_count
+      tooltip : Number of images you want to use for validation
+      version:
+      - { hi: '99999', lo: '2.0.0' }     
+  quantization:
+  - accuracy_level:
+      n: Accuracy Level
+      t: choice
+      uistage: gen_quant
+      order: 140
+      helpId : U_Xnnc_Editor_acc_lev
+      tooltip : 0 for Less Precise/Fast , 1 Medium , 2 Most Precise/Slow
+      dv: 0
+      visible: false
+      version:
+      - { hi: '2.0.0', lo: '2.0.0', choice: [ '0', '1', '2' ] }    
+      - { hi: '2.1.0', lo: '2.1.0', choice: [ '0', '1', '2' , '3' ] }    
+      - { hi: '2.4.1', lo: '2.2.0', choice: [ '0', '1', '2' , '3' , '4' ] }    
+      - { hi: '99999', lo: '2.5.0', choice: [ '0', '1', '2' , '3' , '4' , 'fp16'] }    
+  - weight_equal :
+      n: Weight Equalization Level
+      t: choice
+      uistage: gen_quant
+      order: 140
+      helpId : U_Xnnc_Editor_weight_equal
+      scope : o
+      tooltip : FOR XNNC VERSION 2.3 ONWARDS|If Level 1 is set, the Cadence weight equalization algorithm would be applied which usually achieves the best accuracy|performances for most classification neural networks
+      version:
+      - { hi: '99999', lo: '2.3.0', choice: [ '1', '2', '3' ] }    
+  - range:
+      n: Quantization range
+      t: slider
+      uistage: gen_quant
+      scope: s
+      order: 150
+      helpId : U_Xnnc_Editor_quant_range
+      stage : gen_quant_profile
+      tooltip : Quantization Min/Max Thresholds
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - fixed_range:
+      n: Fixed point simulation range
+      t: slider
+      uistage: gen_quant
+      scope: o
+      helpId: U_Xnnc_Editor_fixed_range
+      order: 150
+      stage : use_quant_profile
+      tooltip : FOR XNNC VERSION 2.3 ONWARDS|If present only these profiles are simulated. Otherwise all profiles specified in range are simulated.
+      version:
+      - { hi: '99999', lo: '2.3.0'}             
+  - stride:
+      n: Range Stride
+      t: int
+      uistage: gen_quant
+      stage : gen_quant_profile
+      scope: s
+      helpId : U_Xnnc_Editor_stride
+      dv: 1
+      order: 150
+      tooltip : Value to skip ranges , Default is 1
+      version:
+      - { hi: '99999', lo: '2.0.0' }    
+  - highprecision_output:
+      n: High Precision Output
+      t: choice
+      uistage: gen_quant
+      stage : gen_quant_profile
+      scope: o
+      helpId : U_Xnnc_Editor_hpOutput
+      dv: false
+      order: 150
+      tooltip : For XNNC VERSION 2.1 Onwards|The default is true, the supported values are true (attempt precision higher than 8-bit) |and false (keeps 8-bit precisionwherever possible)for network outputs.|This may be used, for example,to improve accuracy of imagenet classification networks which do not have Softmax at output.
+      version:
+      - { hi: '99999', lo: '2.1.0' , choice : [ 'true' , 'false' ] }
+  - quant_bypass:
+      n: Quantization ByPass
+      t: choice
+      uistage: gen_quant
+      stage : gen_quant_profile
+      scope: o
+      helpId : U_Xnnc_Editor_qByPass
+      dv: true
+      order: 150
+      tooltip : For XNNC VERSION 2.1 Onwards|To enable QuantByPass flow to support Tensorflow Networks with defined min/max ranges|captured in FakeQuantWithMinMaxVars and FakeQuantWithMinMaxVarsPerChannel Ops.
+      version:
+      - { hi: '99999', lo: '2.1.0' , choice : [ 'true' , 'false' ] }
+  - nodename_datatypes :
+      n: Node name and datatypes yaml file
+      t: str
+      uistage: gen_quant
+      scope: o
+      dv: nodename_dt.yaml
+      helpId: U_Xnnc_Editor_node_name_yaml
+      order: 150
+      tooltip : FOR XNNC VERSION 2.3 ONWARDS|To force the in/out datatype of selected nodes, use a yaml file in which the|node names and their corresponding intypes and outtypes are specified. This option is not|supported for accuracy level 0.
+      version:
+      - { hi: '99999', lo: '2.3.0' }     
+  - nodekind_datatypes  :
+      n: Node kind and datatypes yaml file
+      t: str
+      uistage: gen_quant
+      scope: o
+      helpId: U_Xnnc_Editor_node_kind_yaml
+      dv: nodekind_dt.yaml
+      order: 150
+      tooltip : FOR XNNC VERSION 2.3 ONWARDS|To force the in/out datatype of selected nodes, use a yaml file in which the|node kinds and their corresponding intypes and outtypes are specified. This option is not|supported for accuracy level 0.
+      version:
+      - { hi: '99999', lo: '2.3.0' } 
+  accuracy_tuning:
+  - hyperparam_tuning:
+      n: Hyperparam tuning
+      t: choice
+      uistage: gen_quant
+      stage : gen_quant_profile
+      scope: o
+      helpId : U_Xnnc_Editor_hpTuning
+      dv: true
+      order: 150
+      tooltip : For XNNC VERSION 2.2 Onwards|To turn on Hyperparameter search
+      group: Quantization_Args
+      version:
+      - { hi: '99999', lo: '2.2.0' , choice : [ 'true' , 'false' ] } 
+  - tuning_evalset:
+      n: Tuning Evalset
+      t: image_file
+      uistage: gen_quant
+      stage : gen_quant_profile
+      scope: o
+      helpId : U_Xnnc_Editor_tEvalSet
+      order: 150
+      tooltip : For XNNC VERSION 2.2 Onwards.|Use this option to provide an imagelist file used for accuracy tuning.|If not provided, the calibration imagelist will be used by default.|Make sure that the calibration imagelist file has labels when you don't provide this option.
+      group: Quantization_Args
+      version:
+      - { hi: '99999', lo: '2.2.0'} 
+  - tuning_evalcount:
+      n: Tuning Evalcount
+      t: int
+      uistage: gen_quant
+      stage : gen_quant_profile
+      scope: o
+      helpId : U_Xnnc_Editor_tEvalCount
+      order: 150
+      tooltip : For XNNC VERSION 2.2 Onwards | Default value is 100. Required if different value is intended.
+      group: Quantization_Args
+      dv: 100
+      version:
+      - { hi: '99999', lo: '2.2.0'} 
+  - detection_annotation:
+      n: Detection annotation
+      t: file
+      uistage: gen_quant
+      stage : gen_quant_profile
+      scope: o
+      helpId : U_Xnnc_Editor_dAnnotation
+      order: 150
+      tooltip : For XNNC VERSION 2.2 Onwards |For Detection annotation for coco and voc to provide annotation information for evalset used
+      group: Quantization_Args
+      version:
+      - { hi: '99999', lo: '2.2.0'} 
+          
+  system:
+  - xtensa_system:
+      n: Xtensa System
+      t: dir
+      uistage: gen_code
+      deps: [ system-xtensa_core ]
+      scope: o
+      stage : gen_code
+      order: 180
+      xcfg : false
+      version:
+      - { hi: '99999', lo: '2.0.0' }   
+  - xtensa_params:
+      n: TDK path
+      t: dir
+      uistage: gen_code
+      scope: o
+      stage : gen_code
+      order: 180
+      xcfg : false
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - xtensa_core:
+      n: Xtensa Core
+      t: choice
+      uistage: xtensa_args
+      stage: gen_code
+      scope : s
+      tooltip : Xtensa Core
+      helpId : U_Xnnc_Editor_xtensa_core
+      order: 180
+      version:
+      - { hi: '99999', lo: '2.0.0' }     
+  - xtensa_core_type:
+      n: Xtensa Core type
+      t: choice
+      uistage: xtensa_args
+      helpId : U_Xnnc_Editor_xtensa_core_type
+      tooltip : If Xtensa core is selected , xplorer will autofill this choice.|This choice can however be changed if required  
+      order: 180
+      version:
+      - { hi: '2.2.0', lo: '2.0.0', choice: [ dsp , dna100, dna150 ] }
+      - { hi: '99999', lo: '2.3.0', choice: [ dsp , dna100, dna150, nna1 , dsp_vq8 , dsp_vp1 , nna1_vp1] }                   
+  - tcm_banks:
+      n: TCM Banks
+      t: str
+      uistage: xtensa_args
+      scope: o
+      order: 180
+      helpId : U_Xnnc_Editor_tcm_banks
+      tooltip: (OPTIONAL) Local memory high order banks configuration.|Comma separated memory bank configurations where each bank is specified as address:size pair.|Only one and two bank configurations supported.|Memory described here must not contain stack or statically allocated data.
+      cons : [ system-tcm_reserve_low, system-tcm_reserve_high ]
+      version:
+      - { hi: '99999', lo: '2.0.0' }   
+  - xi_cnn_path:
+      n: XI CNN Path
+      t: dir
+      uistage: xtensa_args
+      helpId : U_Xnnc_Editor_xi_cnn_path
+      scope: o
+      tooltip: (OPTIONAL) Path to XI library source codes.|Default location is the xicnn_(core_name) directory in <compiler-dir>\Optimizer\bin directory.|This directory must contain both libxi and libxi_ref subdirectories.
+      order: 170
+      version:
+      - { hi: '99999', lo: '2.0.0' }        
+  - tcm_reserve_low:
+      n: TCM reserve low
+      t: str
+      uistage: xtensa_args
+      dv: 0x200
+      order: 190
+      scope : o
+      helpId : U_Xnnc_Editor_tcm_low
+      hex: true
+      tooltip: Space reserved to avoid conflicts with static data in DRAM1 for standard Vision P6
+      cons : [ system-tcm_banks ]
+      version:
+      - { hi: '99999', lo: '2.0.0' }  
+  - tcm_reserve_high:
+      n: TCM reserve high
+      t: str
+      uistage: xtensa_args
+      dv: 0x3000
+      order: 200
+      helpId : U_Xnnc_Editor_tcm_high
+      scope : o
+      hex: true
+      tooltip: Space reserved for stack at the end of DRAM0 for standard Vision P6
+      cons : [ system-tcm_banks ]
+      version:
+      - { hi: '99999', lo: '2.0.0' }   
+  - tcm_contiguous:
+      n: TCM Contiguous
+      t: choice
+      dv: 'True'
+      uistage: xtensa_args
+      helpId : U_Xnnc_Editor_tcm_cont
+      scope: s
+      stage : gen_code
+      order: 210
+      tooltip : If true, allocations across DRAM boundary are allowed
+      version:
+      - { hi: '99999', lo: '2.0.0', choice: [ 'True' , 'False' ] }      
+  - dma_queue_size:
+      n: DMA queue size
+      t: int
+      dv : 32
+      uistage: xtensa_args
+      helpId : U_Xnnc_Editor_dma_size
+      scope: o
+      order: 211
+      tooltip: This declares the number of entries in statically allocated DMA queue.|Default is 32. 
+      version:
+      - { hi: '99999', lo: '2.0.0' }       
+  - xos_max_threads:
+      n: XOS Max Threads
+      t: int
+      uistage: xtensa_args
+      helpId : U_Xnnc_Editor_xos
+      scope: o
+      order: 211
+      tooltip: For XNNC VERSION 2.2 Onwards| Default is not defined.This declares the maximum number of threads (CNNRT_THREAD_NUM) if XOS is enabled at build time (ENABLE_XOS=1).|Defining xos_max_threads adds additional test, test_inference_mt,in generated code and disables some performance|optimization for multithreading. 
+      version:
+      - { hi: '99999', lo: '2.2.0' }       
+  performance:
+  - read_delay:
+      n: Read Delay
+      t: int
+      dv : 100
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_rDelay
+      scope: s
+      stage : gen_code
+      tooltip: Xtensa ISS or XTSC system memory read/write delay (default is 100 cycles) |Controls system memory performance model and launch settings in generated Xplorer Workspace or |XTSC run configuration for DNA.
+      order: 220
+      version:
+      - { hi: '99999', lo: '2.0.0' }        
+  - write_delay:
+      n: Write Delay
+      t: int
+      dv : 100
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_wDelay
+      scope: s
+      stage : gen_code
+      order: 230
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - read_repeat:
+      n: Read Repeat
+      t: int
+      dv : 0
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_wDelay
+      scope: o
+      stage : gen_code
+      order: 230
+      tooltip: For XNNC VERSION 2.1 Onwards|Xtensa ISS and XTSC system memory additional read/write repeat cycles|(default is 0 which implies that each transfer completes one cycle after theprevious one).|Note that XTSC model will use (read_repeat+1) and (write_repeat+1) to match ISS definition of this parameter.
+      version:
+      - { hi: '99999', lo: '2.1.0' }  
+  - write_repeat:
+      n: Write Repeat
+      t: int
+      dv : 0
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_wDelay
+      scope: o
+      stage : gen_code
+      order: 230
+      version:
+      - { hi: '99999', lo: '2.1.0' }  
+  - optimization:
+      n: Optimization
+      dv: level2
+      t: choice
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_optimization
+      order: 240
+      tooltip: Optimization level ( level1 -> reduced search space) (level2 -> larger search space than level1 (default))
+      version:
+      - { hi: '99999', lo: '2.0.0', choice: [ level1, level2 ] }  
+  - compression_min_saving:
+      n: Compression min saving
+      t: int
+      uistage: gen_code
+      scope: o
+      order: 250
+      helpId : U_Xnnc_Editor_compress_min_save
+      dv : 100
+      group: Compression_Args
+      tooltip: (OPTIONAL) Minimum size saving in percentage for compression to be applied
+      version:
+      - { hi: '99999', lo: '2.0.0' }       
+  - compression_min_size:
+      n: Compression min size
+      t: int
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_compress_min_size
+      scope: o
+      order: 260
+      dv : 8196
+      group : Compression_Args
+      tooltip: (OPTIONAL) Minimum table size for compression to be considered, in bytes
+      version:
+      - { hi: '99999', lo: '2.0.0' }      
+  - compression_only_dma_bound:
+      n: Compression dma bound
+      t: choice
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_compress_dma
+      scope: o
+      order: 270
+      group : Compression_Args
+      tooltip: (OPTIONAL) Only enable compression on dma bound operators. Default is True.
+      version:
+      - { hi: '99999', lo: '2.0.0', choice: [ 'True' , 'False' ] }      
+  - compression_min_sparsity:
+      n: Compression min sparsity
+      t: int
+      dv: 30
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_compress_spar
+      scope: o
+      order: 280
+      group : Compression_Args
+      tooltip: (OPTIONAL) DNA specific.|Compress activations when expected sparsity percent is greater than this value.|Default is 100, effectively disabled.
+      version:
+      - { hi: '99999', lo: '2.0.0' }       
+  - axi_width:
+      n: AXI width
+      t: int
+      dv: 256
+      uistage: gen_code
+      scope: o
+      order: 290
+      xcfg : false
+      version:
+      - { hi: '99999', lo: '2.0.0' } 
+  - preemption_granularity:
+      n: Preemption Granularity 
+      t: int
+      dv: 0
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_pGranularity
+      scope: o
+      order: 290
+      tooltip: For XNNC VERSION 2.2 Onwards|DNA specific. Preemption granularity in cycles.|Value is number of cycles the compiler should strive to keep all DNA mapped layer blocks under.|If a single layer is expected toexecute in more than preemption granularity cycles a warning will be issued.|Default is zero, implying the compiler will not attempt to limit the size of DNA layer blocks.
+      version:
+      - { hi: '99999', lo: '2.2.0' } 
+  graph:
+  - batch:
+      n: Batch
+      t: int
+      dv: 1
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_gBatch
+      scope: o
+      order: 291
+      group: Graph_Args
+      tooltip: (OPTIONAL) Generate code for batch size <Num>. Default is 1 (i.e. no batching). 
+      version:
+      - { hi: '99999', lo: '2.0.0' }            
+  - coefficient_data_section:
+      n: Coefficient Data Section
+      t: str
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_gCoeff
+      scope: o
+      order: 292
+      dv : .data.cnnsyscoeff.
+      group: Graph_Args
+      tooltip: (OPTIONAL) Controls coefficient tables data section name in generated code.|Value must be a valid section name.|Default name is .data.cnnsyscoeff
+      version:
+      - { hi: '99999', lo: '2.0.0' }    
+  - input_name:
+      n: Input Name
+      t: str
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_g_in_name
+      group : Graph_Args
+      tooltip: (OPTIONAL) Input Node Name
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - input_layout:
+      n: Input Layout
+      t: choice
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_g_in_layout
+      group : Graph_Args
+      tooltip: (OPTIONAL) Input data layout for input <input name>
+      version:
+      - { hi: '99999', lo: '2.0.0', choice: [ 'WHD', 'DWH' ] }
+  - input_stride1:
+      n: Input Stride 1
+      t: int
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_g_in_Strides
+      group : Graph_Args
+      tooltip: (OPTIONAL) Input Stride 1
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - input_stride2:
+      n: Input Stride 2
+      t: int
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_g_in_Strides
+      group : Graph_Args
+      tooltip: (OPTIONAL) Input Stride 2
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - input_stride3:
+      n: Input Stride 3
+      t: int
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_g_in_Strides
+      group : Graph_Args
+      tooltip: (OPTIONAL) Input Stride 3
+      version:
+      - { hi: '99999', lo: '2.0.0' }                          
+  - output_name:
+      n: Output Name
+      t: str
+      uistage: gen_code
+      scope: o
+      order: 294
+      helpId : U_Xnnc_Editor_g_out_name
+      group : Graph_Args
+      tooltip: (OPTIONAL) Output Node Name
+      version:
+      - { hi: '99999', lo: '2.0.0' }  
+  - output_layout:
+      n: Output Layout
+      t: choice
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_g_out_layout
+      scope: o
+      order: 293
+      group : Graph_Args
+      tooltip: (OPTIONAL) Output data layout for output <output name>
+      version:
+      - { hi: '99999', lo: '2.0.0', choice: [ 'WHD', 'DWH' ] }                    
+  - output_stride1:
+      n: Output Stride 1
+      t: int
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_g_out_Strides
+      group : Graph_Args
+      tooltip: (OPTIONAL) Output Stride 1
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - output_stride2:
+      n: Output Stride 2
+      t: int
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_g_out_Strides
+      group : Graph_Args
+      tooltip: (OPTIONAL) Output Stride 2
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - output_stride3:
+      n: Output Stride 3
+      t: int
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_g_out_Strides
+      group : Graph_Args
+      tooltip: (OPTIONAL) Output Stride 3
+      version:
+      - { hi: '99999', lo: '2.0.0' }
+  - tensor_name:
+      n: Tensor Name
+      t: str
+      uistage: gen_code
+      scope: o
+      order: 294
+      helpId : U_Xnnc_Editor_tensorInfo
+      group : Graph_Args
+      tooltip: (OPTIONAL) Tensor Name
+      version:
+      - { hi: '99999', lo: '2.2.0' }  
+  - tensor_layout:
+      n: Tensor Layout
+      t: choice
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_tensorInfo
+      scope: o
+      order: 293
+      group : Graph_Args
+      tooltip: (OPTIONAL) Tensor Data Layout
+      version:
+      - { hi: '99999', lo: '2.2.0', choice: [ 'WHD', 'DWH' ] }                    
+  - tensor_stride1:
+      n: Tensor Stride 1
+      t: int
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_tensorInfo
+      group : Graph_Args
+      tooltip: (OPTIONAL) Tensor Stride 1
+      version:
+      - { hi: '99999', lo: '2.2.0' }
+  - tensor_stride2:
+      n: Tensor Stride 2
+      t: int
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_tensorInfo
+      group : Graph_Args
+      tooltip: (OPTIONAL) Tensor Stride 2
+      version:
+      - { hi: '99999', lo: '2.2.0' }
+  - tensor_stride3:
+      n: Tensor Stride 3
+      t: int
+      uistage: gen_code
+      scope: o
+      order: 293
+      helpId : U_Xnnc_Editor_tensorInfo
+      group : Graph_Args
+      tooltip: (OPTIONAL) Tensor Stride 3
+      version:
+      - { hi: '99999', lo: '2.2.0' }                          
+  - tiling:
+      n: Tiling
+      t: str
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_g_tiling
+      scope: o
+      order: 295
+      group : Graph_Args
+      tooltip: (OPTIONAL) Output tile dimensions for operator < operator name>. <values> are declared as <width, height, depth>.
+      version:
+      - { hi: '99999', lo: '2.0.0' }                             
+  multicore:
+  - sym_multicore:
+      n: No of Cores
+      t: int
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_multi_num
+      scope: o
+      order: 291
+      dv : 1
+      group : MultiCore
+      version:
+      - { hi: '99999', lo: '2.0.0' }          
+  - sysrom_start_addr:
+      n: System ROM Start Address
+      t: str
+      uistage: gen_code
+      scope: o
+      dv : 0x50000000
+      helpId : U_Xnnc_Editor_multi_rom_st
+      hex: true
+      order: 291
+      group : MultiCore
+      version:
+      - { hi: '99999', lo: '2.0.0' }          
+  - sysrom_size:
+      n: System Rom Size
+      t: str
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_multi_rom_si
+      scope: o
+      dv: 268435456
+      size: true
+      order: 291
+      group : MultiCore
+      tooltip : System ROM size (in bytes).
+      version:
+      - { hi: '99999', lo: '2.0.0' }          
+  - sysram_start_addr:
+      n: System RAM Start Address
+      t: str
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_multi_ram_st
+      scope: o
+      dv : 0x60000000
+      hex : true
+      group : MultiCore
+      order: 291
+      version:
+      - { hi: '99999', lo: '2.0.0' }          
+  - sysram_size:
+      n: System Ram Size
+      t: str
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_multi_ram_si
+      scope: o
+      dv : 1610612736
+      size : true
+      group : MultiCore
+      order: 291
+      tooltip : System RAM size (in bytes)
+      version:
+      - { hi: '99999', lo: '2.0.0' }          
+  - global_start_addr:
+      n: Global Start Address
+      t: str
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_multi_glob_space
+      scope: o
+      group : MultiCore
+      dv: 0xf0000000
+      hex : true
+      order: 291
+      tooltip: Starting global address that local memories are mapped to. From this address, each core's local memories, plus 1KB MMIO space for multicore communication, are incrementally mapped to 1MB space
+      version:
+      - { hi: '99999', lo: '2.0.0' }          
+  - global_addr_spacing:
+      n: Global Address Spacing
+      t: str
+      uistage: gen_code
+      scope: o
+      group : MultiCore
+      helpId : U_Xnnc_Editor_multi_glob_start
+      dv: 1048576
+      size : true
+      order: 291
+      version:
+      - { hi: '99999', lo: '2.0.0' }          
+  - xipc_external_interrupt:
+      n: XIPC External Edge Interrupt
+      t: str
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_multi_xipc
+      scope: o
+      group : MultiCore
+      order: 291
+      version:
+      - { hi: '99999', lo: '2.0.0' }          
+  - fifo_depth:
+      n: Fifo Depth
+      t: str
+      uistage: gen_code
+      helpId : U_Xnnc_Editor_multi_fifo
+      group : MultiCore
+      scope: o
+      dv: 1024
+      order: 291
+      version:
+      - { hi: '99999', lo: '2.0.0' }          
+
+#  pruning:
+#  - prune_validation_dataset:
+#      n: Pruning validation dataset
+#      t: file
+#      stage: prune
+#      scope: s
+#      order: 300
+#      version:
+#      - { hi: '1.9.0', lo: '1.5.0' }   
+#  - prune_calibration_dataset:
+#      n: Pruning calibration dataset
+#      t: file
+#      stage: prune
+#      scope: s
+#      order: 310
+#      version:
+#      - { hi: '1.9.0', lo: '1.5.0' }       
+#  - prune_validation_size:
+#      n: Pruning validation size
+#      t: int
+#      stage: prune
+#      scope: s
+#      order: 320
+#      version:
+#      - { hi: '1.9.0', lo: '1.5.0' }   
+#  - prune_calibration_size:
+#      n: Pruning calibration size
+#      t: int
+#      stage: prune
+#      scope: s
+#      order: 330
+#      version:
+#      - { hi: '1.9.0', lo: '1.5.0' }      
+#  - prune_calibration_subset_size:
+#      n: Pruning calibration subset size
+#      t: int
+#      stage: prune
+#      scope: s
+#      order: 340
+#      version:
+#      - { hi: '1.9.0', lo: '1.5.0' }      
+#  - num_iterations:
+#      n: No of Iterations
+#      t: int
+#      stage: prune
+#      scope: s
+#      order: 350
+#      version:
+#      - { hi: '1.9.0', lo: '1.5.0' }       
+#  - thresh_drop:
+#      n: Threshold drop
+#      t: int
+#      stage: prune
+#      scope: s
+#      order: 360
+#      version:
+#      - { hi: '1.9.0', lo: '1.5.0' }  
+#  - min_sparsity_percent:
+#      n: Min sparsity percent
+#      t: int
+#      stage: prune
+#      scope: s
+#      order: 370
+#      version:
+#      - { hi: '1.9.0', lo: '1.5.0' }        
+  tf2onnx:               # section
+  - inputs:
+      n: Inputs
+      t: str
+      uistage: convt
+      helpId : U_Xnnc_Editor_tf_input
+      order: 40
+      scope: o
+      tooltip: Input Node Name.
+      disable : {network-type : [ONNX , Caffe2]}
+      version:
+      - { hi: '99999', lo: '2.0.0'}
+  - outputs:
+      n: Outputs
+      t: str
+      uistage: convt
+      order: 40
+      helpId : U_Xnnc_Editor_tf_output
+      scope: o
+      tooltip: Output Node Names.
+      disable : {network-type : [ONNX , Caffe2]}
+      version:
+      - { hi: '99999', lo: '2.0.0'}
+  - extra_args:
+      n: Extra Args
+      t: str
+      uistage: convt
+      helpId : U_Xnnc_Editor_tf_extra
+      order: 40
+      scope: o
+      tooltip : Extra Arguments to the Converter.
+      disable : {network-type : [ONNX , Caffe2]}
+      version:
+      - { hi: '99999', lo: '2.0.0'}
+  - TF_model_format:
+      n: Tensorflow model format
+      t: choice
+      uistage: convt
+      order: 40
+      helpId: U_Xnnc_Editor_tf_model_format
+      scope: o
+      dv : frozen_graph
+      tooltip : Tensorflow model type. If not chosen , value defaults to frozen_graph
+      disable : {network-type : [ONNX , Caffe2]}
+      version:
+      - { hi: '99999', lo: '2.3.0' , choice: [ 'frozen_graph' , 'saved_model' ]}
+  pruning:
+  - dummy_attr:
+      n: Dummy for section alocation
+      t: image_file
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_valid_set
+      xcfg : false
+      scope: o
+      order: 291
+      tooltip: For XNNC VERSION 2.1 Onwards|List of images in pruning to perform final accuracy measurement 
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - validation_set:
+      n: Validation Set
+      t: image_file
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_valid_set
+      scope: o
+      order: 291
+      group : pruning
+      tooltip: For XNNC VERSION 2.1 Onwards|List of images in pruning to perform final accuracy measurement 
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - calibration_set:
+      n: Calibration Set
+      t: image_file
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_calib_set
+      scope: o
+      order: 291
+      group : pruning
+      tooltip: For XNNC VERSION 2.1 Onwards|List of images in pruning to pick the layers to prune and amount of pruning to perform
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - validation_count:
+      n: Validation Count
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_valid_count
+      scope: o
+      order: 291
+      group : pruning
+      tooltip : For XNNC VERSION 2.1 Onwards|No. of Images for validation
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - calibration_count:
+      n: Calibration count
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_calib_count
+      scope: o
+      order: 291
+      group : pruning
+      tooltip : For XNNC VERSION 2.1 Onwards|No. of Images for calibration
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - calibration_subset_size:
+      n: Calibration Subset Size
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_calib_sub
+      scope: o
+      order: 291
+      group : pruning
+      tooltip : For XNNC VERSION 2.1 Onwards|No. of Images to use in each iteration of pruning
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - num_iterations:
+      n: No of Pruning Iterations
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_p_no_iter
+      scope: o
+      order: 291
+      group : pruning
+      tooltip : For XNNC VERSION 2.1 Onwards| Number of Pruning Iterations.|Default Value is 6 times the number of convolution|and fully connected layers
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - min_sparsity_percent:
+      n: Minimum Sparsity Percent
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_p_min_spar
+      scope: o
+      order: 291
+      dv : 8
+      group : pruning
+      tooltip : For XNNC VERSION 2.1 Onwards| Minimum Sparsity Percent for successful pruning.| Default Value is 8.
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - thresh_drop:
+      n: Drop Threshold
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_drop_thresh
+      scope: o
+      order: 291
+      tooltip : For XNNC VERSION 2.1 Onwards|Indicates Maximum Allowed top1.|Default Value is 1%
+      dv : 1
+      group : pruning
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - batch:
+      n: Batch
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_batch
+      scope: o
+      order: 291
+      dv : 1
+      group : pruning
+      tooltip : For XNNC VERSION 2.1 Onwards|Indicates the batch-size for GPU.|Default Value is 1
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - val_out_cntrl:
+      n: Validation Output Control
+      t: str
+      uistage: compression
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_pc_val_octrl
+      group : pruning
+      tooltip : For XNNC VERSION 2.1 Onwards|Specifies Output Control for pruning validation set|If not defined , the values will be selected based on out_cntrl section.
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - cal_out_cntrl:
+      n: Calibration Output Control
+      t: str
+      uistage: compression
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_pc_cal_octrl
+      tooltip : For XNNC VERSION 2.1 Onwards|Specifies Output Control for pruning calibration set|If not defined , the values will be selected based on out_cntrl section.
+      group : pruning
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - chkptfile:
+      n: Check-Point File
+      t: str
+      uistage: compression
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_pc_chkpt
+      group : pruning
+      tooltip : For XNNC VERSION 2.1 Onwards|Checkpoint file that stores the current state of the pruning tool|It is useful in long runs to resume processing,if the processes is terminated or to continue to prune a pruned model further
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  clustering:
+  - validation_set:
+      n: Validation Set
+      t: image_file
+      uistage: compression
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_pc_valid_set
+      group : clustering
+      tooltip: For XNNC VERSION 2.1 Onwards|List of images in clustering to perform final accuracy measurement 
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - calibration_set:
+      n: Calibration Set
+      t: image_file
+      uistage: compression
+      scope: o
+      helpId : U_Xnnc_Editor_pc_calib_set
+      order: 291
+      group : clustering
+      tooltip : For XNNC VERSION 2.1 Onwards|List of images in clustering that are used to pick layers to cluster
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - validation_count:
+      n: Validation Count
+      t: int
+      uistage: compression
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_pc_valid_count
+      tooltip : For XNNC VERSION 2.1 Onwards|Number of images in validation set
+      group : clustering
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - calibration_count:
+      n: Calibration count
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_calib_count
+      scope: o
+      order: 291
+      group : clustering
+      tooltip : For XNNC VERSION 2.1 Onwards|Number of images in calibration set
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - calibration_subset_size:
+      n: Calibration Subset Size
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_calib_sub
+      scope: o
+      order: 291
+      group : clustering
+      tooltip : For XNNC VERSION 2.1 Onwards|No. of Images to use in each iteration of clustering
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - thresh_drop:
+      n: Drop Threshold
+      t: int
+      uistage: compression
+      scope: o
+      helpId : U_Xnnc_Editor_pc_thresh_drop
+      order: 291
+      dv : 1
+      tooltip : For XNNC VERSION 2.1 Onwards|Indicates Maximum Allowed top1.|Default Value is 1%
+      group : clustering
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - priority:
+      n: Priority
+      t: str
+      uistage: compression
+      helpId : U_Xnnc_Editor_c_priority
+      scope: o
+      order: 291
+      group : clustering
+      tooltip: For XNNC VERSION 2.1 Onwards|Comma Separated List of Layer Names to be prioritized for clustering
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - batch:
+      n: Batch
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_batch
+      scope: o
+      order: 291
+      dv : 1
+      group : clustering
+      tooltip : For XNNC VERSION 2.1 Onwards|Indicates the batch-size for GPU.|Default Value is 1
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - val_out_cntrl:
+      n: Validation Output Control
+      t: str
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_val_octrl
+      scope: o
+      order: 291
+      group : clustering
+      tooltip : For XNNC VERSION 2.1 Onwards|Specifies Output Control for clustering validation set|If not defined , the values will be selected based on out_cntrl section.
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - cal_out_cntrl:
+      n: Calibration Output Control
+      t: str
+      uistage: compression
+      helpId : U_Xnnc_Editor_pc_cal_octrl
+      scope: o
+      order: 291
+      group : clustering
+      tooltip : For XNNC VERSION 2.1 Onwards|Specifies Output Control for clustering calbration set|If not defined , the values will be selected based on out_cntrl section.
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - flim:
+      n: Failed Attempts Threshold
+      t: int
+      uistage: compression
+      helpId : U_Xnnc_Editor_c_fail_attempts
+      scope: o
+      order: 291
+      group : clustering
+      tooltip : For XNNC VERSION 2.1 Onwards|Specifies the number of failed attempts at clustering.|Default Value is the number of weight layers in the model.
+      version:
+      - { hi: '99999', lo: '2.1.0' }          
+  - chkptfile:
+      n: Check-Point File
+      t: str
+      uistage: compression
+      scope: o
+      helpId : U_Xnnc_Editor_pc_chkpt
+      order: 291
+      group : clustering
+      tooltip : For XNNC VERSION 2.1 Onwards|CheckPoint file that stores the cuurent state of the project for clustering tool.|It is useful in long runs to resume processing, if the processes is terminated.
+      version:
+      - { hi: '99999', lo: '2.1.0' }
+# Don't remove the dummy attribute from this section. There is an issue in Editor controls creation and dummy is required.
+  yolo_parameters:
+  - enable_yolo_pp:
+      n: Enable Yolo Post Processing
+      t: choice
+      uistage: network_args
+      scope: o
+      order: 291
+      dv: True
+      helpId : U_Xnnc_Editor_eYolo
+      group : Yolo_Args
+      tooltip: For XNNC version 2.1 onwards.|Enable post processing for Yolo arguments. 
+      version:
+      - { hi: '99999', lo: '2.1.0', choice: [ 'True', 'False' ]} 
+  - iou_threshold:
+      n: IOU Threshold
+      t: flt
+      uistage: network_args
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_iou
+      group : Yolo_Args
+      tooltip: For XNNC version 2.1 onwards.| Specify the IOU threshold
+      version:
+      - { hi: '99999', lo: '2.1.0'}
+  - score_threshold:
+      n: Score Threshold
+      t: flt
+      uistage: network_args
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_sThreshold
+      group : Yolo_Args
+      tooltip: For XNNC version 2.1 onwards.| Specify the score threshold
+      version:
+      - { hi: '99999', lo: '2.1.0'}
+  - anchors:
+      n: Anchors
+      t: str
+      uistage: network_args
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_anchors
+      group : Yolo_Args
+      tooltip: For XNNC version 2.1 onwards.|When specifying anchors values for same output are separated by ‘,’. | The values for different outputs are separated by ‘;’
+      version:
+      - { hi: '99999', lo: '2.1.0'}
+  - number_classes:
+      n: Number of classes
+      t: int
+      uistage: network_args
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_nClasses
+      group : Yolo_Args
+      tooltip: For XNNC version 2.1 onwards.| Number of classes.
+      version:
+      - { hi: '99999', lo: '2.1.0'}
+  - bb_per_cell:
+      n: Anchor boxes per output
+      t: int
+      uistage: network_args
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_bPerOutput
+      group : Yolo_Args
+      tooltip: For XNNC version 2.1 onwards.| Bounding Boxes per cell
+      version:
+      - { hi: '99999', lo: '2.1.0'}
+  - detections_per_class:
+      n: Detections per class
+      t: int
+      uistage: network_args
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_dPerClass
+      group : Yolo_Args
+      tooltip: For XNNC version 2.1 onwards.| Detections per class
+      version:
+      - { hi: '99999', lo: '2.1.0'}
+  - dummy:
+      n: Dummy
+      t: int
+      uistage: network_args
+      scope: o
+      order: 291
+      helpId : U_Xnnc_Editor_pc_valid_set
+      xcfg : false
+      tooltip: For XNNC version 2.1 onwards.| Detections per class
+      version:
+      - { hi: '99999', lo: '2.1.0'}
+  custom:
+  - accelerators:
+      n: Custom Accelerators
+      t: str
+      uistage: network_args
+      scope: o
+      order: 291
+      group : custom_args
+      helpId : U_Xnnc_Editor_cAccelerators
+      tooltip: For XNNC version 2.2 onwards. 
+      version:
+      - { hi: '99999', lo: '2.2.0'}
+  - options:
+      n: Custom Accelerator Options
+      t: str
+      uistage: network_args
+      scope: o
+      order: 291
+      group : custom_args
+      helpId : U_Xnnc_Editor_cOptions
+      tooltip: For XNNC version 2.2 onwards.| Options to the accelerator 
+      version:
+      - { hi: '99999', lo: '2.2.0'}
+  quant_torch:
+  - batchsize:
+      n: Batchsize
+      t: int
+      uistage: network_args
+      scope: o
+      order: 291
+      group : torch_quant
+      helpId : U_Xnnc_Editor_cAccelerators
+      tooltip: For XNNC version 2.5 onwards. |Sets batchsize during torch quantization stage.
+      dv : 128 
+      version:
+      - { hi: '99999', lo: '2.5.0'}
+  - validate:
+      n: Validate accuracy
+      t: choice
+      uistage: network_args
+      scope: o
+      order: 291
+      group : torch_quant
+      helpId : U_Xnnc_Editor_cOptions
+      tooltip: For XNNC version 2.5 onwards.|Validates accuracy of original and quantized model in torch. Default value is false. 
+      version:
+      - { hi: '99999', lo: '2.5.0' , choice: [ 'False', 'True' ]}
+      
+  testInferenceXtraArgs:
+   - --input-layout:
+      n: Input Layout (Test Inference Extra Args)
+      t: multi
+      uistage: network_args
+      dv: NHWC
+      table : test_infer_args
+      order: 62
+      helpId : U_Xnnc_Editor_input_data_layout #temporary
+      tooltip : Default for ONNX->NHWC , Caffe2->NCHW
+      multi_attrs :
+      - { cntrl : combo , widget_count : 1  , secondary_sep: ":" , loVersion : '2.3.0' , hiVersion : '99999' , type : str}
+      version:
+      - { hi: '99999', lo: '2.3.0', choice: [ 'NHWC', 'NCHW', 'RGB', 'BGR' , 'NonImage'] }   
+  
+# $ -> AND , ^ -> XOR , | -> OR , ~ -> NOT , + -> NEEDS 
+# type is either error or warning
+custom_rules:
+  - {stage : compression , rules: [grp-pruning^grp-clustering , sec-pruning|sec-clustering] , type : 'error'}
+  - {group : MultiCore , rules: [attr-xtensa_core_type~=dna150] , type : 'error'}
+  - {group : pruning , rules: [~grp-clustering] , type : 'warning'}
+  - {group : clustering , rules: [~grp-pruning] , type : 'warning'}    

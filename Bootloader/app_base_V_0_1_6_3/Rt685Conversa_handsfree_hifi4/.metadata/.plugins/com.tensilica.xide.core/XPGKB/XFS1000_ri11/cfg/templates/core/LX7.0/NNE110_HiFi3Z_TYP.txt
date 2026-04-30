@@ -1,0 +1,1 @@
+HiFi 3Z and 64-MAC NNE110 with 64 KB UBUF; includes 7-stage HiFi 3Z  (with vFPU), 64 KB I/D caches, 128 KB Inst RAM, 2x128 KB Data RAM and iDMA.

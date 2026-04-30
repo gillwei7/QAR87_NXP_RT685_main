@@ -1,0 +1,4 @@
+Vision Q7 baseline reference configuration. 
+No optional ISA additions. 
+
+General imaging and computer vision applications.
