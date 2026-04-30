@@ -73,28 +73,39 @@ void bt_ready(int err)
 {
     struct net_buf *buf = NULL;
     struct bt_hci_cp_write_class_of_device *cp;
+    PRINTF("[BTDBG] bt_ready enter, err=%d\n", err);
 
     if (err) {
-        PRINTF("Bluetooth init failed (err %d)\n", err);
+        PRINTF("[BTDBG] bt_ready fail, err=%d\n", err);
         return;
     }
 
 #if (defined(CONFIG_BT_SETTINGS) && (CONFIG_BT_SETTINGS > 0))
+#if APP_SKIP_BT_SETTINGS_FLOW
+    PRINTF("[BTDBG] skip settings_load()\n");
+#else
+    PRINTF("[BTDBG] settings_load begin\n");
     settings_load();
+    PRINTF("[BTDBG] settings_load done\n");
+#endif
 #endif /* CONFIG_BT_SETTINGS */
 
-    PRINTF("Bluetooth initialized\n");
+    PRINTF("[BTDBG] Bluetooth initialized\n");
 
+    PRINTF("[BTDBG] bt_hci_cmd_create begin\n");
     buf = bt_hci_cmd_create(BT_HCI_OP_WRITE_CLASS_OF_DEVICE, sizeof(*cp));
     if (buf != NULL)
     {
         cp = net_buf_add(buf, sizeof(*cp));
         sys_put_le24(A2DP_CLASS_OF_DEVICE, &cp->class_of_device[0]);
+        PRINTF("[BTDBG] bt_hci_cmd_send_sync begin\n");
         err = bt_hci_cmd_send_sync(BT_HCI_OP_WRITE_CLASS_OF_DEVICE, buf, NULL);
+        PRINTF("[BTDBG] bt_hci_cmd_send_sync done, err=%d\n", err);
     }
     else
     {
         err = -ENOBUFS;
+        PRINTF("[BTDBG] bt_hci_cmd_create failed, err=%d\n", err);
     }
 
     if (err)
@@ -112,21 +123,35 @@ void bt_ready(int err)
     	PRINTF("Failed to read FW version");
     }
 
+    PRINTF("[BTDBG] a2dp_sink_ready begin\n");
     	a2dp_sink_ready();
+    PRINTF("[BTDBG] a2dp_sink_ready done\n");
+    PRINTF("[BTDBG] hfp_hf_init begin\n");
     hfp_hf_init();
+    PRINTF("[BTDBG] hfp_hf_init done\n");
+    PRINTF("[BTDBG] app_connect_init begin\n");
     app_connect_init();
+    PRINTF("[BTDBG] app_connect_init done\n");
     bt_conn_auth_cb_register(&auth_cb_display);
 
 	#if (Using_UART5ToPrint)||(Using_UART2ToPrint)
 		app_shell_init();
 	#endif
 
-    	a2dp_sink_register_service();
+    a2dp_sink_register_service();
     hfp_hf_register_service();
-    	app_lfs_init();
+
+#if APP_SKIP_BT_SETTINGS_FLOW
+    PRINTF("[BTDBG] skip app_lfs_init()\n");
+#else
+    PRINTF("[BTDBG] app_lfs_init begin\n");
+    app_lfs_init();
+    PRINTF("[BTDBG] app_lfs_init done\n");
+#endif
 
 #if defined(APP_LE_PERIPHERAL_ENABLE) && (APP_LE_PERIPHERAL_ENABLE == 1)
     le_adv_start();
+    PRINTF("[BTDBG] le_adv_start done\n");
 #endif
     app_a2dp_hf_auto_connect();
 #if 0

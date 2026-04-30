@@ -16,6 +16,7 @@
 #include <sys/util.h>
 #include <sys/slist.h>
 #include <sys/byteorder.h>
+#include "fsl_debug_console.h"
 
 
 #include <bluetooth/bluetooth.h>
@@ -4585,13 +4586,16 @@ int bt_enable(bt_ready_cb_t cb)
 	API_RESULT retval;
 	int err = 0;
 	static bool first = true;
+	PRINTF("[BTDBG2] bt_enable enter\n");
 
 	atomic_clear_bit(bt_dev.flags, BT_DEV_DISABLE);
 
 	if (atomic_test_and_set_bit(bt_dev.flags, BT_DEV_ENABLE)) {
+		PRINTF("[BTDBG2] bt_enable already enabled\n");
 		return -EALREADY;
 	}
 
+	PRINTF("[BTDBG2] bt_ble_porting_init\n");
 	bt_ble_porting_init();
 
 	k_work_init(&bt_dev.init, init_work);
@@ -4599,19 +4603,29 @@ int bt_enable(bt_ready_cb_t cb)
 	/* Initialize OSAL */
 	if (first)
 	{
+		PRINTF("[BTDBG2] platform/controller/os init begin\n");
 		bt_ble_platform_init();
 		controller_init();
 		EM_os_init();
 		EM_debug_init();
 		EM_timer_init();
+		PRINTF("[BTDBG2] platform/controller/os init done\n");
 		first = false;
 	}
 
 	timer_em_init();
+	PRINTF("[BTDBG2] timer_em_init done\n");
 
 	if (IS_ENABLED(CONFIG_BT_SETTINGS))
 	{
+#if APP_SKIP_BT_SETTINGS_FLOW
+		PRINTF("[BTDBG2] skip bt_settings_init\n");
+		err = 0;
+#else
+		PRINTF("[BTDBG2] bt_settings_init begin\n");
 		err = bt_settings_init();
+		PRINTF("[BTDBG2] bt_settings_init done err=%d\n", err);
+#endif
 	}
 
 	if ((0 != err) && (-EALREADY != err))
@@ -4655,7 +4669,9 @@ int bt_enable(bt_ready_cb_t cb)
 	k_thread_name_set(&bt_workq.thread, "BT RX WQ");
 #endif
 
+	PRINTF("[BTDBG2] BT_ethermind_init begin\n");
 	BT_ethermind_init();
+	PRINTF("[BTDBG2] BT_ethermind_init done\n");
 
 	/* TODO: Enable Snoop Logging */
 #if (defined(CONFIG_BT_SNOOP) && (CONFIG_BT_SNOOP > 0))
@@ -4664,12 +4680,14 @@ int bt_enable(bt_ready_cb_t cb)
 	BT_snoop_logging_disable();
 #endif
 
+	PRINTF("[BTDBG2] BT_bluetooth_on begin\n");
 	retval = BT_bluetooth_on
 		(
 		ethermind_hci_event_callback,
 		ethermind_bt_on_complete,
 		(CHAR *)CONFIG_BT_DEVICE_NAME
 		);
+	PRINTF("[BTDBG2] BT_bluetooth_on done retval=%d\n", retval);
 	assert(API_SUCCESS == retval);
 
 #if (defined(CONFIG_BT_ISO) && (CONFIG_BT_ISO > 0))
@@ -4677,11 +4695,14 @@ int bt_enable(bt_ready_cb_t cb)
 #endif
 
 	if (!cb) {
+		PRINTF("[BTDBG2] wait init_done begin\n");
 		err = k_sem_take(&bt_dev.init_done, K_FOREVER);
+		PRINTF("[BTDBG2] wait init_done done err=%d\n", err);
 	}
 
 	(void)retval;
 
+	PRINTF("[BTDBG2] bt_enable return err=%d\n", err);
 	return err;
 }
 

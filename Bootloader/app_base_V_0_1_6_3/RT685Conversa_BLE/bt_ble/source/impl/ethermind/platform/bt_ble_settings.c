@@ -7,6 +7,7 @@
 
 #if ((defined(CONFIG_BT_SETTINGS)) && (CONFIG_BT_SETTINGS))
 #include "fsl_common.h"
+#include "fsl_debug_console.h"
 
 #include "lfs.h"
 #include "littlefs_pl.h"
@@ -28,18 +29,24 @@ STRUCT_SECTION_DEFINE(settings_handler_static);
 /* Initialize the settings */
 int settings_init(void)
 {
+    PRINTF("[BTDBG3] settings_init enter, lfs=%p\n", lfs);
     if (NULL != lfs)
     {
+        PRINTF("[BTDBG3] settings_init already inited\n");
         return -EALREADY;
     }
+    PRINTF("[BTDBG3] settings_init call lfs_pl_init\n");
     lfs = lfs_pl_init();
+    PRINTF("[BTDBG3] settings_init lfs_pl_init ret=%p\n", lfs);
 
     if (NULL == lfs)
     {
+        PRINTF("[BTDBG3] settings_init return -EIO\n");
         return -EIO;
     }
     else
     {
+        PRINTF("[BTDBG3] settings_init return 0\n");
         return 0;
     }
 }

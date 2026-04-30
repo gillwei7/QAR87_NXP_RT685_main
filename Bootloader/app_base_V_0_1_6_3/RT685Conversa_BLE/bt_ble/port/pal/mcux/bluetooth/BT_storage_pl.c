@@ -130,8 +130,11 @@ void storage_bt_init_pl (void)
     }
 
     lfs = lfs_pl_init();
-
-    assert(NULL != lfs);
+    if (NULL == lfs)
+    {
+        /* Degrade gracefully when settings backend is unavailable. */
+        return;
+    }
 
 #if ((defined STORAGE_IDLE_TASK_SYNC_ENABLE) && (STORAGE_IDLE_TASK_SYNC_ENABLE))
     if (NULL == g_nvWriteBack)
@@ -181,6 +184,10 @@ API_RESULT storage_open_pl (UCHAR type, UCHAR mode)
 {
 #if ((defined(CONFIG_BT_SETTINGS)) && (CONFIG_BT_SETTINGS))
     int err;
+    if (NULL == lfs)
+    {
+        return API_FAILURE;
+    }
 
 #if ((defined STORAGE_IDLE_TASK_SYNC_ENABLE) && (STORAGE_IDLE_TASK_SYNC_ENABLE))
     nv_offset = 0;

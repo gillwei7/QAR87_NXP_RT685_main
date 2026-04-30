@@ -9,6 +9,7 @@
 #if ((defined(CONFIG_BT_SETTINGS)) && (CONFIG_BT_SETTINGS))
 
 #include "fsl_common.h"
+#include "fsl_debug_console.h"
 
 #ifdef EDGEFAST_BT_LITTLEFS_MFLASH
 #include "mflash_common.h"
@@ -292,6 +293,7 @@ lfs_t * lfs_pl_init(void)
     static uint8_t initialized = 0;
     int error = 0;
     osa_status_t ret;
+    PRINTF("[BTDBG3] lfs_pl_init enter, initialized=%u\n", initialized);
 
     if (0 == initialized)
     {
@@ -310,8 +312,9 @@ lfs_t * lfs_pl_init(void)
         CoreDebug->DEMCR |= (1 << CoreDebug_DEMCR_TRCENA_Pos);
 #endif /* LITTLEFS_PL_DEBUG */
 
+        PRINTF("[BTDBG3] lfs_pl_init mutex create begin\n");
         ret = OSA_MutexCreate((osa_mutex_handle_t)s_flashOpsLock);
-        assert(KOSA_StatusSuccess == ret);
+        PRINTF("[BTDBG3] lfs_pl_init mutex create done, ret=%d\n", (int)ret);
         if (KOSA_StatusSuccess != ret)
         {
             error = -1;
@@ -325,15 +328,21 @@ lfs_t * lfs_pl_init(void)
             HAL_FlashInit();
 #endif
 
+            PRINTF("[BTDBG3] lfs_pl_init mount begin, start=0x%08x blocks=%u\n",
+                   (unsigned int)LittleFS_ctx.start_addr,
+                   (unsigned int)LittleFS_config.block_count);
             error = lfs_mount(&lfs_pl, &LittleFS_config);
+            PRINTF("[BTDBG3] lfs_pl_init mount done, err=%d\n", error);
 
             if (LFS_ERR_CORRUPT == error)
             {
+                PRINTF("[BTDBG3] lfs_pl_init format begin\n");
                 error = lfs_format(&lfs_pl, &LittleFS_config);
+                PRINTF("[BTDBG3] lfs_pl_init format done, err=%d\n", error);
                 if (0 <= error)
                 {
                     error = lfs_mount(&lfs_pl, &LittleFS_config);
-                    assert(0 <= error);
+                    PRINTF("[BTDBG3] lfs_pl_init remount done, err=%d\n", error);
                 }
             }
             initialized = 1;
@@ -342,10 +351,12 @@ lfs_t * lfs_pl_init(void)
 
     if (0 == error)
     {
+        PRINTF("[BTDBG3] lfs_pl_init return OK\n");
         return &lfs_pl;
     }
     else
     {
+        PRINTF("[BTDBG3] lfs_pl_init return NULL, err=%d\n", error);
         return NULL;
     }
 }

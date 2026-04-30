@@ -511,12 +511,14 @@ void hfp_hf_a2dp_task(void *pvParameters)
     int err = 0;
 
     PRINTF("Bluetooth Handsfree demo start...\n");
+    PRINTF("[BTDBG] bt_enable begin\n");
 
     /* Initializate BT Host stack */
     err = bt_enable(bt_ready);
+    PRINTF("[BTDBG] bt_enable return, err=%d\n", err);
     if (err)
     {
-        PRINTF("Bluetooth init failed (err %d)\n", err);
+        PRINTF("3 Bluetooth init failed (err %d)\n", err);
         return;
     }
 #if 0

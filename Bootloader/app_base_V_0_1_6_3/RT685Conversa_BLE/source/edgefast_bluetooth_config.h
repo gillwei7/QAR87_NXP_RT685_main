@@ -126,6 +126,8 @@
 // #define CONFIG_BT_ISO_BROADCAST 0
 // #define CONFIG_BT_PLATFORM 0
 #define CONFIG_BT_SETTINGS 1
+/* Debug switch: 1=skip all BT settings/LFS init paths, 0=normal behavior */
+#define APP_SKIP_BT_SETTINGS_FLOW 0
 #define CONFIG_BT_SETTINGS_CCC_LAZY_LOADING 1
 #define CONFIG_BT_SETTINGS_CCC_STORE_ON_WRITE 1
 #define CONFIG_BT_SETTINGS_CF_STORE_ON_WRITE 1
