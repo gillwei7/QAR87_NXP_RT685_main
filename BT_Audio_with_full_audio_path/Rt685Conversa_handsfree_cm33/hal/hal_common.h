@@ -59,22 +59,22 @@
 // SW Version
 #if HAL_MCU_APP_RELEASE
 #if UsingQAR87BoardHwVersion == 0 // Dev Board
-static uint8_t sw_version[40] = "26.13.01";
+static uint8_t sw_version[40] = "26.17.01";
 #endif
 #if UsingQAR87BoardHwVersion == 1 // Actual Board
 #if CES_DEMO_FOR_NOVATEK
-static uint8_t sw_version[40] = "26.13.01.ForNovatek";
+static uint8_t sw_version[40] = "26.17.01.ForNovatek";
 #else
-static uint8_t sw_version[40] = "26.13.01";
+static uint8_t sw_version[40] = "26.17.01";
 #endif
 #endif
 
 #else
 #if UsingQAR87BoardHwVersion == 0 // Dev Board
-static uint8_t sw_version[60] = "26.13.01.Test";
+static uint8_t sw_version[60] = "26.17.01.Test";
 #endif
 #if UsingQAR87BoardHwVersion == 1 // Actual Board
-static uint8_t sw_version[60] = "26.13.01.Test";
+static uint8_t sw_version[60] = "26.17.01.Test";
 #endif
 
 #endif
