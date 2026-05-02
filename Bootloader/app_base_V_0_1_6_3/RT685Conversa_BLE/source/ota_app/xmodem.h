@@ -29,12 +29,12 @@ struct xmodem_cfg
     int  (*canread)(void);
     /* number of canread() retries to make ~1s delay */
     uint32_t canread_retries;
-    
+
     /* destination address passed to the buffer_full_callback */
     uint32_t dst_addr;
     /* maximum permitted file size to be received */
     size_t maxsize;
-    
+
     /* buffer setup used to pass data to the caller */
     uint8_t *buffer;
     /* MUST be a multiple of 1024 if 1kB packet size is used */

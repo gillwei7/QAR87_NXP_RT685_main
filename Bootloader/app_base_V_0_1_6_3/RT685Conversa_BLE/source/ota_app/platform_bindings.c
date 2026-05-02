@@ -6,6 +6,7 @@
  */
 
 #include "platform_bindings.h"
+#include <string.h>
 #include "fsl_usart.h"
 #include "board.h"
 
@@ -30,7 +31,7 @@ status_t sha256_finish(hashctx_t *ctx, void *output)
 {
     status_t ret;
     size_t size = 32; /* expected size of hash */
-    
+
     memset(output, 0, size);
 
     ret = tc_sha256_final(output, ctx);
@@ -63,7 +64,7 @@ int xmodem_getc(void)
     {
         ;
     }
-    
+
     return USART_ReadByte(xmodem_usart);
 }
 
