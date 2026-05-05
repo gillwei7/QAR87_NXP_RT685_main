@@ -330,6 +330,10 @@ void spi_command_atomic_event_parser (uint8_t event_id, const uint8_t *args)
 			battery_timer_start();
 			led_post_event(HAL_LED_EVENT_REFRESH);
 			set_ringtone_state(Ringtone_PowerON);
+
+			// Workaround for file sync not ready
+			spi_command_atomic_exec_start_wifi_ap();
+
 			break;
 
 		case CMD_ATOMIC_EVENT_CAMERA_ACTIVATED:
