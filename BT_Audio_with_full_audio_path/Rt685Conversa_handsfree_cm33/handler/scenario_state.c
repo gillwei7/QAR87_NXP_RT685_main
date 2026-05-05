@@ -663,7 +663,7 @@ static void scenario_video_recording_handler (void)
 
 				video_recording_handler_start_state = 0;
 			}
-		} else if (video_recording_handler_start_state > 200) {
+		} else if (video_recording_handler_start_state > 1500) {
 			//TODO Retry 5 time
 			PRINTF("[VideoRecording] Start video recording Failed...\r\n");
 			video_recording_handler_start_state = 0;
@@ -703,7 +703,7 @@ static void scenario_video_recording_handler (void)
 
 				video_recording_handler_stop_state = 0;
 			}
-		} else if (video_recording_handler_stop_state > 200) {
+		} else if (video_recording_handler_stop_state > 1500) {
 			//TODO Retry 5 time
 			if (spi_protocol_get_status() == S_IDLE) {
 
