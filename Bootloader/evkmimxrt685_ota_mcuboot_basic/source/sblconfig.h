@@ -33,9 +33,10 @@
 
 /* Crypto Config */
 
-#define CONFIG_BOOT_SIGNATURE
-#define CONFIG_BOOT_SIGNATURE_TYPE_RSA
-#define CONFIG_BOOT_SIGNATURE_TYPE_RSA_LEN 2048
+/* Disable image signature verification for debugging bring-up */
+/* #define CONFIG_BOOT_SIGNATURE */
+/* #define CONFIG_BOOT_SIGNATURE_TYPE_RSA */
+/* #define CONFIG_BOOT_SIGNATURE_TYPE_RSA_LEN 2048 */
 #define COMPONENT_MBEDTLS
 #define CONFIG_BOOT_BOOTSTRAP
 

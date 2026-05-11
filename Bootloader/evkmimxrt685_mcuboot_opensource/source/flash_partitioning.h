@@ -22,7 +22,8 @@
 
 #define BOOT_FLASH_ACT_APP  0x08040000
 /* Max dual-slot layout in 16MB flash: each slot size = 0x7E0000. */
-#define BOOT_FLASH_CAND_APP 0x08820000
+//#define BOOT_FLASH_CAND_APP 0x08820000
+#define BOOT_FLASH_CAND_APP 0x08540000
 
 #endif /* CONFIG_BOOT_CUSTOM_DEVICE_SETUP */
 

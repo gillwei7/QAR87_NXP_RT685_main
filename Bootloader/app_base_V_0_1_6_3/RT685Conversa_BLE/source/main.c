@@ -66,6 +66,7 @@ static shell_status_t shellCmd_mem(shell_handle_t shellHandle, int32_t argc, cha
 static shell_status_t shellCmd_reboot(shell_handle_t shellHandle, int32_t argc, char **argv);
 
 static int flash_sha256(uint32_t offset, size_t size, uint8_t sha256[32]);
+static status_t get_fixed_secondary_partition_info(uint32_t image, partition_t *ptn);
 
 /*******************************************************************************
  * Variables (from ota_mcuboot_basic.c; not used by main() until integrated)
@@ -437,13 +438,19 @@ static shell_status_t shellCmd_xmodem(shell_handle_t shellHandle, int32_t argc, 
         }
     }
 
-    if (bl_get_update_partition_info(image, &prt_ota) != kStatus_Success)
+    if (get_fixed_secondary_partition_info((uint32_t)image, &prt_ota) != kStatus_Success)
     {
         PRINTF("FAILED to determine address for download\n");
         return kStatus_SHELL_Error;
     }
 
-    PRINTF("Started xmodem download into flash at 0x%X\n", prt_ota.start);
+    PRINTF("XMODEM target slot id: %u\n", (unsigned int)FLASH_AREA_IMAGE_SECONDARY((uint32_t)image));
+    PRINTF("XMODEM target start (offset):   0x%08X\n", (unsigned int)prt_ota.start);
+    PRINTF("XMODEM target start (physical): 0x%08X\n", (unsigned int)(BOOT_FLASH_BASE + prt_ota.start));
+    PRINTF("XMODEM target size : 0x%08X (%u bytes)\n", (unsigned int)prt_ota.size, (unsigned int)prt_ota.size);
+    PRINTF("Started xmodem download into flash (offset 0x%X, physical 0x%X)\n",
+           (unsigned int)prt_ota.start,
+           (unsigned int)(BOOT_FLASH_BASE + prt_ota.start));
 
     struct xmodem_cfg cfg = {
         .putc               = xmodem_putc,
@@ -484,6 +491,13 @@ static shell_status_t shellCmd_xmodem(shell_handle_t shellHandle, int32_t argc, 
     print_hash(sha256_flash, 10);
     PRINTF("...\n");
 
+    if (bl_update_image_state((uint32_t)image, kSwapType_ReadyForTest) != kStatus_Success)
+    {
+        PRINTF("FAILED to mark image as ReadyForTest.\n");
+        return kStatus_SHELL_Error;
+    }
+    PRINTF("Image marked ReadyForTest. Run reboot to switch to downloaded image.\n");
+
     return kStatus_SHELL_Success;
 }
 
@@ -501,11 +515,16 @@ static shell_status_t shellCmd_xmodem_sb3(shell_handle_t shellHandle, int32_t ar
         return kStatus_SHELL_Error;
     }
 
-    if (bl_get_update_partition_info(0, &prt_ota) != kStatus_Success)
+    if (get_fixed_secondary_partition_info(0, &prt_ota) != kStatus_Success)
     {
         PRINTF("FAILED to determine address for download\n");
         return kStatus_SHELL_Error;
     }
+
+    PRINTF("XMODEM SB3 target slot id: %u\n", (unsigned int)FLASH_AREA_IMAGE_SECONDARY(0));
+    PRINTF("XMODEM SB3 target start (offset):   0x%08X\n", (unsigned int)prt_ota.start);
+    PRINTF("XMODEM SB3 target start (physical): 0x%08X\n", (unsigned int)(BOOT_FLASH_BASE + prt_ota.start));
+    PRINTF("XMODEM SB3 target size : 0x%08X (%u bytes)\n", (unsigned int)prt_ota.size, (unsigned int)prt_ota.size);
 
     /* Todo add provisioning check */
     if (sb3_api_init() != kStatus_Success)
@@ -596,6 +615,27 @@ static int flash_sha256(uint32_t offset, size_t size, uint8_t sha256[32])
     }
 
     sha256_finish(&sha256ctx, sha256);
+
+    return kStatus_Success;
+}
+
+static status_t get_fixed_secondary_partition_info(uint32_t image, partition_t *ptn)
+{
+    uint32_t faid;
+
+    if ((ptn == NULL) || (image >= MCUBOOT_IMAGE_NUMBER))
+    {
+        return kStatus_InvalidArgument;
+    }
+
+    faid = FLASH_AREA_IMAGE_SECONDARY(image);
+    if (faid >= MCUBOOT_IMAGE_SLOT_NUMBER)
+    {
+        return kStatus_Fail;
+    }
+
+    ptn->start = boot_flash_map[faid].fa_off;
+    ptn->size  = boot_flash_map[faid].fa_size;
 
     return kStatus_Success;
 }
