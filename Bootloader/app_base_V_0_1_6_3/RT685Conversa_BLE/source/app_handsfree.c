@@ -521,28 +521,6 @@ void hfp_hf_a2dp_task(void *pvParameters)
         PRINTF("3 Bluetooth init failed (err %d)\n", err);
         return;
     }
-#if 0
-    if(g_pairedDeviceCount)
-    {
-    	//try to connect paired device at startup
-    	connect_paired_device(1);
-    }else
-    {
-		//configure BT discoverable and connectable at startup
-		bt_br_set_connectable(false);
-		if (bt_br_set_connectable(true))
-		{
-		   PRINTF("BR/EDR set/reset connectable failed\n");
-		   return;
-		}
-		if (bt_br_set_discoverable(true))
-		{
-		  PRINTF("BR/EDR set discoverable failed\n");
-		   return;
-		}
-		PRINTF("BR/EDR set connectable and discoverable done\n");
-    }
-#endif
 
     xTaskCreate(peripheral_gls_task, "peripheral_gls_task", 512, NULL, tskIDLE_PRIORITY + 1, NULL);
 
