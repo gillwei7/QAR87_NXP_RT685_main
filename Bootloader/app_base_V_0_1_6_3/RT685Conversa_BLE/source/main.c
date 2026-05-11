@@ -8,7 +8,8 @@
 /*
  * OTA/MCUBoot shell helpers below are copied from
  * evkmimxrt685_ota_mcuboot_basic/source/ota_mcuboot_basic.c (same repo).
- * Not wired into main() yet — kept for upcoming XMODEM / image workflow.
+ * Commands are registered on the app UART shell via app_mcuboot_shell_commands_register()
+ * from app_shell_init() (same handle as the "bt" command).
  */
 
 #include "fsl_debug_console.h"
@@ -93,8 +94,6 @@ static SHELL_COMMAND_DEFINE(xmodem_sb3, "\n\"xmodem_sb3\": Start SB3 receiving w
                             SHELL_IGNORE_PARAMETER_COUNT);
 #endif
 static SHELL_COMMAND_DEFINE(reboot, "\n\"reboot\": Triggers software reset\n", shellCmd_reboot, 0);
-
-SDK_ALIGN(static uint8_t s_otaShellHandleBuffer[SHELL_HANDLE_SIZE], 4);
 
 /*
  * Buffer used to handover data from XMODEM to flash programming routine.
@@ -601,15 +600,23 @@ static int flash_sha256(uint32_t offset, size_t size, uint8_t sha256[32])
     return kStatus_Success;
 }
 
+void app_mcuboot_shell_commands_register(shell_handle_t shellHandle)
+{
+    (void)SHELL_RegisterCommand(shellHandle, SHELL_COMMAND(image));
+    (void)SHELL_RegisterCommand(shellHandle, SHELL_COMMAND(xmodem));
+#ifdef MCUBOOT_OTA_SB3_SUPPORT
+    (void)SHELL_RegisterCommand(shellHandle, SHELL_COMMAND(xmodem_sb3));
+#endif
+    (void)SHELL_RegisterCommand(shellHandle, SHELL_COMMAND(mem));
+    (void)SHELL_RegisterCommand(shellHandle, SHELL_COMMAND(reboot));
+}
+
 /*******************************************************************************
  * Code (application main — unchanged flow)
  ******************************************************************************/
 
 int main(void)
 {
-    /* OTA shell buffer reserved for ota_mcuboot_basic-style integration (silences -Wunused-variable). */
-    (void)s_otaShellHandleBuffer[0];
-
     BOARD_InitHardware();
 
     if (xTaskCreate(hfp_hf_a2dp_task, "hfp_hf_a2dp_task", configMINIMAL_STACK_SIZE * 8, NULL, /*was configMINIMAL_STACK_SIZE * 8*/

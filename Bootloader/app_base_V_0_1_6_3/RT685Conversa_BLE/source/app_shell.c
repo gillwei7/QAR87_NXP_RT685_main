@@ -610,4 +610,6 @@ void app_shell_init(void)
 
     /* Add new command to commands list */
     SHELL_RegisterCommand(s_shellHandle, SHELL_COMMAND(bt));
+
+    app_mcuboot_shell_commands_register(s_shellHandle);
 }
