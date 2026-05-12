@@ -27,12 +27,11 @@
 #include "fsl_debug_console.h"
 #include "app_connect.h"
 //#include "a2dp_pl_media_48KHz.h"
-#include "app_shell.h"
 
 #include "BT_config.h"
 #include "app_handsfree.h"
 #include "app_a2dp_sink.h"
-
+#include "app_shell.h"
 
 #define A2DP_CLASS_OF_DEVICE (0x200404U)
 
@@ -134,9 +133,9 @@ void bt_ready(int err)
     PRINTF("[BTDBG] app_connect_init done\n");
     bt_conn_auth_cb_register(&auth_cb_display);
 
-	#if (Using_UART5ToPrint)||(Using_UART2ToPrint)
-		app_shell_init();
-	#endif
+#if (Using_UART5ToPrint)||(Using_UART2ToPrint)
+    app_shell_init();
+#endif
 
     a2dp_sink_register_service();
     hfp_hf_register_service();
@@ -154,53 +153,5 @@ void bt_ready(int err)
     PRINTF("[BTDBG] le_adv_start done\n");
 #endif
     app_a2dp_hf_auto_connect();
-#if 0
-   // if(g_pairedDeviceCount)
-   // {
-   // 	PRINTF("Trying connect paired device at startup\n");
-    	//try to connect paired device at startup
-   //  	connect_paired_device(paired_devices[0].addr[0]);
-   // }else
-   // {
-    	//configure BT discoverable and connectable at startup
-    	bt_br_set_connectable(false);
-    	if (bt_br_set_connectable(true))
-    	{
-    	   PRINTF("BR/EDR set/reset connectable failed\n");
-    	   return;
-    	}
-    	if (bt_br_set_discoverable(true))
-    	{
-    	  PRINTF("BR/EDR set discoverable failed\n");
-    	   return;
-    	}
-    	PRINTF("BR/EDR set connectable and discoverable done\n");
 
-        if(g_pairedDeviceCount)
-        {
-        	PRINTF("Trying connect paired device at startup\n");
-        	//try to connect paired device at startup
-         	connect_paired_device(paired_devices[0].addr[0]);
-        }
-    //}
-#endif
 }
-
-#if 0
-void hfp_hf_a2dp_task(void *pvParameters)
-{
-    int err = 0;
-    (void)err;
-
-    PRINTF("HFP+A2DP SINK Demo started...\n");
-
-    /* Initializate BT Host stack */
-    err = bt_enable(bt_ready);
-    if (err) {
-        PRINTF("Bluetooth init failed (err %d)\n", err);
-        return;
-    }
-
-    vTaskDelete(NULL);
-}
-#endif

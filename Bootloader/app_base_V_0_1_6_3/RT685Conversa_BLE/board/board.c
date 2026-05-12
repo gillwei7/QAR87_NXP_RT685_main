@@ -34,6 +34,17 @@
     ((((uint32_t)BOARD_InitDebugConsole >= 0x08000000U) && ((uint32_t)BOARD_InitDebugConsole < 0x10000000U)) || \
      (((uint32_t)BOARD_InitDebugConsole >= 0x18000000U) && ((uint32_t)BOARD_InitDebugConsole < 0x20000000U)))
 #endif
+
+#define BOARD_DEBUG_UART_BASEADDR (uint32_t) USART2
+#define BOARD_DEBUG_UART_INSTANCE 2U
+#define BOARD_DEBUG_UART_CLK_FREQ CLOCK_GetFlexCommClkFreq(2U)
+#define BOARD_DEBUG_UART_FRG_CLK \
+	(&(const clock_frg_clk_config_t){2, kCLOCK_FrgPllDiv, 255, 0}) /*!< Select FRG0 mux as frg_pll */
+#define BOARD_DEBUG_UART_CLK_ATTACH kFRG_to_FLEXCOMM2
+#define BOARD_DEBUG_UART_RST        kFC2_RST_SHIFT_RSTn
+#define BOARD_DEBUG_UART_CLKSRC     kCLOCK_Flexcomm2
+#define BOARD_UART_IRQ_HANDLER      FLEXCOMM2_IRQHandler
+#define BOARD_UART_IRQ              FLEXCOMM2_IRQn
 /*******************************************************************************
  * Variables
  ******************************************************************************/
@@ -63,6 +74,11 @@ void BOARD_InitDebugConsole(void)
 
 		DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
 	#endif
+
+	CLOCK_SetFRGClock(BOARD_DEBUG_UART_FRG_CLK);
+	CLOCK_AttachClk(BOARD_DEBUG_UART_CLK_ATTACH);
+	uartClkSrcFreq = BOARD_DEBUG_UART_CLK_FREQ;
+	DbgConsole_Init(BOARD_DEBUG_UART_INSTANCE, BOARD_DEBUG_UART_BAUDRATE, BOARD_DEBUG_UART_TYPE, uartClkSrcFreq);
 }
 
 static status_t flexspi_hyper_ram_write_mcr(FLEXSPI_Type *base, uint8_t regAddr, uint32_t *mrVal)

@@ -16,6 +16,7 @@
 #include "fsl_device_registers.h"
 #include "fsl_shell.h"
 #include "fsl_common.h"
+#include "fsl_component_serial_manager.h"
 #include <porting.h>
 #include <string.h>
 #include <stdint.h>
@@ -38,8 +39,6 @@
 #include "mflash_drv.h"
 #include "xmodem.h"
 #include "platform_bindings.h"
-#include "uart2_data_port.h"
-#include "fsl_usart.h"
 
 #include "app_handsfree.h"
 
@@ -51,6 +50,7 @@
  * Prototypes (handsfree app)
  ******************************************************************************/
 extern void BOARD_InitHardware(void);
+extern void BOARD_InitDebugConsole(void);
 
 /*******************************************************************************
  * Prototypes (from ota_mcuboot_basic.c)
@@ -62,6 +62,7 @@ static shell_status_t shellCmd_reboot(shell_handle_t shellHandle, int32_t argc, 
 
 static int flash_sha256(uint32_t offset, size_t size, uint8_t sha256[32]);
 static status_t get_fixed_secondary_partition_info(uint32_t image, partition_t *ptn);
+static void uart2_serial_read_task(void *pvParameters);
 
 /*******************************************************************************
  * Variables (from ota_mcuboot_basic.c; not used by main() until integrated)
@@ -95,6 +96,7 @@ static SHELL_COMMAND_DEFINE(reboot, "\n\"reboot\": Triggers software reset\n", s
 static uint32_t s_otaProgbuf[1024 / sizeof(uint32_t)];
 
 static hashctx_t s_sha256_xmodem_ctx;
+static SERIAL_MANAGER_READ_HANDLE_DEFINE(s_uart2ReadHandleBuffer);
 
 /*******************************************************************************
  * Code (from ota_mcuboot_basic.c)
@@ -519,14 +521,49 @@ void app_mcuboot_shell_commands_register(shell_handle_t shellHandle)
  * Code (application main — unchanged flow)
  ******************************************************************************/
 
+static void uart2_serial_read_task(void *pvParameters)
+{
+    serial_manager_status_t serialStatus;
+    serial_read_handle_t readHandle = (serial_read_handle_t)s_uart2ReadHandleBuffer;
+    uint8_t ch;
+    uint32_t receivedLength;
+
+    (void)pvParameters;
+
+    serialStatus = SerialManager_OpenReadHandle(g_serialHandle, readHandle);
+    if (serialStatus != kStatus_SerialManager_Success)
+    {
+        PRINTF("UART2 read task open handle failed: %d\r\n", (int)serialStatus);
+        vTaskDelete(NULL);
+    }
+
+    for (;;)
+    {
+        receivedLength = 0U;
+        if (SerialManager_TryRead(readHandle, &ch, 1U, &receivedLength) == kStatus_SerialManager_Success &&
+            receivedLength > 0U)
+        {
+            PUTCHAR((int)ch);
+        }
+        else
+        {
+            vTaskDelay(pdMS_TO_TICKS(1));
+        }
+    }
+}
+
 int main(void)
 {
-    static const uint8_t s_uart2TestMsg[] = "UART2 init OK\r\n";
-
     BOARD_InitHardware();
+    BOARD_InitDebugConsole();
 
-    UART2_DataPort_Init();
-    USART_WriteBlocking(USART2, s_uart2TestMsg, sizeof(s_uart2TestMsg) - 1U);
+    if (xTaskCreate(uart2_serial_read_task, "uart2_read_task", configMINIMAL_STACK_SIZE * 2U, NULL, tskIDLE_PRIORITY + 1,
+                    NULL) != pdPASS)
+    {
+        PRINTF("uart2 read task creation failed!\r\n");
+        while (1)
+            ;
+    }
 
     if (xTaskCreate(hfp_hf_a2dp_task, "hfp_hf_a2dp_task", configMINIMAL_STACK_SIZE * 8, NULL, /*was configMINIMAL_STACK_SIZE * 8*/
                     tskIDLE_PRIORITY + 1, NULL) != pdPASS)
