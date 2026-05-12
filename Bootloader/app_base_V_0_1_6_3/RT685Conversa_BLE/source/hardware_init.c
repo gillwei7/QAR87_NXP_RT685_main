@@ -63,7 +63,7 @@
 
 #include "UsbApp.h"
 #include "Sweep.h"
-
+#include "uart2_data_port.h"
 
 #endif
 
@@ -548,7 +548,8 @@ void BOARD_InitHardware(void)
 
 	hal_gpio_port_init();
 	BOARD_InitPMICs();
-	BOARD_InitDebugConsole();
+	//BOARD_InitDebugConsole();
+
 #if EnableUsbComAndAudio == 1
 #if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
 	/* attach AUDIO PLL clock to SCTimer input7. */
@@ -644,7 +645,7 @@ void BOARD_InitHardware(void)
 		DelayMsByReadingCycCnt(20);		//wait a while to let DSP priting finish
 
 		SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-		BOARD_InitDebugConsole();		//not sure --- conflict with DSP init debug console --- earlier prints can not be displayed
+		//BOARD_InitDebugConsole();		//not sure --- conflict with DSP init debug console --- earlier prints can not be displayed
 		PRINTF("RT685 MCU: DSP handshake is received\r\n");
 		SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
 	#endif

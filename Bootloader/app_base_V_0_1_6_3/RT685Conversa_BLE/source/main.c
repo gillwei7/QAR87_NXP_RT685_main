@@ -38,6 +38,8 @@
 #include "mflash_drv.h"
 #include "xmodem.h"
 #include "platform_bindings.h"
+#include "uart2_data_port.h"
+#include "fsl_usart.h"
 
 #include "app_handsfree.h"
 
@@ -519,7 +521,12 @@ void app_mcuboot_shell_commands_register(shell_handle_t shellHandle)
 
 int main(void)
 {
+    static const uint8_t s_uart2TestMsg[] = "UART2 init OK\r\n";
+
     BOARD_InitHardware();
+
+    UART2_DataPort_Init();
+    USART_WriteBlocking(USART2, s_uart2TestMsg, sizeof(s_uart2TestMsg) - 1U);
 
     if (xTaskCreate(hfp_hf_a2dp_task, "hfp_hf_a2dp_task", configMINIMAL_STACK_SIZE * 8, NULL, /*was configMINIMAL_STACK_SIZE * 8*/
                     tskIDLE_PRIORITY + 1, NULL) != pdPASS)

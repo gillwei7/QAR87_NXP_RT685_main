@@ -373,52 +373,7 @@ int app_hfp_hf_discover(struct bt_conn *conn, uint8_t channel)
     return err;
 }
 
-#if 0
-static void bt_ready(int err)
-{
-    struct net_buf *buf = NULL;
-    struct bt_hci_cp_write_class_of_device *cp;
-
-    if (err)
-    {
-        PRINTF("Bluetooth init failed (err %d)\n", err);
-        return;
-    }
-
-#if (defined(CONFIG_BT_SETTINGS) && (CONFIG_BT_SETTINGS > 0))
-    settings_load();
-#endif /* CONFIG_BT_SETTINGS */
-
-    PRINTF("Bluetooth initialized\n");
-
-    buf = bt_hci_cmd_create(BT_HCI_OP_WRITE_CLASS_OF_DEVICE, sizeof(*cp));
-    if (buf != NULL)
-    {
-        cp = net_buf_add(buf, sizeof(*cp));
-        sys_put_le24(HFP_CLASS_OF_DEVICE, &cp->class_of_device[0]);
-        err = bt_hci_cmd_send_sync(BT_HCI_OP_WRITE_CLASS_OF_DEVICE, buf, NULL);
-    }
-    else
-    {
-        err = -ENOBUFS;
-    }
-
-    if (err)
-    {
-        PRINTF("setting class of device failed\n");
-    }
-
-    app_connect_init();
-    bt_conn_auth_cb_register(&auth_cb_display);
-    bt_sdp_register_service(&hfp_hf_rec);
-    handsfree_enable();
-    app_shell_init();
-    app_a2dp_hf_auto_connect();
-    
-}
-#else
 extern void bt_ready(int err);
-#endif
 
 void hfp_AnswerCall(void)
 {
