@@ -7,8 +7,10 @@
 #ifndef _FSL_DEBUG_CONSOLE_CONF_H_
 #define _FSL_DEBUG_CONSOLE_CONF_H_
 
-#define DEBUG_CONSOLE_TRANSMIT_BUFFER_LEN 512U
-#define DEBUG_CONSOLE_RECEIVE_BUFFER_LEN 1024U
+/* Burst hex dump (e.g. 1024 bytes -> 2048 chars + CRLF) needs headroom vs ring (size - 1) usable. */
+#define DEBUG_CONSOLE_TRANSMIT_BUFFER_LEN 2048U
+/* Serial manager RX ring holds at most (size - 1) bytes; need > app RX block (e.g. 1024) + margin. */
+#define DEBUG_CONSOLE_RECEIVE_BUFFER_LEN 2048U
 #define DEBUG_CONSOLE_TX_RELIABLE_ENABLE 1
 // #define DEBUG_CONSOLE_RX_ENABLE 0
 #define DEBUG_CONSOLE_PRINTF_MAX_LOG_LEN 128U

@@ -39,6 +39,7 @@
 #include "mflash_drv.h"
 #include "xmodem.h"
 #include "platform_bindings.h"
+#include "flash_partitioning.h"
 
 #include "app_handsfree.h"
 
@@ -63,6 +64,8 @@ static shell_status_t shellCmd_reboot(shell_handle_t shellHandle, int32_t argc, 
 static int flash_sha256(uint32_t offset, size_t size, uint8_t sha256[32]);
 static status_t get_fixed_secondary_partition_info(uint32_t image, partition_t *ptn);
 static void uart2_serial_read_task(void *pvParameters);
+static void uart2_mem_read_dump(uint32_t addr, size_t len);
+static int uart2_program_one_page_to_flash(uint32_t amba_addr, uint8_t *data, size_t len);
 
 /*******************************************************************************
  * Variables (from ota_mcuboot_basic.c; not used by main() until integrated)
@@ -98,39 +101,73 @@ static uint32_t s_otaProgbuf[1024 / sizeof(uint32_t)];
 static hashctx_t s_sha256_xmodem_ctx;
 static SERIAL_MANAGER_READ_HANDLE_DEFINE(s_uart2ReadHandleBuffer);
 
+/* Max bytes requested per SerialManager_TryRead (keep 256 for RX ring / pacing). */
+#define UART2_RX_BLOCK_BYTES (256U)
+/* Accumulate this many UART bytes, then mem dump / program one NOR page / dump again. */
+#define UART2_RX_ACCUM_BYTES (MFLASH_PAGE_SIZE)
+/* Target AMBA address (same as BOOT_FLASH_CAND_APP in flash_partitioning.h). */
+#define UART2_TEST_FLASH_AMBA_ADDR (BOOT_FLASH_CAND_APP)
+
+SDK_ALIGN(static uint8_t s_uart2RxAccum[UART2_RX_ACCUM_BYTES], 4);
+
 /*******************************************************************************
  * Code (from ota_mcuboot_basic.c)
  ******************************************************************************/
 
 static void hexdump(const void *src, size_t size)
 {
+    static const char kHex[] = "0123456789ABCDEF";
     const unsigned char *src8 = src;
-    const int CNT = 16;
+    char line[96];
+    size_t pos = 0U;
 
-    for (size_t i = 0; i < size; i++)
+    while (pos < size)
     {
-        int n = (int)(i % (size_t)CNT);
-        if (n == 0)
+        size_t n = size - pos;
+        if (n > 16U)
         {
-            PRINTF("%08x  ", (uint32_t)src + (uint32_t)i);
+            n = 16U;
         }
-        PRINTF("%02X ", src8[i]);
-        if ((i && n == CNT - 1) || (i + 1 == size))
         {
-            int rem = CNT - 1 - n;
-            for (int j = 0; j < rem; j++)
+            char *p          = line;
+            uint32_t addr    = (uint32_t)(uintptr_t)src8 + (uint32_t)pos;
+            int hi;
+
+            for (hi = 28; hi >= 0; hi -= 4)
             {
-                PRINTF("   ");
+                *p++ = kHex[(addr >> (uint32_t)hi) & 0x0FU];
             }
-            PRINTF("|");
-            for (int j = n; j >= 0; j--)
+            *p++ = ' ';
+            *p++ = ' ';
+            for (size_t j = 0; j < n; j++)
             {
-                PUTCHAR(isprint((int)src8[i - (size_t)j]) ? (int)src8[i - (size_t)j] : '.');
+                unsigned char b = src8[pos + j];
+                *p++ = kHex[b >> 4];
+                *p++ = kHex[b & 0x0FU];
+                *p++ = ' ';
             }
-            PRINTF("|\n");
+            for (size_t j = n; j < 16U; j++)
+            {
+                *p++ = ' ';
+                *p++ = ' ';
+                *p++ = ' ';
+            }
+            *p++ = '|';
+            for (size_t j = 0; j < n; j++)
+            {
+                int c = (int)src8[pos + j];
+                *p++ = (char)(isprint(c) ? c : '.');
+            }
+            *p++ = '|';
+            *p++ = '\r';
+            *p++ = '\n';
+            *p   = '\0';
+            /* One PRINTF per line so other tasks cannot splice into the middle of a row. */
+            PRINTF("%s", line);
         }
+        pos += n;
     }
-    PUTCHAR('\n');
+    PRINTF("\r\n");
 }
 
 static void print_hash(const void *src, size_t size)
@@ -517,6 +554,63 @@ void app_mcuboot_shell_commands_register(shell_handle_t shellHandle)
     (void)SHELL_RegisterCommand(shellHandle, SHELL_COMMAND(reboot));
 }
 
+/* Same path as shell "mem read addr size" for direct AMBA pointer dump. */
+static void uart2_mem_read_dump(uint32_t addr, size_t len)
+{
+#ifdef MFLASH_PAGE_INTEGRITY_CHECKS
+    if (mflash_drv_is_readable(addr) != kStatus_Success)
+    {
+        PRINTF("mem read: page not readable at 0x%08X\r\n", addr);
+        return;
+    }
+#endif
+    PRINTF("mem read 0x%08X %u\r\n", addr, (unsigned int)len);
+    hexdump((void *)(uintptr_t)addr, len);
+}
+
+/*!
+ * @brief Erase sector containing @a amba_addr, then program exactly one page (@a len == MFLASH_PAGE_SIZE).
+ */
+static int uart2_program_one_page_to_flash(uint32_t amba_addr, uint8_t *data, size_t len)
+{
+    uint32_t off;
+    int32_t st;
+
+    if (amba_addr < MFLASH_BASE_ADDRESS)
+    {
+        PRINTF("flash: AMBA addr 0x%08X below MFLASH_BASE 0x%08X\r\n", amba_addr, (unsigned int)MFLASH_BASE_ADDRESS);
+        return -1;
+    }
+    off = amba_addr - MFLASH_BASE_ADDRESS;
+    if ((off & (MFLASH_PAGE_SIZE - 1U)) != 0U || len != MFLASH_PAGE_SIZE)
+    {
+        PRINTF("flash: need page-aligned addr and len=%u, got len=%u\r\n",
+               (unsigned int)MFLASH_PAGE_SIZE,
+               (unsigned int)len);
+        return -1;
+    }
+    if (((uintptr_t)data & 3U) != 0U)
+    {
+        PRINTF("flash: data must be 4-byte aligned\r\n");
+        return -1;
+    }
+
+    st = mflash_drv_sector_erase(off & ~(uint32_t)(MFLASH_SECTOR_SIZE - 1U));
+    if (st != 0)
+    {
+        PRINTF("flash: sector_erase failed %d\r\n", (int)st);
+        return (int)st;
+    }
+
+    st = mflash_drv_page_program(off, (uint32_t *)(void *)data);
+    if (st != 0)
+    {
+        PRINTF("flash: page_program off=0x%X failed %d\r\n", (unsigned int)off, (int)st);
+        return (int)st;
+    }
+    return 0;
+}
+
 /*******************************************************************************
  * Code (application main — unchanged flow)
  ******************************************************************************/
@@ -525,8 +619,10 @@ static void uart2_serial_read_task(void *pvParameters)
 {
     serial_manager_status_t serialStatus;
     serial_read_handle_t readHandle = (serial_read_handle_t)s_uart2ReadHandleBuffer;
-    uint8_t ch;
     uint32_t receivedLength;
+    size_t total_filled;
+    uint32_t try_len;
+    static uint8_t s_mflash_inited;
 
     (void)pvParameters;
 
@@ -539,15 +635,54 @@ static void uart2_serial_read_task(void *pvParameters)
 
     for (;;)
     {
-        receivedLength = 0U;
-        if (SerialManager_TryRead(readHandle, &ch, 1U, &receivedLength) == kStatus_SerialManager_Success &&
-            receivedLength > 0U)
+        total_filled = 0U;
+        while (total_filled < UART2_RX_ACCUM_BYTES)
         {
-            PUTCHAR((int)ch);
+            try_len = (uint32_t)(UART2_RX_ACCUM_BYTES - total_filled);
+            if (try_len > UART2_RX_BLOCK_BYTES)
+            {
+                try_len = UART2_RX_BLOCK_BYTES;
+            }
+            receivedLength = 0U;
+            if (SerialManager_TryRead(readHandle, &s_uart2RxAccum[total_filled], try_len, &receivedLength) ==
+                    kStatus_SerialManager_Success &&
+                receivedLength > 0U)
+            {
+                total_filled += (size_t)receivedLength;
+            }
+            else
+            {
+                vTaskDelay(pdMS_TO_TICKS(1));
+            }
         }
-        else
+
+        PRINTF("\r\n--- UART accumulated %u bytes ---\r\n", (unsigned int)UART2_RX_ACCUM_BYTES);
+
+        if (s_mflash_inited == 0U)
         {
-            vTaskDelay(pdMS_TO_TICKS(1));
+            if (mflash_drv_init() != 0)
+            {
+                PRINTF("mflash_drv_init failed\r\n");
+            }
+            else
+            {
+                s_mflash_inited = 1U;
+            }
+        }
+
+        PRINTF("--- Flash before program (mem read @ 0x%08X) ---\r\n", UART2_TEST_FLASH_AMBA_ADDR);
+        uart2_mem_read_dump(UART2_TEST_FLASH_AMBA_ADDR, UART2_RX_ACCUM_BYTES);
+
+        if (s_mflash_inited != 0U)
+        {
+            PRINTF("--- Programming %u bytes (1 page) to 0x%08X ---\r\n",
+                   (unsigned int)UART2_RX_ACCUM_BYTES,
+                   UART2_TEST_FLASH_AMBA_ADDR);
+            if (uart2_program_one_page_to_flash(UART2_TEST_FLASH_AMBA_ADDR, s_uart2RxAccum, UART2_RX_ACCUM_BYTES) == 0)
+            {
+                PRINTF("--- Flash after program ---\r\n");
+                uart2_mem_read_dump(UART2_TEST_FLASH_AMBA_ADDR, UART2_RX_ACCUM_BYTES);
+            }
         }
     }
 }
@@ -557,7 +692,8 @@ int main(void)
     BOARD_InitHardware();
     BOARD_InitDebugConsole();
 
-    if (xTaskCreate(uart2_serial_read_task, "uart2_read_task", configMINIMAL_STACK_SIZE * 2U, NULL, tskIDLE_PRIORITY + 1,
+    /* PUTCHAR -> DbgConsole_SendDataReliable (+ mutex/flush when TX_RELIABLE): needs more than *2 minimal stack. */
+    if (xTaskCreate(uart2_serial_read_task, "uart2_read_task", configMINIMAL_STACK_SIZE * 8U, NULL, tskIDLE_PRIORITY + 1,
                     NULL) != pdPASS)
     {
         PRINTF("uart2 read task creation failed!\r\n");
