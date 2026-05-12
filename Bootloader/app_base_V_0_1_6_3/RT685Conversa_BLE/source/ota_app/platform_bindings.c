@@ -12,6 +12,7 @@
 
 #include "tinycrypt/sha256.h"
 #include "tinycrypt/constants.h"
+#include "MIMXRT685S_cm33_COMMON.h"
 
 /* Hash bindings */
 
@@ -45,7 +46,7 @@ status_t sha256_finish(hashctx_t *ctx, void *output)
 
 /* Board specific code to access Debug UART by XMODEM */
 
-static USART_Type *xmodem_usart = (USART_Type *)BOARD_DEBUG_UART_BASEADDR;
+static USART_Type *xmodem_usart = (USART_Type *)USART2;//BOARD_DEBUG_UART_BASEADDR;
 
 
 int xmodem_putc(int c)

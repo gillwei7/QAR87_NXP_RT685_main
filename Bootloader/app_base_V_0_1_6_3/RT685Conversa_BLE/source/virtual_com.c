@@ -328,6 +328,8 @@ usb_status_t USB_DeviceCdcVcomSetConfigure(class_handle_t handle, uint8_t config
     if (USB_COMPOSITE_CONFIGURE_INDEX == configure)
     {
         PtrUsbDevComposite->cdcVcom.attach = 1;
+        /* Host may not send SET_CONTROL_LINE_STATE (DTE) until the COM port is opened; allow PRINTF bulk IN. */
+        PtrUsbDevComposite->cdcVcom.startTransactions = 1U;
         /* Schedule buffer for receive */
         USB_DeviceCdcAcmRecv(PtrUsbDevComposite->cdcVcom.cdcAcmHandle, USB_CDC_VCOM_DIC_BULK_OUT_ENDPOINT, s_currRecvBuf,
                              g_cdcVcomDicEndpoints[0].maxPacketSize);
@@ -621,7 +623,11 @@ Type and send b/B to ...\r\n\
 __attribute__((section("CodeQuickAccess")))
 void PRINTF_UsbCom(uint8_t *data, size_t len)
 {
-	USB_DeviceCdcAcmSend(PtrUsbDevComposite->cdcVcom.cdcAcmHandle, USB_CDC_VCOM_DIC_BULK_IN_ENDPOINT, data, len);
+	if ((PtrUsbDevComposite == NULL) || (len == 0U) || (PtrUsbDevComposite->cdcVcom.cdcAcmHandle == NULL))
+	{
+		return;
+	}
+	(void)USB_DeviceCdcAcmSend(PtrUsbDevComposite->cdcVcom.cdcAcmHandle, USB_CDC_VCOM_DIC_BULK_IN_ENDPOINT, data, len);
 }
 #endif
 

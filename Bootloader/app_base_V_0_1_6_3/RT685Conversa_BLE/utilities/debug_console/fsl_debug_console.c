@@ -1063,29 +1063,34 @@ int DbgConsole_Printf(const char *fmt_s, ...)
 
 
 extern void PRINTF_UsbCom(uint8_t *data, size_t len);
+#if PRINTF_GoesToUsbCom == 1
+struct _usb_device_composite_struct;
+extern struct _usb_device_composite_struct *PtrUsbDevComposite;
+#endif
 /* See fsl_debug_console.h for documentation of this function. */
 int DbgConsole_Vprintf(const char *fmt_s, va_list formatStringArg)
 {
     int logLength = 0, result = 0;
     char printBuf[DEBUG_CONSOLE_PRINTF_MAX_LOG_LEN] = {'\0'};
 
+#if PRINTF_GoesToUsbCom == 1
+    logLength = StrFormatPrintf(fmt_s, formatStringArg, printBuf, DbgConsole_PrintCallback);
+    if (logLength > 0)
+    {
+        PRINTF_UsbCom((uint8_t *)printBuf, (size_t)logLength);
+    }
+    return logLength;
+#else
     if (NULL != g_serialHandle)
     {
         /* format print log first */
         logLength = StrFormatPrintf(fmt_s, formatStringArg, printBuf, DbgConsole_PrintCallback);
-        /* print log */
-
-		#if PRINTF_GoesToUsbCom==1
-			PRINTF_UsbCom((uint8_t *)printBuf, (size_t)logLength);
-			//result = DbgConsole_SendDataReliable((uint8_t *)printBuf, (size_t)logLength);
-		#else
-			#if(Using_UART5ToPrint)||(Using_UART2ToPrint)
-				result = DbgConsole_SendDataReliable((uint8_t *)printBuf, (size_t)logLength);
-			#endif
-		#endif
-
+#if (Using_UART5ToPrint) || (Using_UART2ToPrint)
+        result = DbgConsole_SendDataReliable((uint8_t *)printBuf, (size_t)logLength);
+#endif
     }
     return result;
+#endif
 }
 
 /* See fsl_debug_console.h for documentation of this function. */

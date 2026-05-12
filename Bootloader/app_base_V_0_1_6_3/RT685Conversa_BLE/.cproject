@@ -150,7 +150,7 @@
 									<listOptionValue builtIn="false" value="__NEWLIB__"/>
 									<listOptionValue builtIn="false" value="USB_STACK_USE_DEDICATED_RAM=1"/>
 									<listOptionValue builtIn="false" value="Using_UART5ToPrint=0"/>
-									<listOptionValue builtIn="false" value="Using_UART2ToPrint=1"/>
+									<listOptionValue builtIn="false" value="Using_UART2ToPrint=0"/>
 								</option>
 								<option id="com.crt.advproject.gcc.fpu.183191050" name="Floating point" superClass="com.crt.advproject.gcc.fpu" useByScannerDiscovery="true" value="com.crt.advproject.gcc.fpu.fpv5sp.hard" valueType="enumerated"/>
 								<option id="com.crt.advproject.gcc.thumb.2031422085" name="Thumb mode" superClass="com.crt.advproject.gcc.thumb" useByScannerDiscovery="false" value="true" valueType="boolean"/>

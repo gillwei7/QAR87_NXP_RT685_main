@@ -549,6 +549,18 @@ void BOARD_InitHardware(void)
 	hal_gpio_port_init();
 	BOARD_InitPMICs();
 	BOARD_InitDebugConsole();
+#if EnableUsbComAndAudio == 1
+#if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
+	/* attach AUDIO PLL clock to SCTimer input7. */
+	CLOCK_AttachClk(kAUDIO_PLL_to_SCT_CLK);
+	CLOCK_SetClkDiv(kCLOCK_DivSctClk, 1);
+
+	g_composite.audioUnified.curAudioPllFrac          = CLKCTL1->AUDIOPLL0NUM;
+	g_composite.audioUnified.curAudioPllFrac_starting = CLKCTL1->AUDIOPLL0NUM;
+#endif
+	/* Before any PRINTF via USB VCOM: set PtrUsbDevComposite (USB_DeviceCdcVcomInit). */
+	UsbAppInit();
+#endif
 	//move to Start Audio task hal_amp_aw88166_power_on();
 	//move to Start Audio task hal_amp_aw88166_init();
 
@@ -573,18 +585,6 @@ void BOARD_InitHardware(void)
 	InitSineToneGen1();
 	InitSineToneGen2();
 	InitBtnEvt(); //need more editing for Quanta board
-
-	#if EnableUsbComAndAudio==1
-		#if defined(USB_DEVICE_AUDIO_USE_SYNC_MODE) && (USB_DEVICE_AUDIO_USE_SYNC_MODE > 0U)
-			/* attach AUDIO PLL clock to SCTimer input7. */
-			CLOCK_AttachClk(kAUDIO_PLL_to_SCT_CLK);
-			CLOCK_SetClkDiv(kCLOCK_DivSctClk, 1);
-
-			g_composite.audioUnified.curAudioPllFrac = CLKCTL1->AUDIOPLL0NUM;		//starting value is 5040
-			g_composite.audioUnified.curAudioPllFrac_starting = CLKCTL1->AUDIOPLL0NUM;
-		#endif
-		UsbAppInit();
-	#endif
 
 	//boot DSP and handshake with DSP
 	#if 1	//folding
@@ -644,7 +644,7 @@ void BOARD_InitHardware(void)
 		DelayMsByReadingCycCnt(20);		//wait a while to let DSP priting finish
 
 		SEMA42_Lock(APP_SEMA42, SEMA42_GATE0, domainId);
-		//BOARD_InitDebugConsole();		//not sure --- conflict with DSP init debug console --- earlier prints can not be displayed
+		BOARD_InitDebugConsole();		//not sure --- conflict with DSP init debug console --- earlier prints can not be displayed
 		PRINTF("RT685 MCU: DSP handshake is received\r\n");
 		SEMA42_Unlock(APP_SEMA42, SEMA42_GATE0);
 	#endif
